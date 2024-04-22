@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="inc">
+      <UniqueIdentifier>{c06e3dc5-97c8-4148-a6b4-a3037fe2c49f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{7b26745d-ce10-4123-9145-4f71d70c2f28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="civetweb">
+      <UniqueIdentifier>{659cd10b-66df-45e5-90e2-efa025f161f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="civetweb\inc">
+      <UniqueIdentifier>{f1f8ea4b-e66f-48d0-ba6d-7aa3702a2fd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="civetweb\src">
+      <UniqueIdentifier>{8a9964b9-365d-4800-a509-65188adb8ac6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="capture">
+      <UniqueIdentifier>{505aace2-0267-4134-aabb-4ff38d0a6895}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="timer">
+      <UniqueIdentifier>{72391a86-c5dc-42a2-bdce-d3928cc3178c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dump">
+      <UniqueIdentifier>{c4a6d1a5-27df-43a5-8864-976b0acc889f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="civetweb\include\CivetServer.h">
+      <Filter>civetweb\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="civetweb\include\civetweb.h">
+      <Filter>civetweb\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="civetweb\src\civetweb_private_lua.h">
+      <Filter>civetweb\src</Filter>
+    </ClInclude>
+    <ClInclude Include="capture\VideoCapture.h">
+      <Filter>capture</Filter>
+    </ClInclude>
+    <ClInclude Include="capture\VideoCaptureImpl.h">
+      <Filter>capture</Filter>
+    </ClInclude>
+    <ClInclude Include="Dump\Crash_Dumper.h">
+      <Filter>dump</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\AudioTrackSourceInput.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\CapturerFactory.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\desktopcapturer.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\EncodedVideoFrameBuffer.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\fileaudiocapturer.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\filevideocapturer.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\framework.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\HttpServerRequestHandler.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\MediaFifo.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\NSJson.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\NullDecoder.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\NullEncoder.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\PeerConnectionManager.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\rtc_obj_sdk.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\VcmCapturer.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\VideoDecoder.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\VideoDecoderFactory.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\VideoEncoderFactory.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\VideoScaler.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\VideoSource.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\VideoTrackSourceInput.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="capture\FFmpegAudioCapturer.h">
+      <Filter>capture</Filter>
+    </ClInclude>
+    <ClInclude Include="capture\AudioCapture.h">
+      <Filter>capture</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\turn_server.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\turn_tool.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\SimpleIni.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\spdloghead.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="civetweb\src\CivetServer.cpp">
+      <Filter>civetweb\src</Filter>
+    </ClCompile>
+    <ClCompile Include="civetweb\src\civetweb.c">
+      <Filter>civetweb\src</Filter>
+    </ClCompile>
+    <ClCompile Include="capture\VideoCapture.cpp">
+      <Filter>capture</Filter>
+    </ClCompile>
+    <ClCompile Include="capture\VideoCaptureImpl.cpp">
+      <Filter>capture</Filter>
+    </ClCompile>
+    <ClCompile Include="Dump\Crash_Dumper.cpp">
+      <Filter>dump</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AudioTrackSourceInput.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HttpServerRequestHandler.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MediaFifo.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NSJson.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PeerConnectionManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rtc_obj_sdk.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VideoTrackSourceInput.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="capture\AudioCapture.cpp">
+      <Filter>capture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\json.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\turn_server.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\spdloghead.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="capture\FFmpegAudioCapturer.cpp">
+      <Filter>capture</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
