@@ -24,8 +24,8 @@ set(WEBRTC_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/webrtc/ CACHE STRING "WEBRTC ro
 
 
 # 添加选项，用于选择生成动态库、静态库或可执行文件
-option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
-option(BUILD_STATIC_LIBS "Build using static libraries" ON)
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+option(BUILD_STATIC_LIBS "Build using static libraries" OFF)
 option(BUILD_EXECUTABLE "Build executable" OFF)
 
 
@@ -81,6 +81,7 @@ endif()
 
 
 target_include_directories(webrtc-streamer  PRIVATE
+ ../3rd/spdlog/include
   ${CMAKE_CURRENT_SOURCE_DIR}/inc
   ${CMAKE_CURRENT_SOURCE_DIR}/capture
   ${CMAKE_CURRENT_SOURCE_DIR}/civetweb/include
