@@ -92,14 +92,22 @@ target_include_directories(webrtc-streamer  PRIVATE
   ${WEBRTC_ROOT_PATH}/include/third_party/boringssl/src/include
  )
 
+# 设置 WEBRTC 库路径
+if (UNIX AND NOT APPLE)
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64") # 判断是否是 ARM64 位系统
+        set(WEBRTC_LIB_PATH ${WEBRTC_ROOT_PATH}/lib/arm64)
+    else()
+        set(WEBRTC_LIB_PATH ${WEBRTC_ROOT_PATH}/lib/linux86)
+    endif()
+endif()
 
+# 链接 WEBRTC 库
 target_link_libraries(webrtc-streamer  PRIVATE 
-${WEBRTC_ROOT_PATH}/lib/linux86/json_reader.o
-${WEBRTC_ROOT_PATH}/lib/linux86/json_value.o
-${WEBRTC_ROOT_PATH}/lib/linux86/json_writer.o
-${WEBRTC_ROOT_PATH}/lib/linux86/libwebrtc.a
-) # 手动指定要链接的 webrtc 库
-
+    ${WEBRTC_LIB_PATH}/json_reader.o
+    ${WEBRTC_LIB_PATH}/json_value.o
+    ${WEBRTC_LIB_PATH}/json_writer.o
+    ${WEBRTC_LIB_PATH}/libwebrtc.a
+)
 
 # 其他的链接库，比如Boost和线程库
 target_link_libraries(webrtc-streamer PRIVATE 
