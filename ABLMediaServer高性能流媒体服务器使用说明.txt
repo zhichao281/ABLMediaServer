@@ -1,25 +1,22 @@
-我们的官网 [https://www.yunshihome.com/](http://)
-
-
-### 一、功能说明
-
-         
-
-- ABLMediaServer是一款高性能流媒体服务器，其在Windows平台采用高性能的完成端口网络模型，在Linux平台则采用epoll，同时配备线程池用于媒体数据的接收、转换和发送。
-
-- 该服务器具有强劲的性能和稳定的运行，经过压力测试表明，在转发性能、CPU占用率和运行稳定性方面具有明显优势。ABLMediaServer能够接收通过ffmpeg命令或其他标准的rtsp、rtmp推流函数推送的rtsp流、rtmp流，并能够代理拉流，接收国标GB28181流。
-
-- 服务器经过转换后，能够输出标准的rtsp码流、rtmp码流、http-flv、ws-flv码流（支持H265视频输出）、http-mp4（视频支持H264、H265，音频支持AAC）、hls码流（视频支持H264、H265，音频支持AAC）、GB28181码流（国标PS流）。
-
-- 此外，流媒体服务器支持录像功能，包括智能录像删除、录像查询、录像文件点播和录像文件极速下载。对于http-flv、ws-flv、http-mp4协议点播时，支持暂停继续和拖动播放；对于rtsp点播录像文件时，支持慢放（1/16、1/8、1/4、1/2）、快放（2、4、8、16）、正常速度以及拖动播放。
-
-- 该服务器还支持秒级（基本上在1秒以内）图片抓拍，并能够对抓拍的图片进行查找和以http协议下载。同时，服务器支持H265转码为H264，转码输出视频支持指定分辨率、宽高、码率大小等参数。在Windows平台上，支持英伟达显卡硬件加速转码。
-
-- 经过测试，Linux平台最大并发转码能力为40路H265（在至强E5 2650 V3的硬件环境下），而Windows平台为35路H265（在i9 + 英伟达RTX 2080的硬件环境下）。
-
-- 最后，服务器支持对转码后的视频打入自定义水印，水印的字符内容、字体大小、字体颜色和字体位置均可在配置文件中配置。
-
-
+一、功能说明
+         ABLMediaServer高性能流媒体服务器，windows平台采用高性能的完成端口网络模型、Linux下采用epoll，加上线程池进行媒体数据
+	的接收、转换、发送。服务器的性能强劲、运行稳定，坚如磐石。经过压力测试比较，转发性能、CPU占有率、运行稳定性优势明显 。可
+	以通过ffmpeg命令或者其他标准的rtsp、rtmp推流函数往ABLMediaServer推送rtsp流、rtmp流，请求服务器代理拉流，请求服务器接收国
+	标GB28181。服务器通过转换，输出标准的rtsp码流、rtmp码流、http-flv、ws-flv 码流（支持H265视频输出）、http-mp4(视频支持H264、
+	H265，音频支持AAC)、hls码流输出（视频支持H264、H265，音频支持AAC）、GB28181码流(国标PS流 )输出。
+		流媒体服务器支持录像、支持智能录像删除、录像查询、录像文件点播、录像文件极速下载。http-flv、ws-flv、http-mp4 协议点播时
+	支持暂停继续、支持拖动播放。rtsp点播录像文件时支持慢放（1/16、1/8、1/4、1/2）,快放（2、4、8、16 ）、正常速度、支持拖动播放。
+	流媒体服务器支秒级(基本上1秒以内)图片抓拍，支持对抓拍的图片进行查找，支持抓拍图片以http协议下载。
+	   服务器支持H265转码为H264，转码输出视频支持指定分辨率、宽高、码率大小等等参数。Windows平台支持英伟达显卡硬件加速转码。实
+	测linux 平台能最大并发转码40路H265（硬件环境 至强 E5 2650 V3），实测windows 平台能最大并发转码35路H265（i9 + 英伟达 RTX 2080）
+	   Linux 新增支持英伟达专业显卡,支持硬件解码、硬件编码，支持多个显卡同时进行转码。两张特斯拉T4（16G）显卡可以同时把80路1080P
+	的H265视频转码为 1280 x 720 的H264，转码延时低于10毫秒，如果需要更强的转码功能可以多插几张显卡或者集群 。
+	   服务器支持转码出来的视频打入自定义水印，支持水印的字符内容、字体大小、 字体颜色、字体位置都可以在配置文件中配置。
+ 	   非常感谢ZLMediaKit和Media-Server 两个工程项目的作者，ABLMediaSever参考复用了ZLMediaKit的http请求函数的参数表(请求的URL
+	及请求的参数名及一些初始值)以及整个框架的一些设计思想。直接调用了Media-Server 工程的 rtmp、flv、hls、fmp4 复用与解复用等等。
+	非常崇拜与感谢两位大佬为中国的开源流媒体努力与付出，再次感谢。
+		  
+                                                                                    【欢迎加入高性能流媒体服务QQ群 873666268 】
   
 二、ABLMediaServer主要功能
 	 
@@ -28,12 +25,63 @@
          1、rtsp外部主动推流    (支持 视频：H264、H265 ，音频：AAC、G711A、G711U)	
          2、rtmp外部主动推流    (支持 视频：H264、H265 ，音频：AAC)	
 		 3、国标GB28181输入     (支持 视频：H264、H265 ，音频：AAC、G711A、G711U) 
+		 4、交通运输部jtt1078   (支持 视频：H264、H265 ，音频：AAC、G711A、G711U) 
 		 
-	   rtsp、rtmp、http-flv 拉流输入：
+	   rtsp、rtmp、http-flv、本地mp4文件 拉流输入：
          1、rtsp     拉流       (支持 视频：H264、H265 ，音频：AAC、G711A、G711U)	
          2、rtmp     拉流       (支持 视频：H264、H265 ，音频：AAC)	
 		 3、http-flv 拉流       (支持 视频：H264、H265 ，音频：AAC)
+		 4、本地mp4  拉流       (支持 视频：H264、H265 ，音频：AAC、G711A、G711U)	  
 		 
+       websock方式私有协议发送PCM数据进入流媒体服务器(可以在浏览器录音通过websocket以下面的私有协议把语音接入流媒体服务器方便国标对讲、或者其他应用比如语音广播)
+		 1、数据包格式
+		    包头　+　数据类型　+　长度　+　数据包  
+		    包头4个字节 0xAB 0xCD 0xEF 0xAB 
+		    数据类型　  1 个字节 ，[ 0x01 推流音频注册 ] [0x02  发送 PCM 音频数据包] [0x03 断开音频推流 ] 
+		    长度     　 2 个字节 ，网络字节顺序（大端） 
+            数据包      音频注册包、pcm音频数据包、注销包 
+			
+	    2、数据包类型
+			 1)、音频注册包 ,json 格式
+				 {"method":"register","app":"talk","stream":"xian_1","audioCodec":"pcm","channels":1,"sampleRate":16000,"targetAudioCodec":"g711a"}
+				 
+				 样例：发送音频注册 
+				  websocket 只要连接上来，就首先发送 音频注册包
+				 (0xAB 0xCD 0xEF 0xAB) + 0x01 + strlen(音频注册包) + {"method":"register","app":"talk","stream":"xian_1","audioCodec":"pcm","channels":1,"sampleRate":16000,"targetAudioCodec":"g711a"}
+	 
+			2) 、音频数据包 只支持 16位采样精度的pcm ，单通道、双通道、常见的采样频率都支持（8000、16000、32000、48000） 
+				 样例：现在只发送纯pcm音频数据 
+				 (0xAB 0xCD 0xEF 0xAB) + 0x02 + strlen(pcm纯音频数据) + pcm纯音频数据
+			 
+			3)、注销包 
+				{"method":"destruction"}   
+			 
+				样例：发送注销包
+				(0xAB 0xCD 0xEF 0xAB) + 0x03 + strlen({"method":"destruction"} ) + {"method":"destruction"}    
+			 
+		支持用ffmpeg推纯音频流接入流媒体服务器，支持的音频格式有(g711A、G711U、AAC、MP3)
+			 1、以rtsp协议推本地aac文件接入流媒体 
+				 ffmpeg -re -stream_loop -1 -i F:\music\xxx.aac -c:a aac -rtsp_transport tcp -f rtsp rtsp://190.15.240.11:554/music/aac1
+				 
+			 2、以rtmp协议推本地aac文件接入流媒体 
+				 ffmpeg -re -stream_loop -1 -i F:\music\xxx.aac -c:a aac -f flv rtmp://190.15.240.11:1935/music/aac2
+				 
+			 3、以rtsp协议推本地mp3文件接入流媒体 
+				 ffmpeg -re -stream_loop -1 -i F:\music\xxx.mp3 -c:a mp3 -rtsp_transport tcp -f rtsp rtsp://190.15.240.11:554/music/aac3
+				 
+			 4、以rtmp协议推本地mp3文件接入流媒体 
+				 ffmpeg -re -stream_loop -1 -i F:\music\xxx.mp3 -c:a mp3 -f flv rtmp://190.15.240.11:1935/music/aac4
+		
+			 5、以rtsp协议推本地mp4文件中的纯音频流接入服务器
+				 1) 比如推一个视频格式为h264，音频为aac的mp4文件中的音频流进入服务器，那么服务器接收到的音频流为aac ,视频不做推送 
+					ffmpeg -re -stream_loop -1 -i F:\video\H264_AAC_2021-02-10_1080P.mp4 -vn -acodec copy -rtsp_transport tcp -f rtsp rtsp://44.35.33.39:554/music/aac5
+					
+				 2) 比如推一个视频格式为h264，音频为g711A的mp4文件中的音频流进入服务器，那么服务器接收到的音频流为g711A ,视频不做推送 
+					ffmpeg -re -stream_loop -1 -i F:\video\H264-G711A-92017.mp4 -vn -acodec copy -rtsp_transport tcp -f rtsp rtsp://44.35.33.39:554/music/aac6
+					
+				 3) 比如推一个视频格式为h264，音频为g711U的mp4文件中的音频流进入服务器，那么服务器接收到的音频流为g711U ,视频不做推送 
+					ffmpeg -re -stream_loop -1 -i F:\video\H264-G711U-56434.mp4 -vn -acodec copy -rtsp_transport tcp -f rtsp rtsp://44.35.33.39:554/music/aac7
+ 		 
     网络协议媒体 输出：
 	   被动拉流输出 
          1、rtsp                (支持 视频：H264、H265 ，音频：AAC、G711A、G711U)	
@@ -43,11 +91,14 @@
          5、http-hls            (支持 视频：H264、H265 ，音频：AAC) 
 		 6、http-mp4            (支持 视频：H264、H265 ，音频：AAC)  
  		 7、websocket-flv       (支持 视频：H264、H265 ，音频：AAC)
+		 8、webrtc              (支持 视频：H264、H265 ，音频：G711A、G711U、OPUS)
+		 9、交通运输部jtt1078   (支持 视频：H264、H265 ，音频：AAC、G711A、G711U) 
 	  
-	   rtsp、rtmp、gb28181 主动推流输出：
+	   rtsp、rtmp、gb28181、jtt1078 主动推流输出：
          1、rtsp推流            (支持 视频：H264、H265 ，音频：AAC、G711A、G711U)	
          2、rtmp推流            (支持 视频：H264、H265 ，音频：AAC)		  
          3、GB28181推流         (支持 视频：H264、H265 ，音频：AAC、G711A、G711U)	
+		 4、交通运输部jtt1078   (支持 视频：H264、H265 ，音频：AAC、G711A、G711U) 
 	  
 	
 三、简明使用例子
@@ -181,8 +232,8 @@
 　　　　 如果rtmp、http-flv 协议，视频为h264 ,可以采用VLC播放验证、或者B站的 flv.js 播放器验证
 		 如果rtmp、http-flv 协议，视频为h265 ,可以采用EasyPlayer.js 播放器验证，【注：VLC 、flv.js 不支持Rtmp的H265视频、也不支持http-flv的265视频 】
 			
-	7）、申请代理rtsp、rtmp、flv 拉流 、申请删除代理拉流 
-		 1) 申请代理rtsp、rtmp、flv 拉流
+	7）、申请代理rtsp、rtmp、flv 拉流 、本地mp4文件 ，申请删除代理拉流 
+		 1) 申请代理rtsp、rtmp、flv 拉流、本地mp4文件 
  		    
 			   URL: /index/api/addStreamProxy
 			   
@@ -191,14 +242,21 @@
 					vhost                                      比如  _defaultVhost_
 					app                      应用名            比如 Media
 					stream                   媒体流名          比如 Camera_00001            【/app/stream 组合起来不能重复】
-					url                      代理拉流url       比如 rtsp://admin:abldyjh2020@192.168.1.120:554 或者 rtmp://190.15.240.36:1935/Media/Camera_00001 或者  http://190.15.240.36:8088/Media/Camera_00001.flv 
-					isRtspRecordURL                            代理拉流的url是否是rtsp录像回放的url 默认0 ，1 是【可选参数】，如果是rtsp录像回放的url，可以进行控制代理拉流，比如 暂停、继续、控制倍速播放，拖动播放等等 ，参考
-					                                           函数 /index/api/controlStreamProxy 
-					enable_mp4                是否录像         1 录像，0 不录像             【可选参数】
+					url                      代理拉流url       比如 rtsp://admin:abldyjh2020@192.168.1.120:554         或者
+                                                   					rtmp://190.15.240.36:1935/Media/Camera_00001       或者 
+ 																	http://190.15.240.36:8088/Media/Camera_00001.flv   或者
+																	d:\\video\\xxxx.mp4   (windows平台)
+																	/home/video/xxxx.mp4  (Linux平台)
+ 					isRtspRecordURL                             代理拉流的url是否是rtsp录像回放的url 默认0 ，1 是【可选参数】，如果是rtsp录像回放的url，可以进行控制代理拉流，比如 暂停、继续、控制倍速播放，拖动播放等等 ，参考
+					                                            函数 /index/api/controlStreamProxy 
+				    optionsHeartbeat          options心跳       options 命令作为心跳包      【可选参数】 代理rtsp拉流成后，是否开启发送 0 不开启， 1 开启 ，默认不开启，如果从 ZLMediaKit 拉取rtsp流，建议设置为 1 
+					enable_mp4                是否录像          1 录像，0 不录像            【可选参数】
 					enable_hls                是否hls切片       1 进行hls 切片 ，0 不切片   【可选参数】
 				    convertOutWidth           转码宽            转码输出宽 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264 
 				    convertOutHeight          转码高            转码输出高 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264  
 				    H264DecodeEncode_enable   H264是否解码      H264分辨率高再编码降分辨率，【可选参数】有时候需要H264视频进行先解码再重新编码降低分辨率，可以设置 H264DecodeEncode_enable 为 1 ，降下来的分辨率为 convertOutWidth 、 convertOutHeight
+					disableVideo              是否过滤掉视频    0 不过滤 ，1 过滤视频       【可选参数】 默认 0 不过滤视频，国家电网协议中需要摄像头和摄像头直接需要对接，摄像头推上来的媒体流中过滤掉视频（disableVideo=1）再发给对方才能完成对讲 
+					disableAudio              是否过滤掉音频    0 不过滤 ，1 过滤音频       【可选参数】 默认 0 不过滤音频，有时候不需要音频、或者由于敏感原因禁止收听音频，可以过滤掉音频流接入流媒体服务器，只需要设置 disableAudio = 1即可过滤音频  
 					
                http  GET 方式 		
 			        1 请求rtsp拉流样例
@@ -225,12 +283,23 @@
 					secret  服务器密码 ，比如  035c73f7-bb6b-4889-a715-d9eb2d1925cc
 					key                  比如  93 ，调用 addStreamProxy 返回的 key 的值 
 					command              比如  pause、resume、seek、scale 对于对应意思：暂停、继续、拖动播放、倍速播放 
- 			        value  (字符串)      比如  1、2、4、8、16(倍速播放) ，360、1800、3600（拖动播放），2022-06-10T14:17:20.000（拖动播放）
+ 			        value  (字符串)      比如  1、2、4、8、16(倍速播放) ，npt方式：360、1800、3600（拖动播放），clock方式：clock=20230625T113000Z-19700101T000001Z（拖动到：2023-06-25 11:30:00执行播放）
 					                           value 为可选参数，当 command 为 pause,resume 时，value 不用 ，当 command 为seek,sacale
 											   是，需要填写value的值 
+					命令、值样例列表
+					command              value                                             注释
+					pause                不需要                                            暂停回放   
+					resume               不需要                                            继续回放   
+					scale                2                                                 2倍速回放
+					seek                 360                                               拖拽从开始点计算起到360秒处再回放  【ntp方式拖拽 ，代表 华为 VCN\3800 】
+					seek                 clock=20230625T113000Z-19700101T000001Z           拖拽到20230625T113000Z处再回放     【clock方式拖拽 ，代表 海康NVR  】
 					
 			    http GET 方式 
-			        http://190.15.240.11:7088/index/api/controlStreamProxy?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=93&command=pause
+			        http://190.15.240.11:7088/index/api/controlStreamProxy?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=93&command=pause              暂停
+			        http://190.15.240.11:7088/index/api/controlStreamProxy?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=93&command=resume             继续
+			        http://190.15.240.11:7088/index/api/controlStreamProxy?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=93&command=scale&value=2      2倍速回放
+			        http://190.15.240.11:7088/index/api/controlStreamProxy?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=93&command=seek&value=360     拖拽到360秒处继续回放
+			        http://190.15.240.11:7088/index/api/controlStreamProxy?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=93&command=seek&value=clock=20230625T113000Z-19700101T000001Z
 				   
 				http  POST 方式 
 				    http URL :
@@ -238,7 +307,10 @@
 					  
 				    body 参数 Json格式 
 				       {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","key":93,"command":"pause"} 
+				       {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","key":93,"command":"resume"} 
 				       {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","key":93,"command":"sacale","value":"2"} 
+				       {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","key":93,"command":"seek","value":"360"} 
+				       {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","key":93,"command":"seek","value":"clock=20230625T113000Z-19700101T000001Z"} 
 				   
 				返回Body：
 					{
@@ -274,19 +346,82 @@
 		
 		         【注：发送http请求 可以使用curl、postman、或者其他标准的http工具 】
 				 
-				 
+		  4)  申请代理调用ffmepg函数实现 rtsp、rtmp、 http-flv、http-mp4、http-hls 拉流 ，建议如果拉取 http-flv、http-mp4、http-hls 码流调用该函数 ， 如果源流是rtsp 、rtmp、本地MP4文件 建议使用 /index/api/addStreamProxy
+		      当然如果源流是 rtsp、rtmp ，也可以尝试使用 addFFmpegProxy
+			  
+                URL: /index/api/addFFmpegProxy
+			   
+			        参数：               参数说明            参数参考值
+					secret                   服务器密码        比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc
+					vhost                                      比如  _defaultVhost_
+					app                      应用名            比如 Media
+					stream                   媒体流名          比如 Camera_00001            【/app/stream 组合起来不能重复】
+					url                      代理拉流url       比如 http://190.15.240.36:8088/Media/Camera_00001.flv    或者  
+                                                   					http://190.15.240.36:8088/Media/Camera_00001.mp4    或者
+ 																	http://190.15.240.36:9088/Media/Camera_00001.m3u8
+ 																	
+ 					enable_mp4                是否录像          1 录像，0 不录像            【可选参数】
+					enable_hls                是否hls切片       1 进行hls 切片 ，0 不切片   【可选参数】
+				    convertOutWidth           转码宽            转码输出宽 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264 
+				    convertOutHeight          转码高            转码输出高 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264  
+				    H264DecodeEncode_enable   H264是否解码      H264分辨率高再编码降分辨率，【可选参数】有时候需要H264视频进行先解码再重新编码降低分辨率，可以设置 H264DecodeEncode_enable 为 1 ，降下来的分辨率为 convertOutWidth 、 convertOutHeight
+					disableVideo              是否过滤掉视频    0 不过滤 ，1 过滤视频       【可选参数】 默认 0 不过滤视频，国家电网协议中需要摄像头和摄像头直接需要对接，摄像头推上来的媒体流中过滤掉视频（disableVideo=1）再发给对方才能完成对讲 
+					disableAudio              是否过滤掉音频    0 不过滤 ，1 过滤音频       【可选参数】 默认 0 不过滤音频，有时候不需要音频、或者由于敏感原因禁止收听音频，可以过滤掉音频流接入流媒体服务器，只需要设置 disableAudio = 1即可过滤音频  
+					
+               http  GET 方式 		
+			        1 请求rtsp拉流样例
+			            http://190.15.240.11:7088/index/api/addFFmpegProxy?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&vhost=_defaultVhost_&app=Media&stream=Camera_00001&url=http://190.15.240.36:8088/Media/Camera_00001.flv&enable_mp4=0
+
+			   http POST 方式  
+                    1 请求rtsp拉流样例		
+                       http请求 url 样例
+                         http://190.15.240.11:7088/index/api/addFFmpegProxy				   
+					   body 参数 , json 格式	  
+			             {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","vhost":"_defaultVhost_","app":"Media","stream":"Camera_00001","url":"http://190.15.240.36:8088/Media/Camera_00001.flv","enable_mp4":0}
+						 
+				返回Body：
+					{
+						"code": 0,           # 0为操作成功，其他值为操作失败
+						"memo": "success",   # success 为成功 
+						"key": 93            # 成功时返回大于0的值，为代理拉流的Key ,删除代理拉流时需要用的   
+					}
+					
+		  5) 申请删除ffmepg函数代理拉流
+ 			     URL: /index/api/delFFmpegProxy
+			   
+			     参数：
+					secret  服务器密码 ，比如  035c73f7-bb6b-4889-a715-d9eb2d1925cc
+					key                  比如  93 ，调用 addStreamProxy 返回的 key 的值 
+ 			   
+			    http GET 方式 
+			        http://190.15.240.11:7088/index/api/delFFmpegProxy?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=93
+				   
+				http  POST 方式 
+				    http URL :
+				      http://190.15.240.11:7088/index/api/delFFmpegProxy
+					  
+				    body 参数 Json格式 
+				       {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","key":93} 
+				   
+				返回Body：
+					{
+						"code": 0,           # 0为操作成功，其他值为操作失败
+						"memo": "success",   # success 为成功 ,如果失败是其他值 
+					}					 
 		   
 	 8）、申请代理rtsp、rtmp、推流 、申请删除代理拉流 
 		 1) 申请代理rtsp、rtmp 推流（注意：不是国标GB28181推流） 
  		    
 			     URL: /index/api/addPushProxy
 			   
-			     参数：     参数说明          参考值
-					secret  服务器密码 ，比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc
-					vhost                比如 _defaultVhost_
-					app     应用名       比如 Media
-					stream  媒体流名     比如 Camera_00001
-					url     代理推流url  比如 rtsp://190.15.240.36:554/Media/Camera_00001 或者 rtmp://190.15.240.36:1935/Media/Camera_00001 
+			     参数：                参数说明          参考值
+					secret             服务器密码 ，      比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc
+					vhost                                 比如 _defaultVhost_
+					app                应用名             比如 Media
+					stream             媒体流名           比如 Camera_00001
+					url                代理推流url        比如 rtsp://190.15.240.36:554/Media/Camera_00001 或者 rtmp://190.15.240.36:1935/Media/Camera_00001 
+					disableVideo       是否过滤掉视频     0 不过滤 ，1 过滤视频  【可选参数】 默认 0 不过滤视频，国家电网协议中需要摄像头和摄像头直接需要对接，摄像头推上来的媒体流中过滤掉视频（disableVideo=1）再发给对方才能完成对讲 
+					disableAudio       是否过滤掉音频     0 不过滤 ，1 过滤音频  【可选参数】 默认 0 不过滤音频，有时候不需要音频、或者由于敏感原因禁止收听音频，可以过滤掉音频流接入流媒体服务器，只需要设置 disableAudio = 1即可过滤音频  
 					
                http  GET 方式 			   
 			         http://190.15.240.11:7088/index/api/addPushProxy?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&vhost=_defaultVhost_&app=Media&stream=Camera_00001&url=rtsp://190.15.240.36:554/Media/Camera_00001
@@ -328,27 +463,40 @@
 						"memo": "success",   # success 为成功 ,如果失败是其他值 
 					}		
 		   		   
-	9）、创建GB28181接收端口、删除GB28181接收端口 
+	9）、创建GB28181\Jtt1078接收端口、删除GB28181\Jtt1078接收端口、国标暂停、继续  
 	
-         1 	创建GB28181接收端口
+         1 	创建GB28181\Jtt1078接收端口
 				 
 			     URL: /index/api/openRtpServer
 				 功能：
-				      创建GB28181接收端口，如果该端口接收超时，会自动回收，不用调用  /index/api/closeRtpServer
+				      创建GB28181\Jtt1078接收端口，如果该端口接收超时，会自动回收，不用调用  /index/api/closeRtpServer
 			   
 			     参数：                      参数说明           参数参考值
 					secret                    服务器密码        比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc
 					vhost                                       比如 _defaultVhost_
-					app                       应用名            比如 gb28181 、rtp 等等 
-					stream_id                 媒体流名          比如 44030012343220234234 （最好是国标编号）
+					app                       应用名            比如 gb28181 、rtp 等等 (接入)
+					stream_id                 媒体流名          比如 44030012343220234234 （最好是国标编号）( 接入 )
 					payload                   PS负载值          国标SDP里面PS负载值　，比如 96,98 ,108 ,一定要从国标SDP里面获取 
 					port                      端口号            0 ，由服务器自动分配，别的值 比如 26324 为指定端口
-					enable_tcp                是否为tcp         0 为 udp ,1 为tcp 方式 
-					enable_mp4                是否录像          1 录像，0 不录像            【可选参数】
+					enable_tcp                是否为tcp         0 为 udp , 1 为tcp被动方式 ，2 为tcp主动连接方式 
+					dst_url                   目标IP            目标IP地址  【可选参数 ，当 enable_tcp 为 2 时必须填写 】
+					dst_port                  目标端口          目标端口    【可选参数 ，当 enable_tcp 为 2 时必须填写】
+					
+ 					enable_mp4                是否录像          1 录像，0 不录像            【可选参数】
 					enable_hls                是否hls切片       1 进行hls 切片 ，0 不切片   【可选参数】
 				    convertOutWidth           转码宽            转码输出宽 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264 
 				    convertOutHeight          转码高            转码输出高 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264  
 				    H264DecodeEncode_enable   H264是否解码      H264分辨率高再编码降分辨率，【可选参数】有时候需要H264视频进行先解码再重新编码降低分辨率，可以设置 H264DecodeEncode_enable 为 1 ，降下来的分辨率为 convertOutWidth 、 convertOutHeight
+					RtpPayloadDataType        rtp打包数据格式   rtp打包数据格式             【可选参数 ，默认 1 】 [1 PS 国标gb28181 ]、[ 2 ES 视频支持 H246\H265，音频只支持G711A、G711U ]、[3 XHB (一家公司的打包格式) 只支持视频，音频不能加入打包 ] [ 4 、Jt1078（2016版本）码流接入 ]
+					disableVideo              是否过滤掉视频    0 不过滤 ，1 过滤视频       【可选参数】 默认 0 不过滤视频，国家电网协议中需要摄像头和摄像头直接需要对接，摄像头推上来的媒体流中过滤掉视频（disableVideo=1）再发给对方才能完成对讲 
+					disableAudio              是否过滤掉音频    0 不过滤 ，1 过滤音频       【可选参数】 默认 0 不过滤音频，有时候不需要音频、或者由于敏感原因禁止收听音频，可以过滤掉音频流接入流媒体服务器，只需要设置 disableAudio = 1即可过滤音频  
+					jtt1078_version           指定1078版本号    2013、2016、2019            【可选参数】 2013 指定为 2013版本 、2016 指定为 2016版本、 2019 指定为 2019 版本  
+					
+					send_app                  应用名            比如 gb28181 、rtp 等等     【可选参数】 用于把本服务器的码流（send_app/send_stream_id）回复给发送端
+					send_stream_id            媒体流名          比如 44030012343220234234   【可选参数】 用于把本服务器的码流（send_app/send_stream_id）回复给发送端
+					send_disableVideo         是否过滤掉视频    0 不过滤 ，1 过滤视频       【可选参数】 默认 0 不过滤视频，国家电网协议中需要摄像头和摄像头直接需要对接，摄像头推上来的媒体流中过滤掉视频（disableVideo=1）再发给对方才能完成对讲 
+					send_disableAudio         是否过滤掉音频    0 不过滤 ，1 过滤音频       【可选参数】 默认 0 不过滤音频，有时候不需要音频、或者由于敏感原因禁止收听音频，可以过滤掉音频流接入流媒体服务器，只需要设置 disableAudio = 1即可过滤音频  
+	                detectSendAppStream       是否检测发送流ID  0 不检测 ，1 检测           【可选参数】 默认 1 在需要回传码流时，事先检测 send_app、send_stream_id 是否存在。0 不检测，先打开接收成功后，稍后再把send_app、send_stream_id接入流媒体，openRtpServer函数自动回复给下级流媒体。
 					
 	             http  GET 方式 			   
 			        http://190.15.240.11:7088/index/api/openRtpServer?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&vhost=_defaultVhost_&app=gb28181&stream_id=44030012343220234234&payload=96&port=0&enable_tcp=0&enable_mp4=0
@@ -368,10 +516,10 @@
 						"key": 93            # 成功时返回大于0的值，GB28181接收实例key ,关闭时需要   
 					  }
 		
-           2    删除 GB28181接收端口		
+           2    删除 GB28181\Jtt1078接收端口		
 			     URL: /index/api/closeRtpServer
 				 功能：
-				      删除GB28181接收端口 
+				      删除GB28181\Jtt1078接收端口 
 			   
 			     参数：              参数说明     参数参考值   
 					secret           服务器密码   比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc
@@ -393,26 +541,84 @@
 						"memo": "success",   # success 为成功 ,如果失败是其他值 
 					}				
 					
-	 10）、创建GB28181发送端口、删除GB28181发送端口 
+           3    暂停 GB28181\Jtt1078接收端口，只是不检测接收端口是否有码流进入。
+			     URL: /index/api/pauseRtpServer
+				 功能：
+				      暂停GB28181\Jtt1078接收
+			   
+			     参数：              参数说明     参数参考值   
+					secret           服务器密码   比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc
+				    key              主键值ID     比如  93 ，  调用 /index/api/openRtpServer 返回的 key 的值 
+ 			   
+			    http GET 方式 
+			       http://44.35.33.249:7088/index/api/pauseRtpServer?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=588
+				   
+				http  POST 方式 
+				   http URL 
+				     http://44.35.33.249:7088/index/api/pauseRtpServer
+					 
+				   http Body 参数 json 格式
+				     {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","key":588}
+				   
+				返回Body：
+					{
+						"code": 0,           # 0为操作成功，其他值为操作失败
+						"memo": "success",   # success 为成功 ,如果失败是其他值 
+					}				
+           
+           4   继续 GB28181\Jtt1078接收端口，开启检测端口是否有码流到达，如果时长到达最大超时没有码流进入会立即删除接收端口
+			     URL: /index/api/resumeRtpServer
+				 功能：
+				      继续GB28181\Jtt1078接收
+			   
+			     参数：              参数说明     参数参考值   
+					secret           服务器密码   比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc
+				    key              主键值ID     比如  93 ，  调用 /index/api/openRtpServer 返回的 key 的值 
+ 			   
+			    http GET 方式 
+			       http://44.35.33.249:7088/index/api/resumeRtpServer?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=588
+				   
+				http  POST 方式 
+				   http URL 
+				     http://44.35.33.249:7088/index/api/resumeRtpServer
+					 
+				   http Body 参数 json 格式
+				     {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","key":588}
+				   
+				返回Body：
+					{
+						"code": 0,           # 0为操作成功，其他值为操作失败
+						"memo": "success",   # success 为成功 ,如果失败是其他值 
+					}	
+					
+	 10）、创建GB28181\Jtt1078 发送端口、删除GB28181\Jtt1078发送端口 
 	
-         1 	创建GB28181发送端口
+         1 	创建GB28181\Jtt1078发送端口
 				 
 			     URL: /index/api/startSendRtp
 				 功能：
-				      创建GB28181发送端口，如果该发送端端口没有数据发送，会自动回收，不用调用  /index/api/stopSendRtp
+				      创建GB28181\Jtt1078发送端口，如果该发送端端口没有数据发送，会自动回收，不用调用  /index/api/stopSendRtp
 			   
-			     参数：              参数说明              参数参考值
-					secret           服务器密码            比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc
-					vhost                                  比如 _defaultVhost_
-					app              应用名                比如 gb28181 、rtp 等等 
-					stream           媒体流名              比如 44030012343220234234 （最好是国标编号）
-					payload          PS负载值              国标SDP里面PS负载值　，比如 96,98 ,108 ,rtp打包时需要
-					ssrc             同步源                ssrc
-					src_port         发送端绑定的端口号    指定服务器在发送国标流时绑定的端口号，如果为 0 ，由服务器自动分配，别的值 比如 26324 为指定端口
-					dst_url          目标IP                目标IP地址 
-					dst_port         目标端口              目标端口 
-					is_udp           是否设置udp           是否设置为UDP通讯，0 TCP，1 udp
+			     参数：                 参数说明              参数参考值
+					secret              服务器密码            比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc
+					vhost                                     比如 _defaultVhost_
+					app                 应用名                比如 gb28181 、rtp 等等  (发送出去)
+					stream              媒体流名              比如 44030012343220234234 （发送出去）
+					payload             PS负载值              国标SDP里面PS负载值　，比如 96,98 ,108 ,rtp打包时需要
+					ssrc                同步源                ssrc
+					src_port            发送端绑定的端口号    指定服务器在发送国标流时绑定的端口号，如果为 0 ，由服务器自动分配，别的值 比如 26324 为指定端口
+					dst_url             目标IP                目标IP地址 
+					dst_port            目标端口              目标端口 
+					is_udp              是否设置udp           0 TCP主动方式，1 udp 方式 ，2 为 TCP 被动方式 
+					RtpPayloadDataType  rtp打包数据格式      【可选参数 ，默认 1 】 [ 1 PS 国标gb28181 ]、[ 2 ES 视频支持 H246\H265，音频只支持G711A、G711U ]、[3 XHB (一家公司的打包格式) 只支持视频，音频不能加入打包 ] [ 4 、Jt1078（2016版本）码流发送 ]
+					disableVideo        是否过滤掉视频        0 不过滤 ，1 过滤视频       【可选参数】 默认 0 不过滤视频，国家电网协议中需要摄像头和摄像头直接需要对接，摄像头推上来的媒体流中过滤掉视频（disableVideo=1）再发给对方才能完成对讲 
+					disableAudio        是否过滤掉音频        0 不过滤 ，1 过滤音频       【可选参数】 默认 0 不过滤音频，有时候不需要音频、或者由于敏感原因禁止收听音频，可以过滤掉音频流接入流媒体服务器，只需要设置 disableAudio = 1即可过滤音频  
+					jtt1078_version     指定1078版本号        2013、2016、2019            【可选参数】 2013 指定为 2013版本 、2016 指定为 2016版本、 2019 指定为 2019 版本  
 					
+					recv_app            应用名               比如 gb28181 、rtp 等等      【可选参数】 接入进来 通过在发送的连接中接收进来的码流 
+					recv_stream         媒体流名             比如 44030012343220234234    【可选参数】 接入进来 通过在发送的连接中接收进来的码流  
+					recv_disableVideo   是否过滤掉视频       0 不过滤 ，1 过滤视频        【可选参数】 默认 0 不过滤视频，国家电网协议中需要摄像头和摄像头直接需要对接，摄像头推上来的媒体流中过滤掉视频（disableVideo=1）再发给对方才能完成对讲 
+					recv_disableAudio   是否过滤掉音频       0 不过滤 ，1 过滤音频        【可选参数】 默认 0 不过滤音频，有时候不需要音频、或者由于敏感原因禁止收听音频，可以过滤掉音频流接入流媒体服务器，只需要设置 disableAudio = 1即可过滤音频  
 					
 	             http  GET 方式 			   
 			        http://190.15.240.11:7088/index/api/startSendRtp?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&vhost=_defaultVhost_&app=gb28181&stream=44030012343220234234&payload=96&ssrc=5224&src_port=26324&dst_url=190.15.240.11&dst_port=9824&is_udp=1
@@ -432,10 +638,10 @@
 						"key": 93            # 成功时返回大于0的值，GB28181发送码流实例key ,关闭时需要   
 					  }
 		
-           2    删除 GB28181发送端口		
+           2    删除 GB28181\Jtt1078发送端口		
 			     URL: /index/api/stopSendRtp
 				 功能：
-				      删除GB28181发送端口 
+				      删除GB28181\Jtt1078发送端口 
 			   
 			     参数：              参数说明     参数参考值   
 					secret           服务器密码   比如  035c73f7-bb6b-4889-a715-d9eb2d1925cc
@@ -509,7 +715,10 @@
 							"key": 34,    
 							"app": "Media",  
 							"stream": "Camera_00001",
-							"status": false ,          【 false 尚未录像，true 正在录像 】
+							"sim": "123456789123",      【1078码流接入这个字段的值不会为空，代表设备的sim卡编码 】
+							"status": false ,           【 false 尚未录像，true 正在录像    】
+			 			    "enable_hls": false,        【 false 尚未启用，true 启用hls回放 】
+                            "transcodingStatus": false, 【 false 尚未转码，true 正在转码    】
 							"sourceURL": "rtsp://10.0.0.239:554/Media/Camera_00001",
 							"sourceType": 23,
 							"readerCount": 0,
@@ -526,7 +735,8 @@
 								"http-flv": "http://10.0.0.239:8088/Media/Camera_00001.flv",
 								"ws-flv": "ws://10.0.0.239:6088/Media/Camera_00001.flv",
 								"http-mp4": "http://10.0.0.239:5088/Media/Camera_00001.mp4",
-								"http-hls": "http://10.0.0.239:9088/Media/Camera_00001.m3u8"
+								"http-hls": "http://10.0.0.239:9088/Media/Camera_00001.m3u8",
+								"webrtc":"http://10.0.0.239:8892/webrtc-streamer.html?video=/Media/Camera_00001"
 							}
 						}
 					]
@@ -901,6 +1111,7 @@
 					"recordFileList": [
 						{
 							"file": "20220116154810.mp4",
+							"duration": 300,   当前录像时间长度，单位 秒
 							"url": {
 								"rtsp": "rtsp://10.0.0.239:554/Media/Camera_00001__ReplayFMP4RecordFile__20220116154810",
 								"rtmp": "rtmp://10.0.0.239:1935/Media/Camera_00001__ReplayFMP4RecordFile__20220116154810",
@@ -912,6 +1123,7 @@
 						},
 						{
 							"file": "20220116155110.mp4",
+							"duration": 256,    当前录像时间长度，单位 秒
 							"url": {
 								"rtsp": "rtsp://10.0.0.239:554/Media/Camera_00001__ReplayFMP4RecordFile__20220116155110",
 								"rtmp": "rtmp://10.0.0.239:1935/Media/Camera_00001__ReplayFMP4RecordFile__20220116155110",
@@ -952,7 +1164,31 @@
 				   "stream":"Camera_00001",                  # stream  
 				   "mediaServerId":"ABLMediaServer_00001",   # 流媒体服务器编号 ，在配置文件可以配置，如果集群流媒体服务器时，可以给每台流媒体服务器起个编号 
 				   "networkType":23,                         # 媒体流来源网络编号，可参考附表  
-				   "key":130                                 # 媒体流来源编号，可以根据这个key进行关闭流媒体 可以调用delMediaStream或close_streams 函数进行关闭
+				   "key":130,                                # 媒体流来源编号，可以根据这个key进行关闭流媒体 可以调用delMediaStream或close_streams 函数进行关闭
+				   "status":true,
+				   "enable_hls":false,
+				   "transcodingStatus":false,
+				   "sourceURL":"rtsp://admin:abldyjh2020@44.35.33.248:554",
+				   "readerCount":0,
+				   "noneReaderDuration":0,
+				   "videoCodec":"H265",
+				   "videoFrameSpeed":25,
+				   "width":1920,
+				   "height":1080,
+				   "videoBitrate":0,
+				   "audioCodec":"AAC",
+				   "audioChannels":1,
+				   "audioSampleRate":8000,
+				   "audioBitrate":0,
+				   "url":
+				      {
+				       "rtsp":"rtsp://44.35.33.249:554/Media/Camera_00001",
+					   "rtmp":"rtmp://44.35.33.249:1935/Media/Camera_00001",
+					   "http-flv":"http://44.35.33.249:8088/Media/Camera_00001.flv",
+					   "ws-flv":"ws://44.35.33.249:6088/Media/Camera_00001.flv",
+					   "http-mp4":"http://44.35.33.249:5088/Media/Camera_00001.mp4",
+					   "http-hls":"http://44.35.33.249:9088/Media/Camera_00001.m3u8"
+					  }
 				  }
 				
 				2、无人观看消息通知样例：
@@ -1028,19 +1264,137 @@
 					  "stream":"Camera_00001",                # stream   不存在的stream 
 					  "mediaServerId":"ABLMediaServer_00001"  # 流媒体服务器编号 ，在配置文件可以配置，如果集群流媒体服务器时，可以给每台流媒体服务器起个编号 
 					} 
+				 6、ABLMediaServer启动时会发送上线通知
+					POST /index/hook/on_server_started HTTP/1.1
+					Accept: */*
+					Accept-Language: zh-CN,zh;q=0.8
+					Connection: keep-alive
+					Content-Length: 105
+					Content-Type: application/json
+					Host: 127.0.0.1
+					Tools: ABLMediaServer-6.3.5(2023-04-30)
+					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
+
+					{"localipAddress":"44.35.33.249","mediaServerId":"ABLMediaServer_00001","datetime":"2023-04-18 10:04:37"}				 
 					
+				  7、某一个码流接入流媒体服务器时会产生 发布 事件通知 	
+					POST /index/hook/on_publish HTTP/1.1
+					Accept: */*
+					Accept-Language: zh-CN,zh;q=0.8
+					Connection: keep-alive
+					Content-Length: 149
+					Content-Type: application/json
+					Host: 127.0.0.1
+					Tools: ABLMediaServer-6.3.5(2023-04-30)
+					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
+
+					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","networkType":50,"key":470,"ip":"44.35.33.248" ,"port":554,"params":""}
+				
+                  8、当播放流媒体服务器里面某一个码流时，会触发 播放事件 ，可以通知 parmas 参数值进行播放鉴权 				
+					POST /index/hook/on_play HTTP/1.1
+					Accept: */*
+					Accept-Language: zh-CN,zh;q=0.8
+					Connection: keep-alive
+					Content-Length: 135
+					Content-Type: application/json
+					Host: 127.0.0.1
+					Tools: ABLMediaServer-6.3.5(2023-04-30)
+					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
+
+					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","networkType":30,"key":472,"ip":"" ,"port":0,"params":"user=admin&password=safsa234234&token=@#$@#$@#ASDFasfdsa@#$23"}
+			
+			     9、如果某一个码流进行MP4录像（enable_mp4=1），会触发录像进度通知事件 
+					POST /index/hook/on_record_progress HTTP/1.1
+					Accept: */*
+					Accept-Language: zh-CN,zh;q=0.8
+					Connection: keep-alive
+					Content-Length: 204
+					Content-Type: application/json
+					Host: 127.0.0.1
+					Tools: ABLMediaServer-6.3.5(2023-04-30)
+					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
+
+					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","networkType":472,"key":470,"fileName":"20230418100440.mp4","currentFileDuration":49,"TotalVideoDuration":49}
+						
+				 10、如果某一个码流开启hls（enable_hls=1）并且设置为切片到硬盘（hlsCutType=1 在配置文件中） ，每当切片完成一个ts文件会触发该事件 
+					POST /index/hook/on_record_ts HTTP/1.1
+					Accept: */*
+					Accept-Language: zh-CN,zh;q=0.8
+					Connection: keep-alive
+					Content-Length: 246
+					Content-Type: application/json
+					Host: 127.0.0.1
+					Tools: ABLMediaServer-6.3.5(2023-04-30)
+					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
+
+					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","networkType":30,"key":470,"createDateTime":"2023-04-18 10:05:47","currentFileDuration":3,"fileName":"D:\WorkDir\ABLMediaServer\x64\Debug\www\Media\Camera_00001\23.ts"}
+					
+				 11、流媒体服务器每隔60秒会触发心跳事件通知 	
+					POST /index/hook/on_server_keepalive HTTP/1.1
+					Accept: */*
+					Accept-Language: zh-CN,zh;q=0.8
+					Connection: keep-alive
+					Content-Length: 105
+					Content-Type: application/json
+					Host: 127.0.0.1
+					Tools: ABLMediaServer-6.3.5(2023-04-30)
+					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
+
+					{"localipAddress":"44.35.33.249","mediaServerId":"ABLMediaServer_00001","datetime":"2023-04-18 10:25:40"}
+				
+                  12、当代理拉流、国标接入等等 码流不到达时会发出 码流不到达的事件通知 				
+					POST /index/hook/on_stream_not_arrive HTTP/1.1
+					Accept: */*
+					Accept-Language: zh-CN,zh;q=0.8
+					Connection: keep-alive
+					Content-Length: 155
+					Content-Type: application/json
+					Host: 127.0.0.1
+					Tools: ABLMediaServer-6.3.5(2023-04-30)
+					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
+
+					{"mediaServerId":"ABLMediaServer_00001","app":"gb28181","stream":"440300123432202342349","networkType":60,"key":470}	
+					
+				  13、如果某一个码流进行MP4录像（enable_mp4=1），当某个MP4文件被删除会触发该事件通知  
+					POST /index/hook/on_delete_record_mp4 HTTP/1.1
+					Accept: */*
+					Accept-Language: zh-CN,zh;q=0.8
+					Connection: keep-alive
+					Content-Length: 204
+					Content-Type: application/json
+					Host: 127.0.0.1
+					Tools: ABLMediaServer-6.3.5(2023-04-30)
+					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
+
+					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","fileName":"20230418100440.mp4"}
+				
+				  14、某一个接入码流当 i 帧到达会发出通知 ，总共通知默认30次，也可以修改总共通知次数 
+					POST /index/hook/on_stream_iframe_arrive HTTP/1.1
+					Accept: */*
+					Accept-Language: zh-CN,zh;q=0.8
+					Connection: keep-alive
+					Content-Length: 161
+					Content-Type: application/json
+					Host: 127.0.0.1
+					Tools: ABLMediaServer-6.3.6(2024-04-02)
+					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
+
+					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","networkType":23,"key":18,"ip":"44.35.33.249" ,"port":65183,"NotificationNumber":1}
+				
+				
 	  20) 图片抓拍 
 			 URL: /index/api/getSnap
 			 
 			 功能：
 				 查询某一接入的媒体源进行抓拍
 
-			 参数：              参数说明     参数参考值
-				secret           服务器密码   比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc        【必填参数】
-				vhost                         比如 _defaultVhost_                              【可选参数】 
-				app              应用名       比如 rtp、gb28181、Media 等等 ，自己起的名字     【必填参数】
-				stream           媒体流名     比如 Camera_00001、44303403343034243200234 等等  【必填参数】
- 				timeout_sec      超时时长     10  即本次抓拍最大超时时长 单位 秒               【必填参数】
+			 参数：               参数说明     参数参考值
+				secret            服务器密码   比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc        【必填参数】
+				vhost                          比如 _defaultVhost_                              【可选参数】 
+				app               应用名       比如 rtp、gb28181、Media 等等 ，自己起的名字     【必填参数】
+				stream            媒体流名     比如 Camera_00001、44303403343034243200234 等等  【必填参数】
+ 				timeout_sec       超时时长     10  即本次抓拍最大超时时长 单位 秒               【必填参数】
+				captureReplayType 返回类型     1 返回url , 2 直接返回抓拍的jpeg图片，默认从配置文件读取这个参数值 【可选参数】 
  				  
 	         http  GET 方式 
                http://127.0.0.1:7088/index/api/getSnap?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&vhost=_defaultVhost_&app=Media&stream=Camera_00001&timeout_sec=10
@@ -1289,14 +1643,141 @@
 					"code": 0,
 					"memo": "ABLMediaServer restartServer Successed ! "
 				}	
-
 				
-		26） 为了方便某些特殊场合，服务器支持udp的10000 端口接入国标PS码流，就是人们常说的单端口模式，url的命名规则为 /rtp/ssrc ,其中ssrc为下级rtp打包
+	      26）获取当前转码的数量
+			 URL: /index/api/getTranscodingCount
+			 
+			 功能：
+				  获取当前正在转码的数量
+
+			 参数：              参数说明     参数参考值
+				secret           服务器密码   比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc        【必填参数】
+ 				  
+	         http  GET 方式 
+               http://127.0.0.1:7088/index/api/getTranscodingCount?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc
+			   
+			http  POST 方式 
+			   http URL 
+				 http://127.0.0.1:7088/index/api/getTranscodingCount
+				 
+			   http Body 参数 json 格式
+				 {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc"}
+				 
+			 返回Body：
+				{
+					"code": 0,
+					"currentTranscodingCount": 2
+				}	
+
+	  27）、列举流媒体服务器所有占用端口 
+			 URL: /index/api/listServerPort
+			 
+			 功能：
+				 列举流媒体服务器所有占用端口
+
+			 参数：              参数说明     参数参考值
+				secret           服务器密码   比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc        【必填参数】
+				app              应用名       比如 rtp、gb28181、Media 等等 ，自己起的名字     【可选参数】
+				stream           媒体流名     比如 Camera_00001、44303403343034243200234 等等  【可选参数】
+				
+				参数填写样例说明：
+			  样例1（app、stream 都不填写） 
+				   secret  035c73f7-bb6b-4889-a715-d9eb2d1925cc
+				    
+				  返回所有在线的媒体源
+				 
+			  样例2 （只填写 app ）
+				   secret  035c73f7-bb6b-4889-a715-d9eb2d1925cc
+				   app     rtp 
+				   返回 app 等于 rtp 的所有媒体源
+				   
+			  样例3 （填写 app = rtp , stream = 44303403343034243200234）
+				   secret  035c73f7-bb6b-4889-a715-d9eb2d1925cc
+				   app     rtp 
+				   stream  44303403343034243200234 
+				  返回 app 等于 rtp、并且 stream 等于 44303403343034243200234 的所有媒体源
+				  
+			  样例4 （填写 stream = 44303403343034243200234）
+				   secret           035c73f7-bb6b-4889-a715-d9eb2d1925cc
+ 				   stream           44303403343034243200234 
+				   返回 stream 等于 44303403343034243200234 的所有媒体源
+ 				  
+	         http  GET 方式 
+                http://127.0.0.1:7088/index/api/listServerPort?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc
+			   
+			http  POST 方式 
+			   http URL 
+				 http://127.0.0.1:7088/index/api/listServerPort
+				 
+			   http Body 参数 json 格式
+				 {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc"}
+				 
+			 返回Body：
+					{
+						"code": 0,
+						"memo": "success",
+						"data": [
+							{
+								"key": 478,
+								"app": "Media",
+								"stream": "Camera_00003",
+								"networkType": 23,
+								"port": 34988
+							},
+							{
+								"key": 477,
+								"app": "Media",
+								"stream": "Camera_00002",
+								"networkType": 23,
+								"port": 34986
+							},
+							{
+								"key": 476,
+								"app": "Media",
+								"stream": "Camera_00001",
+								"networkType": 23,
+								"port": 34984
+							},
+							{
+								"key": 456,
+								"app": "",
+								"stream": "",
+								"networkType": 68,
+								"port": 10000
+							}
+						]
+					}
+				
+                   【注释：可以根据 "networkType": 23, 这个字段标识对象的网络类型 ，具体详见网络类型的对照表 】	
+			  
+		28）、批量设置服务器的配置参数 
+  		       URL: /index/api/setServerConfig
+			
+			 功能：
+				 批量设置服务器的配置参数
+
+			 参数：                     参数说明                  参数参考值
+				secret                  服务器密码                比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc              【必填参数】
+ 			    noneReaderDuration      多少秒无人观看通知一次    20                                                     【可选参数】
+			    on_server_started       服务器启动通知            http://10.0.0.238:4088/index/hook/on_server_started    【可选参数】
+				iframeArriveNoticCount  i帧达到通知总数           30                                                     【可选参数】
+				
+			http  GET 方式 	
+		       http://127.0.0.1:7088/index/api/setServerConfig?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&noneReaderDuration=20&on_server_started=http://10.0.0.238:4088/index/hook/on_server_started&iframeArriveNoticCount=30
+			
+			http  POST 方式 
+			   http URL 
+				 http://127.0.0.1:7088/index/api/setServerConfig
+				 
+			   http Body 参数 json 格式
+				 {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","noneReaderDuration":20,"iframeArriveNoticCount":30,"on_server_started":"http://10.0.0.238:4088/index/hook/on_server_started"}
+			  
+		29） 为了方便某些特殊场合，服务器支持udp的10000 端口接入国标PS码流，就是人们常说的单端口模式，url的命名规则为 /rtp/ssrc ,其中ssrc为下级rtp打包
 		     的16进制的值转换为大小的字符串，即可sprintf(url,"rtp/%X",ssrc) ,具体接入的url名字可以调用 getMediaList 查询出接入的国标流 。需要注意的是 
 			 下级 rtp 打包时每路视频的rtp中的ssrc不能相同。
 			 
 			  
-	    27） 网络类型的对照表
+	    30） 网络类型的对照表
 	      1 媒体输入网络类型对照表 
 		  
 		      整形值     代表意义

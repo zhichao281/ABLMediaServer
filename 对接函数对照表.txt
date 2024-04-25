@@ -1,0 +1,18 @@
+                                                      对接函数对照表 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------				   
+    ZLMeidaKit                      ABLMediaServer              功能简介
+1、 getServerConfig                 getServerConfig             获取流媒体服务器配置信息，主要有服务器IP，各种网络协议的端口比如，554、1935、5088、6088、8088 
+2、 listRtpServer                   getMediaServer              获取已经接入的媒体流，可以增加 app、stream 这两个参数进行精确查找码流是否接入
+3、 openRtpServer                   openRtpServer               打开国标收流 如果要TCP方式 需要指定 enable_tcp=1 ,调用成功后，ABLMediaServer 返回key 作为关键字 
+4、 closeRtpServer                  closeRtpServer              关闭国标收流，ABLMediaServer 需要key 作为关键字 进行关闭 
+5、 startSendRtp                    startSendRtp                打开国标推流
+6、 stopSendRtp                     stopSendRtp                 关闭国标收流 
+7、 事件通知 和 ZLMeidaKit 基本是一致的  
+
+
+可能要注意一些细节问题
+１、心跳函数，
+２、ｚｌｍ　的关闭基本上是字符串参数，ＡＢＬ的关闭函数基本上是　整形　ｋｅｙ　
+３、ABL　，调用ｇｅｔＭｅｄｉａＬｉｓｔ　函数会返回所有播放的，这样ｗｖｐ里面就不需要拼接，还有ABL的播放地址　基本上没有　ｌｉｖｅ
+　　这个字符
+  

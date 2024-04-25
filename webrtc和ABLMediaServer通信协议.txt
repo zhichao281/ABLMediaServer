@@ -1,0 +1,63 @@
+-----------webrtc和ABLMediaServer通信协议--------------------------------
+一、webrtc模块回调函数定义 
+	#if (defined _WIN32 || defined _WIN64)
+	  typedef void (CALLBACK* WebRtcCallBack) (char* callbackJson, void* pUserHandle);
+	#else 
+	  typedef void (*WebRtcCallBack) (char* callbackJson, void* pUserHandle);
+	#endif
+	
+	1）回调函数参数说明：
+	 char*  callbackJson  回调参数json字符串
+	 void*  pUserHandle   用户指针
+	 
+	 callbackJson 回调参数json字符串成员 样例：
+	   {"eventID":1,"media":"video","app":"live","stream":"Camera_00001","playerID":100) 
+	   
+	 json字符串成员说明：
+	   "eventID"   事件类型，比如请求 视频播放、视频关闭、视频播放中 等等，可以扩展 
+	   "media"     媒体类型 ，"video"  只播放视频 ，"audio" 只播放音频 ， "play"  视频、音频同时播放 
+       "app"       和流媒体服务器的app同样意思
+       "stream"    和流媒体服务器的stream同样意思
+       "playerID"  是webrtc播放中产生的ID ，必须唯一 
+	   
+	   
+二、webrtc 初始化 ，假设webRtc对象实力为 gblDownloadMgrGet 
+
+    gblDownloadMgrGet->init(char* webrtcConfig,WebRtcCallBack webrtcCallBack);
+	
+	函数参数说明：
+	 char*           webrtcConfig      webrtc 模块初始化参数，现在暂时只有 webrtc的端口 {"webrtcPort":8000} 
+	 webRtcCallBack  webrtcCallBack    webrtc 回调函数 ，参考 回调函数的定义 WebRtcCallBack
+
+三、webrtc 视频播放 
+    1）、chrome 先请求播放 http://44.35.33.249:8000/webrtc-streamer.html?video=/live/Camera_00001
+	2）、webrtc 模块获取到媒体源名字 /live/Camera_00001 ，先查找内部是否已经增加过 videoCaptureManager::GetInstance()->GetInput("/live/Camera_00001")
+	     如果增加过webrtc在内部直接分享即可。
+	3）、没有增加过 videoCaptureManager::GetInstance()->GetInput("/live/Camera_00001")，需要调用 getliveList("/live/Camera_00001") 向ABL查找该媒体源
+	　　是否存在，如果不存在返回webrtc并提示找不到 "/live/Camera_00001" ，如果 ABL 存在 "/live/Camera_00001" ，需要调用回调函数 WebRtcCallBack 回调播放
+	    该路 "/live/Camera_00001" 请求 
+
+四、webrtc 停止播放 （被动关闭播放即用户强制浏览器）
+    1）、当用户关闭浏览器，停止播放  http://44.35.33.249:8000/webrtc-streamer.html?video=/live/Camera_00001 
+	2）、webrtc模块得知停止播放 /live/Camera_00001 ，需要往 ABL 回调 停止播放 消息 。
+	3）、webrtc模块自己停止 playerID 该路播放，并且销毁 playerID 这路的资源 
+	
+五、webrtc 停止播放 （流媒体服务器主动关闭webrtc播放）
+    1）、由于鉴权失败、服务到期等等方面原因，流媒体服务器可以主动强制关闭webrtc播放
+	2）、ABL主动调用 gblDownloadMgrGet->stopWebRtcPlay(uint64_t nPlayerID);
+	3)、 ABL自行销毁 webrtc 分发类资源  
+	
+六、webrtc 销毁掉某媒体源播放
+    1）、当视频接入被认为中断、或者网络异常被中断 ，比如 视频源 /live/Camera_00001 中断 
+	2）、ABL内部自行销毁 /live/Camera_00001 所占用的所有资源 
+	3）、webRtc 需要提供一个函数删除webrtc内部的媒体源 gblDownloadMgrGet->deleteWebRtcSource("/live/Camera_00001")
+	4）、webRtc 需要删除 "/live/Camera_00001" 的所有播放，删除 "/live/Camera_00001" 该路媒体源所占用的所有资源 
+	
+	注：webrtc模块需要增加
+	    gblDownloadMgrGet->stopWebRtcPlay(uint64_t nPlayerID);       主动关闭某一路播放 
+		gblDownloadMgrGet->deleteWebRtcSource(char* szMediaSource);  主动关闭某一个媒体源 
+	
+		
+     
+	 
+	 
