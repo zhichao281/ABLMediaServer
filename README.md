@@ -1,5 +1,6 @@
 我们的官网 [https://www.yunshihome.com/](http://)
 
+我们的QQ群：873666268
 
 ### 一、功能说明
 
