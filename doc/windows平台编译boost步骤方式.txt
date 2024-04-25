@@ -1,0 +1,5 @@
+1、打开VS：x86 Native Tools Command Prompt
+2、切换到boost 目录：cd /d D:\vison_software\ZLMediaKit\ABLMediaServer\ABLMediaServer\boost\boost_1_73_0\boost_1_73_0
+3、执行bootstrap.bat生成b2.exe
+4、使用b2.exe编译：
+b2 install  --toolset=msvc-14.2 --address-model=64 --architecture=x86 --without-graph --without-graph_parallel --without-mpi --without-nowide --without-program_options --without-test --without-python --without-wave --stagedir=“E:\study\ABLMediaServer\3rd\boost_1_73_0\boost_intall” link=static runtime-link=shared runtime-link=static threading=multi address-model=64 debug release

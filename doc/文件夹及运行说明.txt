@@ -1,0 +1,19 @@
+文件夹     功能说明
+Linux       Linux 平台运行文件
+            ABLMediaServer         是主程序
+			ABLMediaServer.ini     是配置文件
+			运行步骤
+			1、用超级用户 root 执行 ,因为要写日志文件，录像功能等等需要写文件 
+			2、转到 ABLMediaServer 所在的路径 ，执行如下命令
+			   chmod 777 ABLMediaServer
+			3、设置so依赖库的路径 ，其中 /xxx/xxx/xxx/xxx/Linux 就是 ABLMediaServer  主程序 所在路径的全路径，一定要准确无误 ，可以用 pwd 命令查询出来
+				 export LD_LIBRARY_PATH=/xxx/xxx/xxx/xxx/Linux
+			4、运行程序 (后台运行)
+               setsid ./ABLMediaServer &
+
+			   
+WinX64     Windows 平台运行路径
+            ABLMediaServer.exe     是主程序
+			ABLMediaServer.ini     是配置文件
+           1、双击 ABLMediaServer.exe 即可把服务器运行起来
+		   
