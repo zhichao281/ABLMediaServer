@@ -1,0 +1,142 @@
+<html>
+<head>
+<script src="libs/EventEmitter.min.js" ></script>
+<script src="janusconfig.js" ></script>
+<script src="janusvideoroom.js" ></script>
+<script src="webrtcconfig.js" ></script>
+<link rel="stylesheet" type="text/css" href="styles.css">
+<script type="module" src="webrtc-streamer-footer-element.js"></script>
+</head>
+<body> 
+	Janus Url:<input id="janusUrl" type="text" size="50" /> 
+	Room id:<input id="janusRoom" type="number" />
+	<input type="button" onclick="connect()" value="ConnectRoom" />
+	<input type="button" onclick="openroom()" value="OpenRoom" />
+	<nav id="menu"></nav>
+	<webrtc-streamer-footer></webrtc-streamer-footer>
+</body>
+<script>
+	// set default value
+	document.querySelector('#janusUrl').value  = janusRoomConfig.url;
+	document.querySelector('#janusRoom').value = janusRoomConfig.roomId;
+
+	function getText(url) {
+		var text;
+		if (url.video) {
+			text = url.video + " ";
+		}
+		if (url.audio) {
+			text += url.audio + " ";
+		}
+		return text;
+	}	
+
+	function clientCallBack (name, status) {
+		console.log("clientCallBack name:"+ name + " status:"+ status);
+
+		const navId = "nav_" + name;
+		const navElt = document.querySelector(`[id="${navId}"]`);
+		if (navElt) {
+			if (status == "down") {
+				navElt.className = "";
+			} else if (status == "up") {
+				navElt.className = "active";
+			}
+		}
+	}
+
+	var bus = new EventEmitter();
+	bus.addListener('state', clientCallBack);	
+	
+	var janus = {};		
+
+	
+	function connect(webrtcStream, user) {	
+		var serverName = document.querySelector('#janusUrl').value;
+		var roomName = parseInt(document.querySelector('#janusRoom').value);	
+
+		let janusserver = new JanusVideoRoom(serverName, webrtcConfig.url, bus);
+		janus[serverName] = janusserver;
+		if (janusserver) {
+			janusserver.join(roomName);
+		}
+		return janusserver;
+	}
+	
+	function disconnect(webrtcStream, user) {
+		var serverName = document.querySelector('#janusUrl').value;
+
+		let janusserver = janus[serverName];
+		janus[serverName] = undefined;
+	}
+
+	function join(webrtcStream, user) {	
+		var roomName = parseInt(document.querySelector('#janusRoom').value);	
+
+		let janusserver = connect();
+		if (janusserver) {
+			janusserver.join(roomName, webrtcStream, user);
+		}
+	}
+
+	function leave(webrtcStream, user) {
+		var serverName = document.querySelector('#janusUrl').value;
+		var roomName = parseInt(document.querySelector('#janusRoom').value);		
+
+		let janusserver = janus[serverName];
+		if (janusserver) {
+			janusserver.leave(roomName, webrtcStream, user);
+		}
+	}
+
+
+	function openroom() {
+		var serverName = document.querySelector('#janusUrl').value;
+		var roomName = document.querySelector('#janusRoom').value;		
+		window.open( serverName + "/videoroomtest.html");
+	}	
+	
+	// ------------------------------------------
+	// init device list 
+	// ------------------------------------------	
+	function onGetDeviceList(remoteDeviceList) {
+		var deviceList = [];
+		if (remoteDeviceList) {
+			deviceList.push.apply( deviceList, remoteDeviceList );
+		}
+
+		// create navigation menu
+		var urllist = document.getElementById("menu");
+		for (var dev in deviceList) {
+			var url = deviceList[dev];
+			var option = document.createElement("a");
+			option.url = url;
+			option.text = getText(url);
+			option.id   = "nav_" + url.video;
+			option.onclick = function () { 
+				if (this.className === "active") {
+					leave(this.url, this.url.video); 
+				} else {
+					join(this.url, this.url.video); 
+				}
+			}
+			urllist.appendChild(option);
+		}		
+	}
+	
+	
+	// load
+	window.onload         = function() { 
+		fetch(webrtcConfig.url + "/api/getMediaList")
+			.then( (response) => (response.json()) )
+			.then( (response) => onGetDeviceList(response) )
+			.catch( (error) => console.log("getMediaList " + error ));
+		connect();
+	} 
+	
+	// unload	
+	window.onbeforeunload = function() { 
+	}
+</script>
+</html>
+

@@ -1,0 +1,30 @@
+<html>
+<head>
+<script src="libs/strophe.min.js" ></script>
+<script src="libs/strophe.muc.min.js" ></script>
+<script src="libs/strophe.disco.min.js" ></script>
+<script src="libs/strophe.jingle.sdp.js"></script>
+<script src="libs/jquery-3.5.1.min.js"></script>
+<script src="libs/EventEmitter.min.js" ></script>
+<script src="xmppvideoroom.js" ></script>
+<script src="xmppconfig.js" ></script>
+<script src="webrtcconfig.js" ></script>
+</head>
+<body></body>
+<script>   
+	function writeStatus(name, status) {
+		var textNode = document.createElement("h3");
+		textNode.innerHTML = name + " " + status;
+		document.body.appendChild(textNode);
+	}
+	var bus = new EventEmitter();
+	bus.addListener('state', writeStatus);
+	var xmpp = new XMPPVideoRoom(xmppRoomConfig.url, webrtcConfig.url, bus);
+	xmpp.join(xmppRoomConfig.roomId, "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov","Bunny");
+	
+	window.onbeforeunload = function() { 
+			xmpp.leave();
+	};
+</script>
+</html>
+

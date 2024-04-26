@@ -1,0 +1,99 @@
+<html>
+<head>
+    <link rel="icon" type="image/png" href="webrtc.png" />
+    <script src="libs/tfjs"></script>
+    <script src="libs/tf-backend-wasm.js"></script>    
+    <script>
+        tf.setBackend('wasm').then(() => main());
+    </script>
+    <script src="libs/coco-ssd"> </script>
+    <script src="libs/posenet"> </script>
+    <script src="libs/deeplab"> </script>
+    <script src="libs/body-pix"></script>
+    <script src="libs/blazeface"></script>
+    <script type="module" src="webrtc-streamer-element.js"></script>
+    <script type="module" src="webrtc-streamer-footer-element.js"></script>
+    <script type="module" src="webrtc-streamer-menu-element.js"></script>
+    <script type="module" src="webrtc-streamer-options-element.js"></script>
+    <script type="module" src="webrtc-streamer-algo-element.js"></script>
+</head>
+<body>
+    <webrtc-streamer-menu id="selector" ></webrtc-streamer-menu>
+    <webrtc-streamer-algo id="algo"></webrtc-streamer-algo>
+    <webrtc-streamer id="stream"></webrtc-streamer>
+    <webrtc-streamer-options id="options" options="rtptransport=tcp&timeout=60&width=0&height=0&bitrate=0&rotation=0" style="display:none"></webrtc-streamer-options>
+    <webrtc-streamer-footer></webrtc-streamer-footer>
+
+    <script>
+        customElements.whenDefined('webrtc-streamer').then(() => {
+            let selectorElement = document.getElementById("selector");
+            let streamElement = document.getElementById("stream");
+            let optionsElement = document.getElementById("options");
+            let algoElement = document.getElementById("algo");
+
+            let url;
+            if (typeof URLSearchParams != 'undefined') {
+                var params = new URLSearchParams(location.search);
+                if (params.has("options")) {
+                    streamElement.setAttribute('options', params.get("options"));
+                }
+                if (params.has("algo")) {
+                    algoElement.setAttribute('selected', params.get("algo"));
+                    streamElement.setAttribute('algo', params.get("algo"));
+                }            
+                if (params.has("video") || params.has("audio")) {
+                    url = { video:params.get("video"), audio:params.get("audio") };
+                }
+                if (params.has("showoptions")) {
+                    optionsElement.style.display = "block";
+                }
+            }
+
+            selectorElement.addEventListener('init', (event) => {
+                    if (url) {
+                        let media = JSON.stringify(url)
+                        selectorElement.setAttribute('selected', media);
+                        streamElement.setAttribute('url', media);
+                    } else {
+                        let mediaList = event.detail;
+                        if (mediaList.length > 0) {
+                            var random = mediaList.sort(() => .5 - Math.random());
+                            let media = JSON.stringify(random[0])
+                            selectorElement.setAttribute('selected', media);
+                            streamElement.setAttribute('url', '');
+                            streamElement.setAttribute('options', optionsElement.getAttribute('options'));
+                            streamElement.setAttribute('url', media);
+                        }
+                    }
+                });            
+            
+
+            selectorElement.addEventListener('change', (event) => {
+                streamElement.setAttribute('url', '');
+                streamElement.setAttribute('options', optionsElement.getAttribute('options'));
+                streamElement.setAttribute('url', event.detail.url);
+            });
+
+            selectorElement.addEventListener('settings', (event) => {
+                optionsElement.style.display = event.detail === "on" ? "block" : "none";
+            });
+
+            algoElement.addEventListener('change', (event) => {
+                streamElement.setAttribute('algo', event.detail.algo);
+            });
+
+            optionsElement.addEventListener('change', (event) => {
+                streamElement.setAttribute('options', event.detail.options);
+            });
+
+            streamElement.addEventListener('click', (event) => {
+                const url = JSON.parse(streamElement.getAttribute('url'))
+                const options = streamElement.getAttribute('options')
+                window.open('./webrtc-streamer.html?video='+encodeURIComponent(url.video)+'&audio='+encodeURIComponent(url.audio)+"&options="+encodeURIComponent(options));
+            });
+            
+        });        
+        </script>
+</body>
+</html>
+

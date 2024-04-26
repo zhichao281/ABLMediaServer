@@ -1,0 +1,257 @@
+@import url('/nav.css');
+
+table {
+    margin: 0 auto;
+}
+
+h2 {
+    margin: 0 auto;
+    text-align: center;
+}
+
+footer {
+    text-align: center;
+}
+
+div {
+    margin: 0 auto;
+    text-align: center;
+}
+
+video {
+    margin: auto;
+    left: 0;
+    right: 0;
+    position: relative;
+    background: grey;
+}
+
+video::-webkit-media-controls{
+    display:none !important
+}
+
+canvas {
+    position: absolute;
+    margin: auto;
+    top:0;
+    left: 0;
+    right: 0;
+    z-index: 1010;
+    background: transparent;
+    width: 100%;
+    height: calc(100% - 36px);
+}
+
+
+.rtsp-player {
+    display: grid;
+    /*grid-gap: 10px;*/
+    /*grid-template-columns: 1fr 1fr;*/
+    /*grid-template-rows: 1fr 1fr;*/
+    height: 100%;
+    /*padding:10px;*/
+    box-sizing: border-box;
+}
+
+.rtsp-player-detail {
+    background-color: #333333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #d5d5d5;
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+}
+
+.rtsp-player-video {
+    position: absolute;
+    height: calc(100% - 36px);
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    background: #000000;
+}
+
+.no-select-video {
+    text-align: center;
+}
+
+.rtsp-player-logo {
+    text-align: center;
+    /*background: url(video-chinaMoble.a2e54f3….png) 0 0/100% 100% no-repeat no-repeat;*/
+    width: 60px;
+    height: 60px;
+    display: inline-block;
+}
+
+.no-select-video-title span {
+    font-size: 14px;
+    font-weight: 400;
+    font-stretch: normal;
+    line-height: 16px;
+    color: #d5d5d5;
+    margin: 25px 0 0;
+}
+
+.rtsp-player-toolbar {
+    background-color: rgba(255, 255, 255, 0.1);
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    height: 36px;
+    width: 100%;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    display: flex;
+}
+
+.play_btn,.setting_btn {
+    height: 100%;
+    outline: none;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background-color: rgb(80, 80, 80);
+    margin-top: 8px;
+    margin-left: 24px;
+    position: relative;
+    margin-right: 24px;
+}
+
+.buffer-bar {
+    width: 0px;
+    height: 4px;
+    background-color: rgb(160, 160, 160);
+    position: absolute;
+}
+
+.buffer-bar__read {
+    width: 0px;
+    height: 4px;
+    background-color: rgb(160, 160, 160);
+    position: absolute;
+}
+
+.buffer-bar__button {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: rgb(31, 144, 255);
+    position: absolute;
+    left: -5px;
+    top: -3.5px;
+    outline: none;
+}
+
+
+.setting-plane {
+    position: absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index: 2000;
+    display: none;
+    padding:40px 60px;
+    box-sizing: border-box;
+}
+.setting-plane-title {
+    width:45%;
+    background: #FFFFFF;
+    padding:10px 20px;
+    color:#333333;
+    text-align: left;
+}
+.setting-plane-content {
+    width:45%;
+    background: #FFFFFF;
+    padding:20px;
+
+}
+.plane-item {
+    text-align: center;
+}
+.plane-item+.plane-item {
+    margin-top:10px;
+}
+
+.plane-item label {
+    font-size:14px;
+    color:#333333;
+}
+.plane-item input {
+    color:#333333;
+}
+
+.plane-item input:focus-visible {
+    outline: -webkit-focus-ring-color auto 0px;
+}
+
+.setting-plane-footer {
+    width:45%;
+    padding:20px;
+    background: #FFFFFF;
+}
+
+.loadBox .loaderContantBox {
+    color: white;
+    font-size: 40px;
+    overflow: hidden;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transform: translateZ(0);
+    /* animation：规定完成动画所花费的时间，该属性必须规定，否则动画时长为0，无法播放 */
+    animation: loadBox 1.7s infinite ease, round 1.7s infinite ease;
+}
+
+@keyframes loadBox {
+    0% {
+        box-shadow: 0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
+        0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
+    }
+
+    5%,
+    95% {
+        box-shadow: 0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
+        0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
+    }
+
+    10%,
+    59% {
+        box-shadow: 0 -0.83em 0 -0.4em, -0.087em -0.825em 0 -0.42em,
+        -0.173em -0.812em 0 -0.44em, -0.256em -0.789em 0 -0.46em,
+        -0.297em -0.775em 0 -0.477em;
+    }
+
+    20% {
+        box-shadow: 0 -0.83em 0 -0.4em, -0.338em -0.758em 0 -0.42em,
+        -0.555em -0.617em 0 -0.44em, -0.671em -0.488em 0 -0.46em,
+        -0.749em -0.34em 0 -0.477em;
+    }
+
+    38% {
+        box-shadow: 0 -0.83em 0 -0.4em, -0.377em -0.74em 0 -0.42em,
+        -0.645em -0.522em 0 -0.44em, -0.775em -0.297em 0 -0.46em,
+        -0.82em -0.09em 0 -0.477em;
+    }
+
+    100% {
+        box-shadow: 0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em,
+        0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em;
+    }
+}
+
+@keyframes round {
+    0% {
+        transform: rotate(0deg); /* 开始旋转 div 元素 */
+    }
+
+    100% {
+        transform: rotate(360deg); /* 结束旋转 div 元素 */
+    }
+}
