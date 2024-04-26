@@ -1,0 +1,22 @@
+<html>
+<head>
+<script src="libs/EventEmitter.min.js" ></script>
+<script src="janusvideoroom.js" ></script>
+<script src="janusconfig.js" ></script>
+<script src="webrtcconfig.js" ></script>
+<script>        
+	function writeStatus(name, status) {
+		var textNode = document.createElement("h3");
+		textNode.innerHTML = name + " " + status;
+		document.body.appendChild(textNode);
+	}
+	
+	var bus = new EventEmitter();
+	bus.addListener('state', writeStatus);	
+	var janus = new JanusVideoRoom(janusRoomConfig.url, webrtcConfig.url, bus);
+	janus.join(janusRoomConfig.roomId, "rtsp://184.72.239.149/vod/mp4:BigBuckBunny_175k.mov","Bunny");
+    
+</script>
+</head>
+</html>
+

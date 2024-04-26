@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Jitsi Room</title>
+	<link rel="stylesheet" type="text/css" href="styles.css">
+    <script src="libs/jquery-3.5.1.min.js"></script>
+    <script src="libs/lib-jitsi-meet.min.js"></script>
+	<script src="xmppconfig.js" ></script>
+	<link rel="icon" type="image/ico" href="jitsi.ico" />
+</head>
+<body>
+	XMPP Url:<input id="xmppServer" type="text" size="50" /> 
+	Room id:<input id="xmppRoom" type="text" />
+	<a href="#" onclick="load()">Load</a>
+	<a href="#" onclick="unload()">Unload</a>
+	<br/>
+</body>
+<script>
+	// set default value
+	document.querySelector('#xmppServer').value  = xmppRoomConfig.url;
+	document.querySelector('#xmppRoom').value = xmppRoomConfig.roomId;
+
+	let connection = null;
+	let remoteTracks = {};
+
+	function onRemoteAddTrack(track) {
+		console.log(`onRemoteAddTrack track ${track}`);
+		if (!track.isLocal()) {
+			const participant = track.getParticipantId();		
+			remoteTracks[participant].push(track);
+			if (track.getType() === 'video') {
+				$('body').append(`<div title='${participant}' onclick="kick('${participant}')"><video autoplay='1' id='${participant}'" /></div>`);
+			} else {
+				$('body').append(`<audio autoplay='1' id='${participant}' />`);
+			}
+			track.attach($(`#${participant}`)[0]);
+		}
+	}
+
+	function onRemoteRemoveTrack(track) {
+		console.log(`onRemoteRemoveTrack track ${track}`);
+		if (!track.isLocal()) {
+			const participant = track.getParticipantId();
+			const tracks = remoteTracks[participant];
+			if (tracks) {
+				for (let i = 0; i < tracks.length; i++) {
+					tracks[i].detach($(`#${participant}`)[0]);
+					$(`#${participant}`).remove();
+					tracks[i].dispose();
+				}
+				delete remoteTracks[participant];
+			}
+		}
+	}
+
+	function onUserLeft(id) {
+		console.log('user left id:' + id);
+	}
+
+	function onUserJoined(id) {
+		console.log('user joined id:' + id);
+		remoteTracks[id] = [];
+		remoteTracks[id].length = 0;	
+	}
+
+	function onConnectionSuccess() {
+		connection.room = connection.initJitsiConference(connection.roomName, {});
+		
+		connection.room.on(JitsiMeetJS.events.conference.USER_JOINED, onUserJoined);
+		connection.room.on(JitsiMeetJS.events.conference.USER_LEFT, onUserLeft);
+		
+		connection.room.on(JitsiMeetJS.events.conference.TRACK_ADDED, onRemoteAddTrack);
+		connection.room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, onRemoteRemoveTrack);
+
+		connection.room.join();
+	}
+
+	function onConnectionFailed() {
+		console.error('Connection Failed!');
+	}
+
+	function disconnect() {
+		console.log('disconnect!');
+		if (connection) {
+			connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, onConnectionSuccess);
+			connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, onConnectionFailed);
+			connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, disconnect);
+		}
+	}
+
+	function kick(paticipant) {
+		if (connection && connection.room) {
+			console.log("kick:" + paticipant)
+			connection.room.kickParticipant(paticipant);
+		}    
+	}
+
+	function join(serverUrl, roomName) {
+		JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.DEBUG);
+		JitsiMeetJS.init({});
+
+		const options = {
+			hosts: {
+				domain: serverUrl,
+				muc: 'conference.' + serverUrl 
+			},
+			bosh: 'https://' + serverUrl + '/http-bind?room='+roomName
+		};
+
+		var connection = new JitsiMeetJS.JitsiConnection(null, null, options);
+		connection.roomName = roomName;
+
+		connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, onConnectionSuccess);
+		connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, onConnectionFailed);
+		connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, disconnect);
+
+		connection.connect();
+		
+		return connection;
+	}
+
+	function load() {
+		var serverName = document.querySelector('#xmppServer').value;
+		var roomName = document.querySelector('#xmppRoom').value;
+		connection = join(serverName, roomName);
+	}
+
+	function unload() {
+		if (connection) {
+			if (connection.room) {
+				connection.room.leave();
+				connection.room = null;
+			}
+			connection.disconnect();
+			connection = null;
+		}
+	}
+	
+	$(window).bind('load', load);
+	$(window).bind('beforeunload', unload);
+
+</script>
+</html>

@@ -1,0 +1,37 @@
+<html>
+<head>
+	<link rel="icon" type="image/png" href="webrtc.png" />
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	<script type="module" src="webrtc-streamer-element.js"></script>
+	<script type="module" src="webrtc-streamer-footer-element.js"></script>
+</head>
+<body>
+	<div id="container">
+		<div id="content">
+			<webrtc-streamer id="stream" options="rtptransport=tcp&timeout=60&width=0&height=0&bitrate=0&rotation=0" style="display:none"></webrtc-streamer>
+		</div>
+	</div>
+	<script>
+		let messageElement = document.getElementById("message");
+        customElements.whenDefined('webrtc-streamer').then(() => {
+            let streamElement = document.getElementById("stream");
+
+			var params = new URLSearchParams(location.search);
+			if (params.has("options")) {
+				streamElement.setAttribute('options', params.get("options"));
+			}
+			if (params.has("video") || params.has("audio")) {
+				let url = { video:params.get("video"), audio:params.get("audio") };
+				streamElement.setAttribute('url', JSON.stringify(url));
+				streamElement.style.display = "block"
+			} else {
+				let url = prompt("WebRTC stream name to connect:")
+				window.location += (window.location.search ? "&" : "?") + `video=${encodeURI(url)}`;
+			}
+		}).catch( (e) => {
+			messageElement.innerText = "webrtc-streamer webcomponent fails to initialize error:" + e
+		})
+	</script>
+</body>
+</html>
+

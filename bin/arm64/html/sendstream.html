@@ -1,0 +1,46 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="styles.css">
+<script src="libs/adapter.min.js" ></script>
+<script src="webrtcstreamer.js" ></script>
+<script src="webrtcconfig.js" ></script>
+<script>        
+    let video = "";  
+    let options = webrtcConfig.options;
+    if (location.search.slice(1)) {
+		if (typeof URLSearchParams != 'undefined') {
+			var params = new URLSearchParams(location.search);
+			if (params.has("video")) {
+				video = params.get("video");
+			}
+			if (params.has("options")) {
+				options = params.get("options");
+			}
+		} 	    
+   }
+
+   window.onload         = function() { 
+		this.webRtcServer      = new WebRtcStreamer("remotevideo", webrtcConfig.url);
+		navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(stream => {
+		
+			var videoElement = document.getElementById("localvideo");
+			videoElement.srcObject = stream;
+			videoElement.play(); 
+	
+			this.webRtcServer.connect(video, "", options, stream) 
+		})
+	}
+	window.onbeforeunload = function() { this.webRtcServer.disconnect() }
+
+</script>
+</head>
+<body> 
+	<div>
+		<video id="localvideo" ></video>
+	</div>
+	<div>	
+		<video id="remotevideo" muted playsinline></video>	
+	</div>
+</body>
+</html>
+

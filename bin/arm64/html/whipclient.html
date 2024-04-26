@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" type="image/png" href="webrtc.png" />
+    <script type="module" src="webrtc-streamer-footer-element.js"></script>
+    <script type="module" src="webrtc-streamer-menu-element.js"></script>
+</head>
+<body>
+    WHIP Url:<input id="whipServer" type="text" size="50" value="http://localhost:7080/whip"/> 
+
+    <webrtc-streamer-menu id="selector" ></webrtc-streamer-menu>
+    <webrtc-streamer-footer></webrtc-streamer-footer>
+
+    <script>
+        const srvurl = location.protocol+"//"+window.location.hostname+":"+window.location.port;
+        function onWhipPublish(response, peerid) {
+            console.log("onWhipPublish:"+JSON.stringify(response));
+        }
+
+        function onCreateOffer(response, peerid) {
+            console.log("onCreateOffer:"+JSON.stringify(response));
+
+            var whipUrl = "http://127.0.0.1:7080/whip/endpoint/aa";
+                
+            fetch(whipUrl, {method: "POST", body: response.sdp, headers:{"Content-Type": "application/sdp"}})
+                .then( (response) => (response.text()) )
+                .then( (response) => onWhipPublish(response, peerid) )
+                .catch( (error) => console.log("whipUrl " + error ))
+        }
+        
+        customElements.whenDefined('webrtc-streamer-menu').then(() => {
+            let selectorElement = document.getElementById("selector");
+
+            let url;
+            if (typeof URLSearchParams != 'undefined') {
+                var params = new URLSearchParams(location.search);
+                if (params.has("video") || params.has("audio")) {
+                    url = { video:params.get("video"), audio:params.get("audio") };
+                }
+            }
+
+            selectorElement.addEventListener('init', (event) => {
+                if (url) {
+                    let media = JSON.stringify(url)
+                    selectorElement.setAttribute('selected', media);
+                } else {
+                    let mediaList = event.detail;
+                    if (mediaList.length > 0) {
+                        var random = mediaList.sort(() => .5 - Math.random());
+                        let media = JSON.stringify(random[0])
+                        selectorElement.setAttribute('selected', media);
+                    }
+                }
+            });            
+            
+
+            selectorElement.addEventListener('change', ({detail}) => {
+                console.error(detail);
+
+                const peerid = Math.random().toString();
+                const json = JSON.parse(detail.url);
+                var videourl = json.video;
+                var createOfferUrl = srvurl + "/api/createOffer?peerid="+ peerid+"&url="+encodeURIComponent(videourl);
+                
+                fetch(createOfferUrl)
+                    .then( (response) => (response.json()) )
+                    .then( (response) => onCreateOffer(response, peerid) )
+                    .catch( (error) => console.log("createOffer " + error ))
+
+            });
+            
+        });        
+        </script>
+</body>
+</html>
+

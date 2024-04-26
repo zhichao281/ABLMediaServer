@@ -1,0 +1,96 @@
+<html>
+	<head>
+            <meta charset="UTF-8">
+            <style>
+            #map {
+                width: 100%;
+                height: 90%;
+                margin: 0 auto;
+            }
+            #focus {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                margin: 0 auto;
+                z-index: 1;
+            }
+            </style>
+            <script src="./webrtcconfig.js"></script>
+            <script type="module" src="./webrtc-streamer-element.js"></script>
+            <script src="https://maps.googleapis.com/maps/api/js?v=3"></script>
+            <script src="./htmlmapmarker.js"></script>
+            <script type="module" src="webrtc-streamer-footer-element.js"></script>
+    </head>
+	<body>
+       
+       <div id="map"></div>
+       <webrtc-streamer-footer></webrtc-streamer-footer>
+
+       <script>
+      fetch(webrtcConfig.url + "/api/getMediaList").then( r => r.json() ).then((response) => { 
+         let mediaList = {}
+         response.forEach( (media) => {
+           if (media.position) {
+              const position = media.position.split(',');
+              mediaList[media.video] = new google.maps.LatLng(position[0], position[1]);
+           }
+         });
+
+         const width = 64;
+         const height = 48;
+         const webrtcoptions = 'rtptransport=tcp&timeout=60';
+         const mapOptions = {
+           zoom: 2,
+           center: new google.maps.LatLng(0,0)
+         };
+         const map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+         let markerList = {};
+         for (let [key, latlng] of Object.entries(mediaList))  {
+              let marker = new HTMLMapMarker({
+                latlng,
+                map,
+                html: `<webrtc-streamer id="${key}" url='{"video":"${key}"}' options='width=64&height=48&${webrtcoptions}' notitle width='100%' height='100%'></webrtc-streamer>`,
+                width,
+                height
+              });      
+              google.maps.event.addListener(marker, 'click', function() {
+                const mapdiv = map.getDiv();
+
+                let div = document.createElement("div");
+                div.id = "focus";
+                div.innerHTML = `<webrtc-streamer id="${key}-focus" url='{"video":"${key}"}' options='${webrtcoptions}' notitle width='100%' height='100%'></webrtc-streamer>`;
+                div.onclick = function() {
+                  mapdiv.removeChild(div);
+                }
+                mapdiv.appendChild(div);
+              });
+              markerList[key] = marker;     
+         }
+         
+        map.addListener('zoom_changed', function() {
+          let zoom = map.getZoom();
+          for (let [key, marker] of Object.entries(markerList))  {
+              const webrtc = document.getElementById(key);
+              marker.setSize(`${width*zoom/4}`, `${height*zoom/4}`);    
+            }
+        });
+
+        map.addListener('idle', function() {
+            var bounds = map.getBounds();
+            let zoom = map.getZoom();
+
+            for (let [key, marker] of Object.entries(markerList))  {
+              if(bounds.contains(marker.getPosition())===true) {
+                marker.attach();
+                marker.setSize(`${width*zoom/4}`, `${height*zoom/4}`);              
+              } else {
+                marker.detach();
+              }
+            }
+        });
+
+      });   
+       </script>       
+	</body>
+</html>
