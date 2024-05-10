@@ -149,7 +149,6 @@ CNetRevcBase::~CNetRevcBase()
 	if (nReplayClient > 0)
 		pDisconnectBaseNetFifo.push((unsigned char*)&nReplayClient, sizeof(nReplayClient));
 
-	malloc_trim(0);
 }
 
 //把域名转换为IP地址

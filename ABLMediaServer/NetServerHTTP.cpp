@@ -628,7 +628,8 @@ bool CNetServerHTTP::ResponseHttpRequest(char* szModem, char* httpURL, char* req
 		(strcmp(httpURL, "/index/api/queryPictureList") == 0) || (strcmp(httpURL, "/index/api/controlStreamProxy") == 0) || (strcmp(httpURL, "/index/api/setTransFilter") == 0) ||
 		(strcmp(httpURL, "/index/api/setConfigParamValue") == 0) || (strcmp(httpURL, "/index/api/shutdownServer") == 0) || (strcmp(httpURL, "/index/api/restartServer") == 0) || 
 		(strcmp(httpURL, "/stats/pushers") == 0 ) || (strcmp(httpURL, "/index/api/getTranscodingCount") == 0) || (strcmp(httpURL, "/index/api/listServerPort") == 0) || (strcmp(httpURL, "/index/api/setServerConfig") == 0) || 
-		(strcmp(httpURL, "/index/api/pauseRtpServer") == 0) || (strcmp(httpURL, "/index/api/resumeRtpServer") == 0) || (strcmp(httpURL, "/index/api/addFFmpegProxy") == 0) || (strcmp(httpURL, "/index/api/delFFmpegProxy") == 0)   ))
+		(strcmp(httpURL, "/index/api/pauseRtpServer") == 0) || (strcmp(httpURL, "/index/api/resumeRtpServer") == 0) || (strcmp(httpURL, "/index/api/addFFmpegProxy") == 0) || (strcmp(httpURL, "/index/api/delFFmpegProxy") == 0) ||
+		(strcmp(httpURL, "/index/api/controlRecordPlay") == 0)))
 	{ 
 		sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"Http Request [ %s ] Not Supported \",\"key\":%d}", IndexApiCode_ErrorRequest, httpURL, 0);
 		ResponseSuccess(szResponseBody);
@@ -863,6 +864,10 @@ bool CNetServerHTTP::ResponseHttpRequest(char* szModem, char* httpURL, char* req
 	else if (strcmp(httpURL, "/index/api/resumeRtpServer") == 0)
 	{//国标接收继续
 		index_api_resumeRtpServer();
+	}
+	else if (strcmp(httpURL, "/index/api/controlRecordPlay") == 0)
+	{//录像回放控制 
+		index_api_controlRecordPlay();
 	}
 	else
 	{
@@ -3399,5 +3404,105 @@ int CNetServerHTTP::SendFirstRequst()
 //请求m3u8文件
 bool  CNetServerHTTP::RequestM3u8File()
 {
+	return true;
+}
+
+//控制代理拉流播放
+bool  CNetServerHTTP::index_api_controlRecordPlay()
+{
+	memset((char*)&m_controlStreamProxy, 0x00, sizeof(m_controlStreamProxy));
+	GetKeyValue("secret", m_controlStreamProxy.secret);
+	GetKeyValue("key", m_controlStreamProxy.key);
+	GetKeyValue("command", m_controlStreamProxy.command);
+	GetKeyValue("value", m_controlStreamProxy.value);
+	uint64_t             nTotalSecond = 1 ;
+
+	if (strlen(m_controlStreamProxy.secret) == 0 || strlen(m_controlStreamProxy.key) == 0 || strlen(m_controlStreamProxy.command) == 0)
+	{
+		sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"[secret , key , command ] parameter need .\"}", IndexApiCode_ParamError);
+		ResponseSuccess(szResponseBody);
+		return false;
+	}
+
+	if (strcmp(ABL_MediaServerPort.secret, m_controlStreamProxy.secret) != 0)
+	{//密码检测
+		sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"secret error\"}", IndexApiCode_secretError);
+		ResponseSuccess(szResponseBody);
+		return false;
+	}
+
+	// command 必须为 pause , resume ,scale ,seek  
+	if (!(strcmp(m_controlStreamProxy.command, "pause") == 0 || strcmp(m_controlStreamProxy.command, "resume") == 0 || strcmp(m_controlStreamProxy.command, "scale") == 0 || strcmp(m_controlStreamProxy.command, "seek") == 0))
+	{
+		sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"command: %s parameter error\"}", IndexApiCode_ParamError, m_controlStreamProxy.command);
+		ResponseSuccess(szResponseBody);
+		return false;
+	}
+
+	//检测 value 是否填写
+	if (strcmp(m_controlStreamProxy.command, "scale") == 0 || strcmp(m_controlStreamProxy.command, "seek") == 0)
+	{
+		if (strlen(m_controlStreamProxy.value) == 0)
+		{
+			sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"parameter: value must need \"}", IndexApiCode_ParamError);
+			ResponseSuccess(szResponseBody);
+			return false;
+		}
+	}
+
+	auto pClientProxy = GetNetRevcBaseClient(atoi(m_controlStreamProxy.key));
+	if (pClientProxy != NULL)
+	{
+		if (pClientProxy->netBaseNetType == NetBaseNetType_NetServerReadMultRecordFile )
+		{//CNetServerReadMultRecordFile
+			CNetServerReadMultRecordFile* pClientRecordPtr = (CNetServerReadMultRecordFile*)pClientProxy.get();
+			if (pClientRecordPtr != NULL)
+			{ 
+ 				if (strcmp(m_controlStreamProxy.command, "pause") == 0)
+				{
+					pClientRecordPtr->UpdatePauseFlag(true);
+				}else if (strcmp(m_controlStreamProxy.command, "resume") == 0)
+				{
+					pClientRecordPtr->UpdatePauseFlag(false);
+				}
+ 				else if (strcmp(m_controlStreamProxy.command, "seek") == 0)
+				{
+					if (atoi(m_controlStreamProxy.value) <= 0)
+					{
+						sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"value: %s parameter error\"}", IndexApiCode_ParamError, m_controlStreamProxy.value);
+						ResponseSuccess(szResponseBody);
+						return false;
+					}
+
+					nTotalSecond = GetCurrentSecondByTime(pClientRecordPtr->m_queryRecordListStruct.endtime) - GetCurrentSecondByTime(pClientRecordPtr->m_queryRecordListStruct.starttime);
+					if (atoll(m_controlStreamProxy.value) > nTotalSecond)
+					{
+						sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"Seek time [%s second] is greater than the total recording time [ %llu second . From  %s to %s ] \"}", IndexApiCode_secretError, m_controlStreamProxy.value, nTotalSecond, pClientRecordPtr->m_queryRecordListStruct.starttime, pClientRecordPtr->m_queryRecordListStruct.endtime);
+						ResponseSuccess(szResponseBody);
+						return false;
+					}
+					pClientRecordPtr->ReaplyFileSeek(atoll(m_controlStreamProxy.value));
+				}
+				else if (strcmp(m_controlStreamProxy.command, "scale") == 0)
+				{
+					pClientRecordPtr->UpdateReplaySpeed(atof(m_controlStreamProxy.value), RtspPlayerType_RecordReplay);
+				}
+				sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"command %s Execution successful \"}", IndexApiCode_OK, m_controlStreamProxy.command);
+			}
+			else
+				sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"Key %s Not Found \"}", IndexApiCode_KeyNotFound, m_controlStreamProxy.key);
+		}
+		else
+		{
+			sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"Key %s is Not Rtsp \"}", IndexApiCode_ErrorRequest, m_controlStreamProxy.key);
+		}
+		ResponseSuccess(szResponseBody);
+	}
+	else
+	{//参数错误 
+		sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"Key %s Not Found \"}", IndexApiCode_KeyNotFound, m_controlStreamProxy.key);
+		ResponseSuccess(szResponseBody);
+	}
+
 	return true;
 }

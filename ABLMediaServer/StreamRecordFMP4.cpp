@@ -160,7 +160,7 @@ int CStreamRecordFMP4::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char
 
 int CStreamRecordFMP4::PushAudio(uint8_t* pAudioData, uint32_t nDataLength, char* szAudioCodec, int nChannels, int SampleRate)
 {
-	if (ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag)
+	if (ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag || !(strcmp(szAudioCodec,"AAC") == 0 || strcmp(szAudioCodec, "MP3") == 0))
 		return -1;
 
 	m_audioFifo.push(pAudioData, nDataLength);
@@ -200,7 +200,7 @@ int CStreamRecordFMP4::SendAudio()
 {
 	std::lock_guard<std::mutex> lock(mediaMP4MapLock);
 
-	if (ABL_MediaServerPort.nEnableAudio == 0 || !bCheckHttpMP4Flag)
+	if (ABL_MediaServerPort.nEnableAudio == 0 || !bCheckHttpMP4Flag || !(strcmp(mediaCodecInfo.szAudioName, "AAC") == 0 || strcmp(mediaCodecInfo.szAudioName, "MP3") == 0))
 		return 0 ;
    
  	unsigned char* pData = NULL;

@@ -233,6 +233,7 @@ public:
    volatile   uint32_t   nReadAudioFrameCount;//读取到音频频帧总数 ，
    MediaSourceType       nMediaSourceType;//媒体源类型，实况播放，录像点播
    uint64_t              duration;//录像回放时读取到录像文件长度
+   uint64_t              durationToatl;//总时长
 
    int                   nRtspRtpPayloadType;//rtp负载方式 0 未知 ，1 ES，2 PS ,用在rtsp代理拉流时使用，
    char                  szReponseTemp[string_length_1024];

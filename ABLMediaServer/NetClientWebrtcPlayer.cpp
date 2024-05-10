@@ -64,8 +64,13 @@ CNetClientWebrtcPlayer::CNetClientWebrtcPlayer(NETHANDLE hServer, NETHANDLE hCli
 	      VideoCaptureManager::getInstance().GetInput(m_szShareMediaURL)->Init("H264", pMediaSource->m_mediaCodecInfo.nWidth, pMediaSource->m_mediaCodecInfo.nHeight, pMediaSource->m_mediaCodecInfo.nVideoFrameRate);
 	      pMediaSource->bCreateWebRtcPlaySourceFlag.exchange(true);
  	    }
+		WriteLog(Log_Debug, "CNetClientWebrtcPlayer = %X  nClient = %llu audioname =%s ", this, nClient, pMediaSource->m_mediaCodecInfo.szAudioName);
+
+		ABL::to_upper(pMediaSource->m_mediaCodecInfo.szAudioName);
 		int format= AUDIOMIX_AVSampleFormat::AUDIOMIX_FMT_S16;
+
 		std::map<std::string, std::string> streamInfo;
+
 		if (strcmp(pMediaSource->m_mediaCodecInfo.szAudioName, "AAC") == 0) {
 			format = AUDIOMIX_AVSampleFormat::AUDIOMIX_FMT_FLTP;
 			streamInfo["codec_id"] = std::to_string(AV_CODEC_ID_AAC);
@@ -90,10 +95,10 @@ CNetClientWebrtcPlayer::CNetClientWebrtcPlayer(NETHANDLE hServer, NETHANDLE hCli
 
 		m_decder = FFmpegAudioDecoderAPI::CreateDecoder(streamInfo);
 		// 处理音频数据的线程函数
-		netlib::ThreadPool::getInstance().append([&]()
+		ABL::ThreadPool::getInstance().append([&]()
 			{
 				stopThread.store(false);
-				while (!stopThread)
+				while (!stopThread.load())
 				{
 					int sample_size = 0;
 					uint8_t* output_data[AV_NUM_DATA_POINTERS] = { 0 };

@@ -270,7 +270,7 @@ int CNetServerHLS::ProcessNetData()
 	int    nPos = 0 ;
 
     //拷贝鉴权参数
-	if (strlen(szPlayParams) == 0)
+	if (strlen(szPlayParams) == 0 && strstr(szRequestFileName,".m3u8") != NULL )
 	{
 		nPos = strRequestFileName.find("?", 0);
 		if(nPos > 0 )
@@ -291,7 +291,7 @@ int CNetServerHLS::ProcessNetData()
 	SplitterAppStream(szPushName);
 
 	//发送播放事件通知，用于播放鉴权
-	if (ABL_MediaServerPort.hook_enable == 1 && bOn_playFlag == false)
+	if (ABL_MediaServerPort.hook_enable == 1 && bOn_playFlag == false && strstr(szRequestFileName, ".m3u8") != NULL)
 	{
  		bOn_playFlag = true;
 		MessageNoticeStruct msgNotice;
@@ -358,7 +358,7 @@ int CNetServerHLS::SendLiveHLS()
 	}
 
 	//更新HLS最后观看时间,因为HLS播放，采用这种方式来判断某路流是否在观看　
-	pushClient->nLastWatchTime = pushClient->nLastWatchTimeDisconect = GetCurrentSecond();
+	pushClient->nLastWatchTime = pushClient->nRecordLastWatchTime = pushClient->nLastWatchTimeDisconect = GetCurrentSecond();
 
 	//记下媒体源
 	sprintf(m_addStreamProxyStruct.url, "http://localhost:%d/%s/%s.m3u8", ABL_MediaServerPort.nHlsPort, m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream);

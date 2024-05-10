@@ -1086,6 +1086,11 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 	char           szRecordURL[string_length_48K] = { 0 };
 	char           szRecordPlayURL[string_length_2048] = { 0 };
 	CNetRevcBase_ptr  mutlRecordPlay = NULL;
+	CMediaStreamSource_ptr pMediaStreamPtr = NULL;
+	char           szFileNameTime[string_length_256] = { 0 };
+	uint64_t       nTime1, nTime2;
+	bool           bFlag1 = false;
+	bool           bFlag2 = false;
 
 	if (xh_ABLRecordFileSourceMap.size() > 0)
 	{
@@ -1100,7 +1105,7 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 #endif 
 			fileM3U8 = fopen(m3u8FileName, "wb");
 			sprintf(szTemp1, "\"http-hls\":\"http://%s:%d/%s/%s%s%s_%s.m3u8\"", ABL_szLocalIP, ABL_MediaServerPort.nHlsPort, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, queryStruct.starttime, queryStruct.endtime);
-		}
+	}
 
 		if (fileM3U8 != NULL)
 		{//ts 切片
@@ -1137,8 +1142,7 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 				);
 			}
 		}
-		sprintf(szMediaSourceInfo, "{\"code\":0,\"app\":\"%s\",\"stream\":\"%s\",\"starttime\":\"%s\",\"endtime\":\"%s\",%s,\"recordFileList\":[", queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime, szRecordURL);
-	}
+}
 
 	sprintf(szShareMediaURL, "/%s/%s", queryStruct.app, queryStruct.stream);
 	iterator1 = xh_ABLRecordFileSourceMap.find(szShareMediaURL);
@@ -1151,7 +1155,21 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 
 		for (it2 = pRecord->fileList.begin(); it2 != pRecord->fileList.end(); it2++)
 		{
-			if (*it2 >= atoll(queryStruct.starttime) && *it2 <= atoll(queryStruct.endtime))
+			sprintf(szFileNameTime, "%llu", *it2);
+			nTime1 = GetCurrentSecondByTime(szFileNameTime);
+			nTime2 = GetCurrentSecondByTime(queryStruct.starttime);
+			bFlag1 = false;
+			bFlag2 = false;
+			if (nFileOrder == 0)
+			{
+				if (nTime1 <= nTime2 && (nTime1 + ABL_MediaServerPort.fileSecond) > nTime2)
+					bFlag1 = true;//第一个符合条件的文件 
+			}
+			if (nFileOrder >= 1 && *it2 <= atoll(queryStruct.endtime))
+				bFlag2 = true;//后面符合条件的文件
+
+			//符合条件的mp4文件 
+			if (bFlag1 || bFlag2)
 			{
 				memset(szTemp2, 0x00, sizeof(szTemp2));
 
@@ -1180,9 +1198,17 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 					sprintf(szRecordPlayURL, "/%s/%s_%s-%s", queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime);
 
 					//没有存在媒体源再创建
-					if (GetMediaStreamSource(szRecordPlayURL, false) == NULL)
+					if ((pMediaStreamPtr = GetMediaStreamSource(szRecordPlayURL, false)) == NULL)
+						mutlRecordPlay = CreateNetRevcBaseClient(NetBaseNetType_NetServerReadMultRecordFile, *it2, 0, szFileName, 0, szRecordPlayURL);
+					if (mutlRecordPlay != NULL)
 					{
-						mutlRecordPlay = CreateNetRevcBaseClient(NetBaseNetType_NetServerReadMultRecordFile, 0, 0, szFileName, 0, szRecordPlayURL);
+						memcpy((char*)&mutlRecordPlay->m_queryRecordListStruct, (char*)&queryStruct, sizeof(queryStruct));
+						sprintf(szMediaSourceInfo, "{\"code\":0,\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s_%s-%s\",\"starttime\":\"%s\",\"endtime\":\"%s\",%s,\"recordFileList\":[", mutlRecordPlay->nClient, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime, queryStruct.starttime, queryStruct.endtime, szRecordURL);
+					}
+					else
+					{
+						if (pMediaStreamPtr != NULL)
+							sprintf(szMediaSourceInfo, "{\"code\":0,\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s_%s-%s\",\"starttime\":\"%s\",\"endtime\":\"%s\",%s,\"recordFileList\":[", pMediaStreamPtr->nClient, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime, queryStruct.starttime, queryStruct.endtime, szRecordURL);
 					}
 				}
 				if (mutlRecordPlay != NULL)
@@ -1231,6 +1257,14 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 
 	if (nMediaCount > 0)
 	{
+		//计算最后一个mp4的播放时长 
+		if (mutlRecordPlay != NULL)
+		{
+			CNetServerReadMultRecordFile* pReadMp4File = (CNetServerReadMultRecordFile*)mutlRecordPlay.get();
+			if (pReadMp4File)
+				pReadMp4File->CalcLastMp4FileDuration();
+		}
+
 		if (fileM3U8)
 		{
 			sprintf(szTemp1, "#EXT-X-ENDLIST\n");
@@ -1241,12 +1275,14 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 		strcat(szMediaSourceInfo, "]}");
 	}
 
-	if (nMediaCount == 0)
-	{
-		sprintf(szMediaSourceInfo, "{\"code\":%d,\"memo\":\"RecordList [app: %s , stream: %s] Record File Not Found .\"}", IndexApiCode_RequestFileNotFound, queryStruct.app, queryStruct.stream);
-	}
 	if (fileM3U8)
 		fclose(fileM3U8);
+
+	if (nMediaCount == 0)
+	{
+		ABLDeleteFile(m3u8FileName);
+		sprintf(szMediaSourceInfo, "{\"code\":%d,\"memo\":\"RecordList [app: %s , stream: %s] Record File Not Found .\"}", IndexApiCode_RequestFileNotFound, queryStruct.app, queryStruct.stream);
+	}
 
 	return nMediaCount;
 }
@@ -3603,7 +3639,7 @@ void WebRtcCallBack(const char* callbackJson, void* pUserHandle)
 				WriteLog(Log_Debug, "不存在流 %s ", callbackStruct.stream);
 			else
 			{
-				if (strcmp(pMediaSource->m_mediaCodecInfo.szVideoName, "H264") == 0 && pMediaSource->bCreateWebRtcPlaySourceFlag.load() == false)
+				if ( pMediaSource->bCreateWebRtcPlaySourceFlag.load() == false)
 				{
 					CNetRevcBase_ptr pClient = CreateNetRevcBaseClient(NetBaseNetType_NetClientWebrtcPlayer, 0, 0, "", 0, callbackStruct.stream);
 					if (pClient != NULL)
@@ -3615,7 +3651,7 @@ void WebRtcCallBack(const char* callbackJson, void* pUserHandle)
 				}
 				else
 				{
-					if (strcmp(pMediaSource->m_mediaCodecInfo.szVideoName, "H264") == 0 && pMediaSource->bCreateWebRtcPlaySourceFlag.load() == true)
+					if (pMediaSource->bCreateWebRtcPlaySourceFlag.load() == true)
 					{
 						pMediaSource->nWebRtcPlayerCount++;
 						WriteLog(Log_Debug, "媒体源 %s 的视频格式为 %s ,已经创建了webrtc 播放媒体源 ", callbackStruct.stream, pMediaSource->m_mediaCodecInfo.szVideoName);
@@ -3644,7 +3680,7 @@ void WebRtcCallBack(const char* callbackJson, void* pUserHandle)
 		}
 	}
 };
-#define VERSION	 "1.0.001.0415" //   001是当日第几个版本       最后的是日期
+#define VERSION	 "1.0.001.0425" //   001是当日第几个版本       最后的是日期
 void  printfVersion()
 {
 
@@ -4380,7 +4416,15 @@ ABL_Restart:
 	int nRet = -1;
 	if (!ABL_bInitXHNetSDKFlag) //保证只初始化1次
 	{
-		nRet = XHNetSDK_Init(ABL_nCurrentSystemCpuCount, 1);
+		if (ABL_nCurrentSystemCpuCount > 0 && ABL_nCurrentSystemCpuCount <= 4)
+			nRet = XHNetSDK_Init(ABL_nCurrentSystemCpuCount * 4, 1);
+		else if (ABL_nCurrentSystemCpuCount > 4 && ABL_nCurrentSystemCpuCount <= 8)
+			nRet = XHNetSDK_Init(ABL_nCurrentSystemCpuCount * 3, 1);
+		else if (ABL_nCurrentSystemCpuCount > 8 && ABL_nCurrentSystemCpuCount <= 32)
+			nRet = XHNetSDK_Init(ABL_nCurrentSystemCpuCount * 2, 1);
+		else
+			nRet = XHNetSDK_Init(ABL_nCurrentSystemCpuCount, 1);
+
 		ABL_bInitXHNetSDKFlag = true;
 		WriteLog(Log_Debug, "Network Init = %d \r\n", nRet);
 	}

@@ -279,7 +279,7 @@ int CStreamRecordTS::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* 
 int CStreamRecordTS::PushAudio(uint8_t* pAudioData, uint32_t nDataLength, char* szAudioCodec, int nChannels, int SampleRate)
 {
 	std::lock_guard<std::mutex> lock(mediaMP4MapLock);
-	if (ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag)
+	if (ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag || !(strcmp(szAudioCodec, "AAC") == 0 || strcmp(szAudioCodec, "MP3") == 0))
 		return -1;
 
 	m_audioFifo.push(pAudioData, nDataLength);
@@ -313,7 +313,7 @@ int CStreamRecordTS::SendVideo()
 int CStreamRecordTS::SendAudio()
 {
 	std::lock_guard<std::mutex> lock(mediaMP4MapLock);
- 	if (ABL_MediaServerPort.nEnableAudio == 0)
+ 	if (ABL_MediaServerPort.nEnableAudio == 0 || !(strcmp(mediaCodecInfo.szAudioName, "AAC") == 0 || strcmp(mediaCodecInfo.szAudioName, "MP3") == 0))
 		return 0 ;
    
  	unsigned char* pData = NULL;

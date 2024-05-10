@@ -47,6 +47,9 @@ public:
    virtual int SendFirstRequst();//发送第一个请求
    virtual bool RequestM3u8File();//请求m3u8文件
 
+   int            CalcLastMp4FileDuration();
+   int64_t        nFirstTimestamp; //第一个视频时间戳 
+   int            nLastMp4FileDuration;//记录最后一个MP4文件实际需要播放的时长，并不是最后一个文件全部播放完毕 
    bool           ReadNextRecordFile();
    bool           CloseRecordFile();
    int            nCurrrentPlayerOrder;

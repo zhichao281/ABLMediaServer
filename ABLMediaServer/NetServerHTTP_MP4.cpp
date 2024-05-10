@@ -390,7 +390,8 @@ int CNetServerHTTP_MP4::ProcessNetData()
 		{
 			if (strlen(szPlayParams) == 0)//拷贝鉴权参数
 				memcpy(szPlayParams, szMP4Name + (nPos + 1), strlen(szMP4Name) - nPos - 1);
- 		}
+			 szMP4Name[nPos] = 0x00 ;
+  		}
 		WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X, setup -3  nClient = %llu ", this, nClient);
 
 		//根据mp4文件，进行查找推流对象 

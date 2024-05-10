@@ -14,11 +14,9 @@
 #include <stdexcept>
 
 
-#define MAX_THREAD  256
-
-
-namespace netlib
+namespace ABL
 {
+
 	using ThreadTask = std::function<void(void)>;
 	
 	class ThreadPool
