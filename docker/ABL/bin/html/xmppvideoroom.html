@@ -1,0 +1,131 @@
+<html>
+<head>
+<script src="libs/strophe.min.js" ></script>
+<script src="libs/strophe.muc.min.js" ></script>
+<script src="libs/strophe.disco.min.js" ></script>
+<script src="libs/strophe.jingle.sdp.js"></script>
+<script src="libs/jquery-3.5.1.min.js"></script>
+<script src="libs/EventEmitter.min.js" ></script>
+<script src="xmppvideoroom.js" ></script>
+<script src="xmppconfig.js" ></script>
+<script src="webrtcconfig.js" ></script>
+<link rel="icon" type="image/ico" href="jitsi.ico" />
+<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body> 
+	XMPP Url:<input id="xmppServer" type="text" size="50" /> 
+	Room id:<input id="xmppRoom" type="text" />
+	<input type="button" onclick="openroom()" value="OpenRoom" />
+	<nav id="menu"></nav>
+	<iframe src="jitsiroom.html" style="height:100%; width: 100%;"></iframe>
+</body>
+<script>
+	// set default value
+	document.querySelector('#xmppServer').value  = xmppRoomConfig.url;
+	document.querySelector('#xmppRoom').value = xmppRoomConfig.roomId;
+		
+	// ------------------------------------------
+	// XMPP connections
+	// ------------------------------------------	
+	var XMPPServerList = {};
+	
+	function getText(url) {
+		var text;
+		if (url.video) {
+			text = url.video + " ";
+		}
+		if (url.audio) {
+			text += url.audio + " ";
+		}
+		return text;
+	}		
+	// ------------------------------------------
+	// init device list 
+	// ------------------------------------------	
+	function onGetDeviceList(remoteDeviceList) {
+		var deviceList = [];
+		if (remoteDeviceList) {
+			deviceList.push.apply( deviceList, remoteDeviceList );
+		}
+
+		// create navigation menu
+		var urllist = document.getElementById("menu");
+		for (var dev in deviceList) {
+			var url = deviceList[dev];
+			var option = document.createElement("a");
+			option.url = url;
+			option.text = getText(url);
+			option.id   = "nav_" + url.video;
+			option.onclick = function () { 
+				if (this.className === "active") {
+					disconnect(this.url.video); 
+				} else {
+					connect(this.url, this.url.video); 
+				}
+			}
+			urllist.appendChild(option);
+		}		
+	}		
+	fetch(webrtcConfig.url + "/api/getMediaList").then(r => r.json()).then( (response) => { 
+		onGetDeviceList(response);
+	});
+		
+	function onPresence (name, status) {
+		console.log("onPresence name:"+ name + " status:"+ status);
+		var videoId = name.split('/')[1];
+		var navId = "nav_" + videoId;
+		var navElt = document.querySelector(`#${navId}`);
+		if (navElt) {
+			if (status == "out") {
+				navElt.className = "";
+			} else if (status == "in") {
+				navElt.className = "active";
+			}
+		}
+	}	
+
+	var bus = new EventEmitter();
+	bus.addListener('presence', onPresence);
+
+	function getXMPPServer() {
+		var serverName = document.querySelector('#xmppServer').value;
+
+		if (!XMPPServerList[serverName]) {
+			XMPPServerList[serverName] = new XMPPVideoRoom(serverName, webrtcConfig.url, bus);
+		}
+		var xmpp = XMPPServerList[serverName];	
+		return xmpp;
+	}	
+	
+	function connect(webrtcStream, xmppuser) {	
+		var roomName = document.querySelector('#xmppRoom').value;	
+		var xmpp = getXMPPServer();
+		xmpp.join(roomName, webrtcStream, xmppuser);
+	}
+	
+	function disconnect(xmppuser) {
+		var roomName = document.querySelector('#xmppRoom').value;	
+		var xmpp = getXMPPServer();
+		if (xmpp) {
+			xmpp.leave(roomName, xmppuser);
+		}
+	}
+	
+	function openroom() {
+		var serverName = document.querySelector('#xmppServer').value;
+		var roomName = document.querySelector('#xmppRoom').value;		
+		window.open( location.protocol + "//" + serverName + "/" + roomName);
+	}
+	
+	var roomName = document.querySelector('#xmppRoom').value;	
+	var xmpp = getXMPPServer();
+	xmpp.query(roomName);		
+	
+	window.onbeforeunload = function() { 
+		console.log(Object.entries(XMPPServerList))
+		Object.entries(XMPPServerList).forEach( ([serverName, xmpp]) => {
+			xmpp.leaveAll();
+		});
+	};		
+</script>
+</html>

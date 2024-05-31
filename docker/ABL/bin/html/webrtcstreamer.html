@@ -1,0 +1,55 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="styles.css">
+<script src="libs/adapter.min.js" ></script>
+<script src="webrtcconfig.js" ></script>
+<script src="webrtcstreamer.js" ></script>
+<script>        
+	if (location.search.slice(1)) {
+		let url = { video:location.search.slice(1) };  
+		let options = webrtcConfig.options;
+		let codec = webrtcConfig.codec;
+		if (typeof URLSearchParams != 'undefined') {
+			var params = new URLSearchParams(location.search);
+			if (params.has("video") || params.has("audio")) {
+				url = { video:params.get("video"), audio:params.get("audio") };
+			}
+			if (params.has("options")) {
+				options = params.get("options");
+			}
+			if (params.has("codec")) {
+				codec = params.get("codec");
+			}
+		} 	    
+		window.onload         = function() {
+			this.webRtcServer = new WebRtcStreamer("video", webrtcConfig.url);
+			document.getElementById("title").innerText = url.video; 
+			webRtcServer.connect(url.video, url.audio, options, undefined, codec);
+			fetch(webrtcConfig.url + "/api/version").then(r => r.text()).then( (response) => { 
+				document.getElementById("footer").innerHTML = "<p><a href='https://github.com/mpromonet/webrtc-streamer'>WebRTC-Streamer</a> " + response.split(" ")[0] + "</p>";			
+			});			
+		}
+		window.onbeforeunload = function() { this.webRtcServer.disconnect() }
+	} else {
+		let url = prompt("WebRTC stream name to connect:")
+		if (typeof URLSearchParams != 'undefined') {
+			window.location += (window.location.search ? "&" : "?") + `video=${encodeURI(url)}`;
+		} else {
+			window.location += (window.location.search ? "&" : "?") + `${encodeURI(url)}`;
+		}
+	}
+</script>
+</head>
+<body>
+	<div id="container">
+		<header>
+			<h2 id="title"></h2>
+		</header>
+		<div id="content">
+		  <video id="video" muted playsinline controls></video>
+		</div>
+		<footer id="footer"></footer>	  
+	</div>	
+</body>
+</html>
+

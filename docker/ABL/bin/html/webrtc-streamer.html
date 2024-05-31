@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>/*body{*/
+    /*    width:100%;*/
+    /*    position: absolute;*/
+    /*    height:100%;*/
+    /*    margin:0;*/
+    /*}*/
+* {
+    margin: 0;
+
+}
+    body {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    #app {
+        width: 100%;
+        height: 100%;
+    }
+
+    .header-top {
+        padding-left: 15px;
+        padding-top: 10px;
+    }
+
+    #input {
+        width: 300px;
+    }
+
+    .container {
+        display: grid;
+        grid-gap: 10px;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        margin: 10px;
+        height: 87%;
+    }
+
+    .active-wrap {
+        border: 1px solid #2c89e6;
+    }
+
+    webrtc-video {
+        display: block;
+        height: 100%;
+        width: 100%;
+        border: 1px solid #d5d5d5;
+    }
+
+    .container2 {
+        width:95%;
+        height:95%;
+        margin: 10px auto;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }</style>
+    <script defer="defer" src="./xhb-webrtc/WebrtcPlayer-min.js"></script>
+</head>
+<body>
+<div id="app">
+    <div class="container2">
+        <webrtc-video class="webrtc-video" id="webrtc1"
+                      options="rtptransport=tcp&timeout=60&width=0&height=0&bitrate=0&rotation=0"></webrtc-video>
+    </div>
+</div>
+</body>
+<script>customElements.whenDefined('webrtc-video').then(() => {
+    let streamElement = document.getElementById("webrtc1");
+    var params = new URLSearchParams(location.search);
+    if (params.has("video")) {
+        streamElement.play(params.get("video"))
+    }
+
+}).catch((e) => {
+})</script>
+</html>

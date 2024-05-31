@@ -1,0 +1,126 @@
+version: '3'
+networks:
+    monitor:
+        driver: bridge
+        external: false
+        name: monitorNetwork
+services:
+    ablmediaserver:
+        container_name: ABLMediaServer  #配置容器名
+        restart: always
+        ulimits:
+            nproc: 65535
+            nofile:
+                soft: 65535
+                hard: 65535
+        build:
+            context: ./ABL
+        volumes:
+            - ./ABL/bin:/opt/media/ABLMediaServer
+        working_dir: /opt/media/ABLMediaServer
+        ports:      
+            - 5088:5088/udp #http-mp4端口
+            - 6088:6088/tcp  #ws-flv端口  
+            - 6088:6088/udp #ws-flv端口  
+            - 7088:7088     #http端口
+           #  - 8088:8088/udp #http-flv端口
+           # - 8088:8088/tcp
+            - 9088:9088/udp #http-hls
+            - 9088:9088/tcp
+            - 1554:1554    #rtsp端口
+            - 1935:1935    #rtmp端口
+            - "10000-10050:10000-10050/tcp"
+            - "10000-10050:10000-10050/udp"
+        environment:
+            - TZ=Asia/Shanghai
+        networks:
+            - monitor
+    wvpRedis:
+        image: redis:6.2-rc3-alpine3.13
+        restart: always
+        container_name: wvpRedis
+        volumes:
+            - ./redis/data:/data
+            - ./redis/log:/logs
+        expose:
+            - "6379"
+        environment:
+            TZ: Asia/Shanghai
+        command: redis-server --port 6379 --appendonly yes
+        networks:
+            - monitor
+    wvpMysql:
+        image: mysql:8.0 # 指定镜像和版本
+        restart: always # 指定开机重启
+        container_name: wvpMysql
+        cap_add:
+            - SYS_NICE  # CAP_SYS_NICE, to prevent mbind error
+        environment:
+            - MYSQL_ALLOW_EMPTY_PASSWORD=no
+            - MYSQL_ROOT_PASSWORD=sky123456
+            - MYSQL_USER=skyadmin
+            - MYSQL_PASSWORD=sky123456
+            - MYSQL_DATABASE=wvp
+            - SQL_MODE= "STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
+        command:
+            --default-authentication-plugin=mysql_native_password
+            --character-set-server=utf8mb4
+            --collation-server=utf8mb4_general_ci
+            --explicit_defaults_for_timestamp=true
+            --lower_case_table_names=1
+            --default-time-zone=+8:00
+        expose:
+            - "3306"
+        volumes:
+        #数据挂载
+            - ./mysql/mysql-data/:/var/lib/mysql:rw # 挂载数据目录
+            - ./mysql/init/:/docker-entrypoint-initdb.d/            #初始化目录挂载
+            - ./mysql/logs:/var/log/mysql
+            - ./mysql/conf.d:/etc/mysql/conf.d
+            - /etc/localtime:/etc/localtime:ro
+            - /etc/timezone:/etc/timezone:ro
+        logging: 
+            driver: "json-file"
+            options: 
+                   max-size: "100m" 
+        networks:
+            - monitor
+    wvp:
+        restart: always
+        ulimits:
+            nproc: 65535
+            nofile:
+                soft: 65535
+                hard: 65535
+        container_name: wvp  #配置容器名
+        image: yunshiting/java:8  # 指定镜像名
+        ports:
+            - 5066:5066/tcp
+            - 5066:5066/udp
+            - 18080:18080                   
+        volumes:
+            - ./wvp:/opt/wvp/     
+        working_dir: /opt/wvp
+        entrypoint: ["/bin/sh", "-c", "java -Duser.timezone=GMT+8 -Xms800m -Xmx800m -jar *.jar --spring.config.location=/opt/wvp/application-dev.yml"]   
+        environment:
+            TZ: Asia/Shanghai
+            SIP_DOMAIN: 4401020049
+            SIP_ID: 44010200492000000001
+            SIP_PASSWORD: admin123           # [可选] 默认设备认证密码，后续扩展使用设备单独密码, 移除密码将不进行校验
+            WVP_PORT: 18080                        #[可选] WVP监听的HTTP端口, 网页和接口调用都是这个端口           
+            SIP_IP: 0.0.0.0                               #本机的IP，对应你的网卡，监听什么ip就是使用什么网卡，
+            SIP_PORT: 5066                            # [可选] 28181服务监听的端口
+            MEDIA_ID: ZbnQN5csqxrPix7a      #  # [必须修改] ABL服务器唯一id，用于触发hook时区别是哪台服务器,mediaServerId
+            MEDIA_IP: ablmediaserver            #ABL服务器的内网IP
+            MEDIA_PORT: 7088                      # [必须修改]ABL服务器的http.port
+            STREAM_IP: 1.14.19.12               # [可选] 返回流地址时的ip，置空使用 media.ip
+            HOOK_IP: wvp                             #abl服务器的hook所使用的IP, 默认使用sip.ip      
+            WVP_DB_PATH: wvpMysql:3306
+            MYSQL_USERNAME: root
+            MYSQL_PASSWORD: sky123456
+            REDIS_HOST: wvpRedis
+            REDIS_PORT: 6379
+            REDIS_PWD:
+            RECORD_PATH: ./media/record   
+        networks:
+            - monitor
