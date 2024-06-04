@@ -1,9 +1,9 @@
 FROM ubuntu:20.04
 
 # 更新软件包列表并安装 tzdata  
-#RUN apt-get update && apt-get install -y tzdata
+RUN apt-get update && apt-get install -y tzdata
 # 使用RUN命令设置时区
-#RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai'>/etc/timezone
+RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai'>/etc/timezone
 
 # 创建目标目录并将二进制文件复制到目标目录
 RUN mkdir -p /opt/media/ABLMediaServer

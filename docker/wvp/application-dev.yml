@@ -115,6 +115,13 @@ user-settings:
   auto-apply-play: true
   # 设备/通道状态变化时发送消息
   device-status-notify: true
+  # 推流直播是否录制
+  record-push-live: false
+  # 国标是否录制
+  record-sip: false
+  # 国标点播 按需拉流, true：有人观看拉流，无人观看释放， false：拉起后不自动释放
+  stream-on-demand: true 
+  
 # [可选] 日志配置, 一般不需要改
 logging:
   config: classpath:logback-spring.xml
