@@ -19,18 +19,15 @@ services:
             - ./ABL/bin:/opt/media/ABLMediaServer
         working_dir: /opt/media/ABLMediaServer
         ports:      
-            - 5088:5088/udp #http-mp4端口
-            - 6088:6088/tcp  #ws-flv端口  
-            - 6088:6088/udp #ws-flv端口  
-            - 7088:7088     #http端口
-           #  - 8088:8088/udp #http-flv端口
-           # - 8088:8088/tcp
-            - 9088:9088/udp #http-hls
-            - 9088:9088/tcp
-            - 1554:1554    #rtsp端口
-            - 1935:1935    #rtmp端口
-            - "10000-10050:10000-10050/tcp"
-            - "10000-10050:10000-10050/udp"
+            - 5088:5088/tcp     #http-mp4端口
+            - 6088:6088/tcp      #ws-flv端口   
+            - 7088:7088/tcp      #http端口
+           # - 8088:8088/tcp    #http-flv端口
+            - 9088:9088/tcp      #http-hls
+            - 1554:1554/tcp      #rtsp端口
+            - 1935:1935/tcp     #rtmp端口
+            - 10000-10050:10000-10050/tcp
+            - 10000-10050:10000-10050/udp
         environment:
             - TZ=Asia/Shanghai
         networks:
@@ -113,7 +110,7 @@ services:
             MEDIA_ID: ZbnQN5csqxrPix7a      #  # [必须修改] ABL服务器唯一id，用于触发hook时区别是哪台服务器,mediaServerId
             MEDIA_IP: ablmediaserver            #ABL服务器的内网IP
             MEDIA_PORT: 7088                      # [必须修改]ABL服务器的http.port
-            STREAM_IP: 1.14.19.12               # [可选] 返回流地址时的ip，置空使用 media.ip
+            STREAM_IP: 1.14.19.123               # [可选] 返回流地址时的ip，置空使用 media.ip
             HOOK_IP: wvp                             #abl服务器的hook所使用的IP, 默认使用sip.ip      
             WVP_DB_PATH: wvpMysql:3306
             MYSQL_USERNAME: root

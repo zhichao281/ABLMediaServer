@@ -23,4 +23,4 @@ RUN chmod -R 777 /opt/media/ABLMediaServer
 ENV LD_LIBRARY_PATH=/opt/media/ABLMediaServer:$LD_LIBRARY_PATH
 
 # 指定入口点运行 ABLMediaServer
-CMD ./ABLMediaServer
+CMD ./start.sh
