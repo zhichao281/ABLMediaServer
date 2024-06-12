@@ -5,19 +5,19 @@ CABLSipParse::CABLSipParse()
 {
 	strcpy(szSplitStr[0], ";");
 	strcpy(szSplitStr[1], ",");
+	nOrder = 1;
 }
 
 //释放sip字符串内存 
 bool CABLSipParse::FreeSipString()
 {
-	SipFieldStruct * sipKey = NULL;
-	for (SipFieldStructMap::iterator iterator1 = sipFieldValueMap.begin(); iterator1 != sipFieldValueMap.end(); ++iterator1)
+ 	for (SipFieldStructMap::iterator iterator1 = sipFieldValueMap.begin(); iterator1 != sipFieldValueMap.end(); ++iterator1)
 	{
-		sipKey = (*iterator1).second;
+		SipFieldStruct * sipKey = (*iterator1).second;
 
 		delete sipKey;
 		sipKey = NULL;
-	}
+ 	}
 	sipFieldValueMap.clear();
 
  	memset(szSipBodyContent, 0x00, sizeof(szSipBodyContent));
@@ -28,15 +28,13 @@ CABLSipParse::~CABLSipParse()
 {
 	std::lock_guard<std::mutex> lock(sipLock);
  	FreeSipString();
-	
-	malloc_trim(0);
 }
 	
 //把sip头全部装入map里面，尽可能找出详细的项数据
 bool CABLSipParse::ParseSipString(char* szSipString)
 {
 	std::lock_guard<std::mutex> lock(sipLock);
-
+	nOrder = 1;
 	FreeSipString();
 
 	if (strlen(szSipString) <= 4)
@@ -46,18 +44,6 @@ bool CABLSipParse::ParseSipString(char* szSipString)
 	SipFieldStruct * sipKey2;
 	string           strSipStringFull = szSipString;
 	int              nPosBody;
-
-	for (SipFieldStructMap::iterator iterator1 = sipFieldValueMap.begin(); iterator1 != sipFieldValueMap.end(); ++iterator1)
-	{
-		sipKey = (*iterator1).second;
- 		
-		if (sipKey != NULL)
-		{
-		  delete sipKey;
-		  sipKey = NULL;
- 		}
- 	}
-	sipFieldValueMap.clear();
 
 	//查找出body数据
 	memset(szSipBodyContent, 0x00, sizeof(szSipBodyContent));
@@ -83,11 +69,8 @@ bool CABLSipParse::ParseSipString(char* szSipString)
 			memset(szLineString, 0x00, sizeof(szLineString));
 			memcpy(szLineString, szSipString + nPos1, nPos2 - nPos1);
 
-			do
-			{
- 			  sipKey = new SipFieldStruct;
-			} while (sipKey == NULL);
-
+ 			sipKey = new SipFieldStruct;
+ 
 			strLineSting = szLineString;
 			if (nLineCount == 0)
 			{
@@ -121,19 +104,16 @@ bool CABLSipParse::ParseSipString(char* szSipString)
 
 			if (strlen(sipKey->szKey) > 0)
 			{
-				sipFieldValueMap.insert(SipFieldStructMap::value_type(sipKey->szKey, sipKey));
+				InsertToMap(sipKey);
 
 				//把方法作为一个关键字，KEY，存储下来
 				if (nLineCount == 0)
 				{
-				   do
-				   {
-					sipKey2 = new SipFieldStruct;
-				   } while (sipKey2 == NULL);
+ 					sipKey2 = new SipFieldStruct;
 
 					strcpy(sipKey2->szKey, "Method");
 					strcpy(sipKey2->szValue, sipKey->szKey);
-					sipFieldValueMap.insert(SipFieldStructMap::value_type(sipKey2->szKey, sipKey2));
+					InsertToMap(sipKey2);
 				}
 
 				//查找子项
@@ -157,10 +137,7 @@ bool CABLSipParse::ParseSipString(char* szSipString)
 							nPos6 = strSubKeyValue.find("=", 0);
 							if (nPos6 > 0 && nPos6 != string::npos)
 							{
-							   do
-							   {
-								sipKey2 = new SipFieldStruct;
-							   } while (sipKey2 == NULL);
+  								sipKey2 = new SipFieldStruct;
 
 								memcpy(sipKey2->szKey, subKeyValue, nPos6);
 								memcpy(sipKey2->szValue, subKeyValue + nPos6 + 1, strlen(subKeyValue) - (nPos6 + 1));
@@ -168,14 +145,12 @@ bool CABLSipParse::ParseSipString(char* szSipString)
 #if 1
 								//调用boost:string trim 函数去掉空格
 								string strTrimLeft = sipKey2->szKey;
-								
 
 #ifdef USE_BOOST
 								boost::trim(strTrimLeft);
 #else
 								ABL::trim(strTrimLeft);
 #endif
-
 								strcpy(sipKey2->szKey, strTrimLeft.c_str());
 
 								//删除双引号
@@ -188,11 +163,9 @@ bool CABLSipParse::ParseSipString(char* szSipString)
 #else
 								ABL::erase_all(strTrimLeft, "\"");
 #endif
-
-
 								strcpy(sipKey2->szValue, strTrimLeft.c_str());
 #endif
-								sipFieldValueMap.insert(SipFieldStructMap::value_type(sipKey2->szKey, sipKey2));
+								InsertToMap(sipKey2);
 							}
 						}
 						else
@@ -206,10 +179,7 @@ bool CABLSipParse::ParseSipString(char* szSipString)
 								nPos6 = strSubKeyValue.find("=", 0);
 								if (nPos6 > 0 && nPos6 != string::npos)
 								{
-									do
-									{
-									   sipKey2 = new SipFieldStruct;
-								    } while (sipKey2 == NULL);
+  									sipKey2 = new SipFieldStruct;
 
 									memcpy(sipKey2->szKey, subKeyValue, nPos6);
 									memcpy(sipKey2->szValue, subKeyValue + nPos6 + 1, strlen(subKeyValue) - (nPos6 + 1));
@@ -217,7 +187,6 @@ bool CABLSipParse::ParseSipString(char* szSipString)
 #if 1
 									//调用boost:string trim 函数去掉空格
 									string strTrimLeft = sipKey2->szKey;
-								
 #ifdef USE_BOOST
 
 
@@ -225,7 +194,6 @@ bool CABLSipParse::ParseSipString(char* szSipString)
 #else
 									ABL::trim(strTrimLeft);
 #endif
-
 									strcpy(sipKey2->szKey, strTrimLeft.c_str());
 
 									//删除双引号
@@ -238,10 +206,9 @@ bool CABLSipParse::ParseSipString(char* szSipString)
 #else
 									ABL::erase_all(strTrimLeft, "\"");
 #endif
-
 									strcpy(sipKey2->szValue, strTrimLeft.c_str());
 #endif
-									sipFieldValueMap.insert(SipFieldStructMap::value_type(sipKey2->szKey, sipKey2));
+									InsertToMap(sipKey2);
 								}
 							}
 
@@ -329,4 +296,23 @@ int   CABLSipParse::GetSize()
 {
 	std::lock_guard<std::mutex> lock(vectorLock);
 	return sipFieldValueMap.size();
+}
+
+bool CABLSipParse::InsertToMap(SipFieldStruct * inSipKey)
+{
+	SipFieldStructMap::iterator iterator1 = sipFieldValueMap.find(inSipKey->szKey);
+	if (iterator1 != sipFieldValueMap.end())
+	{
+		sprintf(szTemp2, "%llu_%X_%d", nOrder,this,rand());
+		strcat(inSipKey->szKey, szTemp2);
+		sipFieldValueMap.insert(SipFieldStructMap::value_type(inSipKey->szKey, inSipKey));
+
+		nOrder++;	
+	}
+	else
+	{
+	   sipFieldValueMap.insert(SipFieldStructMap::value_type(inSipKey->szKey, inSipKey));
+
+	}
+	return true;
 }

@@ -591,11 +591,29 @@ namespace ABL {
 		gb28181LibraryUse.AddMember("memo", "When playing HTTP FLV and WS FLV, do you want to turn on mute when there is no audio in the source stream .", allocator);
 		params.PushBack(gb28181LibraryUse, allocator);
 
+		/*sprintf(szTempBuffer, ",{\"GB28181RtpMinPort\":%d,\"memo\":\"Recv GB28181 min Port .\"}", ABL_MediaServerPort.GB28181RtpMinPort);
+		strcat(szMediaSourceInfoBuffer, szTempBuffer);
+		sprintf(szTempBuffer, ",{\"GB28181RtpMaxPort\":%d,\"memo\":\"Recv GB28181 max Port .\"}", ABL_MediaServerPort.GB28181RtpMaxPort);
+		strcat(szMediaSourceInfoBuffer, szTempBuffer);*/
+		// 添加 GB28181RtpMinPort 参数对象
+		Value GB28181RtpMinPort(kObjectType);
+		GB28181RtpMinPort.AddMember("GB28181RtpMinPort", ABL_MediaServerPort.GB28181RtpMinPort, allocator);
+		GB28181RtpMinPort.AddMember("memo", "Recv GB28181 min Port ..", allocator);
+		params.PushBack(GB28181RtpMinPort, allocator);
+
+		// 添加 GB28181RtpMaxPort 参数对象
+		Value GB28181RtpMaxPort(kObjectType);
+		GB28181RtpMaxPort.AddMember("GB28181RtpMaxPort", ABL_MediaServerPort.GB28181RtpMaxPort, allocator);
+		GB28181RtpMaxPort.AddMember("memo", "Recv GB28181 max Port .", allocator);
+		params.PushBack(GB28181RtpMaxPort, allocator);
+
+
 		// 添加 listeningip 参数对象
 		Value listeningip(kObjectType);
 		listeningip.AddMember("rtc.listening-ip", Value(ABL_MediaServerPort.listeningip, allocator).Move(), allocator);
 		listeningip.AddMember("memo", "webrtc listeningip .", allocator);
 		params.PushBack(listeningip, allocator);
+
 
 		Value listeningport(kObjectType);
 		listeningport.AddMember("rtc.listening-port", ABL_MediaServerPort.listeningport,  allocator);

@@ -83,8 +83,11 @@ extern ABL_cudaEncode_CreateVideoEncode cudaEncode_CreateVideoEncode ;
 extern ABL_cudaEncode_DeleteVideoEncode cudaEncode_DeleteVideoEncode ;
 extern ABL_cudaEncode_CudaVideoEncode cudaEncode_CudaVideoEncode ;
 extern ABL_cudaEncode_UnInit cudaEncode_UnInit ;
-
+ 
+//设置路径权限 
+extern void  ABL_SetPathAuthority(char* szPath);
 #endif
+
 CMediaStreamSource::CMediaStreamSource(char* szURL, uint64_t nClientTemp, MediaSourceType nSourceType, uint32_t nDuration, H265ConvertH264Struct  h265ConvertH264Struct)
 {
 	memset(sim, 0x00, sizeof(sim));
@@ -707,7 +710,7 @@ void   CMediaStreamSource::SaveTsMp4M3u8File()
 			{//切片完毕一个TS文件通知
 				MessageNoticeStruct msgNotice;
 				msgNotice.nClient = NetBaseNetType_HttpClient_on_record_ts;
-				sprintf(msgNotice.szMsg, "{\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"createDateTime\":\"%s\",\"currentFileDuration\":%d,\"fileName\":\"%s\"}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient, szCreateTSDateTime, ABL_MediaServerPort.hlsCutTime, szHookTSFileName);
+				sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_ts\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"createDateTime\":\"%s\",\"currentFileDuration\":%d,\"fileName\":\"%s\"}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient, szCreateTSDateTime, ABL_MediaServerPort.hlsCutTime, szHookTSFileName);
 				pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 			}
 		}
@@ -1257,7 +1260,7 @@ bool CMediaStreamSource::PushVideo(unsigned char* szVideo, int nLength, char* sz
 		{
 			MessageNoticeStruct msgNotice;
 			msgNotice.nClient = NetBaseNetType_HttpClient_on_publish;
- 			sprintf(msgNotice.szMsg, "{\"id\":\"%d\",\"app\":\"%s\",\"stream\":\"%s\",\"schema\":\"%d\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"params\":\"%s\",\"vhost\":\"__defaultVhost__\"}", pClient->nClient, app, stream, pClient->netBaseNetType, ABL_MediaServerPort.mediaServerID, pClient->netBaseNetType, pClient->nClient, pClient->szClientIP, pClient->nClientPort, pClient->szPlayParams);
+ 			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_publish\",\"id\":\"%d\",\"app\":\"%s\",\"stream\":\"%s\",\"schema\":\"%d\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"params\":\"%s\",\"vhost\":\"__defaultVhost__\"}", pClient->nClient, app, stream, pClient->netBaseNetType, ABL_MediaServerPort.mediaServerID, pClient->netBaseNetType, pClient->nClient, pClient->szClientIP, pClient->nClientPort, pClient->szPlayParams);
  			pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
  
 			m_bNoticeOnPublish = true;
@@ -1280,7 +1283,7 @@ bool CMediaStreamSource::PushVideo(unsigned char* szVideo, int nLength, char* sz
 			{
 				MessageNoticeStruct msgNotice;
 				msgNotice.nClient = NetBaseNetType_HttpClient_on_iframe_arrive;
-				sprintf(msgNotice.szMsg, "{\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"NotificationNumber\":%d}", app, stream, ABL_MediaServerPort.mediaServerID, pClient->netBaseNetType, pClient->nClient, pClient->szClientIP, pClient->nClientPort, iFrameArriveNoticCount);
+				sprintf(msgNotice.szMsg, "{\"eventName\":\"on_stream_iframe_arrive\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"NotificationNumber\":%d}", app, stream, ABL_MediaServerPort.mediaServerID, pClient->netBaseNetType, pClient->nClient, pClient->szClientIP, pClient->nClientPort, iFrameArriveNoticCount);
 				pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 			}
 		}
@@ -1468,9 +1471,10 @@ bool CMediaStreamSource::PushVideo(unsigned char* szVideo, int nLength, char* sz
 		sprintf(szRecordPath, "%s%s", ABL_MediaServerPort.recordPath, app);
 		umask(0);
 		mkdir(szRecordPath, 777);
+		ABL_SetPathAuthority(szRecordPath);
 		sprintf(szRecordPath, "%s%s/%s/", ABL_MediaServerPort.recordPath, app, stream);
-		umask(0);
 		mkdir(szRecordPath, 777);
+		ABL_SetPathAuthority(szRecordPath);
 #endif
 		if (CreateRecordFileSource(app, stream))
 		{
@@ -1548,7 +1552,7 @@ bool CMediaStreamSource::PushVideo(unsigned char* szVideo, int nLength, char* sz
 		{
 			MessageNoticeStruct msgNotice;
 			msgNotice.nClient = NetBaseNetType_HttpClient_None_reader;
-			sprintf(msgNotice.szMsg, "{\"app\":\"%s\",\"stream\":\"%s\",\"noneReaderDuration\":%d,\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu}", app, stream, GetCurrentSecond() - nLastWatchTimeDisconect, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient);
+			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_stream_none_reader\",\"app\":\"%s\",\"stream\":\"%s\",\"noneReaderDuration\":%d,\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu}", app, stream, GetCurrentSecond() - nLastWatchTimeDisconect, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient);
  			pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 
 			nLastWatchTime = GetCurrentSecond();
@@ -1557,7 +1561,7 @@ bool CMediaStreamSource::PushVideo(unsigned char* szVideo, int nLength, char* sz
 		//无人观看最大时长，必须关闭
 		if ((GetCurrentSecond() - nLastWatchTimeDisconect) >= (ABL_MediaServerPort.maxTimeNoOneWatch * 60))
 		{
-			WriteLog(Log_Debug, "app = %s ,stream = %s  无人观看已经达到 %llu 分钟 ，现在执行删除 ", app, stream, (GetCurrentSecond() - nLastWatchTimeDisconect) / 60 );
+			WriteLog(Log_Debug, "app = %s ,stream = %s  无人观看已经达到 %d 秒 ，现在执行删除 ", app, stream, (GetCurrentSecond() - nLastWatchTimeDisconect));
 			nLastWatchTimeDisconect = GetCurrentSecond(); //防止2次删除 
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 		}
@@ -1585,7 +1589,7 @@ bool CMediaStreamSource::PushVideo(unsigned char* szVideo, int nLength, char* sz
 				pClient->bOn_playFlag = true;
 				MessageNoticeStruct msgNotice;
 				msgNotice.nClient = NetBaseNetType_HttpClient_on_play;
-				sprintf(msgNotice.szMsg, "{\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"params\":\"%s\"}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, (*it).second,pClient->szClientIP,pClient->nClientPort,pClient->szPlayParams);
+				sprintf(msgNotice.szMsg, "{\"eventName\":\"on_play\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"params\":\"%s\"}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, (*it).second,pClient->szClientIP,pClient->nClientPort,pClient->szPlayParams);
 				pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
  			}
 
@@ -1716,20 +1720,20 @@ bool CMediaStreamSource::PushAudio(unsigned char* szAudio, int nLength, char* sz
 	{
 		auto pClient = GetNetRevcBaseClient(nClient);
  
- 		if (pClient)
+		if (pClient && m_bNoticeOnPublish == false)
 		{
+			m_bNoticeOnPublish = true;
 			MessageNoticeStruct msgNotice;
 			msgNotice.nClient = NetBaseNetType_HttpClient_on_publish;
-			sprintf(msgNotice.szMsg, "{\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"params\":\"%s\"}", app, stream, ABL_MediaServerPort.mediaServerID, pClient->netBaseNetType, pClient->nClient, pClient->szClientIP, pClient->nClientPort, pClient->szPlayParams);
+			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_publish\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"params\":\"%s\"}", app, stream, ABL_MediaServerPort.mediaServerID, pClient->netBaseNetType, pClient->nClient, pClient->szClientIP, pClient->nClientPort, pClient->szPlayParams);
 			pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
-			m_bNoticeOnPublish = true;
 		}
  
 		if (pClient != NULL)
 		{
 			MessageNoticeStruct msgNotice;
 			msgNotice.nClient = NetBaseNetType_HttpClient_on_stream_arrive;
-			sprintf(msgNotice.szMsg, "{\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"status\":%s,\"enable_hls\":%s,\"transcodingStatus\":%s,\"sourceURL\":\"%s\",\"networkType\":%d,\"readerCount\":%d,\"noneReaderDuration\":%d,\"videoCodec\":\"%s\",\"videoFrameSpeed\":%d,\"width\":%d,\"height\":%d,\"videoBitrate\":%d,\"audioCodec\":\"%s\",\"audioChannels\":%d,\"audioSampleRate\":%d,\"audioBitrate\":%d,\"url\":{\"rtsp\":\"rtsp://%s:%d/%s/%s\",\"rtmp\":\"rtmp://%s:%d/%s/%s\",\"http-flv\":\"http://%s:%d/%s/%s.flv\",\"ws-flv\":\"ws://%s:%d/%s/%s.flv\",\"http-mp4\":\"http://%s:%d/%s/%s.mp4\",\"http-hls\":\"http://%s:%d/%s/%s.m3u8\"}}", nClient, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, enable_mp4 == true ? "true" : "false", enable_hls == true ? "true" : "false", H265ConvertH264_enable == true ? "true" : "false", pClient->m_addStreamProxyStruct.url, pClient->netBaseNetType, mediaSendMap.size(), (int)0,
+			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_stream_arrive\",\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"status\":%s,\"enable_hls\":%s,\"transcodingStatus\":%s,\"sourceURL\":\"%s\",\"networkType\":%d,\"readerCount\":%d,\"noneReaderDuration\":%d,\"videoCodec\":\"%s\",\"videoFrameSpeed\":%d,\"width\":%d,\"height\":%d,\"videoBitrate\":%d,\"audioCodec\":\"%s\",\"audioChannels\":%d,\"audioSampleRate\":%d,\"audioBitrate\":%d,\"url\":{\"rtsp\":\"rtsp://%s:%d/%s/%s\",\"rtmp\":\"rtmp://%s:%d/%s/%s\",\"http-flv\":\"http://%s:%d/%s/%s.flv\",\"ws-flv\":\"ws://%s:%d/%s/%s.flv\",\"http-mp4\":\"http://%s:%d/%s/%s.mp4\",\"http-hls\":\"http://%s:%d/%s/%s.m3u8\"}}", nClient, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, enable_mp4 == true ? "true" : "false", enable_hls == true ? "true" : "false", H265ConvertH264_enable == true ? "true" : "false", pClient->m_addStreamProxyStruct.url, pClient->netBaseNetType, mediaSendMap.size(), (int)0,
 				m_mediaCodecInfo.szVideoName, m_mediaCodecInfo.nVideoFrameRate, m_mediaCodecInfo.nWidth, m_mediaCodecInfo.nHeight, m_mediaCodecInfo.nVideoBitrate, m_mediaCodecInfo.szAudioName, m_mediaCodecInfo.nChannels, m_mediaCodecInfo.nSampleRate, m_mediaCodecInfo.nAudioBitrate,
 				ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,
 				ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,
@@ -1880,7 +1884,7 @@ bool CMediaStreamSource::PushAudio(unsigned char* szAudio, int nLength, char* sz
 		{
 			MessageNoticeStruct msgNotice;
 			msgNotice.nClient = NetBaseNetType_HttpClient_None_reader;
-			sprintf(msgNotice.szMsg, "{\"app\":\"%s\",\"stream\":\"%s\",\"noneReaderDuration\":%d,\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu}", app, stream, GetCurrentSecond() - nLastWatchTimeDisconect, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient);
+			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_stream_none_reader\",\"app\":\"%s\",\"stream\":\"%s\",\"noneReaderDuration\":%d,\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu}", app, stream, GetCurrentSecond() - nLastWatchTimeDisconect, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient);
 			pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 
 			nLastWatchTime = GetCurrentSecond();
@@ -2061,6 +2065,7 @@ void  CMediaStreamSource::CreateSubPathByURL(char* szMediaURL)
 			strcat(szHLSPath, szTemp);
 			umask(0);
 			mkdir(szHLSPath, 777);
+		    ABL_SetPathAuthority(szHLSPath);
 #endif
 
 			WriteLog(Log_Debug, "创建HLS子路径 %s ", szHLSPath);
@@ -2077,6 +2082,7 @@ void  CMediaStreamSource::CreateSubPathByURL(char* szMediaURL)
 			strcat(szHLSPath, szTemp);
 			umask(0);
 			mkdir(szHLSPath, 777);
+			ABL_SetPathAuthority(szHLSPath);
 #endif
 			WriteLog(Log_Debug, "创建HLS子路径 %s ", szHLSPath);
 			break;
@@ -2510,14 +2516,14 @@ void   CMediaStreamSource::UpdateVideoFrameSpeed(int nVideoSpeed,int netType)
 bool  CMediaStreamSource::GetVideoWidthHeight(char* szVideoCodeName, unsigned char* pVideoData, int nDataLength)
 {
 	//码流达到通知
-	if (ABL_MediaServerPort.hook_enable == 1 && m_bNoticeOnPublish && m_mediaCodecInfo.nWidth > 0 && m_mediaCodecInfo.nHeight > 0 && bNoticeClientArriveFlag == false)
+	if (ABL_MediaServerPort.hook_enable == 1 && m_bNoticeOnPublish  && bNoticeClientArriveFlag == false)
 	{  
 		auto pClient = GetNetRevcBaseClient(nClient);
 		if (pClient != NULL)
 		{
 			MessageNoticeStruct msgNotice;
 			msgNotice.nClient = NetBaseNetType_HttpClient_on_stream_arrive;
- 			sprintf(msgNotice.szMsg, "{\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"status\":%s,\"enable_hls\":%s,\"transcodingStatus\":%s,\"sourceURL\":\"%s\",\"networkType\":%d,\"readerCount\":%d,\"noneReaderDuration\":%d,\"videoCodec\":\"%s\",\"videoFrameSpeed\":%d,\"width\":%d,\"height\":%d,\"videoBitrate\":%d,\"audioCodec\":\"%s\",\"audioChannels\":%d,\"audioSampleRate\":%d,\"audioBitrate\":%d,\"url\":{\"rtsp\":\"rtsp://%s:%d/%s/%s\",\"rtmp\":\"rtmp://%s:%d/%s/%s\",\"http-flv\":\"http://%s:%d/%s/%s.flv\",\"ws-flv\":\"ws://%s:%d/%s/%s.flv\",\"http-mp4\":\"http://%s:%d/%s/%s.mp4\",\"http-hls\":\"http://%s:%d/%s/%s.m3u8\",\"webrtc\":\"http://%s:%d/webrtc-streamer.html?video=/%s/%s\"}}",nClient, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, enable_mp4 == true ? "true" : "false", enable_hls == true ? "true" : "false", H265ConvertH264_enable == true ? "true" : "false", pClient->m_addStreamProxyStruct.url, pClient->netBaseNetType, mediaSendMap.size(), (int)0,
+ 			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_stream_arrive\",\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"status\":%s,\"enable_hls\":%s,\"transcodingStatus\":%s,\"sourceURL\":\"%s\",\"networkType\":%d,\"readerCount\":%d,\"noneReaderDuration\":%d,\"videoCodec\":\"%s\",\"videoFrameSpeed\":%d,\"width\":%d,\"height\":%d,\"videoBitrate\":%d,\"audioCodec\":\"%s\",\"audioChannels\":%d,\"audioSampleRate\":%d,\"audioBitrate\":%d,\"url\":{\"rtsp\":\"rtsp://%s:%d/%s/%s\",\"rtmp\":\"rtmp://%s:%d/%s/%s\",\"http-flv\":\"http://%s:%d/%s/%s.flv\",\"ws-flv\":\"ws://%s:%d/%s/%s.flv\",\"http-mp4\":\"http://%s:%d/%s/%s.mp4\",\"http-hls\":\"http://%s:%d/%s/%s.m3u8\",\"webrtc\":\"http://%s:%d/webrtc-streamer.html?video=/%s/%s\"}}",nClient, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, enable_mp4 == true ? "true" : "false", enable_hls == true ? "true" : "false", H265ConvertH264_enable == true ? "true" : "false", pClient->m_addStreamProxyStruct.url, pClient->netBaseNetType, mediaSendMap.size(), (int)0,
 				m_mediaCodecInfo.szVideoName, m_mediaCodecInfo.nVideoFrameRate, m_mediaCodecInfo.nWidth, m_mediaCodecInfo.nHeight, m_mediaCodecInfo.nVideoBitrate, m_mediaCodecInfo.szAudioName, m_mediaCodecInfo.nChannels, m_mediaCodecInfo.nSampleRate, m_mediaCodecInfo.nAudioBitrate,
 				ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,
 				ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,

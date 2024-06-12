@@ -65,9 +65,12 @@ CNetClientSnap::CNetClientSnap(NETHANDLE hServer, NETHANDLE hClient, char* szIP,
 	sprintf(szPicturePath, "%s%s", ABL_MediaServerPort.picturePath, m_addStreamProxyStruct.app);
 	umask(0);
 	mkdir(szPicturePath, 777);
+	SetPathAuthority(szPicturePath);
+ 
 	sprintf(szPicturePath, "%s%s/%s/", ABL_MediaServerPort.picturePath, m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream);
-	umask(0);
-	mkdir(szPicturePath, 777);
+ 	mkdir(szPicturePath, 777);
+	SetPathAuthority(szPicturePath);
+	
 #endif
 
 	m_videoFifo.InitFifo(MaxLiveingVideoFifoBufferLength);

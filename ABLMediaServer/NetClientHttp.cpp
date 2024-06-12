@@ -76,52 +76,6 @@ CNetClientHttp::~CNetClientHttp()
 	bRunFlag = false;
 	std::lock_guard<std::mutex> lock(NetClientHTTPLock);
 
-	switch (netBaseNetType)
-	{
-		case NetBaseNetType_HttpClient_None_reader:
-			 ABL_MediaServerPort.nClientNoneReader = 0;
-			break;
-		case NetBaseNetType_HttpClient_Not_found:
-			 ABL_MediaServerPort.nClientNotFound = 0;
-			break;
-		case NetBaseNetType_HttpClient_Record_mp4:
-			 ABL_MediaServerPort.nClientRecordMp4 = 0;
-			break;
-		case NetBaseNetType_HttpClient_Record_Progress:
-			ABL_MediaServerPort.nClientRecordProgress = 0;
-			break;
-		case NetBaseNetType_HttpClient_on_stream_arrive:
-			ABL_MediaServerPort.nClientArrive = 0;
-			break;
-		case NetBaseNetType_HttpClient_on_stream_not_arrive:
-			ABL_MediaServerPort.nClientNotArrive = 0;
-			break;
-		case NetBaseNetType_HttpClient_on_stream_disconnect:
-			ABL_MediaServerPort.nClientDisconnect = 0;
-			break;
-		case NetBaseNetType_HttpClient_on_record_ts:
-			ABL_MediaServerPort.nClientRecordTS = 0;
-			break;
-		case NetBaseNetType_HttpClient_ServerStarted:
-			ABL_MediaServerPort.nServerStarted = 0;
-			break;
-		case NetBaseNetType_HttpClient_ServerKeepalive:
-			ABL_MediaServerPort.nServerKeepalive = 0;
-			break;
-		case NetBaseNetType_HttpClient_DeleteRecordMp4:
-			ABL_MediaServerPort.nClientDeleteRecordMp4 = 0;
-			break;
-		case NetBaseNetType_HttpClient_on_play:
-			ABL_MediaServerPort.nPlay = 0;
-			break;
-		case NetBaseNetType_HttpClient_on_publish:
-			ABL_MediaServerPort.nPublish = 0;
-			break;
-		case NetBaseNetType_HttpClient_on_iframe_arrive:
-			ABL_MediaServerPort.nFrameArrive = 0;
-			break;
-	}
-
 	m_videoFifo.FreeFifo();
 
 	WriteLog(Log_Debug, "CNetClientHttp Îö¹¹ = %X nClient = %llu ,nMediaClient = %llu", this, nClient, nMediaClient);
@@ -134,8 +88,6 @@ int CNetClientHttp::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* s
 		return -1;
 
 	m_videoFifo.push(pVideoData, nDataLength);
-
-	MessageSendThreadPool->InsertIntoTask(nClient);
 
 	return 0;
 }
@@ -206,9 +158,7 @@ int CNetClientHttp::ProcessNetData()
 {
 	if (!bRunFlag)
 		return -1;
-
-	netDataCache[netDataCacheLength] = 0x00;
-	nNetStart = nNetEnd = netDataCacheLength = 0;
+	std::lock_guard<std::mutex> lock(NetClientHTTPLock);
 
 	unsigned char* pData = NULL;
 	int            nLength = 0;
@@ -216,30 +166,16 @@ int CNetClientHttp::ProcessNetData()
 	if ((pData = m_videoFifo.pop(&nLength)) != NULL && strlen(szResponseURL) > 0 )
 	{
 		memset(szResponseData, 0x00, sizeof(szResponseData));
-		memcpy(szResponseData, pData, nLength);
-
-		if (netBaseNetType == NetBaseNetType_HttpClient_None_reader)
-			HttpRequest(szResponseURL, szResponseData, nLength);
-		else if (netBaseNetType == NetBaseNetType_HttpClient_Not_found)
-			HttpRequest(szResponseURL, szResponseData, nLength);
-		else if (netBaseNetType == NetBaseNetType_HttpClient_Record_mp4)
-			HttpRequest(szResponseURL, szResponseData, nLength);
-		else if (netBaseNetType == NetBaseNetType_HttpClient_Record_Progress)
-			HttpRequest(szResponseURL, szResponseData, nLength);
-		else if (netBaseNetType == NetBaseNetType_HttpClient_on_stream_arrive)
-			HttpRequest(szResponseURL, szResponseData, nLength);
-		else if (netBaseNetType == NetBaseNetType_HttpClient_on_stream_not_arrive)
-			HttpRequest(szResponseURL, szResponseData, nLength);
-		else if (netBaseNetType == NetBaseNetType_HttpClient_on_stream_disconnect)
-			HttpRequest(szResponseURL, szResponseData, nLength);
-		else if (netBaseNetType == NetBaseNetType_HttpClient_on_record_ts)
-			HttpRequest(szResponseURL, szResponseData, nLength);
-		else
-			HttpRequest(szResponseURL, (char*)pData, nLength);
+ 		memcpy(szResponseData, pData, nLength);
+ 
+		HttpRequest(szResponseURL, szResponseData, nLength);
 
 		m_videoFifo.pop_front();
 	}
 
+	if(m_videoFifo.GetSize() > 0 )
+	  MessageSendThreadPool->InsertIntoTask(nClient);
+ 
 	return 0;
 }
 
@@ -248,54 +184,11 @@ int CNetClientHttp::SendFirstRequst()
 {
 	if (!bRunFlag)
 		return -1;
-	switch (netBaseNetType)
-	{
-	case NetBaseNetType_HttpClient_None_reader:
-		ABL_MediaServerPort.nClientNoneReader = nClient;
-		break;
-	case NetBaseNetType_HttpClient_Not_found:
-		ABL_MediaServerPort.nClientNotFound = nClient;
-		break;
-	case NetBaseNetType_HttpClient_Record_mp4:
-		ABL_MediaServerPort.nClientRecordMp4 = nClient;
-		break;
-	case NetBaseNetType_HttpClient_Record_Progress:
-		ABL_MediaServerPort.nClientRecordProgress = nClient;
-		break;
-	case NetBaseNetType_HttpClient_on_stream_arrive:
-		ABL_MediaServerPort.nClientArrive = nClient;
-		break;
-	case NetBaseNetType_HttpClient_on_stream_not_arrive:
-		ABL_MediaServerPort.nClientNotArrive = nClient;
-		break;
-	case NetBaseNetType_HttpClient_on_stream_disconnect:
-		ABL_MediaServerPort.nClientDisconnect = nClient;
-		break;
-	case NetBaseNetType_HttpClient_on_record_ts:
-		ABL_MediaServerPort.nClientRecordTS = nClient;
-		break;
- 	case NetBaseNetType_HttpClient_ServerStarted:
-		ABL_MediaServerPort.nServerStarted = nClient;
-		break;
-	case NetBaseNetType_HttpClient_ServerKeepalive:
-		ABL_MediaServerPort.nServerKeepalive = nClient;
-		break;
-	case NetBaseNetType_HttpClient_DeleteRecordMp4:
-		ABL_MediaServerPort.nClientDeleteRecordMp4 = nClient;
-		break;
-	case NetBaseNetType_HttpClient_on_play:
-		ABL_MediaServerPort.nPlay = nClient;
-		break;
-	case NetBaseNetType_HttpClient_on_publish:
-		ABL_MediaServerPort.nPublish = nClient;
-		break;
-	case NetBaseNetType_HttpClient_on_iframe_arrive:
-		ABL_MediaServerPort.nFrameArrive = nClient;
-		break;
-	}
 
-	PushVideo((unsigned char*)msgNotice.szMsg, strlen(msgNotice.szMsg), "JSON");
+	bConnectSuccessFlag = true;
 
+	MessageSendThreadPool->InsertIntoTask(nClient);
+ 
 	return 0;
 }
 
@@ -307,6 +200,9 @@ bool  CNetClientHttp::RequestM3u8File()
 
 void CNetClientHttp::HttpRequest(char* szUrl, char* szBody,int nLength)
 {
+	if (nLength > 0)
+	 szBody[0] = '{';
+
 	if (!bConnectSuccessFlag || strlen(szBody) == 0 || nLength <= 0 || !bRunFlag)
 	{
 		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
@@ -328,6 +224,4 @@ void CNetClientHttp::HttpRequest(char* szUrl, char* szBody,int nLength)
 	}
 
 	WriteLog(Log_Debug, "CNetClientHttp = %X nClient = %llu ,netBaseNetType = %d \r\nURL = %s \r\nbody = %s ", this, nClient, netBaseNetType,szUrl,szBody);
-
-	pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 }

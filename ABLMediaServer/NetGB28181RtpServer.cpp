@@ -822,7 +822,7 @@ CNetGB28181RtpServer::~CNetGB28181RtpServer()
 	 {
 		 MessageNoticeStruct msgNotice;
 		 msgNotice.nClient = NetBaseNetType_HttpClient_on_stream_not_arrive;
-		 sprintf(msgNotice.szMsg, "{\"mediaServerId\":\"%s\",\"app\":\"%s\",\"stream\":\"%s\",\"networkType\":%d,\"key\":%llu}", ABL_MediaServerPort.mediaServerID,m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream,  netBaseNetType, nClient);
+		 sprintf(msgNotice.szMsg, "{\"eventName\":\"on_stream_not_arrive\",\"mediaServerId\":\"%s\",\"app\":\"%s\",\"stream\":\"%s\",\"networkType\":%d,\"key\":%llu}", ABL_MediaServerPort.mediaServerID,m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream,  netBaseNetType, nClient);
 		 pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 	 }
 

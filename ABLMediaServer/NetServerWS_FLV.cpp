@@ -329,10 +329,11 @@ int CNetServerWS_FLV::ProcessNetData()
 	unsigned char  nCommand = 0x00 ;
 	unsigned char szPong[4] = { 0x8A,0x80,0x00,0x00 };
 
-	if (netDataCacheLength > 2048 || strstr((char*)netDataCache, "%") != NULL)
+	if (netDataCacheLength > string_length_4096 )
 	{
 		WriteLog(Log_Debug, "CNetServerWS_FLV = %X , nClient = %llu ,netDataCacheLength = %d, 发送过来的url数据长度非法 ,立即删除 ", this, nClient, netDataCacheLength);
 		DeleteNetRevcBaseClient(nClient);
+		return -1;
 	}
 
 	if (nWebSocketCommStatus == WebSocketCommStatus_Connect)
@@ -470,6 +471,7 @@ bool  CNetServerWS_FLV::Create_WS_FLV_Handle()
 		if (strstr(szFlvName, RecordFileReplaySplitter) == NULL)
 		{//实况点播
 			pushClient = GetMediaStreamSource(szFlvName, true);
+
 			if (pushClient == NULL)
 			{
 				WriteLog(Log_Debug, "CNetServerWS_FLV=%X, 没有推流对象的地址 %s nClient = %llu ", this, szFlvName, nClient);
@@ -526,7 +528,7 @@ bool  CNetServerWS_FLV::Create_WS_FLV_Handle()
 			DeleteNetRevcBaseClient(nClient);
 		}
 		nWebSocketCommStatus = WebSocketCommStatus_ShakeHands;
-		
+
 		nNetStart = nNetEnd = netDataCacheLength = 0;
 		memset(netDataCache, 0x00, MaxHttp_WsFlvNetCacheBufferLength);
 

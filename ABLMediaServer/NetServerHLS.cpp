@@ -20,7 +20,6 @@ extern boost::shared_ptr<CMediaStreamSource>  GetMediaStreamSource(char* szURL, 
 extern std::shared_ptr<CMediaStreamSource>  GetMediaStreamSource(char* szURL, bool bNoticeStreamNoFound = false);
 #endif
 
-
 extern CMediaFifo                      pDisconnectBaseNetFifo; //清理断裂的链接 
 extern bool                            DeleteClientMediaStreamSource(uint64_t nClient);
 extern char                            ABL_wwwMediaPath[256]; //www 子路径
@@ -68,6 +67,7 @@ CNetServerHLS::~CNetServerHLS()
 	  delete [] pTsFileBuffer;
 	  pTsFileBuffer;
 	}
+	httpParse.FreeSipString();
  
 	WriteLog(Log_Debug, "CNetServerHLS 析构 = %X  szRequestFileName = %s, nClient = %llu \r\n", this, szRequestFileName, nClient);
 	malloc_trim(0);
@@ -219,10 +219,11 @@ int CNetServerHLS::ProcessNetData()
 	if (!bRunFlag)
 		return -1;
 
-	if (netDataCacheLength > 512 || strstr((char*)netDataCache, "%") != NULL)
+	if (netDataCacheLength > string_length_4096 )
 	{
 		WriteLog(Log_Debug, "CNetServerHLS = %X , nClient = %llu ,netDataCacheLength = %d, 发送过来的url数据长度非法 ,立即删除 ", this, nClient, netDataCacheLength);
 		DeleteNetRevcBaseClient(nClient);
+		return -1;
 	}
 
   	if (ReadHttpRequest() == false )
@@ -296,7 +297,7 @@ int CNetServerHLS::ProcessNetData()
  		bOn_playFlag = true;
 		MessageNoticeStruct msgNotice;
 		msgNotice.nClient = NetBaseNetType_HttpClient_on_play;
-		sprintf(msgNotice.szMsg, "{\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"params\":\"%s\"}", m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient, szClientIP, nClientPort, szPlayParams);
+		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_play\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"params\":\"%s\"}", m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient, szClientIP, nClientPort, szPlayParams);
 		pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 	}
 
@@ -338,7 +339,8 @@ int CNetServerHLS::ProcessNetData()
 	      pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 #endif
 
-
+	 httpParse.FreeSipString();
+ 
 	return 0;
 }
 
@@ -589,7 +591,6 @@ int CNetServerHLS::SendRecordHLS()
 #else
 		ABL::replace_all(strTemp, RecordFileReplaySplitter, "/");
 #endif
-	
 		sprintf(szRequestFileName, "%s%s", ABL_MediaServerPort.recordPath, strTemp.c_str() + 1);
 
 		FILE* fReadMP4 = NULL;

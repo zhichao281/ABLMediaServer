@@ -68,6 +68,7 @@ static int record_ts_write(void* param, const void* packet, size_t bytes)
 
 			if (handle->fTSFileWrite == NULL)
 			{
+				handle->nStartDateTime = GetCurrentSecond();
 #ifdef OS_System_Windows
 				SYSTEMTIME st;
 				GetLocalTime(&st);
@@ -164,10 +165,9 @@ bool  CStreamRecordTS::H264H265FrameToTSFile(unsigned char* szVideo, int nLength
 		//完成一个fmp4切片文件通知 
 		if (ABL_MediaServerPort.hook_enable == 1 )
 		{
-			GetCurrentDatetime();//获取当前时间
 			MessageNoticeStruct msgNotice;
 			msgNotice.nClient = NetBaseNetType_HttpClient_Record_mp4;
-			sprintf(msgNotice.szMsg, "{\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\",\"fileSize\":%llu}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, szCurrentDateTime, nWriteRecordByteSize);
+			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_mp4\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\",\"fileSize\":%llu}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, getDatetimeBySecond(nStartDateTime + (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate)), nWriteRecordByteSize);
 			pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 		}
  		nCurrentVideoFrames = 0;
@@ -242,10 +242,9 @@ CStreamRecordTS::~CStreamRecordTS()
 		//完成一个fmp4切片文件通知 
 		if (ABL_MediaServerPort.hook_enable == 1 )
 		{
-			GetCurrentDatetime();//获取当前时间
 			MessageNoticeStruct msgNotice;
 			msgNotice.nClient = NetBaseNetType_HttpClient_Record_mp4;
-			sprintf(msgNotice.szMsg, "{\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\",\"fileSize\":%llu}", key, app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, szCurrentDateTime, nWriteRecordByteSize);
+			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_mp4\",\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\",\"fileSize\":%llu}", key, app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, getDatetimeBySecond(nStartDateTime + (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate)), nWriteRecordByteSize);
 			pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 		}
 	}
@@ -265,11 +264,11 @@ int CStreamRecordTS::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* 
 
 	m_videoFifo.push(pVideoData, nDataLength);
 
-	if (ABL_MediaServerPort.hook_enable == 1 && (GetTickCount64() - nCreateDateTime ) >= 1000 * 10  )
+	if (ABL_MediaServerPort.hook_enable == 1 && (GetTickCount64() - nCreateDateTime ) >= 1000 * 15  )
 	{
 		MessageNoticeStruct msgNotice;
 		msgNotice.nClient = NetBaseNetType_HttpClient_Record_Progress;
-		sprintf(msgNotice.szMsg, "{\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"TotalVideoDuration\":%llu}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType,key, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), (nTotalVideoFrames / mediaCodecInfo.nVideoFrameRate));
+		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_progress\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"TotalVideoDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\"}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType,key, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), (nTotalVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, getDatetimeBySecond(nStartDateTime + (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate)));
 		pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 		nCreateDateTime = GetTickCount64();
 	}

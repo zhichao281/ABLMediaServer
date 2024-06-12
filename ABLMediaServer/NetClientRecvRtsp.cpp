@@ -422,7 +422,7 @@ CNetClientRecvRtsp::~CNetClientRecvRtsp()
 	{
 		MessageNoticeStruct msgNotice;
 		msgNotice.nClient = NetBaseNetType_HttpClient_on_stream_not_arrive;
- 		sprintf(msgNotice.szMsg, "{\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu}", m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, hParent);
+ 		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_stream_not_arrive\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu}", m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, hParent);
 		pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 	}
 
@@ -1092,6 +1092,8 @@ bool   CNetClientRecvRtsp::GetMediaInfoFromRtspSDP()
 		memcpy(szVideoSDP, szRtspContentSDP + nPos1, strlen(szRtspContentSDP) - nPos1);
 		sipParseV.ParseSipString(szVideoSDP);
 	}
+	else
+		return false;
 
 	//获取视频编码名称
 	string strVideoName;
@@ -1398,16 +1400,20 @@ int CNetClientRecvRtsp::ProcessNetData()
 								WriteLog(Log_Debug, "CNetClientRecvRtsp = %X  nClient = %llu , 获取到rtp最大长度 , nMaxRtpLength = %d ", this, nClient, nMaxRtpLength);
 							}
 						}
-						//rtp 包长度正常才进行解包
-						if (nRtpLength <= nMaxRtpLength && rtpDecoder[1] != NULL)
-							rtp_payload_decode_input(rtpDecoder[1], netDataCache + nNetStart, nRtpLength);
-						else
-						{//rtp 包长度异常
-							WriteLog(Log_Debug, "CNetClientRecvRtsp = %X rtp包头长度有误  nClient = %llu ,nRtpLength = %llu , nMaxRtpLength = %d ", this, nClient, nRtpLength, nMaxRtpLength);
-							DeleteNetRevcBaseClient(nClient);
-							return -1;
+
+						if (strcmp(szSdpAudioName, "NONE") != 0)
+						{//不支持的音频格式 
+							//rtp 包长度正常才进行解包
+							if (nRtpLength <= nMaxRtpLength && rtpDecoder[1] != NULL)
+								rtp_payload_decode_input(rtpDecoder[1], netDataCache + nNetStart, nRtpLength);
+							else
+							{//rtp 包长度异常
+								WriteLog(Log_Debug, "CNetClientRecvRtsp = %X rtp包头长度有误  nClient = %llu ,nRtpLength = %llu , nMaxRtpLength = %d ", this, nClient, nRtpLength, nMaxRtpLength);
+								DeleteNetRevcBaseClient(nClient);
+								return -1;
+							}
 						}
- 
+  
 						//if(nPrintCount % 100 == 0 )
 						//	WriteLog(Log_Debug, "this =%X ,Audio Length = %d ",this,nReadLength);
 
@@ -2126,9 +2132,11 @@ bool   CNetClientRecvRtsp::StartRtpPsDemux()
 		else if (strcmp(szAudioName, "G711_U") == 0)
 			strcpy(szSdpAudioName, "pcmu");
 		else 
-			strcpy(szSdpAudioName, "pcma");
+			strcpy(szSdpAudioName, "NONE");
 
-		rtpDecoder[1] = rtp_payload_decode_create(nAudioPayload, szSdpAudioName, &hRtpHandle[1], this);
+		if(strcmp(szSdpAudioName,"NONE") != 0)
+		   rtpDecoder[1] = rtp_payload_decode_create(nAudioPayload, szSdpAudioName, &hRtpHandle[1], this);
+
 		return true;
 	}
 	else

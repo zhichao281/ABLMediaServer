@@ -17,14 +17,13 @@ extern boost::shared_ptr<CMediaStreamSource> GetMediaStreamSource(char* szURL, b
 extern bool                                  DeleteMediaStreamSource(char* szURL);
 extern bool                                  DeleteClientMediaStreamSource(uint64_t nClient);
 
-
 extern CMediaFifo                            pDisconnectBaseNetFifo; //清理断裂的链接 
 extern char                                  ABL_MediaSeverRunPath[256]; //当前路径
 extern MediaServerPort                       ABL_MediaServerPort;
 extern boost::shared_ptr<CNetRevcBase>       CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL);
 extern CNetBaseThreadPool*                   RecordReplayThreadPool;
 extern CMediaFifo                            pMessageNoticeFifo;  //消息通知FIFO
-
+extern boost::shared_ptr<CNetRevcBase>       GetNetRevcBaseClient(NETHANDLE CltHandle);
 
 #else
 extern bool                                  DeleteNetRevcBaseClient(NETHANDLE CltHandle);
@@ -40,6 +39,7 @@ extern MediaServerPort                       ABL_MediaServerPort;
 extern std::shared_ptr<CNetRevcBase>       CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL);
 extern CNetBaseThreadPool* RecordReplayThreadPool;
 extern CMediaFifo                            pMessageNoticeFifo;  //消息通知FIFO
+extern std::shared_ptr<CNetRevcBase>       GetNetRevcBaseClient(NETHANDLE CltHandle);
 #endif
 static int fmp4_hls_segment(void* param, const void* data, size_t bytes, int64_t pts, int64_t dts, int64_t duration)
 {
@@ -84,6 +84,7 @@ static int fmp4_hls_segment(void* param, const void* data, size_t bytes, int64_t
 
 CNetServerHTTP_MP4::CNetServerHTTP_MP4(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort,char* szShareMediaURL)
 {
+	nCurrentRecordFileOrder = 0;
 	pMP4Buffer = NULL;
 	bOn_playFlag = false;
 	memset((char*)&avc, 0x00, sizeof(avc));
@@ -321,10 +322,11 @@ int CNetServerHTTP_MP4::ProcessNetData()
 
 	if (!bFindMP4NameFlag)
 	{
-		if (netDataCacheLength > 512 || strstr((char*)netDataCache, "%") != NULL)
+		if (netDataCacheLength > string_length_4096 || strstr((char*)netDataCache, "%") != NULL)
 		{
 			WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X , nClient = %llu ,netDataCacheLength = %d, 发送过来的url数据长度非法 ,立即删除 ", this, nClient, netDataCacheLength);
 			DeleteNetRevcBaseClient(nClient);
+			return -1;
 		}
 
 		if (strstr((char*)netDataCache, "\r\n\r\n") == NULL)
@@ -395,33 +397,24 @@ int CNetServerHTTP_MP4::ProcessNetData()
 		WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X, setup -3  nClient = %llu ", this, nClient);
 
 		//根据mp4文件，进行查找推流对象 
-		if (memcmp(szMP4Name + strlen(szMP4Name) - 4, ".mp4", 4) == 0 || memcmp(szMP4Name + strlen(szMP4Name) - 4, ".MP4", 4) == 0)
+		if (strMP4Name.find("?download_speed=",0) == string::npos && strMP4Name.find("__ReplayFMP4RecordFile__", 0) == string::npos)
 		{
 			httpMp4Type = HttpMp4Type_Play;
 		}
 		else
 		{
-			string strDownload = szMP4Name;
-			int nPos = strDownload.find("?download_speed=", 0);
-			if (nPos < 0)
-			{
-				WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X, 非法的http请求 %s nClient = %llu ", this, szMP4Name, nClient);
-
-				sprintf(httpResponseData, "HTTP/1.1 404 Not Found\r\nConnection: keep-alive\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nAccess-Control-Allow-Origin: *\r\nServer: %s\r\n\r\n", MediaServerVerson);
-				nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
-
-				DeleteNetRevcBaseClient(nClient);
-				return -1;
+ 			int nPos = strMP4Name.find("?download_speed=", 0);
+			if (nPos != string::npos)
+			{//去掉 ?后面
+ 				strcpy(szMP4Name, strMP4Name.c_str());
+				char szDownLoadSpeed[string_length_4096] = { 0 };
+				memcpy(szDownLoadSpeed, szMP4Name + nPos + strlen("?download_speed="), strlen(szMP4Name) - nPos - strlen("?download_speed="));
+				szMP4Name[nPos] = 0x00;
+				nHttpDownloadSpeed = atoi(szDownLoadSpeed);
 			}
-
-			//去掉 ?后面 
-			char szDownLoadSpeed[string_length_4096] = { 0 };
-			memcpy(szDownLoadSpeed ,szMP4Name  + nPos + strlen("?download_speed="),strlen(szMP4Name) - nPos - strlen("?download_speed="));
-			szMP4Name[nPos] = 0x00;
-			nHttpDownloadSpeed = atoi(szDownLoadSpeed);
 			httpMp4Type = HttpMp4Type_Download;
  		}
-
+ 
 		//根据mp4文件，进行简单判断是否合法
 		if (!(strstr(szMP4Name, ".mp4") != NULL || strstr(szMP4Name, ".MP4") != NULL))
 		{
@@ -439,11 +432,11 @@ int CNetServerHTTP_MP4::ProcessNetData()
 #else
 		std::shared_ptr<CMediaStreamSource> pushClient=NULL;
 #endif
-		
 		strcpy(szMediaSourceURL, szMP4Name);
-		if (strstr(szMP4Name, RecordFileReplaySplitter) == NULL)
+		if (httpMp4Type == HttpMp4Type_Play)
 		{
 			 pushClient = GetMediaStreamSource(szMP4Name, true);
+
 			if (pushClient == NULL)
 			{
  				return  ResponseError("没有推流对象的地址");
@@ -451,19 +444,43 @@ int CNetServerHTTP_MP4::ProcessNetData()
 		}
 		else
 		{//录像点播
- 		   //查询点播的录像是否存在
-			if (QueryRecordFileIsExiting(szMediaSourceURL) == false)
-			{
- 				return ResponseError("没有录像文件");
-			}
+			if (strstr(szMP4Name, RecordFileReplaySplitter) != NULL)
+			{//单个录像文件下载 
+ 				if (QueryRecordFileIsExiting(szMediaSourceURL) == false)
+  					return ResponseError("没有录像文件");
 
+#ifdef OS_System_Windows
+				sprintf(szRequestReplayRecordFile, "%s%s\\%s\\%s.mp4", ABL_MediaServerPort.recordPath, szSplliterApp, szSplliterStream, szReplayRecordFile);
+#else
+				sprintf(szRequestReplayRecordFile, "%s%s/%s/%s.mp4", ABL_MediaServerPort.recordPath, szSplliterApp, szSplliterStream, szReplayRecordFile);
+#endif				 
+				mutliRecordPlayNameList.push_back(szRequestReplayRecordFile);
+			}
+			else
+			{//多个录像文件下载 
+				pushClient = GetMediaStreamSource(szMP4Name);
+
+				if (pushClient == NULL)
+				{
+					return  ResponseError("没有推流对象的地址");
+				}
+
+				auto  pRecordMediaSource = GetNetRevcBaseClient(pushClient->nClient);
+				if (pRecordMediaSource != NULL && pRecordMediaSource->mutliRecordPlayNameList.size() > 0)
+				{//拷贝多个文件
+					for(int i=0;i<pRecordMediaSource->mutliRecordPlayNameList.size();i++)
+					  mutliRecordPlayNameList.push_back(pRecordMediaSource->mutliRecordPlayNameList[i]);
+				}else 
+					return  ResponseError("没有推流对象的地址");
+			}
+ 
 			//发送播放事件通知，用于播放鉴权
-			if (ABL_MediaServerPort.hook_enable == 1 && bOn_playFlag == false)
+			if (ABL_MediaServerPort.hook_enable == 1 && bOn_playFlag == false && mutliRecordPlayNameList.size() >  0 )
 			{
 				bOn_playFlag = true;
 				MessageNoticeStruct msgNotice;
 				msgNotice.nClient = NetBaseNetType_HttpClient_on_play;
-				sprintf(msgNotice.szMsg, "{\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"params\":\"%s\"}", szSplliterApp, szSplliterStream, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient, szClientIP, nClientPort, szPlayParams);
+				sprintf(msgNotice.szMsg, "{\"eventName\":\"on_play\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"params\":\"%s\"}", szSplliterApp, szSplliterStream, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient, szClientIP, nClientPort, szPlayParams);
 				pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 			}
 
@@ -471,28 +488,31 @@ int CNetServerHTTP_MP4::ProcessNetData()
 			if (httpMp4Type == HttpMp4Type_Download)
 			{
 				bCheckHttpMP4Flag = true;
-#ifdef OS_System_Windows
-				sprintf(szRequestReplayRecordFile, "%s%s\\%s\\%s.mp4", ABL_MediaServerPort.recordPath, szSplliterApp, szSplliterStream, szReplayRecordFile);
-#else
-				sprintf(szRequestReplayRecordFile, "%s%s/%s/%s.mp4", ABL_MediaServerPort.recordPath, szSplliterApp, szSplliterStream, szReplayRecordFile);
-#endif
-				fFileMp4 = fopen(szRequestReplayRecordFile, "rb");
+				nCurrentRecordFileOrder = 0;
+
+				fFileMp4 = fopen(mutliRecordPlayNameList[nCurrentRecordFileOrder].c_str(), "rb");
 				if(fFileMp4 == NULL)
 					return ResponseError("读取下载文件失败");
 			    
-				nRecordFileSize = 1024 * 1024 * 100;
+				nRecordFileSize =  0 ;
 #ifdef OS_System_Windows
-				struct _stat64 fileBuf;
-				int error = _stat64(szRequestReplayRecordFile, &fileBuf);
-				if (error == 0)
-					nRecordFileSize = fileBuf.st_size;
+				for (int i = 0; i < mutliRecordPlayNameList.size(); i++)
+				{//统计所有文件的大小 
+					struct _stat64 fileBuf;
+					int error = _stat64(mutliRecordPlayNameList[i].c_str(), &fileBuf);
+					if (error == 0)
+						nRecordFileSize += fileBuf.st_size;
+				}
 #else 
-				struct stat fileBuf;
-				int error = stat(szRequestReplayRecordFile, &fileBuf);
-				if (error == 0)
-					nRecordFileSize = fileBuf.st_size;
+				for (int i = 0; i < mutliRecordPlayNameList.size(); i++)
+				{
+			     	struct stat fileBuf;
+				    int error = stat(mutliRecordPlayNameList[i].c_str(), &fileBuf);
+				    if (error == 0)
+					  nRecordFileSize += fileBuf.st_size;
+ 				}
 #endif
-				sprintf(httpResponseData, "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Credentials: true\r\nAccess-Control-Allow-Origin: %s\r\nConnection: keep-alive\r\nContent-Type: video/mp4; charset=utf-8\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nContent-Length: %d\r\nServer: %s\r\n\r\n",szOrigin,nRecordFileSize, MediaServerVerson);
+				sprintf(httpResponseData, "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Credentials: true\r\nAccess-Control-Allow-Origin: %s\r\nConnection: close\r\nContent-Type: video/mp4\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=15\r\nContent-Length: %d\r\nServer: %s\r\nContent-Disposition: attachment;\r\n\r\n", szOrigin, nRecordFileSize, MediaServerVerson);
 				nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
 
 				RecordReplayThreadPool->InsertIntoTask(nClient); //投递任务
@@ -551,9 +571,32 @@ int CNetServerHTTP_MP4::ProcessNetData()
 				}
 				else
 				{
-					WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X, 录像文件下载完毕 %s nClient = %llu ", this, szMP4Name, nClient);
-					DeleteNetRevcBaseClient(nClient);
-					return -1;
+					nCurrentRecordFileOrder ++;
+					if (nCurrentRecordFileOrder >= mutliRecordPlayNameList.size())
+					{
+ 						WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X, 录像文件下载完毕 %s nClient = %llu , nCurrentRecordFileOrder = %d , mutliRecordPlayNameList.size() = %d ", this, szMP4Name, nClient, nCurrentRecordFileOrder, mutliRecordPlayNameList.size());
+						DeleteNetRevcBaseClient(nClient);
+						return -1;
+					}
+					else
+					{//读取下一个文件
+						if (fFileMp4 != NULL)
+						{
+							fclose(fFileMp4);
+							fFileMp4 = fopen(mutliRecordPlayNameList[nCurrentRecordFileOrder].c_str(), "rb");
+							if (fFileMp4 == NULL)
+							{//读取文件失败 
+								WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X,  nClient = %llu , 下载文件失败  %s ", this,  nClient, mutliRecordPlayNameList[nCurrentRecordFileOrder].c_str());
+								DeleteNetRevcBaseClient(nClient);
+								return -1;
+							}
+							else
+							{
+								WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X,  nClient = %llu , 正在下载文件 %d / %d  %s ", this, nClient, nCurrentRecordFileOrder + 1, mutliRecordPlayNameList.size(),mutliRecordPlayNameList[nCurrentRecordFileOrder].c_str());
+								RecordReplayThreadPool->InsertIntoTask(nClient); //投递任务
+							}
+						}
+					}
 				}
 			}
 			else

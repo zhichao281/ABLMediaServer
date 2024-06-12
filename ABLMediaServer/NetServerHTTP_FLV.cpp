@@ -329,10 +329,11 @@ int CNetServerHTTP_FLV::ProcessNetData()
 {
 	if (!bFindFlvNameFlag)
 	{
-		if (netDataCacheLength > 512 || strstr((char*)netDataCache, "%") != NULL)
+		if (netDataCacheLength > string_length_4096 )
 		{
 			WriteLog(Log_Debug, "CNetServerHTTP_FLV = %X , nClient = %llu ,netDataCacheLength = %d, 发送过来的url数据长度非法 ,立即删除 ", this, nClient, netDataCacheLength);
 			DeleteNetRevcBaseClient(nClient);
+			return -1;
 		}
 
 		if (strstr((char*)netDataCache, "\r\n\r\n") == NULL)
@@ -419,6 +420,7 @@ int CNetServerHTTP_FLV::ProcessNetData()
 		if (strstr(szFlvName, RecordFileReplaySplitter) == NULL)
 		{//实况点播
 		     pushClient = GetMediaStreamSource(szFlvName, true);
+
 			if (pushClient == NULL)
 			{
 				WriteLog(Log_Debug, "CNetServerHTTP_FLV=%X, 没有推流对象的地址 %s nClient = %llu ", this, szFlvName, nClient);
@@ -541,7 +543,6 @@ int CNetServerHTTP_FLV::ProcessNetData()
 		//把客户端 加入源流媒体拷贝队列 
 		pushClient->AddClientToMap(nClient);
 
-	
 	}
   
 	return 0;

@@ -17,6 +17,8 @@ services:
             context: ./ABL
         volumes:
             - ./ABL/bin:/opt/media/ABLMediaServer
+            - /etc/timezone:/etc/timezone     #设置时区
+            - /etc/localtime:/etc/localtime   #设置时区
         working_dir: /opt/media/ABLMediaServer
         ports:      
             - 5088:5088/tcp     #http-mp4端口
@@ -30,6 +32,8 @@ services:
             - 10000-10050:10000-10050/udp
         environment:
             - TZ=Asia/Shanghai
+            - SET_CONTAINER_TIMEZONE=true
+            - CONTAINER_TIMEZONE=Asia/Shanghai
         networks:
             - monitor
     wvpRedis:

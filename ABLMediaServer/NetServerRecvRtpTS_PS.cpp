@@ -1,7 +1,7 @@
 /*
 功能：
-	接收TS流，形成媒体源，用于接收推送ts流文件
-
+    接收TS流，形成媒体源，用于接收推送ts流文件
+ 	 
 日期    2022-02-16
 作者    罗家兄弟
 QQ      79941308
@@ -45,15 +45,15 @@ extern void LIBNET_CALLMETHOD                onread(NETHANDLE srvhandle, NETHAND
 CNetServerRecvRtpTS_PS::CNetServerRecvRtpTS_PS(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort,char* szShareMediaURL)
 {
 	netBaseNetType = NetBaseNetType_NetGB28181RecvRtpPS_TS;
-	int nRet = XHNetSDK_BuildUdp(NULL, ABL_MediaServerPort.ps_tsRecvPort, NULL, &nClient, onread, 1);
-	nClientPort = ABL_MediaServerPort.ps_tsRecvPort;
-	WriteLog(Log_Debug, (nRet == 0) ? "绑定端口 %d(udp) 成功(success) " : "绑定端口 %d(udp) 失败(fail) ", ABL_MediaServerPort.ps_tsRecvPort);
-	WriteLog(Log_Debug, "CNetServerRecvRtpTS_PS 构造 = %X  nClient = %llu ,nRet = %d ", this, nClient, nRet);
+ 	int nRet = XHNetSDK_BuildUdp(NULL,ABL_MediaServerPort.ps_tsRecvPort, NULL, &nClient, onread, 1);
+	nClientPort = ABL_MediaServerPort.ps_tsRecvPort ;
+	WriteLog(Log_Debug, (nRet == 0) ? "绑定端口 [udp] %d 成功(success) " : "绑定端口 %d(udp) 失败(fail) ", ABL_MediaServerPort.ps_tsRecvPort);
+	WriteLog(Log_Debug, "CNetServerRecvRtpTS_PS 构造 = %X  nClient = %llu ,nRet = %d ", this, nClient,nRet);
 }
 
 CNetServerRecvRtpTS_PS::~CNetServerRecvRtpTS_PS()
 {
-	XHNetSDK_DestoryUdp(nClient);
+ 	XHNetSDK_DestoryUdp(nClient);
 	WriteLog(Log_Debug, "CNetServerRecvRtpTS_PS 析构 = %X  nClient = %llu ,nMediaClient = %llu\r\n", this, nClient, nMediaClient);
 	malloc_trim(0);
 }
@@ -81,7 +81,7 @@ int CNetServerRecvRtpTS_PS::SendAudio()
 
 int CNetServerRecvRtpTS_PS::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHandle, uint8_t* pData, uint32_t nDataLength, void* address)
 {
-	if (nDataLength <= 12 || pData == NULL)
+	if (nDataLength <= 12 || pData == NULL  )
 		return -1;//非法数据
 
 	rtpHeadPtr = (_rtp_header*)pData;
@@ -98,9 +98,9 @@ int CNetServerRecvRtpTS_PS::InputNetData(NETHANDLE nServerHandle, NETHANDLE nCli
 		sprintf(szRtpSource, "rtp://%s:%d", inet_ntoa(((sockaddr_in*)address)->sin_addr), ntohs(((sockaddr_in*)address)->sin_port));
 		strcat(szRtpSource, szTemp);
 
-		if (memcmp(pData + sizeof(_rtp_header), psHeadFlag, 4) == 0)
+		if(memcmp(pData + sizeof(_rtp_header), psHeadFlag, 4) == 0)
 		{//PS 
-			rtpClientPtr = CreateNetRevcBaseClient(NetBaseNetType_NetGB28181UDPPSStreamInput, 0, rtpClient, inet_ntoa(((sockaddr_in*)address)->sin_addr), ntohs(((sockaddr_in*)address)->sin_port), szTemp);
+		   rtpClientPtr = CreateNetRevcBaseClient(NetBaseNetType_NetGB28181UDPPSStreamInput, 0, rtpClient, inet_ntoa(((sockaddr_in*)address)->sin_addr), ntohs(((sockaddr_in*)address)->sin_port), szTemp);
 		}
 		else
 		{//TS
@@ -113,21 +113,21 @@ int CNetServerRecvRtpTS_PS::InputNetData(NETHANDLE nServerHandle, NETHANDLE nCli
 		if (rtpClientPtr->nSSRC == 0)
 			rtpClientPtr->nSSRC = rtpHeadPtr->ssrc; //默认第一个ssrc 
 		if (rtpClientPtr->nSSRC == rtpHeadPtr->ssrc)
-			rtpClientPtr->InputNetData(nServerHandle, nClientHandle, pData, nDataLength, address);
+ 			rtpClientPtr->InputNetData(nServerHandle, nClientHandle, pData, nDataLength,address);
 	}
 
-	return 0;
+    return 0;
 }
 
 int CNetServerRecvRtpTS_PS::ProcessNetData()
 {
-	return 0;
+ 	return 0;
 }
 
 //发送第一个请求
 int CNetServerRecvRtpTS_PS::SendFirstRequst()
 {
-	return 0;
+  	 return 0;
 }
 
 //请求m3u8文件

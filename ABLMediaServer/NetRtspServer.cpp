@@ -361,7 +361,7 @@ CNetRtspServer::~CNetRtspServer()
 	{
 		while (!bExitProcessFlagArray[i])
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
-			//Sleep(5);
+		//	Sleep(5);
 	}
 	WriteLog(Log_Debug, "CNetRtspServer 任务退出完毕 nTime = %llu, nClient = %llu ", GetTickCount64(), nClient);
 
@@ -1221,7 +1221,7 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 			return;
 
 		//判断推流地址是否存在
-		auto pMediaSourceTemp = GetMediaStreamSource(szMediaSourceURL, true);
+		auto pMediaSourceTemp = GetMediaStreamSource(szMediaSourceURL,true);
 		if (pMediaSourceTemp != NULL || strstr(szMediaSourceURL, RecordFileReplaySplitter) != NULL )
 		{
 			sprintf(szResponseBuffer, "RTSP/1.0 406 Not Acceptable\r\nServer: %s\r\nCSeq: %s\r\n\r\n", MediaServerVerson, szCSeq);
@@ -1326,9 +1326,10 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 		if (strstr(szMediaSourceURL, RecordFileReplaySplitter) == NULL)
 		{//观看实况
 			pMediaSource = GetMediaStreamSource(szMediaSourceURL,true);
+
 			if (pMediaSource == NULL || !(strlen(pMediaSource->m_mediaCodecInfo.szVideoName) > 0 || strlen(pMediaSource->m_mediaCodecInfo.szAudioName) > 0))
 			{
-				sprintf(szResponseBuffer, "RTSP/1.0 404 Not FOUND\r\nServer: %s\r\nCSeq: %s\r\n\r\n", MediaServerVerson, szCSeq);
+ 				sprintf(szResponseBuffer, "RTSP/1.0 404 Not FOUND\r\nServer: %s\r\nCSeq: %s\r\n\r\n", MediaServerVerson, szCSeq);
 				nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
 				WriteLog(Log_Debug, "媒体流 %s 不存在 ,准备删除 nClient =%llu ", szMediaSourceURL, nClient);
 
@@ -1528,7 +1529,7 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 
 			if(nReplayClient > 0 )
 			{
-			  auto pBasePtr = GetNetRevcBaseClient(nReplayClient);
+				auto pBasePtr = GetNetRevcBaseClient(nReplayClient);
 			  if (pBasePtr)
 			  {
 				CReadRecordFileInput* pReplayPtr = (CReadRecordFileInput*)pBasePtr.get();
@@ -1632,22 +1633,30 @@ bool   CNetRtspServer::GetMediaInfoFromRtspSDP()
 	memset(szAudioSDP, 0x00, sizeof(szAudioSDP));
 	memset(szVideoName, 0x00, sizeof(szVideoName));
 	memset(szAudioName, 0x00, sizeof(szAudioName));
-	if (nPos1 >= 0 && nPos2 > 0)
-	{
+	if (nPos1 >= 0 && nPos2 > 0 && nPos2 > nPos1)
+	{//视频SDP 排在前面 ，音频SDP排在后面
 		memcpy(szVideoSDP, szRtspContentSDP + nPos1, nPos2 - nPos1);
 		memcpy(szAudioSDP, szRtspContentSDP + nPos2, strlen(szRtspContentSDP) - nPos2);
 
 		sipParseV.ParseSipString(szVideoSDP);
 		sipParseA.ParseSipString(szAudioSDP);
 	}
+	else if (nPos1 >= 0 && nPos2 > 0 && nPos2 < nPos1)
+	{//视频SDP排在后面，音频SDP排在前面，ZLMediaKit 采用这样的排列方式 
+		memcpy(szVideoSDP, szRtspContentSDP + nPos1, strlen(szRtspContentSDP) - nPos1);
+		memcpy(szAudioSDP, szRtspContentSDP + nPos2, nPos1 - nPos2);
+
+		sipParseV.ParseSipString(szVideoSDP);
+		sipParseA.ParseSipString(szAudioSDP);
+	}
 	else if (nPos1 >= 0 && nPos2 < 0)
-	{
+	{//只有视频
 		memcpy(szVideoSDP, szRtspContentSDP + nPos1, strlen(szRtspContentSDP) - nPos1);
 		sipParseV.ParseSipString(szVideoSDP);
 	}
-	else if (nPos2 >= 0)
-	{
-		memcpy(szAudioSDP, szRtspContentSDP+nPos2,strlen(szRtspContentSDP) - nPos2);
+	else if (nPos1 < 0 && nPos2 >= 0)
+	{//只有音频 
+		memcpy(szAudioSDP, szRtspContentSDP + nPos2, strlen(szRtspContentSDP) - nPos2);
 		sipParseA.ParseSipString(szAudioSDP);
 	}
 	else
@@ -1770,14 +1779,14 @@ bool   CNetRtspServer::GetMediaInfoFromRtspSDP()
 
 		if (strcmp(szAudioName, "PCMA") == 0)
 		{
-		//	nSampleRate = 8000;
-		//	nChannels = 1;
+			nSampleRate = 8000;
+			nChannels = 1;
 			strcpy(szAudioName, "G711_A");
 		}
 		else if (strcmp(szAudioName, "PCMU") == 0)
 		{
-		//	nSampleRate = 8000;
-		//	nChannels = 1;
+			nSampleRate = 8000;
+			nChannels = 1;
 			strcpy(szAudioName, "G711_U");
 		}
 		else if (strcmp(szAudioName, "MPEG4-GENERIC") == 0)
