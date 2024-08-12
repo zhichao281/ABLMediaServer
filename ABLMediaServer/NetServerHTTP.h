@@ -22,7 +22,7 @@ using namespace boost;
 #define  MaxNetServerHttpBuffer      1024*1024*2 
 
 #define  MaxMediaSourceInfoLength    1024*1024*6   
-typedef  map<string, RequestKeyValue*, less<string> > RequestKeyValueMap;
+typedef  std::map<string, RequestKeyValue*, less<string> > RequestKeyValueMap;
 
 class CNetServerHTTP : public CNetRevcBase
 {

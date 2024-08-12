@@ -197,7 +197,14 @@ CNetServerReadMultRecordFile::CNetServerReadMultRecordFile(NETHANDLE hServer, NE
  		mediaCodecInfo.nWidth = video_dec_ctx->width;
 		mediaCodecInfo.nHeight = video_dec_ctx->height;
 		pix_fmt = video_dec_ctx->pix_fmt;
- 	}
+	}
+	else
+	{
+		avformat_close_input(&pFormatCtx2);
+	    pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient)); //清理断裂的链接 
+		WriteLog(Log_Debug, "NetServerReadMultRecordFile =  %X ,nClient = %llu 文件中不存在视频、音频流  ", this, hClient);
+		return ;
+	}
 
 	//查找出音频源
 	if (open_codec_context(&stream_isAudio, &audio_dec_ctx, pFormatCtx2, AVMEDIA_TYPE_AUDIO) >= 0)
@@ -224,7 +231,6 @@ CNetServerReadMultRecordFile::CNetServerReadMultRecordFile(NETHANDLE hServer, NE
 		mediaCodecInfo.nChannels = audio_stream->codecpar->channels;
 #endif // FFMPEG6
 
-		
 		sample_index = 8;
 		for (int i = 0; i < 13; i++)
 		{
@@ -453,7 +459,19 @@ int CNetServerReadMultRecordFile::ProcessNetData()
 
 	if (nAVType == AVType_Video && packet2->size > 0 )
 	{//读取视频
-   	    pMediaSource->PushVideo(packet2->data, packet2->size,mediaCodecInfo.szVideoName);
+		if (abs(m_dScaleValue - 8.0) <= 0.01 || abs(m_dScaleValue - 16.0) <= 0.01)
+		{//抽帧
+			if (m_rtspPlayerType == RtspPlayerType_RecordReplay)
+			{//录像回放
+				if (CheckVideoIsIFrame(mediaCodecInfo.szVideoName, packet2->data, packet2->size))
+					pMediaSource->PushVideo(packet2->data, packet2->size , mediaCodecInfo.szVideoName);
+			}
+			else //录像下载
+				pMediaSource->PushVideo(packet2->data, packet2->size, mediaCodecInfo.szVideoName);
+		}
+		else
+			pMediaSource->PushVideo(packet2->data, packet2->size, mediaCodecInfo.szVideoName);
+
 		nReadVideoFrameCount ++;
 
 		if (nFirstTimestamp == -1 && packet2)
@@ -717,6 +735,13 @@ BeginReadFile:
 			nCurrrentPlayerOrder++;
 			goto BeginReadFile;
 		}
+	}
+	else
+	{
+		avformat_close_input(&pFormatCtx2);
+		WriteLog(Log_Debug, "NetServerReadMultRecordFile =  %X ,nClient = %llu 文件中不存在视频、音频流  ", this, nClient);
+	    pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient)); //清理断裂的链接 
+		return false ;
 	}
 
 	//重新产生转换器

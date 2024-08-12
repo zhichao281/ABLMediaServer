@@ -539,6 +539,11 @@ int CNetServerHLS::SendRecordHLS()
 #endif
 		sprintf(szRequestFileName, "%s%s", ABL_MediaServerPort.recordPath, strTemp.c_str()+1);
  
+		strTemp = szRequestFileName;
+		int nPos = strTemp.rfind("?", strTemp.size());
+		if (nPos > 0)
+			szRequestFileName[nPos] = 0x00;
+
 		FILE* fReadM3u8 = NULL;
 		fReadM3u8 = fopen(szRequestFileName, "rb");
 		

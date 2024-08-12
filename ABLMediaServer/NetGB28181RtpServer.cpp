@@ -1519,9 +1519,8 @@ void  CNetGB28181RtpServer::GB28181SentRtpVideoData(unsigned char* pRtpVideo, in
 		if (nSendRet != 0)
 		{
 			bRunFlag = false;
-
-			WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, 发送国标RTP码流出错 ，Length = %d ,nSendRet = %d", this, nSendRtpVideoMediaBufferLength, nSendRet);
-			DeleteNetRevcBaseClient(nClient);
+ 			WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, 发送国标RTP码流出错 ，Length = %d ,nSendRet = %d", this, nSendRtpVideoMediaBufferLength, nSendRet);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 			return;
 		}
 
@@ -1535,7 +1534,8 @@ void  CNetGB28181RtpServer::GB28181SentRtpVideoData(unsigned char* pRtpVideo, in
 		if (nSendRet != 0)
 		{
 			WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, 发送国标RTP码流出错 ，Length = %d ,nSendRet = %d", this, nSendRtpVideoMediaBufferLength, nSendRet);
-			DeleteNetRevcBaseClient(nClient);
+			bRunFlag = false;
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 			return;
 		}
 

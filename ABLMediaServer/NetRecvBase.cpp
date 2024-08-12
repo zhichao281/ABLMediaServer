@@ -473,8 +473,8 @@ int  CNetRevcBase::CalcVideoFrameSpeed(unsigned char* pRtpData, int nLength)
 						m_nVideoFrameSpeed = 25;
 					else if (m_nVideoFrameSpeed == 7)
 						m_nVideoFrameSpeed = 30;
-					else if (m_nVideoFrameSpeed > 30)
-						m_nVideoFrameSpeed = 30;
+					else if (m_nVideoFrameSpeed > 120)
+						m_nVideoFrameSpeed = 120;
 
 					if(nSpeedCount[0] > 10 )
 						m_nVideoFrameSpeed = 25; 
@@ -529,8 +529,8 @@ int   CNetRevcBase::CalcFlvVideoFrameSpeed(int nVideoPTS, int nMaxValue)
 						m_nVideoFrameSpeed = 25;
 					else if (m_nVideoFrameSpeed == 7)
 						m_nVideoFrameSpeed = 30;
-					else if(m_nVideoFrameSpeed > 30)
-						m_nVideoFrameSpeed = 30;
+					else if(m_nVideoFrameSpeed > 120)
+						m_nVideoFrameSpeed = 120;
 
 					if (nSpeedCount[0] > 10)
 						m_nVideoFrameSpeed = 25;
@@ -566,6 +566,9 @@ bool  CNetRevcBase::SplitterAppStream(char* szMediaSoureFile)
 
 	memcpy(m_addStreamProxyStruct.app, szMediaSoureFile+1, nPos2 - 1 );
 	memcpy(m_addStreamProxyStruct.stream, szMediaSoureFile + nPos2 +1 ,strlen(szMediaSoureFile) - nPos2 - 1);
+
+	strcpy(app, m_addStreamProxyStruct.app);
+	strcpy(stream, m_addStreamProxyStruct.stream);
 
 	return true;
 }

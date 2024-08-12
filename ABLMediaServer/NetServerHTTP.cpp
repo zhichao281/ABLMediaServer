@@ -451,7 +451,9 @@ bool CNetServerHTTP::SplitterTextParam(char* szTextParam)
 			memset(szBlockString, 0x00, sizeof(szBlockString));
 			strcpy(szBlockString, strBlockString.c_str());
 
-			RequestKeyValue* keyValue = new RequestKeyValue();
+			RequestKeyValue* keyValue = NULL;
+			while(keyValue == NULL)
+				keyValue = new RequestKeyValue();
 			nFind2 = strBlockString.find("=", 0);
 			if (nFind2 > 0)
 			{
@@ -545,7 +547,9 @@ bool CNetServerHTTP::SplitterJsonParam(char* szJsonParam)
 						sprintf(szValue, "%llu", jValue.GetInt64());
 				}
 
-				RequestKeyValue* keyValue = new RequestKeyValue();
+				RequestKeyValue* keyValue = NULL;
+				while(keyValue == NULL )
+					keyValue = new RequestKeyValue();
 				strcpy(keyValue->key, name.c_str());
 				strcpy(keyValue->value, szValue);
 				requestKeyValueMap.insert(RequestKeyValueMap::value_type(keyValue->key, keyValue));
@@ -1734,17 +1738,6 @@ bool  CNetServerHTTP::index_api_startSendRtp()
 		return false;
 	}
 
-	//如果是tcp 被动连接，必须指定本地端口 
-	if (is_udp == 2)
-	{
-		if (atoi(m_startSendRtpStruct.src_port) == 0)
-		{
-			sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"src_port parameter error ,if tcp passive connected, the binding: src_port must be specified \"}", IndexApiCode_ParamError);
-			ResponseSuccess(szResponseBody);
-			return false;
-		}
- 	}
-
 	if (strlen(m_startSendRtpStruct.payload) == 0 || atoi(m_startSendRtpStruct.payload) < 0 )
 	{
 		sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"payload parameter error \",\"key\":%d}", IndexApiCode_ParamError, 0);
@@ -1923,7 +1916,20 @@ bool  CNetServerHTTP::index_api_startSendRtp()
 		}
 		else if (is_udp == 2)
 		{//tcp 被动连接 
-			nRet = XHNetSDK_Listen((int8_t*)("0.0.0.0"), atoi(m_startSendRtpStruct.src_port), &nMediaClient, onaccept, onread, onclose, true);
+			if(atoi(m_startSendRtpStruct.src_port) > 0 )
+			   nRet = XHNetSDK_Listen((int8_t*)("0.0.0.0"), atoi(m_startSendRtpStruct.src_port), &nMediaClient, onaccept, onread, onclose, true);
+			else
+			{
+			  while (true)
+			  {//一直绑定到成功为止
+			    nRet = XHNetSDK_Listen((int8_t*)("0.0.0.0"), ABL_nGB28181Port, &nMediaClient, onaccept, onread, onclose, true);
+			    ABL_nGB28181Port += 2;
+				if (nRet == 0)
+					break;
+ 			  }
+			  sprintf(m_startSendRtpStruct.src_port, "%d", ABL_nGB28181Port - 2);//修改为实际绑定的端口
+ 			}
+
 			WriteLog(Log_Debug, "XHNetSDK_Listen()  nMediaClient = %llu", nMediaClient);
 			if (nRet == 0 && nMediaClient > 0)
 			{
@@ -2423,7 +2429,7 @@ bool  CNetServerHTTP::index_api_getSnap()
 		return false;
 	}
 
-	if (strcmp(m_getSnapStruct.secret, m_getSnapStruct.secret) != 0)
+	if (strcmp(m_getSnapStruct.secret, ABL_MediaServerPort.secret) != 0)
 	{//密码检测
 		sprintf(szResponseBody, "{\"code\":%d,\"memo\":\"secret error\"}", IndexApiCode_secretError);
 		ResponseSuccess(szResponseBody);

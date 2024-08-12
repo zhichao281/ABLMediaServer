@@ -45,12 +45,13 @@ public:
 #endif
 
    AudioResamplerAPI* m_resampler = nullptr;
-   FFmpegAudioDecoderAPI* m_decder = nullptr;
+   FFmpegAudioDecoderAPI* m_AudioDecder = nullptr;
    int m_nb_channels = 2;
 
    int m_sample_rate = 48000;
 
    std::atomic<bool> stopThread;
+   uint8_t* outData[AV_NUM_DATA_POINTERS] = { 0 };
 };
 
 #endif

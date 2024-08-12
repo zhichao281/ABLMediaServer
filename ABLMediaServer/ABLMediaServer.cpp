@@ -419,6 +419,16 @@ CNetRevcBase_ptr GetNetRevcBaseClientNoLock(NETHANDLE CltHandle)
 
 CMediaStreamSource_ptr CreateMediaStreamSource(char* szURL, uint64_t nClient, MediaSourceType nSourceType, uint32_t nDuration, H265ConvertH264Struct  h265ConvertH264Struct)
 {
+	//获取提供源
+	CNetRevcBase_ptr pSourceClient = GetNetRevcBaseClient(nClient);
+	if (pSourceClient == NULL)
+	{
+		WriteLog(Log_Debug, "媒体源提供者不存在  nClient = %llu ", nClient);
+		return NULL;
+	}
+	strcpy(pSourceClient->m_szShareMediaURL, szURL);
+	pSourceClient->SplitterAppStream(pSourceClient->m_szShareMediaURL);
+
 	std::lock_guard<std::mutex> lock(ABL_CMediaStreamSourceMapLock);
 
 	
@@ -567,70 +577,67 @@ bool DeleteClientMediaStreamSource(uint64_t nClient)
 //删除媒体源
 int  CloseMediaStreamSource(closeStreamsStruct closeStruct)
 {
-	std::lock_guard<std::mutex> lock(ABL_CMediaStreamSourceMapLock);
-	CMediaStreamSource_ptrMap::iterator iterator1;
-	CMediaStreamSource_ptr   pClient = NULL;
+	std::lock_guard<std::mutex> lock(ABL_CNetRevcBase_ptrMapLock);
 	int  nDeleteCount = 0;
 
-	for (iterator1 = xh_ABLMediaStreamSourceMap.begin(); iterator1 != xh_ABLMediaStreamSourceMap.end(); ++iterator1)
+	CNetRevcBase_ptrMap::iterator iterator1;
+	CNetRevcBase_ptr   pClient = NULL;
+
+	for (iterator1 = xh_ABLNetRevcBaseMap.begin(); iterator1 != xh_ABLNetRevcBaseMap.end(); iterator1++)
 	{
 		pClient = (*iterator1).second;
-
-		if (closeStruct.force == 1 && strlen(closeStruct.app) > 0 && strlen(closeStruct.stream) > 0)
-		{//强制关闭
-			if (strcmp(pClient->app, closeStruct.app) == 0 && strcmp(pClient->stream, closeStruct.stream) == 0)
-			{
-				nDeleteCount++;
-				pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
+		if (pClient->netBaseNetType == NetBaseNetType_RtspServerRecvPushVideo ||
+			pClient->netBaseNetType == NetBaseNetType_RtspServerRecvPushAudio ||
+			pClient->netBaseNetType == NetBaseNetType_GB28181TcpPSInputStream ||
+			pClient->netBaseNetType == NetBaseNetType_WebSocektRecvAudio ||
+			pClient->netBaseNetType == NetBaseNetType_RtmpServerRecvPush ||
+			pClient->netBaseNetType == NetBaseNetType_RtspServerRecvPush ||
+			pClient->netBaseNetType == NetBaseNetType_addStreamProxyControl ||
+			pClient->netBaseNetType == NetBaseNetType_NetGB28181RtpServerUDP ||
+			pClient->netBaseNetType == NetBaseNetType_NetGB28181RtpServerListen ||
+			pClient->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Active ||
+			pClient->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Server ||
+			pClient->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Client ||
+			pClient->netBaseNetType == NetBaseNetType_NetGB28181RecvRtpPS_TS ||
+			pClient->netBaseNetType == NetBaseNetType_NetGB28181UDPPSStreamInput ||
+			pClient->netBaseNetType == NetBaseNetType_NetGB28181UDPTSStreamInput ||
+			pClient->netBaseNetType == NetBaseNetType_NetServerReadMultRecordFile ||
+			pClient->netBaseNetType == ReadRecordFileInput_ReadTSFile
+			)
+		{
+			if (strlen(closeStruct.app) > 0 && strlen(closeStruct.stream) > 0)
+			{//强制关闭
+				if (strcmp(pClient->app, closeStruct.app) == 0 && strcmp(pClient->stream, closeStruct.stream) == 0)
+				{
+					nDeleteCount++;
+					pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
+				}
 			}
-		}
-		else if (closeStruct.force == 1 && strlen(closeStruct.app) > 0 && strlen(closeStruct.stream) == 0)
-		{//强制关闭
-			if (strcmp(pClient->app, closeStruct.app) == 0)
-			{
-				nDeleteCount++;
-				pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
+			else if (strlen(closeStruct.app) > 0 && strlen(closeStruct.stream) == 0)
+			{//强制关闭
+				if (strcmp(pClient->app, closeStruct.app) == 0)
+				{
+					nDeleteCount++;
+					pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
+				}
 			}
-		}
-		else if (closeStruct.force == 1 && strlen(closeStruct.app) == 0 && strlen(closeStruct.stream) > 0)
-		{//强制关闭
-			if (strcmp(pClient->stream, closeStruct.stream) == 0)
-			{
-				nDeleteCount++;
-				pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
+			else if (strlen(closeStruct.app) == 0 && strlen(closeStruct.stream) > 0)
+			{//强制关闭
+				if (strcmp(pClient->stream, closeStruct.stream) == 0)
+				{
+					nDeleteCount++;
+					pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
+				}
 			}
-		}
-		else if (closeStruct.force == 1 && strlen(closeStruct.app) == 0 && strlen(closeStruct.stream) == 0)
-		{//强制关闭
-			nDeleteCount++;
-			pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
-		}
-		else if (closeStruct.force == 0 && strlen(closeStruct.app) > 0 && strlen(closeStruct.stream) > 0)
-		{//不强制关闭
-			if (pClient->mediaSendMap.size() == 0 && strcmp(pClient->app, closeStruct.app) == 0 && strcmp(pClient->stream, closeStruct.stream) == 0)
-			{
-				nDeleteCount++;
-				pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
-			}
-		}
-		else if (closeStruct.force == 0 && strlen(closeStruct.app) > 0 && strlen(closeStruct.stream) == 0)
-		{//不强制关闭
-			if (pClient->mediaSendMap.size() == 0 && strcmp(pClient->app, closeStruct.app) == 0)
-			{
-				nDeleteCount++;
-				pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
-			}
-		}
-		else if (closeStruct.force == 0 && strlen(closeStruct.app) == 0 && strlen(closeStruct.stream) > 0)
-		{//不强制关闭
-			if (pClient->mediaSendMap.size() == 0 && strcmp(pClient->stream, closeStruct.stream) == 0)
-			{
+			else if (strlen(closeStruct.app) == 0 && strlen(closeStruct.stream) == 0 && !(pClient->netBaseNetType == NetBaseNetType_GB28181TcpPSInputStream || pClient->netBaseNetType == NetBaseNetType_NetGB28181RecvRtpPS_TS))
+			{//强制关闭
 				nDeleteCount++;
 				pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
 			}
 		}
 	}
-	return nDeleteCount;
+
+	return  nDeleteCount;
 }
 
 //先把基类的视频接入对象ID全部装入FIFO，这样减少一个lock，杜绝外部混乱调用http api 函数造成死锁 
@@ -1184,7 +1191,7 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 			bFlag2 = false;
 			if (nFileOrder == 0)
 			{
-				if (nTime1 <= nTime2 && (nTime1 + ABL_MediaServerPort.fileSecond) > nTime2)
+				if ((nTime1 <= nTime2 && (nTime1 + ABL_MediaServerPort.fileSecond) > nTime2) || nTime2 < nTime1)
 					bFlag1 = true;//第一个符合条件的文件 
 			}
 			if (nFileOrder >= 1 && *it2 <= atoll(queryStruct.endtime))
@@ -1267,6 +1274,13 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 					if (fp)
 						fclose(fp);
 				}
+			}
+
+			//后面的mp4文件不再符合条件 ，需要中断查询 
+			if (*it2 > atoll(queryStruct.endtime))
+			{
+				WriteLog(Log_Debug, "queryRecordListByTime() 后面的mp4文件不再符合条件 ，需要中断查询 *it2 = %llu , endtime = %s ", *it2, queryStruct.endtime);
+				break;
 			}
 		}
 	}
@@ -1598,7 +1612,7 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 							pXHClient->netBaseNetType = NetBaseNetType_NetGB28181SendRtpTCP_Passive;//国标28181 tcp 被动方式发送码流 
 							gb28181Listen->nMediaClient = CltHandle; //已经有人连接进来，只允许一个连接进来 
 							memcpy((char*)&pXHClient->m_startSendRtpStruct, (char*)&gb28181Listen->m_startSendRtpStruct, sizeof(pXHClient->m_startSendRtpStruct)); //把listen对象的 m_startSendRtpStruct 拷贝给CNetGB28181RtpClient对象的 m_startSendRtpStruct
-							pXHClient->SendFirstRequst();
+					
 						}
 					}
 					else
@@ -2027,7 +2041,7 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 							pXHClient->netBaseNetType = NetBaseNetType_NetGB28181SendRtpTCP_Passive;//国标28181 tcp 被动方式发送码流 
 							gb28181Listen->nMediaClient = CltHandle; //已经有人连接进来，只允许一个连接进来 
 							memcpy((char*)&pXHClient->m_startSendRtpStruct, (char*)&gb28181Listen->m_startSendRtpStruct, sizeof(pXHClient->m_startSendRtpStruct)); //把listen对象的 m_startSendRtpStruct 拷贝给CNetGB28181RtpClient对象的 m_startSendRtpStruct
-							pXHClient->SendFirstRequst();
+						
 						}
 					}
 					else
@@ -2934,6 +2948,7 @@ void LIBNET_CALLMETHOD	onaccept(NETHANDLE srvhandle,
 	unsigned short nPort = 5567;
 	uint64_t       hParent;
 	int            nAcceptNumvber;
+	CNetRevcBase_ptr pNetRevcBase_ptr = NULL;
 
 	if (address)
 	{
@@ -2942,10 +2957,18 @@ void LIBNET_CALLMETHOD	onaccept(NETHANDLE srvhandle,
 		nPort = ::ntohs(addr->sin_port);
 	}
 
-	if (CreateNetRevcBaseClient(NetRevcBaseClient_ServerAccept, srvhandle, clihandle, temp, nPort, "") == NULL)
+	if ((pNetRevcBase_ptr = CreateNetRevcBaseClient(NetRevcBaseClient_ServerAccept, srvhandle, clihandle, temp, nPort, "")) == NULL)
 		XHNetSDK_Disconnect(clihandle);
+
+	if (pNetRevcBase_ptr != NULL)
+	{
+		if (pNetRevcBase_ptr->netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Passive)
+		{//国标28181 tcp 被动方式发送码流 
+			pNetRevcBase_ptr->SendFirstRequst();
+		}
+	}
 }
-#
+
 void LIBNET_CALLMETHOD onread(NETHANDLE srvhandle,
 	NETHANDLE clihandle,
 	uint8_t* data,
@@ -2956,10 +2979,11 @@ void LIBNET_CALLMETHOD onread(NETHANDLE srvhandle,
 	if (pBasePtr != NULL)
 	{
 		pBasePtr->InputNetData(srvhandle, clihandle, data, datasize, address);
-		NetBaseThreadPool->InsertIntoTask(clihandle);//验证使用、arm平台有点问题 
-		//pBasePtr->ProcessNetData();
+		NetBaseThreadPool->InsertIntoTask(clihandle);//Window、Linux 平台使用 
+		//pBasePtr->ProcessNetData();//arm平台 使用 
 	}
 }
+
 
 void LIBNET_CALLMETHOD	onclose(NETHANDLE srvhandle,
 	NETHANDLE clihandle)
@@ -3236,7 +3260,7 @@ void* ABLMedisServerFastDeleteThread(void* lpVoid)
 			pDisconnectBaseNetFifo.pop_front();
 		}
 
-		SendToMapFromMutePacketList();
+		
 		std::this_thread::sleep_for(std::chrono::milliseconds(64));
 		//Sleep(64);
 	}
@@ -3683,7 +3707,7 @@ void WebRtcCallBack(const char* callbackJson, void* pUserHandle)
 
 		if (callbackStruct.eventID == 2)
 		{//创建webrtc播放
-			CMediaStreamSource_ptr pMediaSource = GetMediaStreamSource(callbackStruct.stream, false);
+			CMediaStreamSource_ptr pMediaSource = GetMediaStreamSource(callbackStruct.stream, true);
 			if (pMediaSource == NULL)
 				WriteLog(Log_Debug, "不存在流 %s ", callbackStruct.stream);
 			else

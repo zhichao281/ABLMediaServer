@@ -2,7 +2,8 @@
 功能：
     负责发送 GB28181 Rtp 码流，包括UDP、TCP模式  
  	增加 国标接收  （即国标发送的同时也支持国标接收）    2023-05-19
-日期    2021-08-15
+	增加支持1078码流以 2016\2019版本发送                 2023-12-23
+	日期    2021-08-15
 作者    罗家兄弟
 QQ      79941308
 E-Mail  79941308@qq.com
@@ -115,9 +116,8 @@ void  CNetGB28181RtpClient::GB28181SentRtpVideoData(unsigned char* pRtpVideo, in
 		if (nSendRet != 0)
 		{
 			bRunFlag = false;
-
-			WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, 发送国标RTP码流出错 ，Length = %d ,nSendRet = %d", this, nSendRtpVideoMediaBufferLength, nSendRet);
-			DeleteNetRevcBaseClient(nClient);
+ 			WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, 发送国标RTP码流出错 ，Length = %d ,nSendRet = %d", this, nSendRtpVideoMediaBufferLength, nSendRet);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return;
 		}
 
@@ -131,7 +131,8 @@ void  CNetGB28181RtpClient::GB28181SentRtpVideoData(unsigned char* pRtpVideo, in
 		if (nSendRet != 0)
 		{
 			WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, 发送国标RTP码流出错 ，Length = %d ,nSendRet = %d", this, nSendRtpVideoMediaBufferLength, nSendRet);
-			DeleteNetRevcBaseClient(nClient);
+			bRunFlag = false;
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 			return;
 		}
 
@@ -424,6 +425,8 @@ void  CNetGB28181RtpClient::CreateRtpHandle()
 
 int CNetGB28181RtpClient::SendVideo()
 {
+	std::lock_guard<std::mutex> lock(businessProcMutex);
+
 	if (!bRunFlag )
 		return -1;
 
@@ -529,6 +532,8 @@ int CNetGB28181RtpClient::SendVideo()
 
 int CNetGB28181RtpClient::SendAudio()
 {
+	std::lock_guard<std::mutex> lock(businessProcMutex);
+
 	if ( ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag || m_startSendRtpStruct.disableAudio[0] == 0x31 )
 		return 0;
 
@@ -752,6 +757,7 @@ int CNetGB28181RtpClient::ProcessNetData()
 //发送第一个请求
 int CNetGB28181RtpClient::SendFirstRequst()
 {//当 gb28181 为tcp时，触发该函数 
+	std::lock_guard<std::mutex> lock(businessProcMutex);
 
 	if (netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Connect)
 	{//回复http请求，连接成功，
@@ -765,7 +771,6 @@ int CNetGB28181RtpClient::SendFirstRequst()
 		memcpy((char*)&mediaCodecInfo, (char*)&pMediaSource->m_mediaCodecInfo, sizeof(MediaCodecInfo));
 		pMediaSource->AddClientToMap(nClient);
 	}
-
 
 	return 0;
 }

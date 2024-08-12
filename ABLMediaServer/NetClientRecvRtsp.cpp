@@ -948,7 +948,7 @@ void  CNetClientRecvRtsp::InputRtspData(unsigned char* pRecvData, int nDataLengt
 	}
 	else if (memcmp(pRecvData, "TEARDOWN", 8) == 0 && strstr((char*)pRecvData, "\r\n\r\n") != NULL)
 	{
-		WriteLog(Log_Debug, "收到断开 TEARDOWN 命令，立即执行删除 nClient = %llu ", nClient);
+		WriteLog(Log_Debug, "收到 TEARDOWN 命令，立即执行删除 nClient = %llu ", nClient);
 		bRunFlag = false;
 		DeleteNetRevcBaseClient(nClient);
 	}

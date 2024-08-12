@@ -9,7 +9,7 @@ E-Mail  79941308@qq.com
 #include "stdafx.h"
 #include "ReadRecordFileInput.h"
 
-extern CNetBaseThreadPool* RecordReplayThreadPool;//录像回放线程池
+extern CNetBaseThreadPool*                   RecordReplayThreadPool;//录像回放线程池
 extern CMediaFifo                            pDisconnectBaseNetFifo; //清理断裂的链接 
 extern bool                                  DeleteNetRevcBaseClient(NETHANDLE CltHandle);
 #ifdef USE_BOOST
@@ -236,6 +236,13 @@ CReadRecordFileInput::CReadRecordFileInput(NETHANDLE hServer, NETHANDLE hClient,
  		mediaCodecInfo.nWidth = video_dec_ctx->width;
 		mediaCodecInfo.nHeight = video_dec_ctx->height;
 		pix_fmt = video_dec_ctx->pix_fmt;
+ 	}
+	else
+	{
+		avformat_close_input(&pFormatCtx2);
+		WriteLog(Log_Debug, "CReadRecordFileInput =  %X ,nClient = %llu 文件中不存在视频、音频流  ", this, hClient);
+	    pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient)); //清理断裂的链接 
+		return;
  	}
 
 	//查找出音频源

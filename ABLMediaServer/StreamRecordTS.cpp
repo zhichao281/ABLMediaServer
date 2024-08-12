@@ -155,7 +155,7 @@ bool  CStreamRecordTS::H264H265FrameToTSFile(unsigned char* szVideo, int nLength
 	}
 	nVideoOrder ++;
 
-	if (nVideoOrder % (ABL_MediaServerPort.fileSecond * 25) == 0)
+	if (nVideoOrder % (ABL_MediaServerPort.fileSecond * mediaCodecInfo.nVideoFrameRate) == 0)
 	{//1ÃëÇÐÆ¬1´Î
 		fflush(fTSFileWrite);
 
@@ -264,7 +264,7 @@ int CStreamRecordTS::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* 
 
 	m_videoFifo.push(pVideoData, nDataLength);
 
-	if (ABL_MediaServerPort.hook_enable == 1 && (GetTickCount64() - nCreateDateTime ) >= 1000 * 15  )
+	if (ABL_MediaServerPort.hook_enable == 1 && (GetTickCount64() - nCreateDateTime ) >= 1000 * 30  )
 	{
 		MessageNoticeStruct msgNotice;
 		msgNotice.nClient = NetBaseNetType_HttpClient_Record_Progress;

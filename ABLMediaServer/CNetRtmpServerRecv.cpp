@@ -603,19 +603,6 @@ int CNetRtmpServerRecv::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, cha
 	if (strlen(mediaCodecInfo.szVideoName) == 0)
 		strcpy(mediaCodecInfo.szVideoName, szVideoCodec);
 
-#ifndef  OS_System_Windows //window 不增加静音
-	if (!bAddMuteFlag && strlen(mediaCodecInfo.szAudioName) == 0)
-	{
-		bAddMuteFlag = true;
-		strcpy(mediaCodecInfo.szAudioName, "AAC");
-		mediaCodecInfo.nChannels = 1;
-		mediaCodecInfo.nSampleRate = 16000;
-		mediaCodecInfo.nBaseAddAudioTimeStamp = 64;
-		AddClientToMapAddMutePacketList(nClient);
-		WriteLog(Log_Debug, "媒体源 %s 没有音频 ，创建 Rtmp 音频输出格式为： 视频 %s、音频：AAC( chans:1,sampleRate:16000 ) nClient = %llu ", m_szShareMediaURL, mediaCodecInfo.szVideoName, nClient);
-	}
-#endif
-
 	m_videoFifo.push(pVideoData, nDataLength);
 	return 0;
 }

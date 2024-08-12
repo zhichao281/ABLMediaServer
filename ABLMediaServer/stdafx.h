@@ -45,6 +45,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <malloc.h>
+#include <thread>
 
 #include<sys/types.h> 
 #include<sys/socket.h>
@@ -54,7 +55,6 @@
 #include<unistd.h> 
 #include <ifaddrs.h>
 #include <netdb.h>
-#include <thread>
 
 #include <pthread.h>
 #include <signal.h>
@@ -72,7 +72,6 @@
 
 #include <limits.h>
 #include <sys/resource.h>
-#include <thread>
 
 #define      BYTE     unsigned char 
 
@@ -503,7 +502,7 @@ enum NetBaseNetType
 	NetBaseNetType_NetServerReadMultRecordFile     = 140,//连续读取多个录像文件
 };
 
-#define   MediaServerVerson                 "ABLMediaServer-6.3.6(2024-06-08)"
+#define   MediaServerVerson                 "ABLMediaServer-6.3.6(2024-08-09)"
 #define   RtspServerPublic                  "DESCRIBE, SETUP, TEARDOWN, PLAY, PAUSE, OPTIONS, ANNOUNCE, RECORD，GET_PARAMETER"
 #define   RecordFileReplaySplitter          "__ReplayFMP4RecordFile__"  //实况、录像区分的标志字符串，用于区分实况，放置在url中。
 

@@ -156,8 +156,6 @@ int CNetServerHTTP_FLV::PushAudio(uint8_t* pAudioData, uint32_t nDataLength, cha
 	if (ABL_MediaServerPort.nEnableAudio == 0)
 		return -1;
 
-	if ( !(strcmp(szAudioCodec, "AAC") == 0 ||  strcmp(szAudioCodec,"MP3") == 0 ))
-		return 0;
 
 	m_audioFifo.push(pAudioData, nDataLength);
 
@@ -167,7 +165,7 @@ int CNetServerHTTP_FLV::PushAudio(uint8_t* pAudioData, uint32_t nDataLength, cha
 void  CNetServerHTTP_FLV::MuxerVideoFlV(char* codeName, unsigned char* pVideo, int nLength)
 {
 	//只有视频，或者屏蔽音频
-	if(ABL_MediaServerPort.nEnableAudio == 0 || strcmp(mediaCodecInfo.szAudioName,"G711_A") == 0 || strcmp(mediaCodecInfo.szAudioName, "G711_U") == 0)
+	if(ABL_MediaServerPort.nEnableAudio == 0 )
 	   nVideoStampAdd = 1000 / mediaCodecInfo.nVideoFrameRate;
 
 	if (strcmp(codeName, "H264") == 0)
@@ -199,17 +197,15 @@ void  CNetServerHTTP_FLV::MuxerAudioFlV(char* codeName, unsigned char* pAudio, i
 			flv_muxer_aac(flvMuxer, pAudio, nLength, audioDts, audioDts);
  		else if (strcmp(mediaCodecInfo.szAudioName, "MP3") == 0)
 			flv_muxer_mp3(flvMuxer, pAudio, nLength, audioDts, audioDts);
- 	}
-
-	if(bUserNewAudioTimeStamp == false)
-		audioDts += mediaCodecInfo.nBaseAddAudioTimeStamp ;
-	else
-	{
-		nUseNewAddAudioTimeStamp --;
-		audioDts += nNewAddAudioTimeStamp;
-		if (nUseNewAddAudioTimeStamp <= 0)
+		else if (strcmp(mediaCodecInfo.szAudioName, "G711_A") == 0)
 		{
-			bUserNewAudioTimeStamp = false;
+			flv_muxer_g711a(flvMuxer, pAudio, nLength, audioDts, audioDts);
+			audioDts += nLength / 8;
+		}
+		else if (strcmp(mediaCodecInfo.szAudioName, "G711_U") == 0)
+		{
+			flv_muxer_g711u(flvMuxer, pAudio, nLength, audioDts, audioDts);
+			audioDts += nLength / 8;
 		}
 	}
 
@@ -260,10 +256,6 @@ int CNetServerHTTP_FLV::SendAudio()
 		DeleteNetRevcBaseClient(nClient);
 		return -1;
 	}
-
-	//不是AAC,mp3
-	if (!(strcmp(mediaCodecInfo.szAudioName, "AAC") == 0 || strcmp(mediaCodecInfo.szAudioName, "MP3") == 0))
-		return -1;
 
 	unsigned char* pData = NULL;
 	int            nLength = 0;
@@ -329,7 +321,7 @@ int CNetServerHTTP_FLV::ProcessNetData()
 {
 	if (!bFindFlvNameFlag)
 	{
-		if (netDataCacheLength > string_length_4096 )
+		if (netDataCacheLength > string_length_4096)
 		{
 			WriteLog(Log_Debug, "CNetServerHTTP_FLV = %X , nClient = %llu ,netDataCacheLength = %d, 发送过来的url数据长度非法 ,立即删除 ", this, nClient, netDataCacheLength);
 			DeleteNetRevcBaseClient(nClient);
@@ -420,7 +412,6 @@ int CNetServerHTTP_FLV::ProcessNetData()
 		if (strstr(szFlvName, RecordFileReplaySplitter) == NULL)
 		{//实况点播
 		     pushClient = GetMediaStreamSource(szFlvName, true);
-
 			if (pushClient == NULL)
 			{
 				WriteLog(Log_Debug, "CNetServerHTTP_FLV=%X, 没有推流对象的地址 %s nClient = %llu ", this, szFlvName, nClient);
@@ -488,36 +479,17 @@ int CNetServerHTTP_FLV::ProcessNetData()
 		flvWrite = flv_writer_create(szWriteFlvName);
 #else //通过网络传输 
 		if ((strcmp(pushClient->m_mediaCodecInfo.szVideoName, "H264") == 0 || strcmp(pushClient->m_mediaCodecInfo.szVideoName, "H265") == 0) &&
-			strcmp(pushClient->m_mediaCodecInfo.szAudioName, "AAC") == 0 && ABL_MediaServerPort.nEnableAudio == 1)
+			strlen(pushClient->m_mediaCodecInfo.szAudioName) > 0 && ABL_MediaServerPort.nEnableAudio == 1)
 		{//H264、H265  && AAC，创建音频，视频
 		  flvWrite = flv_writer_create2(1, 1, NetServerHTTP_FLV_OnWrite_CB, (void*)this);
 		  WriteLog(Log_Debug, "创建http-flv 输出格式为： 视频 %s、音频 %s  nClient = %llu ", pushClient->m_mediaCodecInfo.szVideoName, pushClient->m_mediaCodecInfo.szAudioName, nClient);
 		}
-		else if ( strcmp(pushClient->m_mediaCodecInfo.szVideoName, "H264") == 0 || strcmp(pushClient->m_mediaCodecInfo.szVideoName, "H265") == 0)
+		else if ((strlen(pushClient->m_mediaCodecInfo.szAudioName) == 0 || ABL_MediaServerPort.nEnableAudio == 0) && ( strcmp(pushClient->m_mediaCodecInfo.szVideoName, "H264") == 0 || strcmp(pushClient->m_mediaCodecInfo.szVideoName, "H265") == 0))
 		{//H264、H265 只创建视频
-			if (ABL_MediaServerPort.nEnableAudio == 0 || ABL_MediaServerPort.flvPlayAddMute == 0)
-			{//没有音频输出，或者没有开启静音
-		  	   flvWrite = flv_writer_create2(0, 1, NetServerHTTP_FLV_OnWrite_CB, (void*)this);
-			   WriteLog(Log_Debug, "创建http-flv 输出格式为： 视频 %s、音频：无音频  nClient = %llu ", pushClient->m_mediaCodecInfo.szVideoName, nClient);
-			}
-			else 
-			{
-#ifdef  OS_System_Windows //window 不增加静音
-				flvWrite = flv_writer_create2(0, 1, NetServerHTTP_FLV_OnWrite_CB, (void*)this);
+ 				flvWrite = flv_writer_create2(0, 1, NetServerHTTP_FLV_OnWrite_CB, (void*)this);
 				WriteLog(Log_Debug, "创建http-flv 输出格式为： 视频 %s、音频：无音频  nClient = %llu ", pushClient->m_mediaCodecInfo.szVideoName, nClient);
-#else 
-				flvWrite = flv_writer_create2(1, 1, NetServerHTTP_FLV_OnWrite_CB, (void*)this);
-				bAddMuteFlag = true;
-				strcpy(mediaCodecInfo.szAudioName, "AAC");
-				mediaCodecInfo.nChannels = 1;
-				mediaCodecInfo.nSampleRate = 16000;
-				mediaCodecInfo.nBaseAddAudioTimeStamp = 64;
-				AddClientToMapAddMutePacketList(nClient);
-				WriteLog(Log_Debug, "创建http-flv 输出格式为： 视频 %s、音频：AAC(chans:1,sampleRate:16000)  nClient = %llu ", pushClient->m_mediaCodecInfo.szVideoName, nClient);
-#endif
-			}
-		}
-		else if (strlen(pushClient->m_mediaCodecInfo.szVideoName) == 0 && (strcmp(pushClient->m_mediaCodecInfo.szAudioName, "AAC") == 0 || strcmp(pushClient->m_mediaCodecInfo.szAudioName, "MP3") == 0))
+ 		}
+		else if (strlen(pushClient->m_mediaCodecInfo.szVideoName) == 0 && strlen(pushClient->m_mediaCodecInfo.szAudioName) > 0 )
 		{//只创建音频
 			flvWrite = flv_writer_create2(1,0, NetServerHTTP_FLV_OnWrite_CB, (void*)this);
 			WriteLog(Log_Debug, "创建http-flv 输出格式为： 无视频 、只有音频 %s  nClient = %llu ", pushClient->m_mediaCodecInfo.szAudioName, nClient);

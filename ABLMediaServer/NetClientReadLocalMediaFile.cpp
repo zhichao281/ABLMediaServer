@@ -19,7 +19,6 @@ extern boost::shared_ptr<CMediaStreamSource> CreateMediaStreamSource(char* szURL
 extern std::shared_ptr<CMediaStreamSource> CreateMediaStreamSource(char* szURL, uint64_t nClient, MediaSourceType nSourceType, uint32_t nDuration, H265ConvertH264Struct  h265ConvertH264Struct);
 
 #endif
-
 extern bool                                  DeleteMediaStreamSource(char* szURL);
 extern MediaServerPort                       ABL_MediaServerPort;
 extern char                                  ABL_MediaSeverRunPath[256] ; //当前路径
@@ -233,6 +232,13 @@ CNetClientReadLocalMediaFile::CNetClientReadLocalMediaFile(NETHANDLE hServer, NE
 		mediaCodecInfo.nHeight = video_dec_ctx->height;
 		pix_fmt = video_dec_ctx->pix_fmt;
  	}
+	else
+	{
+		avformat_close_input(&pFormatCtx2);
+		WriteLog(Log_Debug, "CNetClientReadLocalMediaFile =  %X ,nClient = %llu 文件中不存在视频、音频流  ", this, hClient);
+	    pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient)); //清理断裂的链接 
+ 		return;
+	}
 
 	//查找出音频源
 	if (open_codec_context(&stream_isAudio, &audio_dec_ctx, pFormatCtx2, AVMEDIA_TYPE_AUDIO) >= 0)
