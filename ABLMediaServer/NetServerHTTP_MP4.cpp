@@ -47,8 +47,8 @@ static int fmp4_hls_segment(void* param, const void* data, size_t bytes, int64_t
 	if (pNetServerHttpMp4 == NULL)
 		return 0;
 	
-	if(!pNetServerHttpMp4->bCheckHttpMP4Flag || !pNetServerHttpMp4->bRunFlag)
-		return -1 ;
+	if (!pNetServerHttpMp4->bCheckHttpMP4Flag || !pNetServerHttpMp4->bRunFlag)
+		return -1;
 
 	if (bytes > 0)
 	{
@@ -89,7 +89,7 @@ CNetServerHTTP_MP4::CNetServerHTTP_MP4(NETHANDLE hServer, NETHANDLE hClient, cha
 	bOn_playFlag = false;
 	memset((char*)&avc, 0x00, sizeof(avc));
 	memset((char*)&hevc, 0x00, sizeof(hevc));
-	bRunFlag = true;
+
 	strcpy(m_szShareMediaURL,szShareMediaURL);
  	netBaseNetType = NetBaseNetType_HttpMP4ServerSendPush;
 	nMediaClient = 0;
@@ -126,7 +126,8 @@ CNetServerHTTP_MP4::CNetServerHTTP_MP4(NETHANDLE hServer, NETHANDLE hClient, cha
 
 CNetServerHTTP_MP4::~CNetServerHTTP_MP4()
 {
-    bCheckHttpMP4Flag = bRunFlag = false ;
+	bRunFlag.exchange(false);
+	bCheckHttpMP4Flag = false;
 	std::lock_guard<std::mutex> lock(mediaMP4MapLock);
 	
 	//É¾³ýfmp4ÇÐÆ¬¾ä±ú
@@ -157,7 +158,7 @@ CNetServerHTTP_MP4::~CNetServerHTTP_MP4()
 
 int CNetServerHTTP_MP4::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* szVideoCodec)
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 	nRecvDataTimerBySecond = 0;
 	m_videoFifo.push(pVideoData, nDataLength);
@@ -166,7 +167,7 @@ int CNetServerHTTP_MP4::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, cha
 
 int CNetServerHTTP_MP4::PushAudio(uint8_t* pAudioData, uint32_t nDataLength, char* szAudioCodec, int nChannels, int SampleRate)
 {
-	if (ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag)
+	if (ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag.load())
 		return -1;
 	 nRecvDataTimerBySecond = 0;
 
@@ -182,8 +183,8 @@ int CNetServerHTTP_MP4::SendVideo()
 {
     std::lock_guard<std::mutex> lock(mediaMP4MapLock);
 	
-	if(!bCheckHttpMP4Flag || !bRunFlag)
-		return -1 ;
+	if (!bCheckHttpMP4Flag || !bRunFlag.load())
+		return -1;
 
 	nRecvDataTimerBySecond = 0;
 
@@ -216,8 +217,8 @@ int CNetServerHTTP_MP4::SendAudio()
 {
     std::lock_guard<std::mutex> lock(mediaMP4MapLock);
 
-	if(!bCheckHttpMP4Flag || !bRunFlag || ABL_MediaServerPort.nEnableAudio == 0 || strcmp(mediaCodecInfo.szAudioName, "AAC") != 0)
-		return -1 ;
+	if (!bCheckHttpMP4Flag || !bRunFlag.load() || ABL_MediaServerPort.nEnableAudio == 0 || strcmp(mediaCodecInfo.szAudioName, "AAC") != 0)
+		return -1;
   
 	unsigned char* pData = NULL;
 	int            nLength = 0;

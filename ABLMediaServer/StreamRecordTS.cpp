@@ -3,7 +3,7 @@
     负责把码流保存为mp4(ts格式) 
 	 
 日期    2023-11-04
-作者    罗家兄弟
+
 QQ      79941308
 E-Mail  79941308@qq.com
 */
@@ -153,31 +153,49 @@ bool  CStreamRecordTS::H264H265FrameToTSFile(unsigned char* szVideo, int nLength
 	{
 
 	}
-	nVideoOrder ++;
+	nVideoOrder++;
 
-	if (nVideoOrder % (ABL_MediaServerPort.fileSecond * mediaCodecInfo.nVideoFrameRate) == 0)
+	if (ABL_MediaServerPort.recordFileCutType == 1)
+	{//按照服务器本地时间长达到 fileSecond 这个参数的秒数量
+		if ((GetTickCount64() - nRecordDateTime) / 1000 >= ABL_MediaServerPort.fileSecond)
+		{
+			bCreateNewRecordFile = true;
+			nRecordDateTime = GetTickCount64();
+		}
+	}
+	else
+	{//根据录像文件的视频帧总数量 和 视频帧速度计算出录像时长达到 fileSecond 这个参数的秒数量
+		if (nVideoOrder % (ABL_MediaServerPort.fileSecond * mediaCodecInfo.nVideoFrameRate) == 0)
+			bCreateNewRecordFile = true;
+	}
+
+	if (bCreateNewRecordFile == true)
 	{//1秒切片1次
 		fflush(fTSFileWrite);
 
 		fclose(fTSFileWrite);
 		fTSFileWrite = NULL;
+		bCreateNewRecordFile = false;
 
 		//完成一个fmp4切片文件通知 
-		if (ABL_MediaServerPort.hook_enable == 1 )
+		if (ABL_MediaServerPort.hook_enable == 1)
 		{
 			MessageNoticeStruct msgNotice;
 			msgNotice.nClient = NetBaseNetType_HttpClient_Record_mp4;
 			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_mp4\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\",\"fileSize\":%llu}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, getDatetimeBySecond(nStartDateTime + (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate)), nWriteRecordByteSize);
 			pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 		}
- 		nCurrentVideoFrames = 0;
+		nCurrentVideoFrames = 0;
 		nWriteRecordByteSize = 0;
 	}
 	return true;
 }
 
-CStreamRecordTS::CStreamRecordTS(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort,char* szShareMediaURL)
+
+CStreamRecordTS::CStreamRecordTS(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort, char* szShareMediaURL)
 {
+	bCreateNewRecordFile = false;
+	nRecordDateTime = GetTickCount64();
 	nVideoStampAdd = 1000 / 25 ;
 	nVideoOrder = 0;
 	fTSFileWrite = NULL;
@@ -221,7 +239,7 @@ CStreamRecordTS::CStreamRecordTS(NETHANDLE hServer, NETHANDLE hClient, char* szI
 
 CStreamRecordTS::~CStreamRecordTS()
 {
-	bRunFlag = false ;
+	bRunFlag.exchange(false);
 	std::lock_guard<std::mutex> lock(mediaMP4MapLock);
 
 	if (tsPacketHandle != NULL)
@@ -256,7 +274,7 @@ CStreamRecordTS::~CStreamRecordTS()
 int CStreamRecordTS::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* szVideoCodec)
 {
 	std::lock_guard<std::mutex> lock(mediaMP4MapLock);
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 	nRecvDataTimerBySecond = 0;
 	nCurrentVideoFrames ++;//当前视频帧数
@@ -278,13 +296,14 @@ int CStreamRecordTS::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* 
 int CStreamRecordTS::PushAudio(uint8_t* pAudioData, uint32_t nDataLength, char* szAudioCodec, int nChannels, int SampleRate)
 {
 	std::lock_guard<std::mutex> lock(mediaMP4MapLock);
-	if (ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag || !(strcmp(szAudioCodec, "AAC") == 0 || strcmp(szAudioCodec, "MP3") == 0))
+	if (ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag.load() || !(strcmp(szAudioCodec, "AAC") == 0 || strcmp(szAudioCodec, "MP3") == 0))
 		return -1;
 
 	m_audioFifo.push(pAudioData, nDataLength);
 
 	return 0;
 }
+
 
 int CStreamRecordTS::SendVideo()
 {

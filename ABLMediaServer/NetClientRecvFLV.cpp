@@ -30,7 +30,7 @@ extern bool                                  DeleteClientMediaStreamSource(uint6
 extern CMediaFifo                            pDisconnectBaseNetFifo; //清理断裂的链接 
 extern int                                   SampleRateArray[] ;
 extern char                                  ABL_MediaSeverRunPath[256]; //当前路径
-
+extern CMediaFifo                            pDisconnectMediaSource;      //清理断裂媒体源 
 extern void LIBNET_CALLMETHOD	onconnect(NETHANDLE clihandle,
 	uint8_t result, uint16_t nLocalPort);
 
@@ -52,7 +52,7 @@ static int NetClientRecvFLVCallBack(void* param, int codec, const void* data, si
 	static uint32_t a_pts = 0, a_dts = 0;
 
 	//printf("[%c] pts: %s, dts: %s, %u, cts: %d, ", flv_type(codec), ftimestamp(pts, s_pts), ftimestamp(dts, s_dts), dts, (int)(pts - dts));
-	if (pClient == NULL || pClient->pMediaSource == NULL || !pClient->bRunFlag)
+	if (pClient == NULL || pClient->pMediaSource == NULL || !pClient->bRunFlag.load())
 		return 0;
 
 	if (FLV_AUDIO_AAC == codec)
@@ -165,7 +165,7 @@ CNetClientRecvFLV::CNetClientRecvFLV(NETHANDLE hServer, NETHANDLE hClient, char*
 	nWriteErrorCount = 0;
 
 	if (ParseRtspRtmpHttpURL(szIP) == true)
-		uint32_t ret = XHNetSDK_Connect((int8_t*)m_rtspStruct.szIP, atoi(m_rtspStruct.szPort), (int8_t*)(NULL), 0, (uint64_t*)&nClient, onread, onclose, onconnect, 0, MaxClientConnectTimerout, 1);
+		uint32_t  ret = XHNetSDK_Connect((int8_t*)m_rtspStruct.szIP, atoi(m_rtspStruct.szPort), (int8_t*)(NULL), 0, (uint64_t*)&nClient, onread, onclose, onconnect, 0, MaxClientConnectTimerout, 1, memcmp(m_rtspStruct.szSrcRtspPullUrl, "https://", 8) == 0 ? true : false);
 
 	nVideoDTS = 0;
 	nAudioDTS = 0;
@@ -179,7 +179,7 @@ CNetClientRecvFLV::CNetClientRecvFLV(NETHANDLE hServer, NETHANDLE hClient, char*
 
 CNetClientRecvFLV::~CNetClientRecvFLV()
 {
-	bRunFlag = false ;
+	bRunFlag.exchange(false);
 	std::lock_guard<std::mutex> lock(NetClientRecvFLVLock);
 
 	//服务器异常断开
@@ -195,9 +195,9 @@ CNetClientRecvFLV::~CNetClientRecvFLV()
 	if (flvDemuxer)
 		flv_demuxer_destroy(flvDemuxer);
 
-	 //如果是接收推流，并且成功接收推流的，则需要删除媒体数据源 szURL ，比如 /Media/Camera_00001 
-	if(strlen(m_szShareMediaURL) >0 && pMediaSource != NULL )
-   	  DeleteMediaStreamSource(m_szShareMediaURL);
+	//如果是接收推流，并且成功接收推流的，则需要删除媒体数据源 szURL ，比如 /Media/Camera_00001 
+	if (strlen(m_szShareMediaURL) > 0 && pMediaSource != NULL)
+		pDisconnectMediaSource.push((unsigned char*)m_szShareMediaURL, strlen(m_szShareMediaURL));
 
 #ifdef  SaveNetDataToFlvFile
 	if (fileFLV != NULL)
@@ -316,7 +316,7 @@ int CNetClientRecvFLV::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHa
 static int http_flv_netRead(void* param, void* buf, int len)
 {
 	CNetClientRecvFLV* pHttpFlv = (CNetClientRecvFLV*)param;
-	if (pHttpFlv == NULL || !pHttpFlv->bRunFlag)
+	if (pHttpFlv == NULL || !pHttpFlv->bRunFlag.load())
 		return 0;
 
 	if (pHttpFlv->netDataCacheLength >= len)
@@ -334,7 +334,7 @@ static int http_flv_netRead(void* param, void* buf, int len)
 int CNetClientRecvFLV::ProcessNetData()
 {
 	std::lock_guard<std::mutex> lock(NetClientRecvFLVLock);
-    if(!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
  
 	if (netDataCacheLength > (1024 * 1024 * 1.256) )
@@ -345,7 +345,7 @@ int CNetClientRecvFLV::ProcessNetData()
 		 //创建失败 
 		if (reader == NULL)
 		{
-			bRunFlag = false;
+			bRunFlag.exchange(false);
 			WriteLog(Log_Debug, "CNetClientRecvFLV = %X nClient = %llu flv_reader_create2 创建失败 ,执行删除 ", this,nClient);
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;

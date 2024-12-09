@@ -34,6 +34,7 @@ extern MediaServerPort                       ABL_MediaServerPort;
 extern CMediaFifo                            pDisconnectBaseNetFifo; //清理断裂的链接 
 extern int                                   SampleRateArray[] ;
 extern CMediaFifo                            pMessageNoticeFifo;          //消息通知FIFO
+extern CMediaFifo                            pDisconnectMediaSource;      //清理断裂媒体源 
 
 extern void LIBNET_CALLMETHOD	onconnect(NETHANDLE clihandle,
 	uint8_t result, uint16_t nLocalPort);
@@ -51,7 +52,7 @@ static int rtmp_client_send(void* param, const void* header, size_t len, const v
 {
 	CNetClientRecvRtmp* pClient = (CNetClientRecvRtmp*)param;
 
-	if (pClient != NULL && pClient->bRunFlag)
+	if (pClient != NULL && pClient->bRunFlag.load())
 	{
 		if (len > 0 && header != NULL)
 		{
@@ -82,7 +83,7 @@ static int rtmp_client_send(void* param, const void* header, size_t len, const v
 static int rtmp_client_onaudio(void* param, const void* data, size_t bytes, uint32_t timestamp)
 {
 	CNetClientRecvRtmp* pNetClientRtmp = (CNetClientRecvRtmp*)param ;
-	if (pNetClientRtmp == NULL || !pNetClientRtmp->bRunFlag)
+	if (pNetClientRtmp == NULL || !pNetClientRtmp->bRunFlag.load())
 		return 0;
 
 	flv_demuxer_input(pNetClientRtmp->flvDemuxer, FLV_TYPE_AUDIO, data, bytes, timestamp);
@@ -101,7 +102,7 @@ static int rtmp_client_onvideo(void* param, const void* data, size_t bytes, uint
 static int rtmp_client_onscript(void* param, const void* data, size_t bytes, uint32_t timestamp)
 {
 	CNetClientRecvRtmp* pNetClientRtmp = (CNetClientRecvRtmp*)param;
-	if (pNetClientRtmp == NULL || !pNetClientRtmp->bRunFlag)
+	if (pNetClientRtmp == NULL || !pNetClientRtmp->bRunFlag.load())
 		return 0;
 	return  flv_demuxer_input(pNetClientRtmp->flvDemuxer, FLV_TYPE_SCRIPT, data, bytes, timestamp);
 }
@@ -115,7 +116,7 @@ static int NetRtmpClientRecvCallBackFLV(void* param, int codec, const void* data
 	static uint32_t a_pts = 0, a_dts = 0;
 
 	//printf("[%c] pts: %s, dts: %s, %u, cts: %d, ", flv_type(codec), ftimestamp(pts, s_pts), ftimestamp(dts, s_dts), dts, (int)(pts - dts));
-	if (pClient == NULL || pClient->pMediaSource == NULL || !pClient->bRunFlag)
+	if (pClient == NULL || pClient->pMediaSource == NULL || !pClient->bRunFlag.load())
 		return 0;
 
 	if (FLV_AUDIO_AAC == codec && pClient->m_addStreamProxyStruct.disableAudio[0] == 0x30)
@@ -253,7 +254,7 @@ CNetClientRecvRtmp::CNetClientRecvRtmp(NETHANDLE hServer, NETHANDLE hClient, cha
 	handler.onscript = rtmp_client_onscript;
 
 	if (ParseRtspRtmpHttpURL(szIP) == true)
-	 uint32_t ret = XHNetSDK_Connect((int8_t*)m_rtspStruct.szIP, atoi(m_rtspStruct.szPort), (int8_t*)(NULL), 0, (uint64_t*)&nClient, onread, onclose, onconnect, 0, MaxClientConnectTimerout, 1);
+		uint32_t  ret = XHNetSDK_Connect((int8_t*)m_rtspStruct.szIP, atoi(m_rtspStruct.szPort), (int8_t*)(NULL), 0, (uint64_t*)&nClient, onread, onclose, onconnect, 0, MaxClientConnectTimerout, 1, memcmp(m_rtspStruct.szSrcRtspPullUrl, "rtmps://", 8) == 0 ? true : false);
 
 	nVideoDTS = 0 ;
 	nAudioDTS = 0 ;
@@ -266,7 +267,7 @@ CNetClientRecvRtmp::CNetClientRecvRtmp(NETHANDLE hServer, NETHANDLE hClient, cha
 CNetClientRecvRtmp::~CNetClientRecvRtmp()
 {
     WriteLog(Log_Debug, "CNetClientRecvRtmp 析构 = %X  nClient = %llu step 1 ",this, nClient);
-	bRunFlag = false;
+	bRunFlag.exchange(false);
 	std::lock_guard<std::mutex> lock(businessProcMutex);
 
     WriteLog(Log_Debug, "CNetClientRecvRtmp 析构 = %X  nClient = %llu step 2 ",this, nClient);
@@ -322,9 +323,9 @@ CNetClientRecvRtmp::~CNetClientRecvRtmp()
     WriteLog(Log_Debug, "CNetClientRecvRtmp 析构 = %X  nClient = %llu step 8 ",this, nClient);
 
 	//如果是接收推流，并且成功接收推流的，则需要删除媒体数据源 szURL ，比如 /Media/Camera_00001 
-	if(strlen(m_szShareMediaURL) > 0 && pMediaSource != NULL)
-	   DeleteMediaStreamSource(m_szShareMediaURL);
-   
+	if (strlen(m_szShareMediaURL) > 0 && pMediaSource != NULL)
+		pDisconnectMediaSource.push((unsigned char*)m_szShareMediaURL, strlen(m_szShareMediaURL));
+
 	WriteLog(Log_Debug, "CNetClientRecvRtmp 析构 = %X  nClient = %llu app = %s ,stream = %s ,bUpdateVideoFrameSpeedFlag = %d", this, nClient, m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream, bUpdateVideoFrameSpeedFlag);
 }
 
@@ -350,7 +351,7 @@ int CNetClientRecvRtmp::SendAudio()
 
 int CNetClientRecvRtmp::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHandle, uint8_t* pData, uint32_t nDataLength, void* address)
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 	std::lock_guard<std::mutex> lock(businessProcMutex);
 
@@ -379,10 +380,10 @@ int CNetClientRecvRtmp::ProcessNetData()
 bool   CNetClientRecvRtmp::GetAppStreamByURL(char* app, char* stream)
 {
 	int nPos1, nPos2;
-	if (memcmp(szClientIP, "rtmp://", 7) != 0)
+	if (!(memcmp(szClientIP, "rtmp://", 7) == 0 || memcmp(szClientIP, "rtmps://", 8) == 0))
 		return false;
 	string strURL = szClientIP;
-	nPos1 = strURL.find("/", 8);
+	nPos1 = strURL.find("/", 10);
 	if (nPos1 > 0 && nPos1 != string::npos)
 	{
 		nPos2 = strURL.find("/", nPos1 + 1);

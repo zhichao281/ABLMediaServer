@@ -67,7 +67,9 @@ extern "C"
 		accept_callback fnaccept,
 		read_callback fnread,
 		close_callback fnclose,
-		uint8_t autoread);
+		uint8_t autoread,
+		bool bSSLFlag = false
+	);
 
 	LIBNET_API int32_t XHNetSDK_Unlisten(NETHANDLE srvhandle);
 
@@ -81,7 +83,10 @@ extern "C"
 		connect_callback fnconnect,
 		uint8_t blocked,
 		uint32_t timeout,
-		uint8_t autoread);
+		uint8_t autoread,
+		bool bSSLFlag = false
+	);
+
 
 	LIBNET_API int32_t XHNetSDK_Disconnect(NETHANDLE clihandle);
 

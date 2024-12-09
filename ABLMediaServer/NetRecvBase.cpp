@@ -47,6 +47,8 @@ extern  uint8_t                              SLICE_START_CODE[4]  ;
 
 CNetRevcBase::CNetRevcBase()
 {
+	bCreateNewRecordFile = false;
+	nRecordDateTime = GetTickCount64();
 	nWriteRecordByteSize = 0;
 	memset(szCurrentDateTime, 0x00, sizeof(szCurrentDateTime));
 	memset(szStartDateTime, 0x00, sizeof(szStartDateTime));
@@ -79,7 +81,7 @@ CNetRevcBase::CNetRevcBase()
 	nTotalVideoFrames = 0;//录像视频总帧数
 	nTcp_Switch = 0;
 	bSendFirstIDRFrameFlag = false;
-	bRunFlag = true;
+	bRunFlag.exchange(true);
 	nSSRC = 0;
 	m_bSendMediaWaitForIFrame = false;
 	m_bIsRtspRecordURL = false;
@@ -195,7 +197,8 @@ bool  CNetRevcBase::ParseRtspRtmpHttpURL(char* szURL)
 	ABL::to_lower(szSrcRtspPullUrl);
 #endif
 
-	if ( !(memcmp(szSrcRtspPullUrl, "rtsp://", 7) == 0 || memcmp(szSrcRtspPullUrl, "rtmp://", 7) == 0 || memcmp(szSrcRtspPullUrl, "http://", 7) == 0))
+	if (!(memcmp(szSrcRtspPullUrl, "rtsp://", 7) == 0 || memcmp(szSrcRtspPullUrl, "rtmp://", 7) == 0 || memcmp(szSrcRtspPullUrl, "http://", 7) == 0 ||
+		memcmp(szSrcRtspPullUrl, "rtsps://", 8) == 0 || memcmp(szSrcRtspPullUrl, "rtmps://", 8) == 0 || memcmp(szSrcRtspPullUrl, "https://", 8) == 0))
 		return false;
 
 	memset((char*)&m_rtspStruct, 0x00, sizeof(m_rtspStruct));
@@ -829,25 +832,28 @@ std::shared_ptr<CMediaStreamSource>   CNetRevcBase::CreateReplayClient(char* szR
 	{
 		auto replayClient = CreateNetRevcBaseClient(ReadRecordFileInput_ReadFMP4File, 0, 0, szRequestReplayRecordFile, 0, szSplliterShareURL);
 		if (replayClient)//记录录像点播的client 
-		 *nReturnReplayClient = replayClient->nClient;
+			*nReturnReplayClient = replayClient->nClient;
 
-		pTempSource = GetMediaStreamSource(szReplayURL);
+		int nWaitCount = 0;
+		while (true)
+		{//等待录像文件创建好媒体源
+			nWaitCount++;
+			//Sleep(200);
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			pTempSource = GetMediaStreamSource(szReplayURL);
+			if (pTempSource != NULL)
+				break;
+			if (nWaitCount >= 30)
+				break;
+		}
 		if (pTempSource == NULL)
 		{
 			if (replayClient)
 				pDisconnectBaseNetFifo.push((unsigned char*)&replayClient->nClient, sizeof(replayClient->nClient));
 			return NULL;
 		}
-		int nWaitCount = 0;
-		while (!pTempSource->bUpdateVideoSpeed)
-		{
-			nWaitCount++;
-			//Sleep(200);
-			std::this_thread::sleep_for(std::chrono::milliseconds(200));
-			if (nWaitCount >= 10)
-				break;
-		}
-	    replayClient->hParent = nClient ;
+
+		replayClient->hParent = nClient;
 	}
 	nMediaSourceType = MediaSourceType_ReplayMedia;
 	duration = pTempSource->nMediaDuration;

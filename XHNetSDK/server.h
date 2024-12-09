@@ -1,10 +1,13 @@
 #pragma  once 
 
 #ifdef USE_BOOST
+#ifndef _SERVER_H_
+#define _SERVER_H_
 
 #include <boost/function.hpp>
 #include "client_manager.h"
 #include "auto_lock.h"
+#include <boost/asio/ssl.hpp>
 
 class server : public boost::enable_shared_from_this<server>
 {
@@ -20,7 +23,9 @@ public:
 	int32_t run();
 	void close();
 	NETHANDLE get_id();
+	boost::atomic_bool sslFlag;
 
+	void init_SSL();
 private:
 	void start_accept();
 	void handle_accept(client_ptr c, const boost::system::error_code& error);
@@ -34,6 +39,7 @@ private:
 	close_callback m_fnclose;
 	const bool m_autoread;
 	NETHANDLE m_id;
+	boost::asio::ssl::context m_context;
 };
 typedef boost::shared_ptr<server>  server_ptr;
 
@@ -47,13 +53,14 @@ inline void server::disconnect_clients()
 	client_manager_singleton::get_mutable_instance().pop_server_clients(get_id());
 }
 
+#endif
 
 #else
 #include <functional>
 #include <memory>
 #include "client_manager.h"
 #include "auto_lock.h"
-
+#include <ssl.hpp>
 class server : public std::enable_shared_from_this<server>
 {
 public:
@@ -68,7 +75,9 @@ public:
 	int32_t run();
 	void close();
 	NETHANDLE get_id();
+	std::atomic<bool> sslFlag;
 
+	void init_SSL();
 private:
 	void start_accept();
 	void handle_accept(client_ptr c, std::error_code error);
@@ -82,6 +91,7 @@ private:
 	close_callback m_fnclose;
 	const bool m_autoread;
 	NETHANDLE m_id;
+	asio::ssl::context m_context;
 };
 
 typedef std::shared_ptr<server>  server_ptr;

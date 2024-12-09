@@ -53,10 +53,9 @@ CNetClientHttp::CNetClientHttp(NETHANDLE hServer, NETHANDLE hClient, char* szIP,
 	strcpy(szClientIP, szIP);
 	nClientPort = nPort;
 	nNetStart = nNetEnd = netDataCacheLength = 0;
-	bRunFlag = true;
 
 	if (ParseRtspRtmpHttpURL(szIP) == true)
-		uint32_t ret = XHNetSDK_Connect((int8_t*)m_rtspStruct.szIP, atoi(m_rtspStruct.szPort), (int8_t*)(NULL), 0, (uint64_t*)&nClient, onread, onclose, onconnect, 0, MaxClientConnectTimerout, 1);
+		uint32_t ret = XHNetSDK_Connect((int8_t*)m_rtspStruct.szIP, atoi(m_rtspStruct.szPort), (int8_t*)(NULL), 0, (uint64_t*)&nClient, onread, onclose, onconnect, 0, MaxClientConnectTimerout, 1, memcmp(m_rtspStruct.szSrcRtspPullUrl, "https://", 8) == 0 ? true : false);
 
 	m_videoFifo.InitFifo(MaxNetClientHttpBuffer);
 	string strResponeURL = szClientIP;
@@ -73,7 +72,7 @@ CNetClientHttp::CNetClientHttp(NETHANDLE hServer, NETHANDLE hClient, char* szIP,
 
 CNetClientHttp::~CNetClientHttp()
 {
-	bRunFlag = false;
+	bRunFlag.exchange(false);
 	std::lock_guard<std::mutex> lock(NetClientHTTPLock);
 
 	m_videoFifo.FreeFifo();
@@ -84,7 +83,7 @@ CNetClientHttp::~CNetClientHttp()
 
 int CNetClientHttp::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* szVideoCodec)
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 
 	m_videoFifo.push(pVideoData, nDataLength);
@@ -111,7 +110,7 @@ int CNetClientHttp::SendAudio()
 
 int CNetClientHttp::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHandle, uint8_t* pData, uint32_t nDataLength, void* address)
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 	nRecvDataTimerBySecond = 0;
 	std::lock_guard<std::mutex> lock(NetClientHTTPLock);
@@ -156,7 +155,7 @@ int CNetClientHttp::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHandl
 
 int CNetClientHttp::ProcessNetData()
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 	std::lock_guard<std::mutex> lock(NetClientHTTPLock);
 
@@ -182,7 +181,7 @@ int CNetClientHttp::ProcessNetData()
 //发送第一个请求
 int CNetClientHttp::SendFirstRequst()
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 
 	bConnectSuccessFlag = true;
@@ -203,7 +202,7 @@ void CNetClientHttp::HttpRequest(char* szUrl, char* szBody,int nLength)
 	if (nLength > 0)
 	 szBody[0] = '{';
 
-	if (!bConnectSuccessFlag || strlen(szBody) == 0 || nLength <= 0 || !bRunFlag)
+	if (!bConnectSuccessFlag || strlen(szBody) == 0 || nLength <= 0 || !bRunFlag.load())
 	{
 		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
  		return;

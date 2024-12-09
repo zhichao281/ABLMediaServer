@@ -39,7 +39,7 @@ static int NetServerHTTP_FLV_MuxerCB(void* flv, int type, const void* data, size
 {
 	CNetServerHTTP_FLV* pHttpFLV = (CNetServerHTTP_FLV*)flv;
 
-	if (!pHttpFLV->bRunFlag)
+	if (!pHttpFLV->bRunFlag.load())
 		return -1;
 
 #ifdef WriteHttp_FlvFileFlag
@@ -55,7 +55,7 @@ int  NetServerHTTP_FLV_OnWrite_CB(void* param, const struct flv_vec_t* vec, int 
 {
 	CNetServerHTTP_FLV* pHttpFLV = (CNetServerHTTP_FLV*)param;
 
-	if (pHttpFLV != NULL && pHttpFLV->bRunFlag )
+	if (pHttpFLV != NULL && pHttpFLV->bRunFlag.load())
 	{
 		for (int i = 0; i < n; i++)
 		{
@@ -65,7 +65,7 @@ int  NetServerHTTP_FLV_OnWrite_CB(void* param, const struct flv_vec_t* vec, int 
 				pHttpFLV->nWriteErrorCount ++;//发送出错累计 
 				if (pHttpFLV->nWriteErrorCount >= 30)
 				{
-					pHttpFLV->bRunFlag = false;
+					pHttpFLV->bRunFlag.exchange(false);
 					WriteLog(Log_Debug, "NetServerHTTP_FLV_OnWrite_CB 发送失败，次数 nWriteErrorCount = %d ", pHttpFLV->nWriteErrorCount);
 					DeleteNetRevcBaseClient(pHttpFLV->nClient);
 				}
@@ -98,7 +98,7 @@ CNetServerHTTP_FLV::CNetServerHTTP_FLV(NETHANDLE hServer, NETHANDLE hClient, cha
 	nWriteErrorCount = 0;
 
 	netBaseNetType = NetBaseNetType_HttpFLVServerSendPush ;
-	bRunFlag = true;
+	
 
     nNewAddAudioTimeStamp = 64;
 	bUserNewAudioTimeStamp = false;
@@ -110,6 +110,7 @@ CNetServerHTTP_FLV::CNetServerHTTP_FLV(NETHANDLE hServer, NETHANDLE hClient, cha
 
 CNetServerHTTP_FLV::~CNetServerHTTP_FLV()
 {
+	bRunFlag.exchange(false);
 	std::lock_guard<std::mutex> lock(NetServerHTTP_FLVLock);
 
 	WriteLog(Log_Debug, "CNetServerHTTP_FLV =%X Step 1 nClient = %llu ",this, nClient);

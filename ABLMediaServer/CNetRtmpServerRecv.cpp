@@ -33,14 +33,15 @@ static int NetRtmpServerRec_MuxerFlv(void* flv, int type, const void* data, size
 extern MediaServerPort                      ABL_MediaServerPort;
 extern bool                                 AddClientToMapAddMutePacketList(uint64_t nClient);
 extern bool                                 DelClientToMapFromMutePacketList(uint64_t nClient);
+extern CMediaFifo                           pDisconnectMediaSource;      //清理断裂媒体源 
 
 static int rtmp_server_send(void* param, const void* header, size_t len, const void* data, size_t bytes)
 {
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
 
-	if (pClient != NULL && pClient->bRunFlag )
+	if (pClient != NULL && pClient->bRunFlag.load())
 	{
-		if (len > 0 && header != NULL)
+		if (len > 0 && header != NULL && pClient->bRunFlag.load())
 		{
 			pClient->nWriteRet = XHNetSDK_Write(pClient->nClient, (uint8_t*)header, len, true);
 			if (pClient->nWriteRet != 0)
@@ -48,7 +49,7 @@ static int rtmp_server_send(void* param, const void* header, size_t len, const v
 				pClient->nWriteErrorCount ++;
 				if (pClient->nWriteErrorCount >= 30)
 				{
-				   pClient->bRunFlag = false;
+					pClient->bRunFlag.exchange(false);
 				   WriteLog(Log_Debug, "rtmp_server_send 发送失败，次数 nWriteErrorCount = %d ", pClient->nWriteErrorCount);
 				   DeleteNetRevcBaseClient(pClient->nClient);
  				}
@@ -56,7 +57,7 @@ static int rtmp_server_send(void* param, const void* header, size_t len, const v
 			else
 				pClient->nWriteErrorCount = 0;
 		}
-		if (bytes > 0 && data != NULL)
+		if (bytes > 0 && data != NULL && pClient->bRunFlag.load())
 		{
 			pClient->nWriteRet = XHNetSDK_Write(pClient->nClient, (uint8_t*)data, bytes, true);
 			if (pClient->nWriteRet != 0)
@@ -75,7 +76,7 @@ static int rtmp_server_send(void* param, const void* header, size_t len, const v
 static int rtmp_server_onpublish(void* param, const char* app, const char* stream, const char* type)
 {//打印 rtmp 主路径 、子路径 
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
-	if (pClient != NULL && pClient->bRunFlag)
+	if (pClient != NULL && pClient->bRunFlag.load())
 	{
 		WriteLog(Log_Debug,"CNetRtmpServerRecv=%X, nClient = %llu, rtmp_server_onpublish(%s, %s, %s)", pClient, pClient->nClient, app, stream, type);
 
@@ -154,7 +155,7 @@ static int rtmp_server_onplay(void* param, const char* app, const char* stream, 
 	WriteLog(Log_Debug, "rtmp_server_onplay(%s, %s, %f, %f, %d)", app, stream, start, duration, (int)reset);
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
  
-    if(!pClient->bRunFlag)
+	if (!pClient->bRunFlag.load())
 		return -1 ;
 
 	//去掉？后面参数字符串
@@ -262,7 +263,7 @@ static int NetRtmpServerRec_MuxerFlv(void* flv, int type, const void* data, size
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)flv;
 
 	int r;
-	if (pClient && pClient->bRunFlag)
+	if (pClient && pClient->bRunFlag.load())
 	{
 		if (FLV_TYPE_VIDEO == type)
 		{
@@ -279,12 +280,12 @@ static int NetRtmpServerRec_MuxerFlv(void* flv, int type, const void* data, size
 static int rtmp_server_onscript(void* param, const void* script, size_t bytes, uint32_t timestamp)
 {//写入 script 内容 
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
-	if (pClient != NULL && pClient->bRunFlag)
+	if (pClient != NULL && pClient->bRunFlag.load())
 	  flv_demuxer_input(pClient->flvDemuxer, FLV_TYPE_SCRIPT, script, bytes, timestamp);
 
 #ifdef  WriteFlvFileByDebug
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
-	if (pClient != NULL && pClient->bRunFlag)
+	if (pClient != NULL && pClient->bRunFlag.load())
 	   flv_writer_input(pClient->s_flv, FLV_TYPE_SCRIPT, script, bytes, timestamp);
 #endif
 	return 0;
@@ -293,7 +294,7 @@ static int rtmp_server_onscript(void* param, const void* script, size_t bytes, u
 static int rtmp_server_onvideo(void* param, const void* data, size_t bytes, uint32_t timestamp)
 {//写入视频 
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
-	if (pClient != NULL && pClient->bRunFlag)
+	if (pClient != NULL && pClient->bRunFlag.load())
 	{
 		if (flv_demuxer_input(pClient->flvDemuxer, FLV_TYPE_VIDEO, data, bytes, timestamp) < 0)
 		{
@@ -308,7 +309,7 @@ static int rtmp_server_onvideo(void* param, const void* data, size_t bytes, uint
 	}
 #ifdef  WriteFlvFileByDebug
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
-	if (pClient != NULL && pClient->bRunFlag)
+	if (pClient != NULL && pClient->bRunFlag.load())
       flv_writer_input(pClient->s_flv, FLV_TYPE_VIDEO, data, bytes, timestamp);
 #endif
 	return 0;
@@ -317,12 +318,12 @@ static int rtmp_server_onvideo(void* param, const void* data, size_t bytes, uint
 static int rtmp_server_onaudio(void* param, const void* data, size_t bytes, uint32_t timestamp)
 {//写入音频 
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
-	if (pClient != NULL && pClient->bRunFlag)
+	if (pClient != NULL && pClient->bRunFlag.load())
 		flv_demuxer_input(pClient->flvDemuxer, FLV_TYPE_AUDIO, data, bytes, timestamp);
 
 #ifdef  WriteFlvFileByDebug
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
-	if (pClient != NULL && pClient->bRunFlag)
+	if (pClient != NULL && pClient->bRunFlag.load())
 		flv_writer_input(pClient->s_flv, FLV_TYPE_AUDIO, data, bytes, timestamp);
 #endif
 	return 0;
@@ -358,7 +359,7 @@ inline char flv_type(int type)
 static int NetRtmpServerRecvCallBackFLV(void* param, int codec, const void* data, size_t bytes, uint32_t pts, uint32_t dts, int flags)
 {
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
-	if(!pClient->bRunFlag)
+	if (!pClient->bRunFlag.load())
 		return -1;
 
 	static char s_pts[64], s_dts[64];
@@ -538,7 +539,7 @@ CNetRtmpServerRecv::CNetRtmpServerRecv(NETHANDLE hServer, NETHANDLE hClient, cha
 #endif
 	rtmp = rtmp_server_create(this, &handler);
 	memset(szRtmpName, 0x00, sizeof(szRtmpName));
-	bRunFlag = true;
+	bRunFlag.exchange(true);
 
 	WriteLog(Log_Debug, "CNetRtmpServerRecv 构造 =%X  nClient = %llu ",this, nClient);
 }
@@ -589,8 +590,8 @@ CNetRtmpServerRecv::~CNetRtmpServerRecv()
 		DelClientToMapFromMutePacketList(nClient);
 
 	//如果是接收推流，并且成功接收推流的，则需要删除媒体数据源 szURL ，比如 /Media/Camera_00001 
-	if (bPushMediaSuccessFlag && netBaseNetType == NetBaseNetType_RtmpServerRecvPush && pMediaSource !=	NULL )
-		DeleteMediaStreamSource(szURL);
+	if (bPushMediaSuccessFlag && netBaseNetType == NetBaseNetType_RtmpServerRecvPush && pMediaSource != NULL)
+		pDisconnectMediaSource.push((unsigned char*)szURL, strlen(szURL));
 
 	WriteLog(Log_Debug, "CNetRtmpServerRecv 析构 = %X  nClient = %llu \r\n", this, nClient);
 	malloc_trim(0);

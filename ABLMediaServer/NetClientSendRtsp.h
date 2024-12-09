@@ -125,7 +125,7 @@ public:
 	int                     au_numbers;
 	int                     SplitterSize[16];
 
-	volatile bool           bRunFlag;
+	
 
 	std::mutex              netDataLock;
 	unsigned char           netDataCache[MaxNetDataCacheBufferLength]; //ÍøÂçÊı¾İ»º´æ

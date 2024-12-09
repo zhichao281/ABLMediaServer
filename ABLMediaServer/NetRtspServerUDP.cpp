@@ -44,7 +44,7 @@ void RTP_DEPACKET_CALL_METHOD NetRtspServerUDP_rtpdepacket_callback(_rtp_depacke
 {
  	CNetRtspServerUDP* pUserHandle = (CNetRtspServerUDP*)cb->userdata;
 
-	if (!pUserHandle->bRunFlag)
+	if (!pUserHandle->bRunFlag.load())
 		return;
 
 	if (pUserHandle != NULL)
@@ -102,7 +102,7 @@ void RTP_DEPACKET_CALL_METHOD NetRtspServerUDP_rtpdepacket_callback(_rtp_depacke
 
 CNetRtspServerUDP::CNetRtspServerUDP(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort,char* szShareMediaURL)
 {
-	bRunFlag = true;
+	bRunFlag.exchange(true);
 	memset(szFullMp3Buffer, 0x00, sizeof(szFullMp3Buffer));
 	memset(szMp3HeadFlag, 0x00, sizeof(szMp3HeadFlag));
 	szMp3HeadFlag[0] = 0xFF;
@@ -132,7 +132,7 @@ CNetRtspServerUDP::CNetRtspServerUDP(NETHANDLE hServer, NETHANDLE hClient, char*
 
 CNetRtspServerUDP::~CNetRtspServerUDP()
 {
-	bRunFlag = false;
+	bRunFlag.exchange(false);
 	std::lock_guard<std::mutex> lock(businessProcMutex);
 
 	if(netBaseNetType == NetBaseNetType_RtspServerRecvPushVideo)

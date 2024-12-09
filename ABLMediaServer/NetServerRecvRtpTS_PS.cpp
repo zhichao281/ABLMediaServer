@@ -42,13 +42,13 @@ extern void LIBNET_CALLMETHOD                onread(NETHANDLE srvhandle, NETHAND
 
 #endif
 
-CNetServerRecvRtpTS_PS::CNetServerRecvRtpTS_PS(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort,char* szShareMediaURL)
+CNetServerRecvRtpTS_PS::CNetServerRecvRtpTS_PS(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort, char* szShareMediaURL)
 {
 	netBaseNetType = NetBaseNetType_NetGB28181RecvRtpPS_TS;
- 	int nRet = XHNetSDK_BuildUdp(NULL,ABL_MediaServerPort.ps_tsRecvPort, NULL, &nClient, onread, 1);
-	nClientPort = ABL_MediaServerPort.ps_tsRecvPort ;
-	WriteLog(Log_Debug, (nRet == 0) ? "绑定端口 [udp] %d 成功(success) " : "绑定端口 %d(udp) 失败(fail) ", ABL_MediaServerPort.ps_tsRecvPort);
-	WriteLog(Log_Debug, "CNetServerRecvRtpTS_PS 构造 = %X  nClient = %llu ,nRet = %d ", this, nClient,nRet);
+	int nRet = XHNetSDK_BuildUdp(NULL, ABL_MediaServerPort.ps_tsRecvPort, NULL, &nClient, onread, 1);
+	nClientPort = ABL_MediaServerPort.ps_tsRecvPort;
+	WriteLog(Log_Debug, (nRet == 0) ? "绑定端口 [ udp ] %d 成功(success) " : "绑定端口 %d(udp) 失败(fail) ", ABL_MediaServerPort.ps_tsRecvPort);
+	WriteLog(Log_Debug, "CNetServerRecvRtpTS_PS 构造 = %X  nClient = %llu ,nRet = %d ", this, nClient, nRet);
 }
 
 CNetServerRecvRtpTS_PS::~CNetServerRecvRtpTS_PS()
@@ -94,7 +94,7 @@ int CNetServerRecvRtpTS_PS::InputNetData(NETHANDLE nServerHandle, NETHANDLE nCli
 	{
 		char szTemp[256] = { 0 };
 		char szRtpSource[256] = { 0 };
-		sprintf(szTemp, "/rtp/%X", rtpHeadPtr->ssrc);
+		sprintf(szTemp, "/rtp/%X",ntohl(rtpHeadPtr->ssrc));
 		sprintf(szRtpSource, "rtp://%s:%d", inet_ntoa(((sockaddr_in*)address)->sin_addr), ntohs(((sockaddr_in*)address)->sin_port));
 		strcat(szRtpSource, szTemp);
 

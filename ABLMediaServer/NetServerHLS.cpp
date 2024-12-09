@@ -59,7 +59,7 @@ CNetServerHLS::CNetServerHLS(NETHANDLE hServer, NETHANDLE hClient, char* szIP, u
 
 CNetServerHLS::~CNetServerHLS()
 {
-	bRunFlag = false;
+	bRunFlag.exchange(false);
 	std::lock_guard<std::mutex> lock(netDataLock);
 	
 	if (pTsFileBuffer != NULL)
@@ -107,7 +107,7 @@ int CNetServerHLS::SendAudio()
 
 int CNetServerHLS::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHandle, uint8_t* pData, uint32_t nDataLength, void* address)
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 	std::lock_guard<std::mutex> lock(netDataLock);
 
@@ -216,7 +216,7 @@ bool  CNetServerHLS::ReadHttpRequest()
  
 int CNetServerHLS::ProcessNetData()
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 
 	if (netDataCacheLength > string_length_4096 )

@@ -30,6 +30,7 @@ extern MediaServerPort                       ABL_MediaServerPort;
 extern CMediaFifo                            pDisconnectBaseNetFifo;       //清理断裂的链接 
 extern char                                  ABL_MediaSeverRunPath[256];   //当前路径
 extern int                                   avpriv_mpeg4audio_sample_rates[];
+extern CMediaFifo                            pDisconnectMediaSource;      //清理断裂媒体源 
 
 static int on_ts_packet(void* param, int program, int stream, int avtype, int flags, int64_t pts, int64_t dts, const void* data, size_t bytes)
 {
@@ -38,7 +39,7 @@ static int on_ts_packet(void* param, int program, int stream, int avtype, int fl
 
 	if (pThis == NULL || pThis->pMediaSource == NULL)
 		return -1;
-	if (!pThis->bRunFlag)
+	if (!pThis->bRunFlag.load())
 		return -1;
 
 	if (PSI_STREAM_AAC == avtype || PSI_STREAM_AUDIO_OPUS == avtype)
@@ -92,7 +93,7 @@ CRtpTSStreamInput::CRtpTSStreamInput(NETHANDLE hServer, NETHANDLE hClient, char*
  	netBaseNetType = NetBaseNetType_NetGB28181UDPTSStreamInput;
 	strcpy(m_szShareMediaURL, szShareMediaURL);
 	nClient = hClient;
-	bRunFlag = true;
+	bRunFlag.exchange(true);
 	strcpy(szClientIP, szIP);
 	nClientPort = nPort;
 
@@ -109,7 +110,7 @@ CRtpTSStreamInput::CRtpTSStreamInput(NETHANDLE hServer, NETHANDLE hClient, char*
 
 CRtpTSStreamInput::~CRtpTSStreamInput()
 {
-	bRunFlag = false;
+	bRunFlag.exchange(false);
 	std::lock_guard<std::mutex> lock(tsRecvLock);
 
 	if (ts)
@@ -122,7 +123,7 @@ CRtpTSStreamInput::~CRtpTSStreamInput()
 
 	//删除分发源
 	if (strlen(m_szShareMediaURL) > 0)
-		DeleteMediaStreamSource(m_szShareMediaURL);
+		pDisconnectMediaSource.push((unsigned char*)m_szShareMediaURL, strlen(m_szShareMediaURL));
 
 	WriteLog(Log_Debug, "CRtpTSStreamInput 析构 = %X  nClient = %llu ,nMediaClient = %llu\r\n", this, nClient, nMediaClient);
 	malloc_trim(0);
@@ -151,11 +152,11 @@ int CRtpTSStreamInput::SendAudio()
 
 int CRtpTSStreamInput::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHandle, uint8_t* pData, uint32_t nDataLength, void* address)
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 	std::lock_guard<std::mutex> lock(tsRecvLock);
 
-	if (nDataLength < 12 || (nDataLength - 12) % 188 != 0 || !bRunFlag)
+	if (nDataLength < 12 || (nDataLength - 12) % 188 != 0 || !bRunFlag.load())
 		return -1;//数据长度非法
 
 	nRecvDataTimerBySecond = 0;
@@ -165,7 +166,7 @@ int CRtpTSStreamInput::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHa
 		pMediaSource = CreateMediaStreamSource(m_szShareMediaURL, nClient, MediaSourceType_LiveMedia, 0, m_h265ConvertH264Struct);
 		if (pMediaSource == NULL)
 		{
-			bRunFlag = false;
+			bRunFlag.exchange(false);
 			WriteLog(Log_Debug, "CRtpTSStreamInput 构造 = %X 创建媒体源失败  nClient = %llu ,m_szShareMediaURL = %s ", this, nClient, m_szShareMediaURL);
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 			return -1 ;

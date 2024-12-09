@@ -1,5 +1,4 @@
 FROM ubuntu:20.04
-
 # 更新软件包列表并安装 tzdata  
 RUN apt-get update && apt-get install -y tzdata
 # 使用RUN命令设置时区

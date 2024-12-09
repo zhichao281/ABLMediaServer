@@ -47,12 +47,6 @@ uint8_t NALU_START_CODE[]              = { 0x00, 0x00, 0x01 };
 uint8_t SLICE_START_CODE[]             = { 0X00, 0X00, 0X00, 0X01 };
 
 #ifdef OS_System_Windows
-extern ABL_cudaDecode_Init  cudaEncode_Init;
-extern ABL_CreateVideoDecode cudaCreateVideoDecode;
-extern ABL_CudaVideoDecode   cudaVideoDecode;
-extern ABL_DeleteVideoDecode cudaDeleteVideoDecode;
-
-
 extern ABL_cudaDecode_Init cudaCodec_Init;
 extern ABL_cudaDecode_GetDeviceGetCount  cudaCodec_GetDeviceGetCount;
 extern ABL_cudaDecode_GetDeviceName cudaCodec_GetDeviceName;
@@ -90,6 +84,7 @@ extern void  ABL_SetPathAuthority(char* szPath);
 
 CMediaStreamSource::CMediaStreamSource(char* szURL, uint64_t nClientTemp, MediaSourceType nSourceType, uint32_t nDuration, H265ConvertH264Struct  h265ConvertH264Struct)
 {
+	bEnableFlag = true;
 	memset(sim, 0x00, sizeof(sim));
 	memset(szM3u8Name, 0x00, sizeof(szM3u8Name));
 	memset(szHLSPath, 0x00, sizeof(szHLSPath));
@@ -331,25 +326,31 @@ void  CMediaStreamSource::InitHlsResoure()
 	}
 }
 
-CMediaStreamSource::~CMediaStreamSource()
+
+//删除所有消费者
+void  CMediaStreamSource::addClientToDisconnectFifo()
 {
-	WriteLog(Log_Debug, "删除媒体源地址 %s , nClient = %llu ", m_szURL, nClient);
 	std::lock_guard<std::mutex> lock(mediaSendMapLock);
- 
-	if(H265ConvertH264_enable)
-	   nConvertObjectCount --;
 
-	videoDecode.stopDecode();
-
-	//删除该推流下面所有关联的拉流对象
 	MediaSendMap::iterator it;
-	uint64_t nSendClient = 0 ;
+	uint64_t nSendClient = 0;
 	for (it = mediaSendMap.begin(); it != mediaSendMap.end(); ++it)
 	{
 		nSendClient = (*it).second;
 		pDisconnectBaseNetFifo.push((unsigned char*)&nSendClient, sizeof(nSendClient));
 	}
 	mediaSendMap.clear();
+}
+
+CMediaStreamSource::~CMediaStreamSource()
+{
+	WriteLog(Log_Debug, "删除媒体源地址 %s , nClient = %llu ", m_szURL, nClient);
+	std::lock_guard<std::mutex> lock(mediaSendMapLock);
+
+	if (H265ConvertH264_enable)
+		nConvertObjectCount--;
+
+	videoDecode.stopDecode();
 
 	if (true)
 	{
@@ -361,7 +362,7 @@ CMediaStreamSource::~CMediaStreamSource()
 				fTSFileWrite = NULL;
 			}
 
- 			//最后删除文件　
+			//最后删除文件　
 			char           szDelName[256] = { 0 };
 			if (tsFileNameFifo.GetSize() > 0)
 			{
@@ -401,9 +402,9 @@ CMediaStreamSource::~CMediaStreamSource()
 #else 
 			if (strlen(szHLSPath) > 0 && ABL_MediaServerPort.nHLSCutType == 1)
 			{
-			  ABLDeletePath(szHLSPath, szHLSPath);
-		      rmdir(szHLSPath);
- 			}
+				ABLDeletePath(szHLSPath, szHLSPath);
+				rmdir(szHLSPath);
+			}
 #endif
 		}
 
@@ -424,16 +425,16 @@ CMediaStreamSource::~CMediaStreamSource()
 		if (true)
 		{//切片到内存
 			SAFE_ARRAY_DELETE(pTsFileCacheBuffer);
- 
+
 			for (int i = 0; i < MaxStoreTsFileCount; i++)
 				mediaFileBuffer[i].FreeFifo();
 
 			SAFE_ARRAY_DELETE(pH265Buffer);
- 		}
- 
+		}
+
 		tsFileNameFifo.FreeFifo();
 		m3u8FileFifo.FreeFifo();
-  	}
+	}
 
 	//关闭录像存储
 	if (enable_mp4 && recordMP4 > 0)
@@ -444,10 +445,11 @@ CMediaStreamSource::~CMediaStreamSource()
 	if (pClient)
 	{
 		if (pClient->netBaseNetType == NetBaseNetType_addStreamProxyControl || pClient->netBaseNetType == NetBaseNetType_addPushProxyControl)
- 		{//代理拉流，代理推流 ,需要检测重连次数超过 配置文件的此次，才断开代理拉流对象 
-			if(pClient->nReConnectingCount > ABL_MediaServerPort.nReConnectingCount)
+		{//代理拉流，代理推流 ,需要检测重连次数超过 配置文件的此次，才断开代理拉流对象 
+			if (pClient->nReConnectingCount > ABL_MediaServerPort.nReConnectingCount)
 				pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
- 		}else
+		}
+		else
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 	}
 
@@ -468,15 +470,15 @@ CMediaStreamSource::~CMediaStreamSource()
 	{
 		cudaCodec_DeleteVideoDecode(nCudaDecodeChan);
 		nCudaDecodeChan = 0;
-	}
-	if(nEncodeCudaChan > 0)
+}
+	if (nEncodeCudaChan > 0)
 	{
 		cudaEncode_DeleteVideoEncode(nEncodeCudaChan);
 		nEncodeCudaChan = 0;
-	}	
+	}
 #endif 
 	avFrameSWS.DeleteAVFrameSws();
-    SAFE_DELETE(pFFVideoFilter);
+	SAFE_DELETE(pFFVideoFilter);
 
 	malloc_trim(0);
 
@@ -486,8 +488,8 @@ CMediaStreamSource::~CMediaStreamSource()
 	{
 		char szDeleteFileTemp[string_length_512] = { 0 };
 		strcpy(szDeleteFileTemp, szSnapPicturePath);
- 		strcat(szDeleteFileTemp, "*.*");
-		ABLDeletePath(szDeleteFileTemp,szSnapPicturePath);
+		strcat(szDeleteFileTemp, "*.*");
+		ABLDeletePath(szDeleteFileTemp, szSnapPicturePath);
 
 		//删除抓拍路径 
 		RemoveDirectory(szSnapPicturePath);
@@ -505,15 +507,16 @@ CMediaStreamSource::~CMediaStreamSource()
 	fCudaWriteYUVFile = NULL;
 #endif
 #ifdef  WriteInputVdideoFlag
-	if(fWriteInputVideo)
- 	  fclose(fWriteInputVideo);
+	if (fWriteInputVideo)
+		fclose(fWriteInputVideo);
 #endif
 #ifdef WriteInputVideoFileFlag
-	if(fWriteInputVideoFile)
-      fclose(fWriteInputVideoFile);
+	if (fWriteInputVideoFile)
+		fclose(fWriteInputVideoFile);
 #endif
-	WriteLog(Log_Debug, "CMediaStreamSource 析构 %X 完成 nClient = %llu \r\n", this , nClient);
+	WriteLog(Log_Debug, "CMediaStreamSource 析构 %X 完成 nClient = %llu \r\n", this, nClient);
 }
+
 
 static void* ts_alloc(void* param, size_t bytes)
 {
@@ -1713,7 +1716,7 @@ bool CMediaStreamSource::PushAudio(unsigned char* szAudio, int nLength, char* sz
 {//直接拷贝给每个网络发送对象
 	std::lock_guard<std::mutex> lock(mediaSendMapLock);
 
-	if (ABL_MediaServerPort.nEnableAudio == 0 || !(strcmp(szAudioCodec,"AAC") == 0 || strcmp(szAudioCodec, "MP3") == 0 || strcmp(szAudioCodec, "G711_A") == 0 || strcmp(szAudioCodec, "G711_U") == 0))
+	if (!bEnableFlag || ABL_MediaServerPort.nEnableAudio == 0 || !(strcmp(szAudioCodec, "AAC") == 0 || strcmp(szAudioCodec, "MP3") == 0 || strcmp(szAudioCodec, "G711_A") == 0 || strcmp(szAudioCodec, "G711_U") == 0))
 		return false;
 
 	//码流达到通知,只有音频码流也需要通知 【当 strlen(m_mediaCodecInfo.szVideoName) == 0  只有音频，没有视频 】,需要等待音频格式拷贝好 （strlen(m_mediaCodecInfo.szAudioName) > 0）
@@ -1734,14 +1737,14 @@ bool CMediaStreamSource::PushAudio(unsigned char* szAudio, int nLength, char* sz
 		{
 			MessageNoticeStruct msgNotice;
 			msgNotice.nClient = NetBaseNetType_HttpClient_on_stream_arrive;
-			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_stream_arrive\",\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"status\":%s,\"enable_hls\":%s,\"transcodingStatus\":%s,\"sourceURL\":\"%s\",\"networkType\":%d,\"readerCount\":%d,\"noneReaderDuration\":%d,\"videoCodec\":\"%s\",\"videoFrameSpeed\":%d,\"width\":%d,\"height\":%d,\"videoBitrate\":%d,\"audioCodec\":\"%s\",\"audioChannels\":%d,\"audioSampleRate\":%d,\"audioBitrate\":%d,\"url\":{\"rtsp\":\"rtsp://%s:%d/%s/%s\",\"rtmp\":\"rtmp://%s:%d/%s/%s\",\"http-flv\":\"http://%s:%d/%s/%s.flv\",\"ws-flv\":\"ws://%s:%d/%s/%s.flv\",\"http-mp4\":\"http://%s:%d/%s/%s.mp4\",\"http-hls\":\"http://%s:%d/%s/%s.m3u8\"}}", nClient, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, enable_mp4 == true ? "true" : "false", enable_hls == true ? "true" : "false", H265ConvertH264_enable == true ? "true" : "false", pClient->m_addStreamProxyStruct.url, pClient->netBaseNetType, mediaSendMap.size(), (int)0,
+			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_stream_arrive\",\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"status\":%s,\"enable_hls\":%s,\"transcodingStatus\":%s,\"sourceURL\":\"%s\",\"networkType\":%d,\"readerCount\":%d,\"noneReaderDuration\":%d,\"videoCodec\":\"%s\",\"videoFrameSpeed\":%d,\"width\":%d,\"height\":%d,\"videoBitrate\":%d,\"audioCodec\":\"%s\",\"audioChannels\":%d,\"audioSampleRate\":%d,\"audioBitrate\":%d,\"url\":{\"rtsp\":\"%s://%s:%d/%s/%s\",\"rtmp\":\"%s://%s:%d/%s/%s\",\"http-flv\":\"%s://%s:%d/%s/%s.flv\",\"ws-flv\":\"%s://%s:%d/%s/%s.flv\",\"http-mp4\":\"%s://%s:%d/%s/%s.mp4\",\"http-hls\":\"%s://%s:%d/%s/%s.m3u8\"}}", nClient, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, enable_mp4 == true ? "true" : "false", enable_hls == true ? "true" : "false", H265ConvertH264_enable == true ? "true" : "false", pClient->m_addStreamProxyStruct.url, pClient->netBaseNetType, mediaSendMap.size(), (int)0,
 				m_mediaCodecInfo.szVideoName, m_mediaCodecInfo.nVideoFrameRate, m_mediaCodecInfo.nWidth, m_mediaCodecInfo.nHeight, m_mediaCodecInfo.nVideoBitrate, m_mediaCodecInfo.szAudioName, m_mediaCodecInfo.nChannels, m_mediaCodecInfo.nSampleRate, m_mediaCodecInfo.nAudioBitrate,
-				ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,
-				ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,
-				ABL_szLocalIP, ABL_MediaServerPort.nHttpFlvPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,
-				ABL_szLocalIP, ABL_MediaServerPort.nWSFlvPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,
-				ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,
-				ABL_szLocalIP, ABL_MediaServerPort.nHlsPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream);
+				ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,
+				ABL_MediaServerPort.nRtmpPort % 2 == 1 ? "rtmps" : "rtmp", ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,
+				ABL_MediaServerPort.nHttpFlvPort % 2 == 1 ? "https" : "http", ABL_szLocalIP, ABL_MediaServerPort.nHttpFlvPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,
+				ABL_MediaServerPort.nWSFlvPort % 2 == 1 ? "wss" : "ws", ABL_szLocalIP, ABL_MediaServerPort.nWSFlvPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,
+				ABL_MediaServerPort.nHttpMp4Port % 2 == 1 ? "https" : "http", ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream,
+				ABL_MediaServerPort.nHlsPort % 2 == 1 ? "https" : "http", ABL_szLocalIP, ABL_MediaServerPort.nHlsPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream);
 
 			pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 			bNoticeClientArriveFlag = true;
@@ -2002,6 +2005,13 @@ bool CMediaStreamSource::PushAudio(unsigned char* szAudio, int nLength, char* sz
 bool CMediaStreamSource::AddClientToMap(NETHANDLE nClient)
 {
 	std::lock_guard<std::mutex> lock(mediaSendMapLock);
+
+	if (!bEnableFlag)
+	{
+		WriteLog(Log_Debug, "准备删除 %s 不再增加发送对象 %llu ", m_szURL, nClient);
+		return false;
+	}
+
 
 	MediaSendMap::iterator it;
 	it = mediaSendMap.find(nClient);

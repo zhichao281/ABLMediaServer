@@ -76,8 +76,10 @@ const struct mov_buffer_t* mp4_mov_file_buffer(void)
 	return &s_io;
 }
 
-CStreamRecordMP4::CStreamRecordMP4(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort,char* szShareMediaURL)
+CStreamRecordMP4::CStreamRecordMP4(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort, char* szShareMediaURL)
 {
+	bCreateNewRecordFile = false;
+	nRecordDateTime = GetTickCount64();
 	ascLength = 0;
 	memset((char*)&ctx.avc, 0x00, sizeof(ctx.avc));
 	memset((char*)&ctx.hevc, 0x00, sizeof(ctx.hevc));
@@ -92,7 +94,7 @@ CStreamRecordMP4::CStreamRecordMP4(NETHANDLE hServer, NETHANDLE hClient, char* s
 	netBaseNetType = NetBaseNetType_RecordFile_MP4;
 	nClient = hClient;
 	nMediaClient = 0;
-	bRunFlag = true;
+	bRunFlag.exchange(true);
 
 	nVideoFrameCount = 0;
 	fWriteMP4 = NULL;
@@ -110,7 +112,7 @@ CStreamRecordMP4::CStreamRecordMP4(NETHANDLE hServer, NETHANDLE hClient, char* s
 
 CStreamRecordMP4::~CStreamRecordMP4()
 {
-	bRunFlag = false;
+	bRunFlag.exchange(false);
 
 	CloseMp4File();
 
@@ -130,31 +132,46 @@ CStreamRecordMP4::~CStreamRecordMP4()
 
 int CStreamRecordMP4::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* szVideoCodec)
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 
-	if(!m_bOpenFlag)
-	  OpenMp4File(mediaCodecInfo.nWidth, mediaCodecInfo.nHeight);
+	if (!m_bOpenFlag)
+		OpenMp4File(mediaCodecInfo.nWidth, mediaCodecInfo.nHeight);
 
 	nRecvDataTimerBySecond = 0;
-	nCurrentVideoFrames ++;//当前视频帧数
-	nTotalVideoFrames ++;//录像视频总帧数
+	nCurrentVideoFrames++;//当前视频帧数
+	nTotalVideoFrames++;//录像视频总帧数
 	nWriteRecordByteSize += nDataLength;
 
 	m_videoFifo.push(pVideoData, nDataLength);
 
-	if (ABL_MediaServerPort.hook_enable == 1 && (GetTickCount64() - nCreateDateTime) >= 1000 * 30 )
+	if (ABL_MediaServerPort.hook_enable == 1 && (GetTickCount64() - nCreateDateTime) >= 1000 * 30)
 	{
- 		MessageNoticeStruct msgNotice;
+		MessageNoticeStruct msgNotice;
 		msgNotice.nClient = NetBaseNetType_HttpClient_Record_Progress;
 		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_progress\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"TotalVideoDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\"}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, key, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), (nTotalVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, getDatetimeBySecond(nStartDateTime + (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate)));
 		pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 		nCreateDateTime = GetTickCount64();
 	}
 
-	if ((nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate) >= ABL_MediaServerPort.fileSecond)
+	if (ABL_MediaServerPort.recordFileCutType == 1)
+	{//按照服务器本地时间长达到 fileSecond 这个参数的秒数量
+		if ((GetTickCount64() - nRecordDateTime) / 1000 >= ABL_MediaServerPort.fileSecond)
+		{
+			bCreateNewRecordFile = true;
+			nRecordDateTime = GetTickCount64();
+		}
+	}
+	else
+	{//根据录像文件的视频帧总数量 和 视频帧速度计算出录像时长达到 fileSecond 这个参数的秒数量
+		if ((nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate) >= ABL_MediaServerPort.fileSecond)
+			bCreateNewRecordFile = true;
+	}
+
+	if (bCreateNewRecordFile == true)
 	{
 		CloseMp4File();
+		bCreateNewRecordFile = false;
 
 		nCurrentVideoFrames = 0;//当前文件大小重新复位
 	}
@@ -164,7 +181,7 @@ int CStreamRecordMP4::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char*
 
 int CStreamRecordMP4::PushAudio(uint8_t* pAudioData, uint32_t nDataLength, char* szAudioCodec, int nChannels, int SampleRate)
 {
-	if (ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag )
+	if (ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag.load())
 		return -1;
 
 	nWriteRecordByteSize += nDataLength;
@@ -175,7 +192,7 @@ int CStreamRecordMP4::PushAudio(uint8_t* pAudioData, uint32_t nDataLength, char*
 
 int CStreamRecordMP4::SendVideo()
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 
 	unsigned char* pData = NULL;
@@ -192,7 +209,7 @@ int CStreamRecordMP4::SendVideo()
 
 int CStreamRecordMP4::SendAudio()
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 
 	unsigned char* pData = NULL;
@@ -214,7 +231,7 @@ int CStreamRecordMP4::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHan
 
 int CStreamRecordMP4::ProcessNetData()
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 
  	return 0;
@@ -289,7 +306,7 @@ bool CStreamRecordMP4::OpenMp4File(int nWidth, int nHeight)
 
 		if (fWriteMP4 == NULL)
 		{
-			bRunFlag = false;
+			bRunFlag.exchange(false);
 			WriteLog(Log_Debug, "创建录像文件失败，准备删除  nClient = %llu ", nClient);
 			DeleteNetRevcBaseClient(nClient);
 			return false;
@@ -340,7 +357,7 @@ bool CStreamRecordMP4::AddVideo(char* szVideoName, unsigned char* pVideoData, in
 {
 	std::lock_guard<std::mutex> lock(writeMp4Lock);
 
-	if (!m_bOpenFlag || !bRunFlag )
+	if (!m_bOpenFlag || !bRunFlag.load())
 		return false;
 
 	if (ABL_MediaServerPort.nEnableAudio == 0)
@@ -422,7 +439,7 @@ bool CStreamRecordMP4::AddAudio(char* szAudioName, unsigned char* pAudioData, in
 	std::lock_guard<std::mutex> lock(writeMp4Lock);
 
 	//保证视频到达后，再加入音频 【】
-	if (!m_bOpenFlag || !bRunFlag )
+	if (!m_bOpenFlag || !bRunFlag.load())
 		return false;
 
 	if (strcmp(szAudioName, "AAC") == 0)

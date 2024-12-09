@@ -72,6 +72,9 @@
     <ClInclude Include="HSingleton.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="libnet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="circular_buffer.cpp">

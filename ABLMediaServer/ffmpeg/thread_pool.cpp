@@ -5,7 +5,7 @@
 #include <iostream>
 namespace ABL
 {
-#define MAX_THREAD  32
+#define MAX_THREAD  64
 
 
 	ThreadPool::ThreadPool(int threadNumber)

@@ -2,6 +2,8 @@
 #ifdef USE_BOOST
 
 
+#ifndef _CLIENT_MANAGER_H_
+#define _CLIENT_MANAGER_H_ 
 
 #include <boost/unordered_map.hpp>
 #include <boost/serialization/singleton.hpp>
@@ -22,10 +24,14 @@ public:
 	~client_manager(void);
 
 	client_ptr malloc_client(boost::asio::io_context& ioc,
+		boost::asio::ssl::context& context,
 		NETHANDLE srvid,
 		read_callback fnread,
 		close_callback fnclose,
-		bool autoread);
+		bool autoread,
+		bool bSSLFlag,
+		ClientType nCLientType,
+		accept_callback fnaccept);
 	void free_client(client* cli);
 	bool push_client(client_ptr& cli);
 	bool pop_client(NETHANDLE id);
@@ -49,13 +55,13 @@ private:
 #ifdef LIBNET_USE_CORE_SYNC_MUTEX
 	auto_lock::al_mutex m_climtx;
 #else
-	std::mutex          m_climtx;
+	auto_lock::al_spin m_climtx;
 #endif
 };
 
 typedef boost::serialization::singleton<client_manager> client_manager_singleton;
 
-
+#endif
 
 #else
 #include <memory>
@@ -81,10 +87,14 @@ public:
 
 
 	client_ptr malloc_client(asio::io_context& ioc,
+		asio::ssl::context& context,
 		NETHANDLE srvid,
 		read_callback fnread,
 		close_callback fnclose,
-		bool autoread);
+		bool autoread,
+		bool bSSLFlag,
+		ClientType nCLientType,
+		accept_callback fnaccept);
 
 
 	void free_client(client* cli);

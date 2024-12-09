@@ -43,6 +43,7 @@ extern std::shared_ptr<CNetRevcBase>       GetNetRevcBaseClient(NETHANDLE CltHan
 extern CMediaFifo                            pMessageNoticeFifo;          //消息通知FIFO
 
 #endif
+extern CMediaFifo                            pDisconnectMediaSource;      //清理断裂媒体源 
 static void* NetGB28181RtpServer_ps_alloc(void* param, size_t bytes)
 {
 	CNetGB28181RtpServer* pThis = (CNetGB28181RtpServer*)param;
@@ -59,7 +60,7 @@ static void NetGB28181RtpServer_ps_free(void* param, void* /*packet*/)
 static int NetGB28181RtpServer_ps_write(void* param, int stream, void* packet, size_t bytes)
 {
 	CNetGB28181RtpServer* pThis = (CNetGB28181RtpServer*)param;
-	if (!pThis->bRunFlag)
+	if (!pThis->bRunFlag.load())
 		return -1;
 
 	 pThis->GB28181PsToRtPacket((unsigned char*)packet, bytes);
@@ -78,7 +79,7 @@ static int NetGB28181RtpServer_ps_write(void* param, int stream, void* packet, s
 void RTP_DEPACKET_CALL_METHOD GB28181_rtppacket_callback_recv(_rtp_depacket_cb* cb)
 {
 	CNetGB28181RtpServer* pThis = (CNetGB28181RtpServer*)cb->userdata;
-	if (!pThis->bRunFlag)
+	if (!pThis->bRunFlag.load())
 		return;
 
 	if(pThis != NULL)
@@ -467,12 +468,12 @@ int   CNetGB28181RtpServer::Find1078HeadFromCacheBuffer(unsigned char* pData, in
 static int on_gb28181_unpacket(void* param, int stream, int avtype, int flags, int64_t pts, int64_t dts, const void* data, size_t bytes)
 {
 	CNetGB28181RtpServer* pThis = (CNetGB28181RtpServer*)param;
-	if (!pThis->bRunFlag)
+	if (!pThis->bRunFlag.load())
 		return -1;
 
 	if (pThis->pMediaSource == NULL)
 	{
-		pThis->bRunFlag = false;
+		pThis->bRunFlag.exchange(false);
 		DeleteNetRevcBaseClient(pThis->nClient);
 		return -1;
 	}
@@ -540,7 +541,7 @@ static void mpeg_ps_dec_testonstream(void* param, int stream, int codecid, const
 void PS_DEMUX_CALL_METHOD GB28181_RtpRecv_demux_callback(_ps_demux_cb* cb)
 {
 	CNetGB28181RtpServer* pThis = (CNetGB28181RtpServer*)cb->userdata;
-	if (!pThis->bRunFlag)
+	if (!pThis->bRunFlag.load())
 		return;
  
 	if (pThis && cb->streamtype == e_rtpdepkt_st_h264 || cb->streamtype == e_rtpdepkt_st_h265 ||
@@ -553,11 +554,11 @@ void PS_DEMUX_CALL_METHOD GB28181_RtpRecv_demux_callback(_ps_demux_cb* cb)
 				pThis->pMediaSource->netBaseNetType = pThis->netBaseNetType;
 		}
 		
-		if(pThis->pMediaSource == NULL)
+		if (pThis->pMediaSource == NULL)
 		{
-			pThis->bRunFlag = false;
- 			DeleteNetRevcBaseClient(pThis->nClient);
-			return ;
+			pThis->bRunFlag.exchange(false);
+			DeleteNetRevcBaseClient(pThis->nClient);
+			return;
 		}
 
 		if (pThis->m_addStreamProxyStruct.disableVideo[0] == 0x30)
@@ -606,7 +607,7 @@ void PS_DEMUX_CALL_METHOD GB28181_RtpRecv_demux_callback(_ps_demux_cb* cb)
 
 		if (pThis->pMediaSource == NULL)
 		{
-			pThis->bRunFlag = false;
+			pThis->bRunFlag.exchange(false);
 			DeleteNetRevcBaseClient(pThis->nClient);
 			return ;
 		}
@@ -705,7 +706,7 @@ CNetGB28181RtpServer::CNetGB28181RtpServer(NETHANDLE hServer, NETHANDLE hClient,
 	MaxNetDataCacheCount = MaxNetDataCacheBufferLength;
 	nSendRtcpTime = 0;
 	pRtpAddress = pSrcAddress = NULL;
-	bRunFlag = true;
+	bRunFlag.exchange(true);
 	fWritePsFile  = NULL ;
 	pWriteRtpFile = NULL ;
 	strcpy(szClientIP, szIP);
@@ -724,7 +725,7 @@ CNetGB28181RtpServer::CNetGB28181RtpServer(NETHANDLE hServer, NETHANDLE hClient,
 
 CNetGB28181RtpServer::~CNetGB28181RtpServer()
 {
-	bRunFlag = false;
+	bRunFlag.exchange(false);
 	std::lock_guard<std::mutex> lock(netDataLock);
 
 	if (netBaseNetType == NetBaseNetType_NetGB28181RtpServerUDP)
@@ -800,8 +801,8 @@ CNetGB28181RtpServer::~CNetGB28181RtpServer()
 		 XHNetSDK_DestoryUdp(nClientRtcp); 
 
 	 //最后才删除媒体源
-	 if (strlen(m_szShareMediaURL) > 0 && pMediaSource != NULL )
-	    DeleteMediaStreamSource(m_szShareMediaURL);
+	 if (strlen(m_szShareMediaURL) > 0 && pMediaSource != NULL)
+		 pDisconnectMediaSource.push((unsigned char*)m_szShareMediaURL, strlen(m_szShareMediaURL));
 
 #ifdef WriteSendPsFileFlag
 	 if(fWriteSendPsFile)
@@ -833,8 +834,9 @@ int CNetGB28181RtpServer::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, c
 {
 	std::lock_guard<std::mutex> lock(netDataLock);
 
-	if (!bRunFlag || m_openRtpServerStruct.send_disableVideo[0] == 0x31)
+	if (!bRunFlag.load() || m_openRtpServerStruct.send_disableVideo[0] == 0x31)
 		return -1;
+
 
 	if (m_openRtpServerStruct.RtpPayloadDataType[0] == 0x31)
 	{//PS 
@@ -865,7 +867,7 @@ int CNetGB28181RtpServer::PushAudio(uint8_t* pAudioData, uint32_t nDataLength, c
 {
 	std::lock_guard<std::mutex> lock(netDataLock);
 
-	if (!bRunFlag || m_openRtpServerStruct.send_disableAudio[0] == 0x31)
+	if (!bRunFlag.load() || m_openRtpServerStruct.send_disableAudio[0] == 0x31)
 		return -1;
 
 	if (strlen(mediaCodecInfo.szAudioName) > 0)
@@ -903,7 +905,7 @@ int CNetGB28181RtpServer::SendAudio()
 
 int CNetGB28181RtpServer::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHandle, uint8_t* pData, uint32_t nDataLength, void* address)
 {
-	if (!bRunFlag || nDataLength <= 0 )
+	if (!bRunFlag.load() || nDataLength <= 0)
 		return -1;
 	std::lock_guard<std::mutex> lock(netDataLock);
  
@@ -1028,8 +1030,8 @@ int CNetGB28181RtpServer::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClien
 int CNetGB28181RtpServer::ProcessNetData()
 {
 	std::lock_guard<std::mutex> lock(netDataLock);
-	if(!bRunFlag)
-		return -1 ;
+	if (!bRunFlag.load())
+		return -1;
 
 	if (m_addStreamProxyStruct.RtpPayloadDataType[0] == 0x34)
 	{//jt1078
@@ -1126,8 +1128,8 @@ int CNetGB28181RtpServer::ProcessNetData()
 				if (netBaseNetType == NetBaseNetType_GB28181TcpPSInputStream && strlen(m_szShareMediaURL) == 0)
 				{
 					strcpy(m_addStreamProxyStruct.app, "rtp");
-					sprintf(m_addStreamProxyStruct.stream, "%X", rtpHeadPtr->ssrc);
-					sprintf(m_szShareMediaURL, "/rtp/%X", rtpHeadPtr->ssrc);
+					sprintf(m_addStreamProxyStruct.stream, "%X", ntohl(rtpHeadPtr->ssrc));
+					sprintf(m_szShareMediaURL, "/rtp/%X", ntohl(rtpHeadPtr->ssrc));
 				}
 
 				if (nRecvRtpPacketCount < 1000 )
@@ -1175,7 +1177,7 @@ struct ps_demuxer_notify_t notify_NetGB28181RtpServer = { mpeg_ps_dec_testonstre
 
 bool  CNetGB28181RtpServer::RtpDepacket(unsigned char* pData, int nDataLength) 
 {
-	if (pData == NULL || nDataLength >= 65536 || !bRunFlag || nDataLength < 12 )
+	if (pData == NULL || nDataLength >= 65536 || !bRunFlag.load() || nDataLength < 12)
 		return false;
 
 	//创建rtp解包
@@ -1301,7 +1303,7 @@ bool  CNetGB28181RtpServer::RtpDepacket(unsigned char* pData, int nDataLength)
 //TCP方式发送rtcp包
 void  CNetGB28181RtpServer::ProcessRtcpData(unsigned char* szRtcpData, int nDataLength, int nChan)
 {
-	if ( !(netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Server || netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Active) || !bRunFlag)
+	if (!(netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Server || netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Active) || !bRunFlag.load())
 		return;
 
 	if (nRtpRtcpPacketType == 1)
@@ -1328,7 +1330,7 @@ void  CNetGB28181RtpServer::ProcessRtcpData(unsigned char* szRtcpData, int nData
 void GB28181RtpServer_rtp_packet_callback_func_send(_rtp_packet_cb* cb)
 {
 	CNetGB28181RtpServer* pThis = (CNetGB28181RtpServer*)cb->userdata;
-	if (pThis == NULL || !pThis->bRunFlag)
+	if (pThis == NULL || !pThis->bRunFlag.load())
 		return;
 
 	if (pThis->netBaseNetType == NetBaseNetType_NetGB28181RtpServerUDP)
@@ -1492,7 +1494,7 @@ void  CNetGB28181RtpServer::CreateSendRtpByPS()
 //PS 数据打包成rtp 
 void  CNetGB28181RtpServer::GB28181PsToRtPacket(unsigned char* pPsData, int nLength)
 {
-	if (hRtpPS > 0 && bRunFlag)
+	if (hRtpPS > 0 && bRunFlag.load())
 	{
 		inputPS.data = pPsData;
 		inputPS.datasize = nLength;
@@ -1503,14 +1505,15 @@ void  CNetGB28181RtpServer::GB28181PsToRtPacket(unsigned char* pPsData, int nLen
 //udp方式发送rtp包
 void  CNetGB28181RtpServer::SendGBRtpPacketUDP(unsigned char* pRtpData, int nLength)
 {
-	if(pSrcAddress != NULL && bRunFlag && pRtpData != NULL && nLength > 0 )
-	  XHNetSDK_Sendto(nClient, pRtpData, nLength, pSrcAddress);
+	if (pSrcAddress != NULL && bRunFlag.load() && pRtpData != NULL && nLength > 0)
+		XHNetSDK_Sendto(nClient, pRtpData, nLength, pSrcAddress);
 }
+
 
 //国标28181PS码流TCP方式发送 
 void  CNetGB28181RtpServer::GB28181SentRtpVideoData(unsigned char* pRtpVideo, int nDataLength)
 {
-	if (bRunFlag == false  )
+	if (bRunFlag.load() == false)
 		return;
 
 	if ((nMaxRtpSendVideoMediaBufferLength - nSendRtpVideoMediaBufferLength < nDataLength + 4) && nSendRtpVideoMediaBufferLength > 0)
@@ -1518,7 +1521,7 @@ void  CNetGB28181RtpServer::GB28181SentRtpVideoData(unsigned char* pRtpVideo, in
 		nSendRet = XHNetSDK_Write(nClient, szSendRtpVideoMediaBuffer, nSendRtpVideoMediaBufferLength, 1);
 		if (nSendRet != 0)
 		{
-			bRunFlag = false;
+			bRunFlag.exchange(false);
  			WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, 发送国标RTP码流出错 ，Length = %d ,nSendRet = %d", this, nSendRtpVideoMediaBufferLength, nSendRet);
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 			return;
@@ -1534,7 +1537,7 @@ void  CNetGB28181RtpServer::GB28181SentRtpVideoData(unsigned char* pRtpVideo, in
 		if (nSendRet != 0)
 		{
 			WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, 发送国标RTP码流出错 ，Length = %d ,nSendRet = %d", this, nSendRtpVideoMediaBufferLength, nSendRet);
-			bRunFlag = false;
+			bRunFlag.exchange(false);
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 			return;
 		}
@@ -1564,7 +1567,7 @@ void  CNetGB28181RtpServer::GB28181SentRtpVideoData(unsigned char* pRtpVideo, in
 	}
 	else
 	{
-		bRunFlag = false;
+		bRunFlag.exchange(false);
 		WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, 非法的国标TCP包头发送方式(必须为 1、2 )nGBRtpTCPHeadType = %d ", this, ABL_MediaServerPort.nGBRtpTCPHeadType);
 		DeleteNetRevcBaseClient(nClient);
 	}

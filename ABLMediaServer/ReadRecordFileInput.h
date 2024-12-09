@@ -47,6 +47,10 @@ public:
    virtual int SendFirstRequst();//发送第一个请求
    virtual bool RequestM3u8File();//请求m3u8文件
 
+   uint64_t           nStartSeekTime;//开始seek时间点
+   volatile bool      bSeekTimeState;//正处于Seek状态时间范围内
+
+
    char           szFileNameUTF8[512] ;
    int            open_codec_context(int *stream_idx, AVCodecContext **dec_ctx, AVFormatContext *fmt_ctx, enum AVMediaType type);
    void           AddADTSHeadToAAC(unsigned char* szData, int nAACLength);

@@ -65,7 +65,7 @@ CNetClientSendRtsp::CNetClientSendRtsp(NETHANDLE hServer, NETHANDLE hClient, cha
 	strcpy(szClientIP, szIP);
 	nClientPort = nPort;
 	nPrintCount = 0;
-	bRunFlag = true;
+
 	bIsInvalidConnectFlag = false;
 
 	netDataCacheLength = 0;//网络数据缓存大小
@@ -112,7 +112,7 @@ CNetClientSendRtsp::CNetClientSendRtsp(NETHANDLE hServer, NETHANDLE hClient, cha
  	fWriteRtpAudio = fopen("d:\\rtspRecv.aac", "wb");
 	bStartWriteFlag = false;
 #endif
-	bRunFlag = true;
+
 	strcpy(szTrackIDArray[1], "streamid=0");
 	strcpy(szTrackIDArray[2], "streamid=1");
 	WriteLog(Log_Debug, "CNetClientSendRtsp 构造 nClient = %llu ", nClient);
@@ -121,7 +121,7 @@ CNetClientSendRtsp::CNetClientSendRtsp(NETHANDLE hServer, NETHANDLE hClient, cha
 CNetClientSendRtsp::~CNetClientSendRtsp()
 {
 	WriteLog(Log_Debug, "CNetClientSendRtsp 等待任务退出 nTime = %llu, nClient = %llu ",GetTickCount64(), nClient);
-	bRunFlag = false;
+	bRunFlag.exchange(false);
  	std::lock_guard<std::mutex> lock(businessProcMutex);
 	
 	for (int i = 0; i < 3; i++)
@@ -158,7 +158,7 @@ CNetClientSendRtsp::~CNetClientSendRtsp()
 int CNetClientSendRtsp::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* szVideoCodec)
 {
 	nRecvDataTimerBySecond = 0;
-	if (!bRunFlag || m_addPushProxyStruct.disableVideo[0] != 0x30 )
+	if (!bRunFlag.load() || m_addPushProxyStruct.disableVideo[0] != 0x30)
 		return -1;
 	std::lock_guard<std::mutex> lock(businessProcMutex);
 
@@ -173,7 +173,7 @@ int CNetClientSendRtsp::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, cha
 int CNetClientSendRtsp::PushAudio(uint8_t* pVideoData, uint32_t nDataLength, char* szAudioCodec, int nChannels, int SampleRate)
 {
 	nRecvDataTimerBySecond = 0;
-	if (!bRunFlag || m_addPushProxyStruct.disableAudio[0] != 0x30)
+	if (!bRunFlag.load() || m_addPushProxyStruct.disableAudio[0] != 0x30)
 		return -1;
 	std::lock_guard<std::mutex> lock(businessProcMutex);
 
@@ -270,7 +270,7 @@ int32_t  CNetClientSendRtsp::XHNetSDKRead(NETHANDLE clihandle, uint8_t* buffer, 
 {
 	int nWaitCount = 0;
 	bExitProcessFlagArray[0] = false;
-	while (!bIsInvalidConnectFlag && bRunFlag)
+	while (!bIsInvalidConnectFlag && bRunFlag.load())
 	{
  		if (netDataCacheLength >= *buffsize)
 		{
@@ -298,7 +298,7 @@ bool   CNetClientSendRtsp::ReadRtspEnd()
 	unsigned int nRet;
 	bool     bRet = false;
 	bExitProcessFlagArray[1] = false;
-	while (!bIsInvalidConnectFlag && bRunFlag)
+	while (!bIsInvalidConnectFlag && bRunFlag.load())
 	{
 		nReadLength = 1;
 		nRet = XHNetSDKRead(nClient, data_ + data_Length, &nReadLength, true, true);
@@ -512,7 +512,7 @@ int  CNetClientSendRtsp::GetRtspPathCount(char* szRtspURL)
 void Video_rtp_packet_callback_func_send(_rtp_packet_cb* cb)
 {
 	CNetClientSendRtsp* pRtspClient = (CNetClientSendRtsp*)cb->userdata;
-	if(pRtspClient->bRunFlag)
+	if (pRtspClient->bRunFlag.load())
 	  pRtspClient->ProcessRtpVideoData(cb->data, cb->datasize);
 }
 
@@ -520,7 +520,7 @@ void Video_rtp_packet_callback_func_send(_rtp_packet_cb* cb)
 void Audio_rtp_packet_callback_func_send(_rtp_packet_cb* cb)
 {
 	CNetClientSendRtsp* pRtspClient = (CNetClientSendRtsp*)cb->userdata;
-	if(pRtspClient->bRunFlag)
+	if (pRtspClient->bRunFlag.load())
 	  pRtspClient->ProcessRtpAudioData(cb->data, cb->datasize);
 }
 
@@ -595,7 +595,7 @@ void CNetClientSendRtsp::SumSendRtpMediaBuffer(unsigned char* pRtpMedia, int nRt
 {
 	std::lock_guard<std::mutex> lock(MediaSumRtpMutex);
  
-	if (bRunFlag)
+	if (bRunFlag.load())
 	{
 		nSendRet = XHNetSDK_Write(nClient, pRtpMedia, nRtpLength, 1);
 		if (nSendRet != 0)
@@ -604,7 +604,7 @@ void CNetClientSendRtsp::SumSendRtpMediaBuffer(unsigned char* pRtpMedia, int nRt
 			//WriteLog(Log_Debug, "发送rtp 包失败 ,累计次数 nSendRtpFailCount = %d 次 ，nClient = %llu ", nSendRtpFailCount, nClient);
 			if (nSendRtpFailCount >= 30)
 			{
-				bRunFlag = false;			
+				bRunFlag.exchange(false);
 				WriteLog(Log_Debug, "发送rtp 包失败 ,累计次数 已经达到 nSendRtpFailCount = %d 次，即将删除 ，nClient = %llu ", nSendRtpFailCount, nClient);
 				pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 			}
@@ -879,7 +879,7 @@ void  CNetClientSendRtsp::InputRtspData(unsigned char* pRecvData, int nDataLengt
 	else if (memcmp(pRecvData, "TEARDOWN", 8) == 0 && strstr((char*)pRecvData, "\r\n\r\n") != NULL)
 	{
 		WriteLog(Log_Debug, "收到 TEARDOWN 命令，立即执行删除 nClient = %llu ", nClient);
-		bRunFlag = false;
+		bRunFlag.exchange(false);
 		DeleteNetRevcBaseClient(nClient);
 	}
 	else if (memcmp(pRecvData, "GET_PARAMETER", 13) == 0 && strstr((char*)pRecvData, "\r\n\r\n") != NULL)
@@ -977,7 +977,7 @@ int CNetClientSendRtsp::ProcessNetData()
 
 	bExitProcessFlagArray[2] = false; 
 	tRtspProcessStartTime = GetTickCount64();
-	while (!bIsInvalidConnectFlag && bRunFlag && netDataCacheLength > 4)
+	while (!bIsInvalidConnectFlag && bRunFlag.load() && netDataCacheLength > 4)
 	{
 	    uint32_t nReadLength = 4;
 		data_Length = 0;

@@ -1,6 +1,6 @@
 #ifndef _NetRecvBase_H
 #define _NetRecvBase_H
-
+#include <atomic>
 #include "MediaFifo.h"
 #include "MediaStreamSource.h"
 #include "AACEncode.h"
@@ -25,6 +25,10 @@ public:
 
    virtual int   SendFirstRequst() = 0;//发送第一个请求
    virtual bool  RequestM3u8File() = 0 ;
+
+   uint64_t               nRecordDateTime;//录像文件秒数
+   bool                   bCreateNewRecordFile;//创建新的录像文件
+   int64_t                oldDTS;//上一次dts值，用于判断是否读取录像文件完毕 
 
    char*                  getDatetimeBySecond(time_t tSecond);
    char                   szDatetimeBySecond[128];
@@ -207,7 +211,7 @@ public:
    uint32_t               psDeMuxHandle;          //ps 解包
 
    uint64_t               hParent;//国标代理的句柄号
-   volatile bool          bRunFlag;
+   std::atomic<bool>     bRunFlag;
    char                   szMediaSourceURL[string_length_1024];//媒体流地址，比如 /Media/Camera_00001 
 
    bool                   SplitterAppStream(char* szMediaSoureFile);

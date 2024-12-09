@@ -20,6 +20,7 @@ extern std::shared_ptr<CMediaStreamSource> GetMediaStreamSource(char* szURL, boo
 extern bool                                  DeleteMediaStreamSource(char* szURL);
 extern             bool                      DeleteNetRevcBaseClient(NETHANDLE CltHandle);
 extern             char                      ABL_MediaSeverRunPath[256] ; //当前路径
+extern CMediaFifo                            pDisconnectMediaSource;      //清理断裂媒体源 
 
 CNetServerRecvAudio::CNetServerRecvAudio(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort, char* szShareMediaURL)
 {
@@ -57,7 +58,7 @@ CNetServerRecvAudio::CNetServerRecvAudio(NETHANDLE hServer, NETHANDLE hClient, c
 	memset(szFlvName, 0x00, sizeof(szFlvName));
  
 	netBaseNetType = NetBaseNetType_WebSocektRecvAudio;
-	bRunFlag = true;
+
 
 	memset(szSec_WebSocket_Key, 0x00, sizeof(szSec_WebSocket_Key));
 	memset(szSec_WebSocket_Protocol, 0x00, sizeof(szSec_WebSocket_Protocol));
@@ -75,7 +76,7 @@ CNetServerRecvAudio::CNetServerRecvAudio(NETHANDLE hServer, NETHANDLE hClient, c
 
 CNetServerRecvAudio::~CNetServerRecvAudio()
 {
-	bRunFlag = false;
+	bRunFlag.exchange(false);
 	std::lock_guard<std::mutex> lock(NetServerWS_FLVLock);
 
 	XHNetSDK_Disconnect(nClient);
@@ -113,7 +114,7 @@ CNetServerRecvAudio::~CNetServerRecvAudio()
 
 	//删除媒体源
 	if (strlen(m_szShareMediaURL) > 0 && pMediaSouce != NULL)
-		DeleteMediaStreamSource(m_szShareMediaURL);
+		pDisconnectMediaSource.push((unsigned char*)m_szShareMediaURL, strlen(m_szShareMediaURL));
 
 #ifdef WritePCMDaFile
  	fclose(fWritePCMFile);
@@ -150,7 +151,7 @@ int CNetServerRecvAudio::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClient
 	std::lock_guard<std::mutex> lock(NetServerWS_FLVLock);
 	nRecvDataTimerBySecond = 0;
 
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 
 	if (MaxNetDataCacheCount - nNetEnd >= nDataLength)
@@ -190,7 +191,7 @@ int CNetServerRecvAudio::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClient
 
 int CNetServerRecvAudio::ProcessNetData()
 {
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 
 	int nRet = 5;
@@ -317,7 +318,7 @@ void   CNetServerRecvAudio::ProcessPcmCacheBuffer()
 			DeleteNetRevcBaseClient(nClient);
 			return;
 		}
-		pMediaSouce =  CreateMediaStreamSource(m_szShareMediaURL, nClient, MediaSourceType_LiveMedia, 0, m_h265ConvertH264Struct);
+		pMediaSouce = CreateMediaStreamSource(m_szShareMediaURL, nClient, MediaSourceType_LiveMedia, 0, m_h265ConvertH264Struct);
 		if(pMediaSouce == NULL)
 		{
 			WriteLog(Log_Debug, "ProcessPcmCacheBuffer() = %X  nClient = %llu , 创建媒体源失败 %s ", this, nClient, m_szShareMediaURL);
@@ -576,7 +577,7 @@ bool  CNetServerRecvAudio::SendWebSocketData(unsigned char* pData, int nDataLeng
 {
 	std::lock_guard<std::mutex> lock(NetServerWS_FLVLock);
 
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return false;
 	if (nDataLength >= 0 && nDataLength <= 125)
 	{

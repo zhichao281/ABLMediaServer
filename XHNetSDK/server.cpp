@@ -1,6 +1,5 @@
 
 #ifdef USE_BOOST
-
 #include <boost/make_shared.hpp>
 #include "io_context_pool.h"
 #include "server.h"
@@ -19,8 +18,9 @@
 #endif
 
 extern io_context_pool g_iocpool;
+extern char            szXHNetSDK_CurrentPath[512];
 
-server::server(boost::asio::io_context &ioc,
+server::server(boost::asio::io_context& ioc,
 	boost::asio::ip::tcp::endpoint& ep,
 	accept_callback fnaccept,
 	read_callback fnread,
@@ -33,15 +33,28 @@ server::server(boost::asio::io_context &ioc,
 	, m_fnclose(fnclose)
 	, m_autoread(autoread)
 	, m_id(generate_identifier())
+	, sslFlag(false)
+	, m_context(boost::asio::ssl::context::sslv23)
 {
 }
 
 server::~server(void)
 {
 	recycle_identifier(m_id);
-#ifndef _WIN32
 	malloc_trim(0);
-#endif
+}
+
+void server::init_SSL()
+{
+	m_context.set_options(
+		boost::asio::ssl::context::default_workarounds
+		| boost::asio::ssl::context::no_sslv2);
+
+	char  path[1024] = { 0 };
+
+	sprintf(path, "%sserver.pem", szXHNetSDK_CurrentPath);
+	m_context.use_certificate_chain_file(path);
+	m_context.use_private_key_file(path, boost::asio::ssl::context::pem);
 }
 
 int32_t server::run()
@@ -123,7 +136,7 @@ void server::start_accept()
 	client_ptr c;
 	while (m_acceptor.is_open())
 	{
-		c = client_manager_singleton::get_mutable_instance().malloc_client(g_iocpool.get_io_context(), get_id(), m_fnread, m_fnclose, m_autoread);
+		c = client_manager_singleton::get_mutable_instance().malloc_client(g_iocpool.get_io_context(), m_context, get_id(), m_fnread, m_fnclose, m_autoread, sslFlag, clientType_Accept, m_fnaccept);
 		if (c)
 		{
 			break;
@@ -134,10 +147,20 @@ void server::start_accept()
 		}
 	}
 
-	m_acceptor.async_accept(c->socket(),
-		boost::bind(&server::handle_accept,
-			shared_from_this(), c,
-			boost::asio::placeholders::error));
+	if (sslFlag.load() == true)
+	{//SSL 连接
+		m_acceptor.async_accept(c->socket_(),
+			boost::bind(&server::handle_accept,
+				shared_from_this(), c,
+				boost::asio::placeholders::error));
+	}
+	else
+	{
+		m_acceptor.async_accept(c->socket(),
+			boost::bind(&server::handle_accept,
+				shared_from_this(), c,
+				boost::asio::placeholders::error));
+	}
 }
 
 void server::handle_accept(client_ptr c, const boost::system::error_code& ec)
@@ -149,7 +172,12 @@ void server::handle_accept(client_ptr c, const boost::system::error_code& ec)
 		if (m_fnaccept)
 		{
 			boost::system::error_code ec;
-			boost::asio::ip::tcp::endpoint endpoint = c->socket().remote_endpoint(ec);
+			boost::asio::ip::tcp::endpoint endpoint;
+			if (sslFlag.load() == true)
+				endpoint = c->socket_().remote_endpoint(ec);
+			else
+				endpoint = c->socket().remote_endpoint(ec);
+
 			if (ec || !client_manager_singleton::get_mutable_instance().push_client(c))
 			{
 				c->close();
@@ -167,7 +195,11 @@ void server::handle_accept(client_ptr c, const boost::system::error_code& ec)
 				tAddr.sin_addr = addr_n;
 				tAddr.sin_port = htons(endpoint.port());
 
-				m_fnaccept(get_id(), c->get_id(), &tAddr);
+				//普通连接，直接通知有连接上来，SSL的等待到握手成功才能通知
+				if (sslFlag.load() == false)
+					m_fnaccept(get_id(), c->get_id(), &tAddr);
+				else
+					memcpy((char*)&c->tAddr4, (char*)&tAddr, sizeof(tAddr));
 			}
 			else
 			{
@@ -179,7 +211,11 @@ void server::handle_accept(client_ptr c, const boost::system::error_code& ec)
 				tAddr.sin6_addr = addr_n;
 				tAddr.sin6_port = htons(endpoint.port());
 
-				m_fnaccept(get_id(), c->get_id(), &tAddr);
+				//普通连接，直接通知有连接上来，SSL的等待到握手成功才能通知
+				if (sslFlag.load() == false)
+					m_fnaccept(get_id(), c->get_id(), &tAddr);
+				else
+					memcpy((char*)&c->tAddr6, (char*)&tAddr, sizeof(tAddr));
 			}
 		}
 
@@ -224,6 +260,7 @@ void server::handle_accept(client_ptr c, const boost::system::error_code& ec)
 #endif
 
 extern io_context_pool g_iocpool;
+extern char            szXHNetSDK_CurrentPath[512];
 
 server::server(asio::io_context& ioc,
 	asio::ip::tcp::endpoint& ep,
@@ -238,6 +275,8 @@ server::server(asio::io_context& ioc,
 	, m_fnclose(fnclose)
 	, m_autoread(autoread)
 	, m_id(generate_identifier())
+	, sslFlag(false)
+	, m_context(asio::ssl::context::sslv23)
 {
 }
 
@@ -245,13 +284,25 @@ server::~server(void)
 {
 	
 	recycle_identifier(m_id);
-
 #ifndef _WIN32
 	malloc_trim(0);
 #endif
-
-
 }
+void server::init_SSL()
+{
+	m_context.set_options(
+		asio::ssl::context::default_workarounds
+		| asio::ssl::context::no_sslv2);
+
+	char  path[1024] = { 0 };
+
+	sprintf_s(path, sizeof(path), "%sserver.pem", szXHNetSDK_CurrentPath);
+
+
+	m_context.use_certificate_chain_file(path);
+	m_context.use_private_key_file(path, asio::ssl::context::pem);
+}
+
 
 int32_t server::run()
 {
@@ -332,7 +383,7 @@ void server::start_accept()
 	client_ptr c;
 	while (m_acceptor.is_open())
 	{
-		c = client_manager::getInstance().malloc_client(g_iocpool.get_io_context(), get_id(), m_fnread, m_fnclose, m_autoread);
+		c = client_manager::getInstance().malloc_client(g_iocpool.get_io_context(), m_context, get_id(), m_fnread, m_fnclose, m_autoread, sslFlag, clientType_Accept, m_fnaccept);
 		if (c)
 		{
 			break;
@@ -344,10 +395,21 @@ void server::start_accept()
 		}
 	}
 
-	m_acceptor.async_accept(c->socket(),
-		std::bind(&server::handle_accept,
-			shared_from_this(), c,
-			std::placeholders::_1));
+	if (sslFlag.load() == true)
+	{//SSL 连接
+		m_acceptor.async_accept(c->socket_(),
+			std::bind(&server::handle_accept,
+				shared_from_this(), c,
+				std::placeholders::_1));
+	}
+	else
+	{
+		m_acceptor.async_accept(c->socket(),
+			std::bind(&server::handle_accept,
+				shared_from_this(), c,
+				std::placeholders::_1));
+	}
+
 }
 
 void server::handle_accept(client_ptr c, std::error_code ec)
@@ -358,8 +420,14 @@ void server::handle_accept(client_ptr c, std::error_code ec)
 
 		if (m_fnaccept)
 		{
-			std::error_code ec;
-			asio::ip::tcp::endpoint endpoint = c->socket().remote_endpoint(ec);
+			std::error_code ec;		
+			asio::ip::tcp::endpoint endpoint;
+			if (sslFlag.load() == true)
+				endpoint = c->socket_().remote_endpoint(ec);
+			else
+				endpoint = c->socket().remote_endpoint(ec);
+
+
 			if (ec || !client_manager::getInstance().push_client(c))
 			{
 				c->close();
@@ -377,7 +445,11 @@ void server::handle_accept(client_ptr c, std::error_code ec)
 				tAddr.sin_addr = addr_n;
 				tAddr.sin_port = htons(endpoint.port());
 
-				m_fnaccept(get_id(), c->get_id(), &tAddr);
+				//普通连接，直接通知有连接上来，SSL的等待到握手成功才能通知
+				if (sslFlag.load() == false)
+					m_fnaccept(get_id(), c->get_id(), &tAddr);
+				else
+					memcpy((char*)&c->tAddr4, (char*)&tAddr, sizeof(tAddr));
 			}
 			else
 			{
@@ -389,7 +461,11 @@ void server::handle_accept(client_ptr c, std::error_code ec)
 				tAddr.sin6_addr = addr_n;
 				tAddr.sin6_port = htons(endpoint.port());
 
-				m_fnaccept(get_id(), c->get_id(), &tAddr);
+				//普通连接，直接通知有连接上来，SSL的等待到握手成功才能通知
+				if (sslFlag.load() == false)
+					m_fnaccept(get_id(), c->get_id(), &tAddr);
+				else
+					memcpy((char*)&c->tAddr6, (char*)&tAddr, sizeof(tAddr));
 			}
 		}
 

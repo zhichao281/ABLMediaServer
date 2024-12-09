@@ -40,7 +40,7 @@ public:
 #ifdef  WriteG711toPCMFileFlag 
    FILE*         fWriteG711;
 #endif
-
+   uint64_t       nSendPacketCount;
    std::mutex     NetRtmpServerLock;
    flv_muxer_t*   flvMuxer;
    uint32_t       nWriteRet;

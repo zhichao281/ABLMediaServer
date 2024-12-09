@@ -1,6 +1,7 @@
 #pragma  once
 #ifdef USE_BOOST
-
+#ifndef _CLIENT_H_
+#define _CLIENT_H_ 
 
 #include <boost/atomic.hpp>
 #include <boost/shared_ptr.hpp>
@@ -10,21 +11,44 @@
 #include "data_define.h"
 #include "libnet.h"
 #include "circular_buffer.h"
+#include <boost/asio/ssl.hpp>
+
+//客户端类型
+enum ClientType
+{
+	clientType_Connect = 1,  //主动向外连接服务器产生的client 
+	clientType_Accept = 2   //外部连接本地端口产生的client 
+};
 
 class client : public boost::enable_shared_from_this<client>
 {
 public:
 	client(boost::asio::io_context& ioc,
+		boost::asio::ssl::context& context,
 		NETHANDLE srvhandle,
 		read_callback fnread,
 		close_callback fnclose,
-		bool autoread);
+		bool autoread,
+		bool bSSLFlag,
+		ClientType nCLientType,
+		accept_callback  fnaccept);
 	~client();
 
-	std::mutex     m_climtx;
+	boost::atomic_bool m_connectflag;
+	int               m_nClientType;
+	accept_callback   m_fnaccept;
+	sockaddr_in       tAddr4;
+	sockaddr_in6      tAddr6;
+
+	boost::asio::ip::tcp::resolver resolver;
+	boost::atomic_bool m_bSSLFlag;
+	void handle_handshake(const boost::system::error_code& error);
+
+	auto_lock::al_spin m_climtx;
 	NETHANDLE get_id();
 	NETHANDLE get_server_id() const;
 	boost::asio::ip::tcp::socket& socket();
+	boost::asio::ssl::stream<boost::asio::ip::tcp::socket>::lowest_layer_type& socket_();
 
 	int32_t run();
 	int32_t connect(int8_t* remoteip,
@@ -54,6 +78,7 @@ private:
 	NETHANDLE m_srvid;
 	NETHANDLE m_id;
 	boost::asio::ip::tcp::socket m_socket;
+	boost::asio::ssl::stream<boost::asio::ip::tcp::socket> m_socket_;
 	read_callback m_fnread;
 	close_callback m_fnclose;
 	connect_callback m_fnconnect;
@@ -101,6 +126,11 @@ inline boost::asio::ip::tcp::socket& client::socket()
 	return m_socket;
 }
 
+inline boost::asio::ssl::stream<boost::asio::ip::tcp::socket>::lowest_layer_type& client::socket_()
+{
+	return m_socket_.lowest_layer();
+}
+
 inline NETHANDLE client::get_id()
 {
 	return m_id;
@@ -111,13 +141,14 @@ inline NETHANDLE client::get_server_id() const
 	return m_srvid;
 }
 
+#endif
 
 #else
 
 
-#ifdef _WIN32
-#define _WIN32_WINNT 0x0A00 
-#endif
+//#ifdef _WIN32
+//#define _WIN32_WINNT 0x0A00 
+//#endif
 
 
 #include <memory>
@@ -127,20 +158,46 @@ inline NETHANDLE client::get_server_id() const
 #include "data_define.h"
 #include "libnet.h"
 #include "circular_buffer.h"
+#include <asio/ssl.hpp>
+
+//客户端类型
+enum ClientType
+{
+	clientType_Connect = 1,  //主动向外连接服务器产生的client 
+	clientType_Accept = 2   //外部连接本地端口产生的client 
+};
+
 
 class client : public std::enable_shared_from_this<client>
 {
 public:
 	client(asio::io_context& ioc,
+		asio::ssl::context& context,
 		NETHANDLE srvhandle,
 		read_callback fnread,
 		close_callback fnclose,
-		bool autoread);
+		bool autoread,
+		bool bSSLFlag,
+		ClientType nCLientType,
+		accept_callback  fnaccept);
+
 	~client();
+
+	std::atomic<bool> m_connectflag;
+	int               m_nClientType;
+	accept_callback   m_fnaccept;
+	sockaddr_in       tAddr4;
+	sockaddr_in6      tAddr6;
+
+	asio::ip::tcp::resolver resolver;
+	std::atomic<bool> m_bSSLFlag;
+	void handle_handshake(const std::error_code& error);
+
 	auto_lock::al_spin m_climtx;
 	NETHANDLE get_id();
 	NETHANDLE get_server_id() const;
 	asio::ip::tcp::socket& socket();
+	asio::ssl::stream<asio::ip::tcp::socket>::lowest_layer_type& socket_();
 
 	int32_t run();
 	int32_t connect(int8_t* remoteip,
@@ -160,16 +217,17 @@ public:
 	void close();
 
 private:
-	void handle_write(std::error_code ec, size_t transize);
-	void handle_read(std::error_code ec, size_t transize);
-	void handle_connect(std::error_code ec);
-	void handle_connect_timeout(std::error_code ec);
+	void handle_write(const std::error_code& ec, size_t transize);
+	void handle_read(const std::error_code& ec, size_t transize);
+	void handle_connect(const std::error_code& ec);
+	void handle_connect_timeout(const std::error_code& ec);
 	bool write_packet();
 
 private:
 	NETHANDLE m_srvid;
 	NETHANDLE m_id;
 	asio::ip::tcp::socket m_socket;
+	asio::ssl::stream<asio::ip::tcp::socket> m_socket_;
 	read_callback m_fnread;
 	close_callback m_fnclose;
 	connect_callback m_fnconnect;
@@ -202,6 +260,13 @@ inline asio::ip::tcp::socket& client::socket()
 {
 	return m_socket;
 }
+
+
+inline asio::ssl::stream<asio::ip::tcp::socket>::lowest_layer_type& client::socket_()
+{
+	return m_socket_.lowest_layer();
+}
+
 
 inline NETHANDLE client::get_id()
 {

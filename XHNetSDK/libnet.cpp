@@ -9,7 +9,10 @@
 #include "client_manager.h"
 #include "udp_session_manager.h"
 #include "identifier_generator.h"
+#include <boost/asio/ssl.hpp>
+#include <unistd.h>
 
+char    szXHNetSDK_CurrentPath[512] = { 0 };
 
 io_context_pool g_iocpool;
 uint32_t g_deinittimes = 0;
@@ -20,14 +23,20 @@ auto_lock::al_mutex g_initmtx;
 auto_lock::al_spin g_initmtx;
 #endif
 
+bool GetMediaServerCurrentPath(char* szCurPath)
+{
+	sprintf(szCurPath, "%s/", get_current_dir_name());
+	return true;
+}
 LIBNET_API int32_t XHNetSDK_Init(uint32_t ioccount,
-							   uint32_t periocthread)
+	uint32_t periocthread)
 {
 #ifdef LIBNET_USE_CORE_SYNC_MUTEX
 	auto_lock::al_lock<auto_lock::al_mutex> al(g_initmtx);
 #else
 	auto_lock::al_lock<auto_lock::al_spin> al(g_initmtx);
 #endif
+	GetMediaServerCurrentPath(szXHNetSDK_CurrentPath);
 
 	++g_deinittimes;
 
@@ -42,7 +51,7 @@ LIBNET_API int32_t XHNetSDK_Init(uint32_t ioccount,
 		{
 			g_initret = g_iocpool.run();
 		}
-	}	
+	}
 
 	return g_initret;
 }
@@ -77,13 +86,16 @@ LIBNET_API int32_t XHNetSDK_Deinit()
 	return ret;
 }
 
-LIBNET_API int32_t XHNetSDK_Listen(int8_t* localip,
-								 uint16_t localport,
-								 NETHANDLE* srvhandle,
-								 accept_callback fnaccept,
-								 read_callback fnread,
-								 close_callback fnclose,
-								 uint8_t autoread)
+LIBNET_API int32_t XHNetSDK_Listen(
+	int8_t* localip,
+	uint16_t localport,
+	NETHANDLE* srvhandle,
+	accept_callback fnaccept,
+	read_callback fnread,
+	close_callback fnclose,
+	uint8_t autoread,
+	bool bSSLFlag
+)
 {
 	int32_t ret = e_libnet_err_noerror;
 
@@ -111,11 +123,14 @@ LIBNET_API int32_t XHNetSDK_Listen(int8_t* localip,
 
 			try
 			{
-				server_ptr s = boost::make_shared<server>(boost::ref(g_iocpool.get_io_context()), boost::ref(endpoint), 
+				server_ptr s = boost::make_shared<server>(boost::ref(g_iocpool.get_io_context()), boost::ref(endpoint),
 					fnaccept, fnread, fnclose, (0 != autoread) ? true : false);
 
 				if (server_manager_singleton::get_mutable_instance().push_server(s))
 				{
+					s->sslFlag.exchange(bSSLFlag);
+					if (bSSLFlag)
+						s->init_SSL();
 					ret = s->run();
 					if (e_libnet_err_noerror == ret)
 					{
@@ -140,7 +155,7 @@ LIBNET_API int32_t XHNetSDK_Listen(int8_t* localip,
 			{
 				ret = e_libnet_err_srvcreate;
 			}
-	
+
 		}
 	}
 
@@ -180,9 +195,11 @@ LIBNET_API int32_t XHNetSDK_Connect(int8_t* remoteip,
 	connect_callback fnconnect,
 	uint8_t blocked,
 	uint32_t timeout,
-	uint8_t autoread)
+	uint8_t autoread,
+	bool bSSLFlag)
 {
 	int32_t ret = e_libnet_err_noerror;
+	boost::asio::ssl::context m_context(boost::asio::ssl::context::sslv23);
 
 	if (e_libnet_err_noerror != g_initret)
 	{
@@ -194,8 +211,15 @@ LIBNET_API int32_t XHNetSDK_Connect(int8_t* remoteip,
 	}
 	else
 	{
+		if (bSSLFlag)
+		{//客户端连接需要SSL
+			char  path[1024] = { 0 };
+			sprintf(path, "%sserver.pem", szXHNetSDK_CurrentPath);
+			m_context.load_verify_file(path);
+		}
+
 		*clihandle = INVALID_NETHANDLE;
-		client_ptr cli = client_manager_singleton::get_mutable_instance().malloc_client(g_iocpool.get_io_context(), INVALID_NETHANDLE, fnread, fnclose, (0 != autoread) ? true : false);
+		client_ptr cli = client_manager_singleton::get_mutable_instance().malloc_client(g_iocpool.get_io_context(), m_context, INVALID_NETHANDLE, fnread, fnclose, (0 != autoread) ? true : false, bSSLFlag, clientType_Connect, NULL);
 		if (cli)
 		{
 			if (client_manager_singleton::get_mutable_instance().push_client(cli))
@@ -268,7 +292,10 @@ LIBNET_API int32_t XHNetSDK_Write(NETHANDLE clihandle,
 		client_ptr cli = client_manager_singleton::get_mutable_instance().get_client(clihandle);
 		if (cli)
 		{
-			ret = cli->write(data, datasize, (0 != blocked) ? true : false);
+			if (cli->m_connectflag.load() == true)
+				ret = cli->write(data, datasize, (0 != blocked) ? true : false);
+			else
+				return e_libnet_err_invalidhandle;
 		}
 		else
 		{
@@ -362,7 +389,7 @@ LIBNET_API int32_t XHNetSDK_BuildUdp(int8_t* localip,
 		{
 			ret = e_libnet_err_srvcreate;
 		}
-		
+
 	}
 
 	return ret;
@@ -443,7 +470,7 @@ LIBNET_API int32_t XHNetSDK_Recvfrom(NETHANDLE udphandle,
 		udp_session_ptr s = udp_session_manager_singleton::get_mutable_instance().get_udp_session(udphandle);
 		if (s)
 		{
-			ret = s->recv_from(buffer, buffsize, remoteaddress, ( 0 != blocked) ? true : false);
+			ret = s->recv_from(buffer, buffsize, remoteaddress, (0 != blocked) ? true : false);
 		}
 		else
 		{
@@ -487,8 +514,9 @@ LIBNET_API int32_t XHNetSDK_Multicast(NETHANDLE udphandle,
 
 LIBNET_API NETHANDLE XHNetSDK_GenerateIdentifier()
 {
-	return generate_identifier(); 
+	return generate_identifier();
 }
+
 
 #else
 
@@ -501,7 +529,14 @@ LIBNET_API NETHANDLE XHNetSDK_GenerateIdentifier()
 #include "udp_session_manager.h"
 #include "identifier_generator.h"
 
+#include <asio/ssl.hpp>
+#ifdef _WIN32
+#include <windows.h> // For GetCurrentDirectory
+#else
+#include <unistd.h>  // For get_current_dir_name
+#endif
 
+char    szXHNetSDK_CurrentPath[512] = { 0 };
 
 io_context_pool g_iocpool;
 uint32_t g_deinittimes = 0;
@@ -512,6 +547,22 @@ auto_lock::al_mutex g_initmtx;
 auto_lock::al_spin g_initmtx;
 #endif
 
+bool GetMediaServerCurrentPath(char* szCurPath)
+{
+#ifdef _WIN32
+	// Windows-specific implementation
+	DWORD path_len = GetCurrentDirectoryA(512, szCurPath);
+	if (path_len == 0) {
+		return false; // Failed to get the directory
+	}
+	return true;
+#else
+	// POSIX-specific implementation (Linux/macOS)
+	sprintf(szCurPath, "%s/", get_current_dir_name());
+	return true;
+#endif
+}
+
 LIBNET_API int32_t XHNetSDK_Init(uint32_t ioccount,
 	uint32_t periocthread)
 {
@@ -520,7 +571,7 @@ LIBNET_API int32_t XHNetSDK_Init(uint32_t ioccount,
 #else
 	auto_lock::al_lock<auto_lock::al_spin> al(g_initmtx);
 #endif
-
+	GetMediaServerCurrentPath(szXHNetSDK_CurrentPath);
 	++g_deinittimes;
 
 	if (e_libnet_err_noerror != g_initret)
@@ -572,13 +623,16 @@ LIBNET_API int32_t XHNetSDK_Deinit()
 
 
 
-LIBNET_API int32_t XHNetSDK_Listen(int8_t* localip,
-								uint16_t localport,
-								NETHANDLE* srvhandle,
-								accept_callback fnaccept,
-								read_callback fnread,
-								close_callback fnclose,
-								uint8_t autoread)
+
+LIBNET_API int32_t XHNetSDK_Listen(
+	int8_t* localip,
+	uint16_t localport,
+	NETHANDLE* srvhandle,
+	accept_callback fnaccept,
+	read_callback fnread,
+	close_callback fnclose,
+	uint8_t autoread,
+	bool bSSLFlag)
 {
 	int32_t ret = e_libnet_err_noerror;
 
@@ -614,6 +668,10 @@ LIBNET_API int32_t XHNetSDK_Listen(int8_t* localip,
 
 				if (server_manager::getInstance().push_server(s))
 				{
+					s->sslFlag.exchange(bSSLFlag);
+					if (bSSLFlag)
+						s->init_SSL();
+
 					ret = s->run();
 					if (e_libnet_err_noerror == ret)
 					{
@@ -681,10 +739,11 @@ LIBNET_API int32_t XHNetSDK_Connect(int8_t* remoteip,
 	connect_callback fnconnect,
 	uint8_t blocked,
 	uint32_t timeout,
-	uint8_t autoread)
+	uint8_t autoread,
+	bool bSSLFlag)
 {
 	int32_t ret = e_libnet_err_noerror;
-
+	asio::ssl::context m_context(asio::ssl::context::sslv23);
 	if (e_libnet_err_noerror != g_initret)
 	{
 		ret = e_libnet_err_noninit;
@@ -695,9 +754,17 @@ LIBNET_API int32_t XHNetSDK_Connect(int8_t* remoteip,
 	}
 	else
 	{
+		if (bSSLFlag)
+		{//客户端连接需要SSL
+			char  path[1024] = { 0 };
+			sprintf_s(path, sizeof(path), "%sserver.pem", szXHNetSDK_CurrentPath);
+			m_context.load_verify_file(path);
+		}
+
 		*clihandle = INVALID_NETHANDLE;
-		client_ptr cli = client_manager::getInstance().malloc_client(g_iocpool.get_io_context(), INVALID_NETHANDLE, fnread, fnclose, (0 != autoread) ? true : false);
+		client_ptr cli = client_manager::getInstance().malloc_client(g_iocpool.get_io_context(), m_context, INVALID_NETHANDLE, fnread, fnclose, (0 != autoread) ? true : false, bSSLFlag, clientType_Connect, NULL);
 		if (cli)
+
 		{
 			if (client_manager::getInstance().push_client(cli))
 			{
@@ -769,7 +836,10 @@ LIBNET_API int32_t XHNetSDK_Write(NETHANDLE clihandle,
 		client_ptr cli = client_manager::getInstance().get_client(clihandle);
 		if (cli)
 		{
-			ret = cli->write(data, datasize, (0 != blocked) ? true : false);
+			if (cli->m_connectflag.load() == true)
+				ret = cli->write(data, datasize, (0 != blocked) ? true : false);
+			else
+				return e_libnet_err_invalidhandle;
 		}
 		else
 		{

@@ -3,6 +3,7 @@
 #ifdef USE_BOOST
 #include <boost/make_shared.hpp>
 #include "client_manager.h"
+#include <boost/asio/ssl.hpp>
 
 struct client_deletor
 {
@@ -26,10 +27,14 @@ client_manager::~client_manager(void)
 }
 
 client_ptr client_manager::malloc_client(boost::asio::io_context& ioc,
+	boost::asio::ssl::context& context,
 	NETHANDLE srvid,
 	read_callback fnread,
 	close_callback fnclose,
-	bool autoread)
+	bool autoread,
+	bool bSSLFlag,
+	ClientType nCLientType,
+	accept_callback  fnaccept)
 {
 #ifdef LIBNET_USE_CORE_SYNC_MUTEX
 	auto_lock::al_lock<auto_lock::al_mutex> al(m_poolmtx);
@@ -38,7 +43,7 @@ client_ptr client_manager::malloc_client(boost::asio::io_context& ioc,
 #endif
 
 	client_ptr cli;
-	cli.reset(m_pool.construct(ioc, srvid, fnread, fnclose, autoread), client_deletor());
+	cli.reset(m_pool.construct(ioc, context, srvid, fnread, fnclose, autoread, bSSLFlag, nCLientType, fnaccept), client_deletor());
 
 	return cli;
 }
@@ -59,7 +64,7 @@ bool client_manager::push_client(client_ptr& cli)
 #ifdef LIBNET_USE_CORE_SYNC_MUTEX
 	auto_lock::al_lock<auto_lock::al_mutex> al(m_climtx);
 #else
-	std::lock_guard<std::mutex> lock(m_climtx);
+	auto_lock::al_lock<auto_lock::al_spin> al(m_climtx);
 #endif
 
 	if (cli)
@@ -76,7 +81,7 @@ bool client_manager::pop_client(NETHANDLE id)
 #ifdef LIBNET_USE_CORE_SYNC_MUTEX
 	auto_lock::al_lock<auto_lock::al_mutex> al(m_climtx);
 #else
-	std::lock_guard<std::mutex> lock(m_climtx);
+	auto_lock::al_lock<auto_lock::al_spin> al(m_climtx);
 #endif
 
 	const_climapiter iter = m_clients.find(id);
@@ -100,7 +105,7 @@ void client_manager::pop_server_clients(NETHANDLE srvid)
 #ifdef LIBNET_USE_CORE_SYNC_MUTEX
 	auto_lock::al_lock<auto_lock::al_mutex> al(m_climtx);
 #else
-	std::lock_guard<std::mutex> lock(m_climtx);
+	auto_lock::al_lock<auto_lock::al_spin> al(m_climtx);
 #endif
 
 	for (const_climapiter iter = m_clients.begin(); m_clients.end() != iter;)
@@ -122,7 +127,7 @@ void client_manager::pop_all_clients()
 #ifdef LIBNET_USE_CORE_SYNC_MUTEX
 	auto_lock::al_lock<auto_lock::al_mutex> al(m_climtx);
 #else
-	std::lock_guard<std::mutex> lock(m_climtx);
+	auto_lock::al_lock<auto_lock::al_spin> al(m_climtx);
 #endif
 
 	for (const_climapiter iter = m_clients.begin(); iter != m_clients.end(); ++iter)
@@ -141,10 +146,10 @@ client_ptr client_manager::get_client(NETHANDLE id)
 #ifdef LIBNET_USE_CORE_SYNC_MUTEX
 	auto_lock::al_lock<auto_lock::al_mutex> al(m_climtx);
 #else
-	std::lock_guard<std::mutex> lock(m_climtx);
+	auto_lock::al_lock<auto_lock::al_spin> al(m_climtx);
 #endif
 
-	client_ptr cli = nullptr;
+	client_ptr cli;
 	const_climapiter iter = m_clients.find(id);
 	if (m_clients.end() != iter)
 	{
@@ -158,6 +163,7 @@ client_ptr client_manager::get_client(NETHANDLE id)
 #include <memory>
 #include "client_manager.h"
 #include <iostream>
+#include <asio/ssl.hpp>
 struct client_deletor
 {
 	void operator()(client* cli)
@@ -182,13 +188,18 @@ client_manager::~client_manager(void)
 }
 
 client_ptr client_manager::malloc_client(asio::io_context& ioc,
+	asio::ssl::context& context,
 	NETHANDLE srvid,
 	read_callback fnread,
 	close_callback fnclose,
-	bool autoread)
+	bool autoread,
+	bool bSSLFlag,
+	ClientType nCLientType,
+	accept_callback  fnaccept)
 {
+
 	std::unique_lock<std::mutex> _lock(m_poolmtx);
-	client_ptr cli=std::make_shared<client>(ioc, srvid, fnread, fnclose, autoread);
+	client_ptr cli=std::make_shared<client>(ioc, context,srvid, fnread, fnclose, autoread, bSSLFlag,  nCLientType, fnaccept);
 	//cli.reset(m_pool.construct(ioc, srvid, fnread, fnclose, autoread), client_deletor());
 	return cli;
 }

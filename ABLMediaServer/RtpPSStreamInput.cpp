@@ -31,12 +31,13 @@ extern MediaServerPort                       ABL_MediaServerPort;
 extern CMediaFifo                            pDisconnectBaseNetFifo;       //清理断裂的链接 
 extern char                                  ABL_MediaSeverRunPath[256];   //当前路径
 extern int                                   SampleRateArray[];
+extern CMediaFifo                            pDisconnectMediaSource;      //清理断裂媒体源 
 
 void RTP_DEPACKET_CALL_METHOD RTP10000_rtppacket_callback_recv(_rtp_depacket_cb* cb)
 {
 	CRtpPSStreamInput* pThis = (CRtpPSStreamInput*)cb->userdata;
  
-	if (pThis != NULL && pThis->bRunFlag)
+	if (pThis != NULL && pThis->bRunFlag.load())
 	{
 		if (pThis->nSSRC == 0)
 			pThis->nSSRC = cb->ssrc; //默认第一个ssrc 
@@ -58,7 +59,7 @@ void RTP_DEPACKET_CALL_METHOD RTP10000_rtppacket_callback_recv(_rtp_depacket_cb*
 void PS_DEMUX_CALL_METHOD RTP10000_RtpRecv_demux_callback(_ps_demux_cb* cb)
 {
 	CRtpPSStreamInput* pThis = (CRtpPSStreamInput*)cb->userdata;
-	if (!pThis->bRunFlag)
+	if (!pThis->bRunFlag.load())
 		return;
 
 	if (pThis && cb->streamtype == e_rtpdepkt_st_h264 || cb->streamtype == e_rtpdepkt_st_h265 ||
@@ -108,7 +109,7 @@ void PS_DEMUX_CALL_METHOD RTP10000_RtpRecv_demux_callback(_ps_demux_cb* cb)
 static int on_gb28181_10000_unpacket(void* param, int stream, int avtype, int flags, int64_t pts, int64_t dts, const void* data, size_t bytes)
 {
 	CRtpPSStreamInput* pThis = (CRtpPSStreamInput*)param;
-	if (!pThis->bRunFlag || pThis->pMediaSource  == NULL )
+	if (!pThis->bRunFlag.load() || pThis->pMediaSource == NULL)
 		return -1;
 
 	if (PSI_STREAM_AAC == avtype || PSI_STREAM_AUDIO_G711A == avtype || PSI_STREAM_AUDIO_G711U == avtype)
@@ -184,7 +185,7 @@ CRtpPSStreamInput::CRtpPSStreamInput(NETHANDLE hServer, NETHANDLE hClient, char*
 	strcpy(m_szShareMediaURL, szShareMediaURL);
 	nClient = hClient;
 	strcpy(szClientIP, szIP);
-	bRunFlag = true;
+	bRunFlag.exchange(true);
 	psBeiJingLaoChen = NULL;
 
 	m_gbPayload = 96;
@@ -199,7 +200,7 @@ CRtpPSStreamInput::CRtpPSStreamInput(NETHANDLE hServer, NETHANDLE hClient, char*
 CRtpPSStreamInput::~CRtpPSStreamInput()
 {
 	std::lock_guard<std::mutex> lock(psRecvLock);
-	bRunFlag = false;
+	bRunFlag.exchange(false);
 
 	m_videoFifo.FreeFifo();
 
@@ -223,7 +224,7 @@ CRtpPSStreamInput::~CRtpPSStreamInput()
 
 	//删除分发源
 	if (strlen(m_szShareMediaURL) > 0)
-		DeleteMediaStreamSource(m_szShareMediaURL);
+		pDisconnectMediaSource.push((unsigned char*)m_szShareMediaURL, strlen(m_szShareMediaURL));
 
 	WriteLog(Log_Debug, "CRtpPSStreamInput 析构 = %X  nClient = %llu ,nMediaClient = %llu\r\n", this, nClient, nMediaClient);
 	malloc_trim(0);
@@ -256,7 +257,7 @@ struct ps_demuxer_notify_t notify_10000 = { mpeg_ps_dec_testonstream_10000, };
 int CRtpPSStreamInput::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHandle, uint8_t* pData, uint32_t nDataLength, void* address)
 {
 	std::lock_guard<std::mutex> lock(psRecvLock);
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 	nRecvDataTimerBySecond = 0;
 
@@ -265,10 +266,10 @@ int CRtpPSStreamInput::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHa
 		pMediaSource = CreateMediaStreamSource(m_szShareMediaURL, nClient, MediaSourceType_LiveMedia, 0, m_h265ConvertH264Struct);
 		if (pMediaSource == NULL)
 		{
-			bRunFlag = false;
+			bRunFlag.exchange(false);
 			WriteLog(Log_Debug, "CRtpPSStreamInput 构造 = %X 创建媒体源失败  nClient = %llu ,m_szShareMediaURL = %s ", this, nClient, m_szShareMediaURL);
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
-			return -1 ;
+			return -1;
 		}
 		pMediaSource->netBaseNetType = NetBaseNetType_NetGB28181UDPPSStreamInput;//指定为PS流接入
  	}

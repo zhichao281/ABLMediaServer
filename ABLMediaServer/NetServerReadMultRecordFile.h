@@ -47,6 +47,10 @@ public:
    virtual int SendFirstRequst();//发送第一个请求
    virtual bool RequestM3u8File();//请求m3u8文件
 
+   uint64_t           nStartSeekTime;//开始seek时间点
+   volatile bool      bSeekTimeState;//正处于Seek状态时间范围内
+
+   int64_t        nSeekSecond;
    int            CalcLastMp4FileDuration();
    int64_t        nFirstTimestamp; //第一个视频时间戳 
    int            nLastMp4FileDuration;//记录最后一个MP4文件实际需要播放的时长，并不是最后一个文件全部播放完毕 
@@ -100,7 +104,6 @@ public:
 #else
    std::shared_ptr<CMediaStreamSource> pMediaSource;
 #endif
-
    int                   nRetLength;
    std::mutex            readRecordFileInputLock;
    unsigned char         audioBuffer[4096];

@@ -56,6 +56,7 @@ public:
    virtual int SendFirstRequst();//发送第一个请求
    virtual bool RequestM3u8File();//请求m3u8文件
 
+   bool           destroy();
    char           m_szContentBaseURL[string_length_1024];//如果Describe 命令返回有 Content-Base 字段，则使用该URL
    int            nRecvRtpPacketCount;
    unsigned short nMaxRtpLength;

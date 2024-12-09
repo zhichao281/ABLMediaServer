@@ -37,7 +37,7 @@ services:
         networks:
             - monitor
     wvpRedis:
-        image: redis:6.2-rc3-alpine3.13
+        image: redis:7.0
         restart: always
         container_name: wvpRedis
         volumes:
@@ -51,7 +51,7 @@ services:
         networks:
             - monitor
     wvpMysql:
-        image: mysql:8.0 # 指定镜像和版本
+        image: mysql:8.1 # 指定镜像和版本
         restart: always # 指定开机重启
         container_name: wvpMysql
         cap_add:
@@ -94,7 +94,7 @@ services:
                 soft: 65535
                 hard: 65535
         container_name: wvp  #配置容器名
-        image: yunshiting/java:8  # 指定镜像名
+        image: java:8  # 指定镜像名
         ports:
             - 5066:5066/tcp
             - 5066:5066/udp
@@ -107,15 +107,14 @@ services:
             TZ: Asia/Shanghai
             SIP_DOMAIN: 4401020049
             SIP_ID: 44010200492000000001
-            SIP_PASSWORD: admin123           # [可选] 默认设备认证密码，后续扩展使用设备单独密码, 移除密码将不进行校验
-            WVP_PORT: 18080                        #[可选] WVP监听的HTTP端口, 网页和接口调用都是这个端口           
-            SIP_IP: 0.0.0.0                               #本机的IP，对应你的网卡，监听什么ip就是使用什么网卡，
-            SIP_PORT: 5066                            # [可选] 28181服务监听的端口
-            MEDIA_ID: ZbnQN5csqxrPix7a      #  # [必须修改] ABL服务器唯一id，用于触发hook时区别是哪台服务器,mediaServerId
-            MEDIA_IP: ablmediaserver            #ABL服务器的内网IP
-            MEDIA_PORT: 7088                      # [必须修改]ABL服务器的http.port
-            STREAM_IP: 1.14.19.123               # [可选] 返回流地址时的ip，置空使用 media.ip
-            HOOK_IP: wvp                             #abl服务器的hook所使用的IP, 默认使用sip.ip      
+            SIP_PASSWORD: admin123         # [可选] 默认设备认证密码，后续扩展使用设备单独密码, 移除密码将不进行校验
+            WVP_PORT: 18080                #[可选] WVP监听的HTTP端口, 网页和接口调用都是这个端口           
+            SIP_PORT: 5066                 # [可选] 28181服务监听的端口
+            MEDIA_ID: ZbnQN5csqxrPix7a     # [必须修改] ABL服务器唯一id，用于触发hook时区别是哪台服务器,mediaServerId
+            MEDIA_IP: ablmediaserver       #ABL服务器的内网IP 这边是docker用ABL容器名代替，
+            MEDIA_PORT: 7088               # [必须修改]ABL服务器的http.port
+            WAN_IP: 1.14.19.123            # [可选] 有公网IP就配置公网IP, 不可用域名
+            HOOK_IP: wvp                   #abl服务器的hook所使用的IP, 默认使用sip.ip 这边是docker用WVP容器名代替，   
             WVP_DB_PATH: wvpMysql:3306
             MYSQL_USERNAME: root
             MYSQL_PASSWORD: sky123456

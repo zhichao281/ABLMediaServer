@@ -25,6 +25,22 @@ FILE(GLOB XHNetSDK_SRC_LIST
 )
 
 
+# 设置安装路径
+if (UNIX AND NOT APPLE)
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+        set(INSTALL_BIN_DIR "${CMAKE_CURRENT_LIST_DIR}/../bin/arm64" CACHE PATH "exe和dll的安装路径")
+        set(INSTALL_LIB_DIR "${CMAKE_CURRENT_LIST_DIR}/../bin/arm64" CACHE PATH "lib的安装路径")
+    else()
+        set(INSTALL_BIN_DIR "${CMAKE_CURRENT_LIST_DIR}/../bin/linux86" CACHE PATH "exe和dll的安装路径")
+        set(INSTALL_LIB_DIR "${CMAKE_CURRENT_LIST_DIR}/../bin/linux86" CACHE PATH "lib的安装路径")
+    endif()
+endif()
+
+# 设置输出目录
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${INSTALL_BIN_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${INSTALL_LIB_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${INSTALL_LIB_DIR})
+
 # 根据选项生成对应的目标
 if (BUILD_SHARED_LIBS)
    add_library(${PROJECT_NAME} SHARED ${XHNetSDK_SRC_LIST})
@@ -39,12 +55,17 @@ else()
 endif()
 
 
-
-
 # 链接当前文件夹下的 asio 头文件目录
 target_include_directories(${PROJECT_NAME} PRIVATE asio/include)
 
 target_link_libraries(${PROJECT_NAME} pthread)
 
-# 设置生成的库文件路径为上一级目录下的 Bin 文件夹
-set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/../Bin)
+# 安装目标文件到 Bin 文件夹中
+install(TARGETS ${PROJECT_NAME}
+    RUNTIME DESTINATION ${INSTALL_BIN_DIR}
+    LIBRARY DESTINATION ${INSTALL_LIB_DIR}
+    ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
+)
+install(DIRECTORY html DESTINATION ${INSTALL_BIN_DIR})
+install(FILES config.json DESTINATION ${INSTALL_BIN_DIR})
+install(FILES Procfile DESTINATION ${INSTALL_BIN_DIR})

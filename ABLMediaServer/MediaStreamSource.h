@@ -70,16 +70,20 @@ public:
    CMediaStreamSource(char* szURL,uint64_t nClientTemp, MediaSourceType nSourceType, uint32_t nDuration, H265ConvertH264Struct h265ConvertH264Struct);
    ~CMediaStreamSource();
 
+  
 #ifdef WriteInputVideoFileFlag
-   FILE*   fWriteInputVideoFile;
+   FILE* fWriteInputVideoFile;
 #endif
+  
    int                nWebRtcPlayerCount;//webRtc播放次数统计 
    uint64_t           nWebRtcPushStreamID;//给webRTC推流提供者 
+   void            addClientToDisconnectFifo();
 #ifdef USE_BOOST
    boost::atomic_bool bCreateWebRtcPlaySourceFlag;//创建webrtc源标志 
 #else
    std::atomic<bool> bCreateWebRtcPlaySourceFlag;//创建webrtc源标志 
 #endif
+   volatile bool   bEnableFlag;
    bool            CopyAudioFrameBufer();
    bool            CopyVideoGopFrameBufer();//拷贝一个gop视频帧 
 

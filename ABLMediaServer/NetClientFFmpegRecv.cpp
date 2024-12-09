@@ -31,7 +31,7 @@ extern MediaServerPort                       ABL_MediaServerPort;
 extern char                                  ABL_MediaSeverRunPath[256]; //当前路径
 extern CMediaFifo                            pMessageNoticeFifo;          //消息通知FIFO
 #endif
-
+extern CMediaFifo                            pDisconnectMediaSource;      //清理断裂媒体源 
 extern int avpriv_mpeg4audio_sample_rates[];
 
 #ifdef OS_System_Windows
@@ -161,8 +161,8 @@ CNetClientFFmpegRecv::CNetClientFFmpegRecv(NETHANDLE hServer, NETHANDLE hClient,
 	if (strstr(szIP, "rtsp://") != NULL)
 	{
 		AVDictionary* format_opts = NULL;
-		av_dict_set(&format_opts, "buffer_size", "9924000", 0);
-		av_dict_set(&format_opts, "fifo_size", "9924000", 0);
+		av_dict_set(&format_opts, "buffer_size", "4924000", 0);
+		av_dict_set(&format_opts, "fifo_size", "4924000", 0);
 		av_dict_set(&format_opts, "timeout", "5000000", 0);
 		av_dict_set(&format_opts, "rtsp_transport", "tcp", 0);
 		nRet2 = avformat_open_input(&pFormatCtx2, szIP, NULL, &format_opts);
@@ -376,7 +376,7 @@ CNetClientFFmpegRecv::~CNetClientFFmpegRecv()
 
 	//删除分发源
 	if (strlen(m_szShareMediaURL) > 0)
-	   DeleteMediaStreamSource(m_szShareMediaURL);
+		pDisconnectMediaSource.push((unsigned char*)m_szShareMediaURL, strlen(m_szShareMediaURL));
 
 	m_audioCacheFifo.FreeFifo();
 #ifdef WriteAACFileFlag

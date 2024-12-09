@@ -72,6 +72,8 @@ public:
    virtual int SendFirstRequst();//发送第一个请求
    virtual bool RequestM3u8File();//请求m3u8文件
 
+   bool            SendPlayMessage();
+   bool            destroy();
    uint32_t        nVdeoFrameNumber ;
    uint32_t        nAudioFrameNumber ;
    bool            responseUdpSetup();
@@ -166,7 +168,7 @@ public:
    int                     au_numbers ;
    int                     SplitterSize[16];
 
-   volatile bool           bRunFlag;
+
 
    std::mutex              netDataLock;
    unsigned char           netDataCache[MaxNetDataCacheBufferLength]; //网络数据缓存

@@ -178,6 +178,7 @@ struct MediaServerPort
 	int  fileSecond;//fmp4切割时长
 	int  videoFileFormat;//录像文件格式 1 为 fmp4, 2 为 mp4 
 	int  fileKeepMaxTime;//录像文件最大保留时长，单位小时
+	int  recordFileCutType; //切割一个完整录像文件的方式
 	int  enable_GetFileDuration;//查询录像列表是否获取录像文件真正时长
 	int  httpDownloadSpeed;//http录像下载速度设定
 	int  fileRepeat;//MP4点播(rtsp/rtmp/http-flv/ws-flv)是否循环播放文件
@@ -228,6 +229,7 @@ struct MediaServerPort
 	char on_stream_iframe_arrive[string_length_512];
 	char on_play[string_length_512];
 	char on_publish[string_length_512];
+	char on_rtsp_replay[string_length_512];
 
 	uint64_t    nClientNoneReader;
 	uint64_t    nClientNotFound;
@@ -243,6 +245,7 @@ struct MediaServerPort
 	uint64_t    nPlay;//播放
 	uint64_t    nPublish;//接入
 	uint64_t    nFrameArrive;//I帧到达　
+	uint64_t    nRtspReplay;//rtsp录像回放
 	int         MaxDiconnectTimeoutSecond;//最大断线超时检测
 	int         ForceSendingIFrame;//强制发送I帧 
 	uint64_t    nServerKeepaliveTime;//服务器心跳时间
@@ -332,7 +335,8 @@ struct MediaServerPort
 		memset(on_play, 0x00, sizeof(on_play));
 		memset(on_publish, 0x00, sizeof(on_publish));
 		memset(on_stream_iframe_arrive, 0x00, sizeof(on_stream_iframe_arrive));
- 
+		memset(on_rtsp_replay, 0x00, sizeof(on_rtsp_replay));
+
 		nClientNoneReader = 0 ;
 		nClientNotFound = 0;
 		nClientRecordMp4 = 0;
@@ -418,6 +422,7 @@ struct H265ConvertH264Struct
 enum NetBaseNetType
 {
 	NetBaseNetType_Unknown                 = 20 ,//未定义的网络类型
+	NetBaseNetType_RtspProtectBaseState = 15,//rtsp所有协议初始状态 
 	NetBaseNetType_RtspServerRecvPushVideo = 16 ,//接收rtsp推流udp方式的视频
 	NetBaseNetType_RtspServerRecvPushAudio = 17 ,//接收rtsp推流udp方式的音频
 	NetBaseNetType_GB28181TcpPSInputStream = 18,//通过10000端口TCP方式接收国标PS流接入
@@ -485,7 +490,8 @@ enum NetBaseNetType
 	NetBaseNetType_HttpClient_on_record_ts          = 95,//TS切片完成
 	NetBaseNetType_HttpClient_on_stream_not_arrive  = 96,//码流没有到达
 	NetBaseNetType_HttpClient_Record_Progress       = 97,//录像下载进度
- 
+	NetBaseNetType_HttpClient_on_rtsp_replay = 98,//rtsp录像回放事件通知
+
 	NetBaseNetType_SnapPicture_JPEG               =100,//抓拍为JPG 
 	NetBaseNetType_SnapPicture_PNG                =101,//抓拍为PNG
 
@@ -502,7 +508,7 @@ enum NetBaseNetType
 	NetBaseNetType_NetServerReadMultRecordFile     = 140,//连续读取多个录像文件
 };
 
-#define   MediaServerVerson                 "ABLMediaServer-6.3.6(2024-08-09)"
+#define   MediaServerVerson                 "ABLMediaServer-6.3.6(2024-11-12)"
 #define   RtspServerPublic                  "DESCRIBE, SETUP, TEARDOWN, PLAY, PAUSE, OPTIONS, ANNOUNCE, RECORD，GET_PARAMETER"
 #define   RecordFileReplaySplitter          "__ReplayFMP4RecordFile__"  //实况、录像区分的标志字符串，用于区分实况，放置在url中。
 

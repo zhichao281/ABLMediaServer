@@ -39,11 +39,12 @@ extern char                                  ABL_MediaSeverRunPath[256]; //µ±Ç°Â
 extern std::shared_ptr<CNetRevcBase>       CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL);
 extern MediaServerPort                       ABL_MediaServerPort;
 extern int                                   SampleRateArray[];
+extern CMediaFifo                            pDisconnectMediaSource;      //ÇåÀí¶ÏÁÑÃ½ÌåÔ´ 
 #endif
 void PS_MUX_CALL_METHOD GB28181_Send_mux_callback(_ps_mux_cb* cb)
 {
 	CNetGB28181RtpClient* pThis = (CNetGB28181RtpClient*)cb->userdata;
-	if (pThis == NULL || !pThis->bRunFlag)
+	if (pThis == NULL || !pThis->bRunFlag.load())
 		return;
  
 	pThis->GB28181PsToRtPacket(cb->data, cb->datasize);
@@ -70,7 +71,7 @@ static int ps_write(void* param, int stream, void* packet, size_t bytes)
 {
 	CNetGB28181RtpClient* pThis = (CNetGB28181RtpClient*)param;
 
-	if(pThis->bRunFlag)
+	if (pThis->bRunFlag.load())
 	  pThis->GB28181PsToRtPacket((unsigned char*)packet, bytes);
 
 	return true;
@@ -80,7 +81,7 @@ static int ps_write(void* param, int stream, void* packet, size_t bytes)
 void GB28181_rtp_packet_callback_func_send(_rtp_packet_cb* cb)
 {
 	CNetGB28181RtpClient* pThis = (CNetGB28181RtpClient*)cb->userdata;
-	if (pThis == NULL || !pThis->bRunFlag)
+	if (pThis == NULL || !pThis->bRunFlag.load())
 		return;
 
 	if (pThis->netBaseNetType == NetBaseNetType_NetGB28181SendRtpUDP)
@@ -96,7 +97,7 @@ void GB28181_rtp_packet_callback_func_send(_rtp_packet_cb* cb)
 //PS Êý¾Ý´ò°ü³Értp 
 void  CNetGB28181RtpClient::GB28181PsToRtPacket(unsigned char* pPsData, int nLength)
 {
-	if(hRtpPS > 0 && bRunFlag)
+	if (hRtpPS > 0 && bRunFlag.load())
 	{
 		inputPS.data = pPsData;
 		inputPS.datasize = nLength;
@@ -107,7 +108,7 @@ void  CNetGB28181RtpClient::GB28181PsToRtPacket(unsigned char* pPsData, int nLen
 //¹ú±ê28181PSÂëÁ÷TCP·½Ê½·¢ËÍ 
 void  CNetGB28181RtpClient::GB28181SentRtpVideoData(unsigned char* pRtpVideo, int nDataLength)
 {
-	if (bRunFlag == false)
+	if (bRunFlag.load() == false)
 		return;
 	
 	if ((nMaxRtpSendVideoMediaBufferLength - nSendRtpVideoMediaBufferLength < nDataLength + 4) && nSendRtpVideoMediaBufferLength > 0)
@@ -115,7 +116,7 @@ void  CNetGB28181RtpClient::GB28181SentRtpVideoData(unsigned char* pRtpVideo, in
  		nSendRet = XHNetSDK_Write(nClient, szSendRtpVideoMediaBuffer, nSendRtpVideoMediaBufferLength, 1);
 		if (nSendRet != 0)
 		{
-			bRunFlag = false;
+			bRunFlag.exchange(false);
  			WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, ·¢ËÍ¹ú±êRTPÂëÁ÷³ö´í £¬Length = %d ,nSendRet = %d", this, nSendRtpVideoMediaBufferLength, nSendRet);
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return;
@@ -131,7 +132,7 @@ void  CNetGB28181RtpClient::GB28181SentRtpVideoData(unsigned char* pRtpVideo, in
 		if (nSendRet != 0)
 		{
 			WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, ·¢ËÍ¹ú±êRTPÂëÁ÷³ö´í £¬Length = %d ,nSendRet = %d", this, nSendRtpVideoMediaBufferLength, nSendRet);
-			bRunFlag = false;
+			bRunFlag.exchange(false);
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 			return;
 		}
@@ -161,7 +162,7 @@ void  CNetGB28181RtpClient::GB28181SentRtpVideoData(unsigned char* pRtpVideo, in
 	}
 	else
 	{
-		bRunFlag = false;
+		bRunFlag.exchange(false);
 		WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, ·Ç·¨µÄ¹ú±êTCP°üÍ··¢ËÍ·½Ê½(±ØÐëÎª 1¡¢2 )nGBRtpTCPHeadType = %d ", this, ABL_MediaServerPort.nGBRtpTCPHeadType);
 		DeleteNetRevcBaseClient(nClient);
 	}
@@ -224,7 +225,7 @@ CNetGB28181RtpClient::CNetGB28181RtpClient(NETHANDLE hServer, NETHANDLE hClient,
 		psBeiJingLaoChen = ps_muxer_create(&handler, this);
 	}
 	hRtpPS = 0;
-	bRunFlag = true;
+	bRunFlag.exchange(true);
 
 	nSendRtpVideoMediaBufferLength = 0; //ÒÑ¾­»ýÀÛµÄ³¤¶È  ÊÓÆµ
 	nStartVideoTimestamp           = GB28181VideoStartTimestampFlag ; //ÉÏÒ»Ö¡ÊÓÆµ³õÊ¼Ê±¼ä´Á £¬
@@ -252,7 +253,7 @@ CNetGB28181RtpClient::CNetGB28181RtpClient(NETHANDLE hServer, NETHANDLE hClient,
 
 CNetGB28181RtpClient::~CNetGB28181RtpClient()
 {
-	bRunFlag = false;
+	bRunFlag.exchange(false);
 	std::lock_guard<std::mutex> lock(businessProcMutex);
 
 	if (netBaseNetType == NetBaseNetType_NetGB28181SendRtpUDP)
@@ -279,7 +280,7 @@ CNetGB28181RtpClient::~CNetGB28181RtpClient()
 	SAFE_ARRAY_DELETE(netDataCache);
 	//×îºó²ÅÉ¾³ýÃ½ÌåÔ´
 	if (strlen(m_recvMediaSource) > 0 && pRecvMediaSource != NULL)
-		DeleteMediaStreamSource(m_recvMediaSource);
+		pDisconnectMediaSource.push((unsigned char*)m_recvMediaSource, strlen(m_recvMediaSource));
 
 #ifdef  WriteGB28181PSFileFlag
 	fclose(writePsFile);
@@ -299,7 +300,7 @@ CNetGB28181RtpClient::~CNetGB28181RtpClient()
 int CNetGB28181RtpClient::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* szVideoCodec)
 {
 	nRecvDataTimerBySecond = 0 ;
-	if (!bRunFlag || m_startSendRtpStruct.disableVideo[0] == 0x31)
+	if (!bRunFlag.load() || m_startSendRtpStruct.disableVideo[0] == 0x31)
 		return -1;
 	std::lock_guard<std::mutex> lock(businessProcMutex);
 
@@ -315,7 +316,7 @@ int CNetGB28181RtpClient::PushAudio(uint8_t* pVideoData, uint32_t nDataLength, c
 	nRecvDataTimerBySecond = 0;
 
 	//µ±ÆÁ±ÎÒôÆµÊ±£¬²»½øÐÐÒôÆµ´ò°ü
-	if (!bRunFlag || m_startSendRtpStruct.disableAudio[0] == 0x31)
+	if (!bRunFlag.load() || m_startSendRtpStruct.disableAudio[0] == 0x31)
 		return -1;
 
 	std::lock_guard<std::mutex> lock(businessProcMutex);
@@ -427,7 +428,7 @@ int CNetGB28181RtpClient::SendVideo()
 {
 	std::lock_guard<std::mutex> lock(businessProcMutex);
 
-	if (!bRunFlag )
+	if (!bRunFlag.load())
 		return -1;
 
 	unsigned char* pData = NULL;
@@ -517,7 +518,7 @@ int CNetGB28181RtpClient::SendVideo()
 		}
 		else if (m_startSendRtpStruct.RtpPayloadDataType[0] == 0x32 || m_startSendRtpStruct.RtpPayloadDataType[0] == 0x33)
 		{//ES ´ò°ü \ XHB ´ò°ü
-			if (hRtpPS > 0 && bRunFlag)
+			if (hRtpPS > 0 && bRunFlag.load())
 			{
 				inputPS.data = pData;
 				inputPS.datasize = nLength;
@@ -534,7 +535,7 @@ int CNetGB28181RtpClient::SendAudio()
 {
 	std::lock_guard<std::mutex> lock(businessProcMutex);
 
-	if ( ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag || m_startSendRtpStruct.disableAudio[0] == 0x31 )
+	if (ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag.load() || m_startSendRtpStruct.disableAudio[0] == 0x31)
 		return 0;
 
 	//jtt1078 
@@ -631,7 +632,7 @@ void  CNetGB28181RtpClient::SendGBRtpPacketUDP(unsigned char* pRtpData, int nLen
 int CNetGB28181RtpClient::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHandle, uint8_t* pData, uint32_t nDataLength, void* address)
 {
  	std::lock_guard<std::mutex> lock(businessProcMutex);
-	if (!bRunFlag || nDataLength <= 0 )
+	if (!bRunFlag.load() || nDataLength <= 0)
 		return -1;
 	if (!(strlen(m_startSendRtpStruct.recv_app) > 0 && strlen(m_startSendRtpStruct.recv_stream) > 0))
 		return -1;
@@ -688,7 +689,7 @@ int CNetGB28181RtpClient::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClien
 int CNetGB28181RtpClient::ProcessNetData()
 {
  	std::lock_guard<std::mutex> lock(businessProcMutex);
-	if (!bRunFlag)
+	if (!bRunFlag.load())
 		return -1;
 	if (!(strlen(m_startSendRtpStruct.recv_app) > 0 && strlen(m_startSendRtpStruct.recv_stream) > 0))
 		return -1;
@@ -779,7 +780,7 @@ int CNetGB28181RtpClient::SendFirstRequst()
 void RTP_DEPACKET_CALL_METHOD NetGB28181RtpClient_rtppacket_callback_recv(_rtp_depacket_cb* cb)
 {
 	CNetGB28181RtpClient* pThis = (CNetGB28181RtpClient*)cb->userdata;
-	if (!pThis->bRunFlag)
+	if (!pThis->bRunFlag.load())
 		return;
 
 	if (pThis->m_startSendRtpStruct.RtpPayloadDataType[0] == 0x31)
@@ -791,7 +792,12 @@ void RTP_DEPACKET_CALL_METHOD NetGB28181RtpClient_rtppacket_callback_recv(_rtp_d
 	{//RTP ½â°ü
 		if (pThis->pRecvMediaSource == NULL)
 		{//rtp½â°ü 
-			pThis->pRecvMediaSource = CreateMediaStreamSource(pThis->m_recvMediaSource, pThis->nClient, MediaSourceType_LiveMedia, 0, pThis->m_h265ConvertH264Struct);
+			uint64_t nClientTemp = 1;
+			if (pThis->hParent == 0)
+				nClientTemp = pThis->nClient;
+			else
+				nClientTemp = pThis->hParent;
+			pThis->pRecvMediaSource = CreateMediaStreamSource(pThis->m_recvMediaSource, nClientTemp, MediaSourceType_LiveMedia, 0, pThis->m_h265ConvertH264Struct);
 			if (pThis->pRecvMediaSource != NULL)
 			{
 				pThis->pRecvMediaSource->netBaseNetType = pThis->netBaseNetType;
@@ -812,8 +818,8 @@ void RTP_DEPACKET_CALL_METHOD NetGB28181RtpClient_rtppacket_callback_recv(_rtp_d
 			else if (cb->payload == 97)//aac
 			{
 				//»ñÈ¡AACÃ½ÌåÐÅÏ¢
-				if(pThis->nRecvSampleRate == 0 && pThis->nRecvChannels == 0)
-				   pThis->GetAACAudioInfo2(cb->data, cb->datasize, &pThis->nRecvSampleRate , &pThis->nRecvChannels);
+				if (pThis->nRecvSampleRate == 0 && pThis->nRecvChannels == 0)
+					pThis->GetAACAudioInfo2(cb->data, cb->datasize, &pThis->nRecvSampleRate, &pThis->nRecvChannels);
 				if (cb->datasize > 0 && cb->datasize < 2048)
 					pThis->pRecvMediaSource->PushAudio((unsigned char*)cb->data, cb->datasize, "AAC", pThis->nRecvChannels, pThis->nRecvSampleRate);
 			}
@@ -832,15 +838,20 @@ struct ps_demuxer_notify_t notify_CNetGB28181RtpClient = { mpeg_ps_dec_NetGB2818
 static int NetGB28181RtpClient_on_gb28181_unpacket(void* param, int stream, int avtype, int flags, int64_t pts, int64_t dts, const void* data, size_t bytes)
 {
 	CNetGB28181RtpClient* pThis = (CNetGB28181RtpClient*)param;
-	if (!pThis->bRunFlag)
+	if (!pThis->bRunFlag.load())
 		return -1;
 
 	if (pThis->pRecvMediaSource == NULL)
 	{//ÓÅÏÈ´´½¨Ã½ÌåÔ´ 
-		pThis->pRecvMediaSource = CreateMediaStreamSource(pThis->m_recvMediaSource, pThis->nClient, MediaSourceType_LiveMedia, 0, pThis->m_h265ConvertH264Struct);
+		uint64_t nClientTemp = 1;
+		if (pThis->hParent == 0)
+			nClientTemp = pThis->nClient;
+		else
+			nClientTemp = pThis->hParent;
+		pThis->pRecvMediaSource = CreateMediaStreamSource(pThis->m_recvMediaSource, nClientTemp, MediaSourceType_LiveMedia, 0, pThis->m_h265ConvertH264Struct);
 		if (pThis->pRecvMediaSource != NULL)
 		{
- 			pThis->pRecvMediaSource->netBaseNetType = pThis->netBaseNetType;
+			pThis->pRecvMediaSource->netBaseNetType = pThis->netBaseNetType;
 			WriteLog(Log_Debug, "NetGB28181RtpClient_on_gb28181_unpacket ´´½¨Ã½ÌåÔ´ %s ³É¹¦  ", pThis->m_recvMediaSource);
 		}
 	}
@@ -854,15 +865,15 @@ static int NetGB28181RtpClient_on_gb28181_unpacket(void* param, int stream, int 
 		pThis->pRecvMediaSource->bUpdateVideoSpeed = true;
 	}
 
-	if (pThis->m_startSendRtpStruct.recv_disableAudio[0] == 0x30  && (PSI_STREAM_AAC == avtype || PSI_STREAM_AUDIO_G711A == avtype || PSI_STREAM_AUDIO_G711U == avtype))
+	if (pThis->m_startSendRtpStruct.recv_disableAudio[0] == 0x30 && (PSI_STREAM_AAC == avtype || PSI_STREAM_AUDIO_G711A == avtype || PSI_STREAM_AUDIO_G711U == avtype))
 	{
 		if (PSI_STREAM_AAC == avtype)
 		{//aac
-		    //»ñÈ¡AACÃ½ÌåÐÅÏ¢
+			//»ñÈ¡AACÃ½ÌåÐÅÏ¢
 			if (pThis->nRecvSampleRate == 0 && pThis->nRecvChannels == 0)
-  				pThis->GetAACAudioInfo2((unsigned char*)data, bytes, &pThis->nRecvSampleRate, &pThis->nRecvChannels);
+				pThis->GetAACAudioInfo2((unsigned char*)data, bytes, &pThis->nRecvSampleRate, &pThis->nRecvChannels);
 
- 			pThis->pRecvMediaSource->PushAudio((unsigned char*)data, bytes, "AAC", pThis->nRecvChannels, pThis->nRecvSampleRate);
+			pThis->pRecvMediaSource->PushAudio((unsigned char*)data, bytes, "AAC", pThis->nRecvChannels, pThis->nRecvSampleRate);
 		}
 		else if (PSI_STREAM_AUDIO_G711A == avtype)
 		{// G711A  
@@ -876,23 +887,24 @@ static int NetGB28181RtpClient_on_gb28181_unpacket(void* param, int stream, int 
 	else if (pThis->m_startSendRtpStruct.recv_disableVideo[0] == 0x30 && (PSI_STREAM_H264 == avtype || PSI_STREAM_H265 == avtype || PSI_STREAM_VIDEO_SVAC == avtype))
 	{
 #ifdef WriteRecvPSDataFlag
-		if (pThis->fWritePSDataFile != NULL )
+		if (pThis->fWritePSDataFile != NULL)
 		{
 			fwrite(data, 1, bytes, pThis->fWritePSDataFile);
 			fflush(pThis->fWritePSDataFile);
 		}
 #endif	
- 		if (PSI_STREAM_H264 == avtype)
+		if (PSI_STREAM_H264 == avtype)
 			pThis->pRecvMediaSource->PushVideo((unsigned char*)data, bytes, "H264");
 		else if (PSI_STREAM_H265 == avtype)
 			pThis->pRecvMediaSource->PushVideo((unsigned char*)data, bytes, "H265");
- 	}
-}
+		}
+	}
 
 //rtp½â°ü 
 bool  CNetGB28181RtpClient::RtpDepacket(unsigned char* pData, int nDataLength)
 {
-	if (pData == NULL || nDataLength > 65536 || !bRunFlag || nDataLength < 12)
+
+	if (pData == NULL || nDataLength > 65536 || !bRunFlag.load() || nDataLength < 12)
 		return false;
 
 	//´´½¨rtp½â°ü

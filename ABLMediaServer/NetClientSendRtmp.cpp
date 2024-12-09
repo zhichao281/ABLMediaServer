@@ -47,7 +47,7 @@ static int rtmp_client_pushCB(void* param, const void* header, size_t len, const
 {
 	CNetClientSendRtmp* pClient = (CNetClientSendRtmp*)param;
 
-	if (pClient != NULL && pClient->bRunFlag )
+	if (pClient != NULL && pClient->bRunFlag.load())
 	{
 		if (len > 0 && header != NULL)
 		{
@@ -57,7 +57,7 @@ static int rtmp_client_pushCB(void* param, const void* header, size_t len, const
 				pClient->nWriteErrorCount ++;
 				if (pClient->nWriteErrorCount >= 30)
 				{
-					pClient->bRunFlag = false;
+					pClient->bRunFlag.exchange(false);
 					WriteLog(Log_Debug, "rtmp_client_pushCB 发送失败，次数 nWriteErrorCount = %d ", pClient->nWriteErrorCount);
 
 				    pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
@@ -139,7 +139,7 @@ static int NetClientSendRtmp_MuxerFlv(void* param, int type, const void* data, s
 	CNetClientSendRtmp* pClient = (CNetClientSendRtmp*)param;
 	int r;
 
- 	if (pClient == NULL || pClient->rtmp == NULL || pClient->flvMuxer == NULL || !pClient->bRunFlag)
+	if (pClient == NULL || pClient->rtmp == NULL || pClient->flvMuxer == NULL || !pClient->bRunFlag.load())
 		return 0;
 
 	if (FLV_TYPE_AUDIO == type)
@@ -196,7 +196,7 @@ CNetClientSendRtmp::CNetClientSendRtmp(NETHANDLE hServer, NETHANDLE hClient, cha
 	nRtmpState3Count = 0;
 	bAddMediaSourceFlag = false;
 	memset(szRtmpName, 0x00, sizeof(szRtmpName));
-	bRunFlag = true;
+
 	netBaseNetType = NetBaseNetType_RtmpClientPush;
  
 	WriteLog(Log_Debug, "CNetClientSendRtmp 构造 = %X  nClient = %llu ",this, nClient);
@@ -204,7 +204,7 @@ CNetClientSendRtmp::CNetClientSendRtmp(NETHANDLE hServer, NETHANDLE hClient, cha
 
 CNetClientSendRtmp::~CNetClientSendRtmp()
 {
-	bRunFlag = false;
+	bRunFlag.exchange(false);
  	std::lock_guard<std::mutex> lock(businessProcMutex);
 
 	if(flvMuxer)
@@ -236,7 +236,7 @@ CNetClientSendRtmp::~CNetClientSendRtmp()
 int CNetClientSendRtmp::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* szVideoCodec)
 {
 	nRecvDataTimerBySecond = 0;
-	if (!bRunFlag || m_addPushProxyStruct.disableVideo[0] != 0x30 )
+	if (!bRunFlag.load() || m_addPushProxyStruct.disableVideo[0] != 0x30)
 		return -1;
 	std::lock_guard<std::mutex> lock(businessProcMutex);
 
@@ -277,7 +277,7 @@ int CNetClientSendRtmp::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, cha
 int CNetClientSendRtmp::PushAudio(uint8_t* pAudioData, uint32_t nDataLength, char* szAudioCodec, int nChannels, int SampleRate)
 {
 	nRecvDataTimerBySecond = 0;
-	if (!bRunFlag || m_addPushProxyStruct.disableAudio[0] != 0x30 )
+	if (!bRunFlag.load() || m_addPushProxyStruct.disableAudio[0] != 0x30)
 		return -1;
 	std::lock_guard<std::mutex> lock(businessProcMutex);
 
