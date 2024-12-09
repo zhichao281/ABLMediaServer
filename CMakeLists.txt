@@ -10,12 +10,10 @@ set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O0 -Wall")
 # 添加宏定义
 add_definitions(-DFFMPEG6)
 
-# 设置构建时和安装时的 rpath 为当前目录（与可执行文件同级目录）
-set(CMAKE_BUILD_RPATH "$ORIGIN")
-set(CMAKE_INSTALL_RPATH "$ORIGIN")
 
-# 确保 rpath 不被清除
-set(CMAKE_SKIP_RPATH FALSE)
+# 允许相对路径
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+ 
 
 
 # 判断是否启用了 USE_BOOST 选项
@@ -108,6 +106,10 @@ file(GLOB ABL_SRCS
 
 # 添加可执行文件
 add_executable(${PROJECT_NAME} ${ABL_SRCS})
+
+ 
+#设置RPATH路径
+set_target_properties(${BUILD_PROJECT_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # 链接需要的库文件
 target_link_libraries(${PROJECT_NAME}
