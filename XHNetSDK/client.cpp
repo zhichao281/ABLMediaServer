@@ -34,6 +34,7 @@ client::client(boost::asio::io_context& ioc,
 	, m_nClientType(nCLientType)
 	, m_fnaccept(fnaccept)
 {
+	m_onwriting.exchange(false);
 	m_closeflag.exchange(false);
 	m_connectflag.exchange(false);
 	m_readbuff = new uint8_t[CLIENT_MAX_RECV_BUFF_SIZE];
@@ -49,7 +50,17 @@ client::~client(void)
 		delete[] m_readbuff;
 		m_readbuff = NULL;
 	}
-	m_circularbuff.uninit();
+
+	//等到异步发送完毕
+	int nWaitCount = 0;
+	while (m_onwriting.load())
+	{//等待10秒 
+		nWaitCount++;
+		usleep(100000);
+		if (nWaitCount >= 10 * 10)
+			break;
+	}
+	m_circularbuff.FreeFifo();
 	malloc_trim(0);
 }
 
@@ -116,6 +127,9 @@ int32_t client::run()
 	}
 	else
 	{//普通读取
+		int ul = 1;
+		int nRet3 = ioctl(m_socket.native_handle(), FIONBIO, &ul); //设置为非阻塞模式 
+		//printf("run() , ioctl nRet3 = %d \r\n",nRet3);
 		m_socket.async_read_some(boost::asio::buffer(m_readbuff, CLIENT_MAX_RECV_BUFF_SIZE),
 			boost::bind(&client::handle_read,
 				shared_from_this(),
@@ -213,6 +227,10 @@ int32_t client::connect(int8_t* remoteip,
 		int nRet2 = setsockopt(m_socket.native_handle(), SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(timeval)); //设置接收超时
 		printf("connect() , setsockopt nRet1 = %d , nRet2 = %d \r\n", nRet1, nRet2);
 
+		int ul = 1;
+		int nRet3 = ioctl(m_socket.native_handle(), FIONBIO, &ul); //设置为非阻塞模式 
+			//printf("connect() , ioctlsocket nRet3 = %d \r\n",nRet3);
+
 		//设置关闭不拖延
 		boost::system::error_code ec;
 		boost::asio::ip::tcp::no_delay no_delay_option(true);
@@ -281,6 +299,7 @@ void client::handle_write(const boost::system::error_code& ec, size_t transize)
 {
 	if (ec)
 	{
+		close();
 		if (client_manager_singleton::get_mutable_instance().pop_client(get_id()))
 		{
 			if (m_fnclose)
@@ -292,16 +311,16 @@ void client::handle_write(const boost::system::error_code& ec, size_t transize)
 		return;
 	}
 
-	m_circularbuff.read_commit(m_currwritesize);
-	m_currwriteaddr = NULL;
-	m_currwritesize = 0;
+	//发送完毕后，执行清理缓冲区对应已经发送的buffer 
+	if (transize > 0)
+		m_circularbuff.pop_front();
 
 #ifdef LIBNET_USE_CORE_SYNC_MUTEX
-	auto_lock::al_lock<auto_lock::al_mutex> al(m_autowrmtx);
+	auto_lock::al_lock<auto_lock::al_mutex> al(m_mutex);
 #else
-	auto_lock::al_lock<auto_lock::al_spin> al(m_autowrmtx);
+	auto_lock::al_lock<auto_lock::al_spin> al(m_mutex);
 #endif
-	m_onwriting = write_packet();
+	m_onwriting.exchange(write_packet());
 }
 
 void client::handle_read(const boost::system::error_code& ec, size_t transize)
@@ -590,6 +609,8 @@ int32_t client::write(uint8_t* data,
 		}
 		else
 		{
+			close();
+
 			if (client_manager_singleton::get_mutable_instance().pop_client(get_id()))
 			{
 				if (m_fnclose)
@@ -599,26 +620,28 @@ int32_t client::write(uint8_t* data,
 		}
 	}
 	else
-	{
-		if (!m_circularbuff.is_init() &&
-			!m_circularbuff.init(CLIENT_MAX_SEND_BUFF_SIZE))
+	{//异步发送
+		//分配异步发送缓冲区
+		if (m_circularbuff.pMediaBuffer == NULL)
+			m_circularbuff.InitFifo(CLIENT_MAX_SEND_BUFF_SIZE);
+
+		//先写入缓冲区 
+		if (m_circularbuff.push(data, datasize) == false)
 		{
-			return e_libnet_err_cliinitswritebuff;
+			m_circularbuff.Reset();
+			m_circularbuff.push(data, datasize);
+			m_onwriting.exchange(false);
 		}
 
-		if (datasize != m_circularbuff.write(data, datasize))
+		//如果没有正在发送，直接进行发送 ，否则在写入完成的回调函数再进行发送 
+		if (!m_onwriting.load())
 		{
-			ret = e_libnet_err_cliwritebufffull;
-		}
-
 #ifdef LIBNET_USE_CORE_SYNC_MUTEX
-		auto_lock::al_lock<auto_lock::al_mutex> al(m_autowrmtx);
+			auto_lock::al_lock<auto_lock::al_mutex> al(m_mutex);
 #else
-		auto_lock::al_lock<auto_lock::al_spin> al(m_autowrmtx);
-#endif
-		if (!m_onwriting)
-		{
-			m_onwriting = write_packet();
+			auto_lock::al_lock<auto_lock::al_spin> al(m_mutex);
+#endif			
+			m_onwriting.exchange(write_packet());
 		}
 	}
 
@@ -627,14 +650,32 @@ int32_t client::write(uint8_t* data,
 
 bool client::write_packet()
 {
-	m_currwriteaddr = m_circularbuff.try_read(CLIENT_PER_SEND_PACKET_SIZE, m_currwritesize);
-	if (m_currwriteaddr && (m_currwritesize > 0))
+	if (m_closeflag.load())
 	{
-		boost::asio::async_write(m_socket, boost::asio::buffer(m_currwriteaddr, m_currwritesize),
-			boost::bind(&client::handle_write,
-				shared_from_this(),
-				boost::asio::placeholders::error,
-				boost::asio::placeholders::bytes_transferred));
+		m_onwriting.exchange(false);
+		m_circularbuff.Reset();
+		return false;
+	}
+
+	m_currwriteaddr = m_circularbuff.pop(&m_currwritesize);
+	if (m_currwritesize > 0)
+	{
+		if (m_bSSLFlag.load() == true)
+		{//SSL 
+			boost::asio::async_write(m_socket_, boost::asio::buffer(m_currwriteaddr, m_currwritesize),
+				boost::bind(&client::handle_write,
+					shared_from_this(),
+					boost::asio::placeholders::error,
+					boost::asio::placeholders::bytes_transferred));
+		}
+		else
+		{//非SSL
+			boost::asio::async_write(m_socket, boost::asio::buffer(m_currwriteaddr, m_currwritesize),
+				boost::bind(&client::handle_write,
+					shared_from_this(),
+					boost::asio::placeholders::error,
+					boost::asio::placeholders::bytes_transferred));
+		}
 
 		return true;
 	}
@@ -644,8 +685,10 @@ bool client::write_packet()
 
 void client::close()
 {
-	if (!m_closeflag.exchange(true))
+	if (m_closeflag.load() == false)
 	{
+		m_closeflag.exchange(true);
+		m_onwriting.exchange(false);
 		m_fnread = NULL;
 
 		if (m_bSSLFlag.load() == true)
@@ -654,6 +697,8 @@ void client::close()
 			{
 				boost::system::error_code ec;
 				m_socket_.lowest_layer().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+				m_socket_.lowest_layer().close(ec);
+				m_socket_.lowest_layer().release(ec);
 			}
 		}
 		else
@@ -661,7 +706,9 @@ void client::close()
 			if (m_socket.is_open())
 			{
 				boost::system::error_code ec;
+				m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
 				m_socket.close(ec);
+				m_socket.release(ec);
 			}
 		}
 
@@ -718,6 +765,7 @@ client::client(asio::io_context& ioc,
 	, m_nClientType(nCLientType)
 	, m_fnaccept(fnaccept)
 {
+	m_onwriting.exchange(false);
 	m_closeflag.exchange(false);
 	m_connectflag.exchange(false);
 	m_readbuff = new uint8_t[CLIENT_MAX_RECV_BUFF_SIZE];
@@ -734,7 +782,16 @@ client::~client(void)
 		delete[] m_readbuff;
 		m_readbuff = NULL;
 	}
-	m_circularbuff.uninit();
+	//等到异步发送完毕
+	int nWaitCount = 0;
+	while (m_onwriting.load())
+	{//等待10秒 
+		nWaitCount++;	
+		std::this_thread::sleep_for(std::chrono::milliseconds(1*1000));
+		if (nWaitCount >= 10 )
+			break;
+	}
+	m_circularbuff.FreeFifo();
 
 #ifndef _WIN32
 	malloc_trim(0);
@@ -808,6 +865,17 @@ int32_t client::run()
 	}
 	else
 	{//普通读取
+		
+#ifndef _WIN32
+		int ul = 1;
+		int nRet3 = ioctl(m_socket.native_handle(), FIONBIO, &ul); //设置为非阻塞模式 
+#else
+		u_long ul = 1; // 1 表示非阻塞模式
+		int nRet3 = ioctlsocket(m_socket.native_handle(), FIONBIO, &ul); // 设置为非阻塞模式
+	
+#endif
+	
+		//printf("run() , ioctl nRet3 = %d \r\n",nRet3);
 		m_socket.async_read_some(asio::buffer(m_readbuff, CLIENT_MAX_RECV_BUFF_SIZE),
 			std::bind(&client::handle_read,
 				shared_from_this(),
@@ -908,6 +976,16 @@ int32_t client::connect(int8_t* remoteip,
 		int nRet2 = setsockopt(m_socket.native_handle(), SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(timeval)); //设置接收超时
 		printf("connect() , setsockopt nRet1 = %d , nRet2 = %d \r\n", nRet1, nRet2);
 
+#ifndef _WIN32
+		int ul = 1;
+		int nRet3 = ioctl(m_socket.native_handle(), FIONBIO, &ul); //设置为非阻塞模式 
+#else
+		u_long ul = 1; // 1 表示非阻塞模式
+		int nRet3 = ioctlsocket(m_socket.native_handle(), FIONBIO, &ul); // 设置为非阻塞模式
+
+#endif
+
+
 		//设置关闭不拖延
 		std::error_code ec;
 		asio::ip::tcp::no_delay no_delay_option(true);
@@ -976,6 +1054,7 @@ void client::handle_write(const std::error_code& ec, size_t transize)
 {
 	if (ec)
 	{
+		close();
 		if (client_manager::getInstance().pop_client(get_id()))
 		{
 			if (m_fnclose)
@@ -987,12 +1066,13 @@ void client::handle_write(const std::error_code& ec, size_t transize)
 		return;
 	}
 
-	m_circularbuff.read_commit(m_currwritesize);
-	m_currwriteaddr = NULL;
-	m_currwritesize = 0;
+	//发送完毕后，执行清理缓冲区对应已经发送的buffer 
+	if (transize > 0)
+		m_circularbuff.pop_front();
+
 
 	std::unique_lock<std::mutex> _lock(m_autowrmtx);
-	m_onwriting = write_packet();
+	m_onwriting.exchange(write_packet());
 }
 
 void client::handle_read(const std::error_code& ec, size_t transize)
@@ -1272,6 +1352,7 @@ int32_t client::write(uint8_t* data,
 		}
 		else
 		{
+			close();
 			if (client_manager::getInstance().pop_client(get_id()))
 			{
 				if (m_fnclose)
@@ -1281,39 +1362,59 @@ int32_t client::write(uint8_t* data,
 		}
 	}
 	else
-	{
-		if (!m_circularbuff.is_init() &&
-			!m_circularbuff.init(CLIENT_MAX_SEND_BUFF_SIZE))
+	{//异步发送
+		//分配异步发送缓冲区
+		if (m_circularbuff.pMediaBuffer == NULL)
+			m_circularbuff.InitFifo(CLIENT_MAX_SEND_BUFF_SIZE);
+
+		//先写入缓冲区 
+		if (m_circularbuff.push(data, datasize) == false)
 		{
-			return e_libnet_err_cliinitswritebuff;
+			m_circularbuff.Reset();
+			m_circularbuff.push(data, datasize);
+			m_onwriting.exchange(false);
 		}
 
-		if (datasize != m_circularbuff.write(data, datasize))
+		//如果没有正在发送，直接进行发送 ，否则在写入完成的回调函数再进行发送 
+		if (!m_onwriting.load())
 		{
-			ret = e_libnet_err_cliwritebufffull;
-		}
-
-		std::unique_lock<std::mutex> _lock(m_autowrmtx);
-		if (!m_onwriting)
-		{
-			m_onwriting = write_packet();
+			m_onwriting.exchange(write_packet());
 		}
 	}
 
 	return ret;
 }
 
+
 bool client::write_packet()
 {
-	m_currwriteaddr = m_circularbuff.try_read(CLIENT_PER_SEND_PACKET_SIZE, m_currwritesize);
-	if (m_currwriteaddr && (m_currwritesize > 0))
+	if (m_closeflag.load())
 	{
-		auto self(shared_from_this());
-		asio::async_write(m_socket, asio::buffer(m_currwriteaddr, m_currwritesize),
-			[this, self](std::error_code ec, std::size_t  length)
-			{		
-					handle_write(ec, length);			
-			});
+		m_onwriting.exchange(false);
+		m_circularbuff.Reset();
+		return false;
+	}
+
+	m_currwriteaddr = m_circularbuff.pop(&m_currwritesize);
+	if (m_currwritesize > 0)
+	{
+		if (m_bSSLFlag.load() == true)
+		{//SSL 
+			asio::async_write(m_socket_, asio::buffer(m_currwriteaddr, m_currwritesize),
+				std::bind(&client::handle_write,
+					shared_from_this(),
+					std::placeholders::_1,
+					std::placeholders::_2));
+		}
+		else
+		{//非SSL
+			asio::async_write(m_socket, asio::buffer(m_currwriteaddr, m_currwritesize),
+				std::bind(&client::handle_write,
+					shared_from_this(),
+					std::placeholders::_1,
+					std::placeholders::_2));
+		}
+
 		return true;
 	}
 
@@ -1322,8 +1423,10 @@ bool client::write_packet()
 
 void client::close()
 {
-	if (!m_closeflag.exchange(true))
+	if (m_closeflag.load() == false)
 	{
+		m_closeflag.exchange(true);
+		m_onwriting.exchange(false);
 		m_fnread = NULL;
 
 		if (m_bSSLFlag.load() == true)
@@ -1332,6 +1435,8 @@ void client::close()
 			{
 				std::error_code ec;
 				m_socket_.lowest_layer().shutdown(asio::ip::tcp::socket::shutdown_both, ec);
+				m_socket_.lowest_layer().close(ec);
+				m_socket_.lowest_layer().release(ec);
 			}
 		}
 		else
@@ -1339,7 +1444,9 @@ void client::close()
 			if (m_socket.is_open())
 			{
 				std::error_code ec;
+				m_socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
 				m_socket.close(ec);
+				m_socket.release(ec);
 			}
 		}
 

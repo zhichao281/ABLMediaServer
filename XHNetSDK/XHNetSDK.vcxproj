@@ -242,6 +242,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AsyncBuffer.h" />
     <ClInclude Include="auto_lock.h" />
     <ClInclude Include="circular_buffer.h" />
     <ClInclude Include="client.h" />
@@ -252,6 +253,7 @@
     <ClInclude Include="io_context_pool.h" />
     <ClInclude Include="libnet.h" />
     <ClInclude Include="libnet_error.h" />
+    <ClInclude Include="MediaFifo.h" />
     <ClInclude Include="object_pool.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="server.h" />
@@ -263,12 +265,14 @@
     <ClInclude Include="XHNetSDK.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AsyncBuffer.cpp" />
     <ClCompile Include="circular_buffer.cpp" />
     <ClCompile Include="client.cpp" />
     <ClCompile Include="client_manager.cpp" />
     <ClCompile Include="identifier_generator.cpp" />
     <ClCompile Include="io_context_pool.cpp" />
     <ClCompile Include="libnet.cpp" />
+    <ClCompile Include="MediaFifo.cpp" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="server_manager.cpp" />
     <ClCompile Include="thread_pool\testThreadPool.cpp" />

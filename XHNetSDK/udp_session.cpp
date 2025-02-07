@@ -805,6 +805,7 @@ int32_t	udp_session::close()
 	{
 		asio::error_code ec;
 		m_socket.close(ec);
+		m_socket.release(ec);
 	}
 
 	return e_libnet_err_noerror;

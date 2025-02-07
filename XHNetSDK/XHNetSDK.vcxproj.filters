@@ -75,6 +75,12 @@
     <ClInclude Include="libnet.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="AsyncBuffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MediaFifo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="circular_buffer.cpp">
@@ -112,6 +118,12 @@
     </ClCompile>
     <ClCompile Include="thread_pool\testThreadPool.cpp">
       <Filter>头文件\thread_pool</Filter>
+    </ClCompile>
+    <ClCompile Include="AsyncBuffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MediaFifo.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -11,7 +11,11 @@
 #include "data_define.h"
 #include "libnet.h"
 #include "circular_buffer.h"
+#include "AsyncBuffer.h"
+#include "MediaFifo.h"
 #include <boost/asio/ssl.hpp>
+
+#include "auto_lock.h"
 
 //客户端类型
 enum ClientType
@@ -33,6 +37,12 @@ public:
 		ClientType nCLientType,
 		accept_callback  fnaccept);
 	~client();
+
+#ifdef LIBNET_USE_CORE_SYNC_MUTEX
+	auto_lock::al_mutex m_mutex;
+#else
+	auto_lock::al_spin m_mutex;
+#endif
 
 	boost::atomic_bool m_connectflag;
 	int               m_nClientType;
@@ -114,10 +124,10 @@ private:
 #else
 	auto_lock::al_spin m_autowrmtx;
 #endif
-	bool m_onwriting;
-	circular_buffer m_circularbuff;
+	boost::atomic_bool m_onwriting;
+	CMediaFifo m_circularbuff;
 	uint8_t* m_currwriteaddr;
-	uint32_t m_currwritesize;
+	int       m_currwritesize;
 };
 typedef boost::shared_ptr<client>  client_ptr;
 
@@ -150,6 +160,7 @@ inline NETHANDLE client::get_server_id() const
 //#define _WIN32_WINNT 0x0A00 
 //#endif
 
+#define _WIN32_WINNT 0x0A00 // 对应 Windows 10 及更高版本
 
 #include <memory>
 #include <atomic>
@@ -157,6 +168,8 @@ inline NETHANDLE client::get_server_id() const
 # include "asio/deadline_timer.hpp"
 #include "data_define.h"
 #include "libnet.h"
+#include "AsyncBuffer.h"
+#include "MediaFifo.h"
 #include "circular_buffer.h"
 #include <asio/ssl.hpp>
 
@@ -248,10 +261,10 @@ private:
 	std::mutex m_writemtx;                //互斥锁	
 	std::mutex m_autowrmtx;                //互斥锁	
 
-	bool m_onwriting;
-	circular_buffer m_circularbuff;
+	std::atomic<bool> m_onwriting;
+	CMediaFifo m_circularbuff;
 	uint8_t* m_currwriteaddr;
-	uint32_t m_currwritesize;
+	int       m_currwritesize;
 
 };
 typedef std::shared_ptr<client>  client_ptr;

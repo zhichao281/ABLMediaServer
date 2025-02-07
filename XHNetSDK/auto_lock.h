@@ -1,6 +1,8 @@
 #ifdef USE_BOOST
 #ifndef _AUTO_LOCK_H_
 #define _AUTO_LOCK_H_ 
+#define LIBNET_USE_CORE_SYNC_MUTEX 
+
 
 #ifdef _WIN32
 
@@ -186,6 +188,7 @@ namespace auto_lock
 #else
 
 #pragma once
+
 
 #ifdef _WIN32
 #include <Windows.h>

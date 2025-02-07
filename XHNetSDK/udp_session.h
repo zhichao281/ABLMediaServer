@@ -105,7 +105,7 @@ inline NETHANDLE udp_session::get_id()
 }
 
 #else
-
+#define _WIN32_WINNT 0x0A00 // 对应 Windows 10 及更高版本
 #include <memory>
 #include <atomic>
 #include <asio.hpp>

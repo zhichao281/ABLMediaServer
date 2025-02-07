@@ -10,11 +10,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O0 -Wall")
 # 添加宏定义
 add_definitions(-DFFMPEG6)
 
-
 # 允许相对路径
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
- 
-
 
 # 判断是否启用了 USE_BOOST 选项
 option(USE_BOOST "Use Boost library" OFF)
@@ -37,11 +34,11 @@ endif()
 # 根据不同架构设置输出目录和链接目录
 if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
 
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/linux)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/linux)    
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/linux86)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/linux86)    
     # 设置链接目录
 set(LIBRARY_DIR
-    ${CMAKE_CURRENT_SOURCE_DIR}/bin/linux
+    ${CMAKE_CURRENT_SOURCE_DIR}/bin/linux86
     ${CMAKE_CURRENT_SOURCE_DIR}/media-server-master/${SYSTEM_NAME_LOWER}
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/linux86
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd/boost/linux86
@@ -54,7 +51,7 @@ elseif (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/arm64)    
     # 设置链接目录
 set(LIBRARY_DIR
-    ${CMAKE_CURRENT_SOURCE_DIR}/bin/linux
+    ${CMAKE_CURRENT_SOURCE_DIR}/bin/arm64
     ${CMAKE_CURRENT_SOURCE_DIR}/media-server-master/${SYSTEM_NAME_LOWER}
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/arm64
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd/boost/arm64
@@ -78,8 +75,6 @@ include_directories(
     ./ABLMediaServer/
     ./3rd/spdlog/include
 )
-
-
 
 
 # 添加子目录，这样子目录中的CMakeLists.txt才会被调用
