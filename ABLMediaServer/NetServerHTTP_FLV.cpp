@@ -55,11 +55,11 @@ int  NetServerHTTP_FLV_OnWrite_CB(void* param, const struct flv_vec_t* vec, int 
 {
 	CNetServerHTTP_FLV* pHttpFLV = (CNetServerHTTP_FLV*)param;
 
-	if (pHttpFLV != NULL && pHttpFLV->bRunFlag.load())
+	if (pHttpFLV != NULL && pHttpFLV->bRunFlag.load() )
 	{
 		for (int i = 0; i < n; i++)
 		{
-			pHttpFLV->nWriteRet = XHNetSDK_Write(pHttpFLV->nClient,(unsigned char*)vec[i].ptr, vec[i].len,true);
+			pHttpFLV->nWriteRet = XHNetSDK_Write(pHttpFLV->nClient,(unsigned char*)vec[i].ptr, vec[i].len, ABL_MediaServerPort.nSyncWritePacket);
 			if (pHttpFLV->nWriteRet != 0)
 			{
 				pHttpFLV->nWriteErrorCount ++;//发送出错累计 
@@ -67,8 +67,8 @@ int  NetServerHTTP_FLV_OnWrite_CB(void* param, const struct flv_vec_t* vec, int 
 				{
 					pHttpFLV->bRunFlag.exchange(false);
 					WriteLog(Log_Debug, "NetServerHTTP_FLV_OnWrite_CB 发送失败，次数 nWriteErrorCount = %d ", pHttpFLV->nWriteErrorCount);
-					DeleteNetRevcBaseClient(pHttpFLV->nClient);
-				}
+					pDisconnectBaseNetFifo.push((unsigned char*)&pHttpFLV->nClient, sizeof(pHttpFLV->nClient));
+ 				}
 			}
 			else
 				pHttpFLV->nWriteErrorCount = 0;//复位 
@@ -98,8 +98,7 @@ CNetServerHTTP_FLV::CNetServerHTTP_FLV(NETHANDLE hServer, NETHANDLE hClient, cha
 	nWriteErrorCount = 0;
 
 	netBaseNetType = NetBaseNetType_HttpFLVServerSendPush ;
-	
-
+ 
     nNewAddAudioTimeStamp = 64;
 	bUserNewAudioTimeStamp = false;
 	nUseNewAddAudioTimeStamp = 0;
@@ -221,7 +220,7 @@ int CNetServerHTTP_FLV::SendVideo()
 	if (nWriteErrorCount >= 30)
 	{
 		WriteLog(Log_Debug, "发送flv 失败,nClient = %llu ",nClient);
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
  		return -1;
 	}
 
@@ -241,7 +240,7 @@ int CNetServerHTTP_FLV::SendVideo()
 	if (nWriteErrorCount >= 30)
 	{
 		WriteLog(Log_Debug, "发送flv 失败,nClient = %llu ", nClient);
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 	}
 
 	return 0;
@@ -254,7 +253,7 @@ int CNetServerHTTP_FLV::SendAudio()
 	if (nWriteErrorCount >= 30)
 	{
 		WriteLog(Log_Debug, "发送flv 失败,nClient = %llu ", nClient);
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 		return -1;
 	}
 
@@ -271,7 +270,7 @@ int CNetServerHTTP_FLV::SendAudio()
   	}
 	if (nWriteErrorCount >= 30)
 	{
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 		WriteLog(Log_Debug, "发送flv 失败,nClient = %llu ", nClient);
 	}
 
@@ -298,7 +297,7 @@ int CNetServerHTTP_FLV::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientH
 			{
 				nNetStart = nNetEnd = netDataCacheLength = 0;
 				WriteLog(Log_Debug, "CNetServerHTTP_FLV = %X nClient = %llu 数据异常 , 执行删除", this, nClient);
-				DeleteNetRevcBaseClient(nClient);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 				return 0;
 			}
  		}
@@ -325,7 +324,7 @@ int CNetServerHTTP_FLV::ProcessNetData()
 		if (netDataCacheLength > string_length_4096)
 		{
 			WriteLog(Log_Debug, "CNetServerHTTP_FLV = %X , nClient = %llu ,netDataCacheLength = %d, 发送过来的url数据长度非法 ,立即删除 ", this, nClient, netDataCacheLength);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 
@@ -335,7 +334,7 @@ int CNetServerHTTP_FLV::ProcessNetData()
 			if (memcmp(netDataCache, "GET ", 4) != 0)
 			{
 				WriteLog(Log_Debug, "CNetServerHTTP_FLV = %X , nClient = %llu , 接收的数据非法 ", this, nClient);
-				DeleteNetRevcBaseClient(nClient);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			}
 			return -1;
  		}
@@ -358,7 +357,7 @@ int CNetServerHTTP_FLV::ProcessNetData()
 				if ((nPos2 - nPos1 - 4) > string_length_2048)
 				{
 					WriteLog(Log_Debug, "CNetServerHTTP_FLV=%X,请求文件名称长度非法 nClient = %llu ", this, nClient);
-					DeleteNetRevcBaseClient(nClient);
+					pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 					return -1;
  				}
 
@@ -387,7 +386,7 @@ int CNetServerHTTP_FLV::ProcessNetData()
 		if (!bFindFlvNameFlag)
 		{
 			WriteLog(Log_Debug, "CNetServerHTTP_FLV=%X, 检测出 非法的 Http-flv 协议数据包 nClient = %llu ", this, nClient);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 
@@ -395,7 +394,7 @@ int CNetServerHTTP_FLV::ProcessNetData()
 		if (!(strstr(szFlvName, ".flv") != NULL || strstr(szFlvName, ".FLV") != NULL))
 		{
 			WriteLog(Log_Debug, "CNetServerHTTP_FLV = %X,  nClient = %llu ", this, nClient);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 
@@ -418,9 +417,9 @@ int CNetServerHTTP_FLV::ProcessNetData()
 				WriteLog(Log_Debug, "CNetServerHTTP_FLV=%X, 没有推流对象的地址 %s nClient = %llu ", this, szFlvName, nClient);
 
 				sprintf(httpResponseData, "HTTP/1.1 404 Not Found\r\nConnection: keep-alive\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nAccess-Control-Allow-Origin: *\r\nServer: %s\r\n\r\n", MediaServerVerson);
-				nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+				nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 
-				DeleteNetRevcBaseClient(nClient);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 				return -1;
 			}
 		}
@@ -431,8 +430,8 @@ int CNetServerHTTP_FLV::ProcessNetData()
 			{
 				WriteLog(Log_Debug, "CNetServerHTTP_FLV = %X, 没有点播的录像文件 %s nClient = %llu ", this, szFlvName, nClient);
  				sprintf(httpResponseData, "HTTP/1.1 404 Not Found\r\nConnection: keep-alive\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nAccess-Control-Allow-Origin: *\r\nServer: %s\r\n\r\n", MediaServerVerson);
-				nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
-				DeleteNetRevcBaseClient(nClient);
+				nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 				return -1;
  			}
 
@@ -442,8 +441,8 @@ int CNetServerHTTP_FLV::ProcessNetData()
 			{
  				WriteLog(Log_Debug, "CNetServerHTTP_FLV=%X, 建录像文件点播失败 %s nClient = %llu ", this, szFlvName, nClient);
  				sprintf(httpResponseData, "HTTP/1.1 404 Not Found\r\nConnection: keep-alive\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nAccess-Control-Allow-Origin: *\r\nServer: %s\r\n\r\n", MediaServerVerson);
-				nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
-				DeleteNetRevcBaseClient(nClient);
+				nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 				return -1;
 			}
 		}
@@ -459,10 +458,10 @@ int CNetServerHTTP_FLV::ProcessNetData()
 			strcpy(szOrigin, "*");
 
 		sprintf(httpResponseData, "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Credentials: true\r\nAccess-Control-Allow-Origin: %s\r\nConnection: keep-alive\r\nContent-Type: video/x-flv; charset=utf-8\r\nDate: Wed, Apr 20 2022 10:04:31 GMT\r\nKeep-Alive: timeout=30, max=100\r\nServer: %s\r\n\r\n", szOrigin, MediaServerVerson);
-		XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+		XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 		if (nWriteRet != 0)
 		{
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 
@@ -470,7 +469,7 @@ int CNetServerHTTP_FLV::ProcessNetData()
 		if (flvMuxer == NULL)
 		{
 			WriteLog(Log_Debug, "创建 flv 打包器失败 ");
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
  		}
 
@@ -498,14 +497,14 @@ int CNetServerHTTP_FLV::ProcessNetData()
 		else
 		{
 			WriteLog(Log_Debug, "视频 %s、音频 %s 格式有误，不支持http-flv 输出,即将删除 nClient = %llu ",pushClient->m_mediaCodecInfo.szVideoName,pushClient->m_mediaCodecInfo.szAudioName,nClient);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 
 		if (flvWrite == NULL)
 		{
 			WriteLog(Log_Debug, "创建 flv 发送组件失败 ");
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 #endif

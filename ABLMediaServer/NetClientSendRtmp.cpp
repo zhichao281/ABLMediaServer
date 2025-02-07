@@ -51,16 +51,16 @@ static int rtmp_client_pushCB(void* param, const void* header, size_t len, const
 	{
 		if (len > 0 && header != NULL)
 		{
-			pClient->nWriteRet = XHNetSDK_Write(pClient->nClient, (uint8_t*)header, len, true);
+			pClient->nWriteRet = XHNetSDK_Write(pClient->nClient, (uint8_t*)header, len, ABL_MediaServerPort.nSyncWritePacket);
 			if (pClient->nWriteRet != 0)
 			{
-				pClient->nWriteErrorCount ++;
+				pClient->nWriteErrorCount++;
 				if (pClient->nWriteErrorCount >= 30)
 				{
 					pClient->bRunFlag.exchange(false);
 					WriteLog(Log_Debug, "rtmp_client_pushCB 发送失败，次数 nWriteErrorCount = %d ", pClient->nWriteErrorCount);
 
-				    pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
+					pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
 				}
 			}
 			else
@@ -70,37 +70,37 @@ static int rtmp_client_pushCB(void* param, const void* header, size_t len, const
 		{
 			pClient->nRecvDataTimerBySecond = 0;
 
-			pClient->nWriteRet = XHNetSDK_Write(pClient->nClient, (uint8_t*)data, bytes, true);
+			pClient->nWriteRet = XHNetSDK_Write(pClient->nClient, (uint8_t*)data, bytes, ABL_MediaServerPort.nSyncWritePacket);
 			if (pClient->nWriteRet != 0)
 			{
 				pClient->nWriteErrorCount++;
 
 				if (!pClient->bResponseHttpFlag)
 				{//推流失败回复
- 					sprintf(pClient->szResponseBody, "{\"code\":%d,\"memo\":\"rtmp push Error \",\"key\":%d}", IndexApiCode_RtmpPushError, 0);
+					sprintf(pClient->szResponseBody, "{\"code\":%d,\"memo\":\"rtmp push Error \",\"key\":%d}", IndexApiCode_RtmpPushError, 0);
 					pClient->ResponseHttp(pClient->nClient_http, pClient->szResponseBody, false);
 				}
 
 				WriteLog(Log_Debug, "rtmp_client_pushCB 发送失败，次数 nWriteErrorCount = %d ", pClient->nWriteErrorCount);
- 			}
+			}
 			else
 			{
 				pClient->nWriteErrorCount = 0;
 
 				//回复http 
-				if (!pClient->bResponseHttpFlag && GetTickCount64() - pClient->nPrintTime >= 1000 )
+				if (!pClient->bResponseHttpFlag && GetTickCount64() - pClient->nPrintTime >= 1000)
 				{//推流成功回复
-  					sprintf(pClient->szResponseBody, "{\"code\":0,\"memo\":\"success\",\"key\":%llu}", pClient->hParent);
+					sprintf(pClient->szResponseBody, "{\"code\":0,\"memo\":\"success\",\"key\":%llu}", pClient->hParent);
 					pClient->ResponseHttp(pClient->nClient_http, pClient->szResponseBody, false);
- 				}
+				}
 			}
 		}
 
 		if (pClient->bAddMediaSourceFlag == false)
 		{
- 			pClient->nRtmpState = rtmp_client_getstate(pClient->rtmp);
+			pClient->nRtmpState = rtmp_client_getstate(pClient->rtmp);
 			if (pClient->nRtmpState == 3)
-				pClient->nRtmpState3Count ++;
+				pClient->nRtmpState3Count++;
 
 			WriteLog(Log_Debug, "rtmp_client_pushCB  nRtmpState = %d ", pClient->nRtmpState);
 			if (pClient->nRtmpState3Count >= 2)
@@ -112,10 +112,10 @@ static int rtmp_client_pushCB(void* param, const void* header, size_t len, const
 
 				pClient->bUpdateVideoFrameSpeedFlag = true; //用于成功交互
 				pClient->bAddMediaSourceFlag = true;
-				auto  pMediaSource = GetMediaStreamSource(pClient->m_szShareMediaURL, true);
+				auto pMediaSource = GetMediaStreamSource(pClient->m_szShareMediaURL, true);
 				if (pMediaSource != NULL)
 				{
- 					//记下媒体源
+					//记下媒体源
 					pClient->SplitterAppStream(pClient->m_szShareMediaURL);
 					sprintf(pClient->m_addStreamProxyStruct.url, "rtmp://localhost:%d/%s/%s", ABL_MediaServerPort.nRtmpPort, pClient->m_addStreamProxyStruct.app, pClient->m_addStreamProxyStruct.stream);
 
@@ -124,13 +124,13 @@ static int rtmp_client_pushCB(void* param, const void* header, size_t len, const
 				}
 				else
 				{
-					WriteLog(Log_Debug, "rtmp_client_pushCB 不存在媒体源 %s ，立即删除 nClient = %llu ", pClient->m_szShareMediaURL,pClient->nClient);
+					WriteLog(Log_Debug, "rtmp_client_pushCB 不存在媒体源 %s ，立即删除 nClient = %llu ", pClient->m_szShareMediaURL, pClient->nClient);
 					pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
- 				}
+				}
 			}
 		}
 	}
- 
+
 	return len + bytes;
 }
 

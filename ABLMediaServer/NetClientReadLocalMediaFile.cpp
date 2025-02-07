@@ -613,11 +613,12 @@ int CNetClientReadLocalMediaFile::ProcessNetData()
 	if (nReadRet < 0)
 	{//文件读取出错 
 		WriteLog(Log_Debug, "ProcessNetData 文件读取完毕 ,nClient = %llu ", nClient);
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 		return -1;
 	}
 	nOldAVType = nAVType;
-	Sleep(1);
+	//Sleep(1);
+	std::this_thread::sleep_for(std::chrono::seconds(1)); // 添加 1 秒延迟
 
 	//加入音频
 	if (nCurrentDateTime - nInputAudioTime >= nInputAudioDelay - 5)
@@ -674,7 +675,7 @@ bool  CNetClientReadLocalMediaFile::ReaplyFileSeek(uint64_t nTimestamp)
 		WriteLog(Log_Debug, "ReaplyFileSeek 拖动时间戳超出文件最大时长 ,nClient = %llu ,nTimestamp = %llu ,duration = %d ", nClient, nTimestamp, duration );
 		return false; 
 	}
-	int nRet = av_seek_frame(pFormatCtx2, -1, nTimestamp * 1000000, AVSEEK_FLAG_BACKWARD);
+	int nRet = av_seek_frame(pFormatCtx2, -1, nTimestamp * AV_TIME_BASE + pFormatCtx2->start_time, AVSEEK_FLAG_BACKWARD);
 
 	bRestoreVideoFrameFlag = bRestoreAudioFrameFlag = true; //因为有拖到播放，需要重新计算已经播放视频，音频帧总数 
 	WriteLog(Log_Debug, "ReaplyFileSeek 拖动播放 ,nClient = %llu ,nTimestamp = %llu ,nRet = %d ", nClient, nTimestamp, nRet);

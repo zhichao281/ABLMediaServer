@@ -6,6 +6,7 @@
 #define   Default_TS_MediaFileByteCount       1024*1024*3  //缺省的切片文件大小 
 #define   MaxStoreTsFileCount                 4            //最大允许保持TS文件数量　
 
+#include "NetRecvBase.h"
 #include "hls-fmp4.h"
 #include "mpeg-ps.h"
 #include "hls-m3u8.h"
@@ -33,6 +34,8 @@
 
 #define   CudaDecodeH264EncodeH264FIFOBufferLength  2048*1024*1
 
+class CNetRevcBase;
+
 //用于记录rtsp推流时的SDP信息
 struct RtspSDPContentStruct
 {
@@ -56,11 +59,7 @@ struct RtspSDPContentStruct
 		nSampleRate = 0 ;
 	}
 };
-#ifdef USE_BOOST
-typedef  boost::unordered_map<NETHANDLE, NETHANDLE> MediaSendMap;//媒体发送列表
-#else
-typedef  std::unordered_map<NETHANDLE, NETHANDLE> MediaSendMap;//媒体发送列表
-#endif
+
 
 #define  OneFrame_MP4_Stream_BufferLength    1024*1024*2 
 
@@ -278,7 +277,14 @@ public:
    char                 sim[string_length_256];
 
    std::mutex           mediaSendMapLock;
-   MediaSendMap         mediaSendMap;//本数据 需要 发送、拷贝的链接列表  
+
+#ifdef USE_BOOST
+   boost::unordered_map<NETHANDLE, boost::shared_ptr<CNetRevcBase> > mediaSendMap;//本数据 需要 发送、拷贝的链接列表  
+
+#else
+   std::unordered_map<NETHANDLE, std::shared_ptr<CNetRevcBase> > mediaSendMap;//本数据 需要 发送、拷贝的链接列表  
+
+#endif
 
    uint64_t             nClient; //记录是那个链接接收的推流 
    uint64_t             nLastWatchTime, nRecordLastWatchTime, nLastWatchTimeDisconect;//最后观看时间

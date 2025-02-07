@@ -213,7 +213,7 @@ void CNetClientHttp::HttpRequest(char* szUrl, char* szBody,int nLength)
 	memcpy(szResponseHttpHead+strlen(szResponseHttpHead), szBody,nLength);
 	szBody[nLength] = 0x00;
 
-	int nRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseHttpHead, strlen(szResponseHttpHead), 1); 
+	int nRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseHttpHead, strlen(szResponseHttpHead), ABL_MediaServerPort.nSyncWritePacket);
 	if (nRet != 0)
 	{
 		WriteLog(Log_Debug, "CNetClientHttp = %X nClient = %llu ,netBaseNetType = %d HttpRequest() 通知消息发送失败 ", this, nClient, netBaseNetType);

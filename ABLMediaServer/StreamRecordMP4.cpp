@@ -76,7 +76,7 @@ const struct mov_buffer_t* mp4_mov_file_buffer(void)
 	return &s_io;
 }
 
-CStreamRecordMP4::CStreamRecordMP4(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort, char* szShareMediaURL)
+CStreamRecordMP4::CStreamRecordMP4(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort,char* szShareMediaURL)
 {
 	bCreateNewRecordFile = false;
 	nRecordDateTime = GetTickCount64();
@@ -135,19 +135,19 @@ int CStreamRecordMP4::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char*
 	if (!bRunFlag.load())
 		return -1;
 
-	if (!m_bOpenFlag)
-		OpenMp4File(mediaCodecInfo.nWidth, mediaCodecInfo.nHeight);
+	if(!m_bOpenFlag)
+	  OpenMp4File(mediaCodecInfo.nWidth, mediaCodecInfo.nHeight);
 
 	nRecvDataTimerBySecond = 0;
-	nCurrentVideoFrames++;//当前视频帧数
-	nTotalVideoFrames++;//录像视频总帧数
+	nCurrentVideoFrames ++;//当前视频帧数
+	nTotalVideoFrames ++;//录像视频总帧数
 	nWriteRecordByteSize += nDataLength;
 
 	m_videoFifo.push(pVideoData, nDataLength);
 
-	if (ABL_MediaServerPort.hook_enable == 1 && (GetTickCount64() - nCreateDateTime) >= 1000 * 30)
+	if (ABL_MediaServerPort.hook_enable == 1 && (GetTickCount64() - nCreateDateTime) >= 1000 * 30 )
 	{
-		MessageNoticeStruct msgNotice;
+ 		MessageNoticeStruct msgNotice;
 		msgNotice.nClient = NetBaseNetType_HttpClient_Record_Progress;
 		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_progress\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"TotalVideoDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\"}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, key, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), (nTotalVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, getDatetimeBySecond(nStartDateTime + (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate)));
 		pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
@@ -169,7 +169,7 @@ int CStreamRecordMP4::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char*
 	}
 
 	if (bCreateNewRecordFile == true)
-	{
+  	{
 		CloseMp4File();
 		bCreateNewRecordFile = false;
 
@@ -308,7 +308,7 @@ bool CStreamRecordMP4::OpenMp4File(int nWidth, int nHeight)
 		{
 			bRunFlag.exchange(false);
 			WriteLog(Log_Debug, "创建录像文件失败，准备删除  nClient = %llu ", nClient);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return false;
 		}
  

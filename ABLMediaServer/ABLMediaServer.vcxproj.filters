@@ -470,6 +470,9 @@
     <ClCompile Include="ffmpeg\thread_pool.cpp">
       <Filter>ffmpeg</Filter>
     </ClCompile>
+    <ClCompile Include="NetClientRecvJTT1078.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ABLMediaServer.rc">

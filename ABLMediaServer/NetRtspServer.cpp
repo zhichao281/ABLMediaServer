@@ -886,7 +886,7 @@ bool   CNetRtspServer::GetMediaURLFromRtspSDP()
 	if (nPathCount != 2)
 	{//限制rtsp推流，需要两级路径
  			WriteLog(Log_Debug, "rtsp推流地址不符合两级的标准，需要推送类似URL: rtsp://190.15.240.11:554/live/Camera_00001 ");
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return false;
  	}
 
@@ -904,7 +904,7 @@ bool   CNetRtspServer::GetMediaURLFromRtspSDP()
 	if (!bGetMediaSoureURL)
 	{
 		WriteLog(Log_Debug, "获取RTSP媒体地址失败 ！ nClient = %llu",nClient);
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 		return false ;
 	}
 	else
@@ -915,10 +915,10 @@ bool   CNetRtspServer::GetMediaURLFromRtspSDP()
 void Video_rtp_packet_callback_func(_rtp_packet_cb* cb)
 {
 	CNetRtspServer* pRtspClient = (CNetRtspServer*)cb->userdata;
-	if (pRtspClient->bRunFlag.load() && pRtspClient->m_RtspNetworkType == RtspNetworkType_TCP)
-		pRtspClient->ProcessRtpVideoData(cb->data, cb->datasize);
-	else if (pRtspClient->bRunFlag.load() && pRtspClient->m_RtspNetworkType == RtspNetworkType_UDP && pRtspClient->nServerVideoUDP[0] > 0)
-		XHNetSDK_Sendto(pRtspClient->nServerVideoUDP[0], cb->data, cb->datasize, (void*)&pRtspClient->addrClientVideo[0]);
+	if(pRtspClient->bRunFlag.load() && pRtspClient->m_RtspNetworkType == RtspNetworkType_TCP)
+	  pRtspClient->ProcessRtpVideoData(cb->data, cb->datasize);
+	else if (pRtspClient->bRunFlag.load() && pRtspClient->m_RtspNetworkType == RtspNetworkType_UDP && pRtspClient->nServerVideoUDP[0] > 0 )
+	  XHNetSDK_Sendto(pRtspClient->nServerVideoUDP[0], cb->data, cb->datasize, (void*)&pRtspClient->addrClientVideo[0]);
 }
 
 //rtp 打包回调音频
@@ -926,8 +926,8 @@ void Audio_rtp_packet_callback_func(_rtp_packet_cb* cb)
 {
 	CNetRtspServer* pRtspClient = (CNetRtspServer*)cb->userdata;
 	if (pRtspClient->bRunFlag.load() && pRtspClient->m_RtspNetworkType == RtspNetworkType_TCP)
-		pRtspClient->ProcessRtpAudioData(cb->data, cb->datasize);
-	else if (pRtspClient->bRunFlag.load() && pRtspClient->m_RtspNetworkType == RtspNetworkType_UDP && pRtspClient->nServerAudioUDP[0] > 0)
+	  pRtspClient->ProcessRtpAudioData(cb->data, cb->datasize);
+	else if (pRtspClient->bRunFlag.load() && pRtspClient->m_RtspNetworkType == RtspNetworkType_UDP && pRtspClient->nServerAudioUDP[0] > 0 )
 		XHNetSDK_Sendto(pRtspClient->nServerAudioUDP[0], cb->data, cb->datasize, (void*)&pRtspClient->addrClientAudio[0]);
 }
 
@@ -992,18 +992,18 @@ void CNetRtspServer::ProcessRtpAudioData(unsigned char* pRtpAudio, int nDataLeng
 		nAudioRtpLen = htons(nDataLength);
 		memcpy(szSendRtpAudioMediaBuffer + (nSendRtpAudioMediaBufferLength + 2), (unsigned char*)&nAudioRtpLen, sizeof(nAudioRtpLen));
 		memcpy(szSendRtpAudioMediaBuffer + (nSendRtpAudioMediaBufferLength + 4), pRtpAudio, nDataLength);
-		XHNetSDK_Write(nClient, szSendRtpAudioMediaBuffer, nDataLength + 4, 1);
+		XHNetSDK_Write(nClient, szSendRtpAudioMediaBuffer, nDataLength + 4, ABL_MediaServerPort.nSyncWritePacket);
 	}
 }
 
 //累积rtp包，发送
 void CNetRtspServer::SumSendRtpMediaBuffer(unsigned char* pRtpMedia, int nRtpLength)
 {
-	std::lock_guard<std::mutex> lock(MediaSumRtpMutex);
-
+ 	std::lock_guard<std::mutex> lock(MediaSumRtpMutex);
+ 
 	if (bRunFlag.load())
 	{
-		nSendRet = XHNetSDK_Write(nClient, pRtpMedia, nRtpLength, 1);
+		nSendRet = XHNetSDK_Write(nClient, pRtpMedia, nRtpLength, ABL_MediaServerPort.nSyncWritePacket);
 		if (nSendRet != 0)
 		{
 			nSendRtpFailCount++;
@@ -1224,7 +1224,7 @@ bool  CNetRtspServer::SendPlayMessage()
 				}
 				else
 				{//开始播放
-					MessageNoticeStruct msgNotice;
+ 					MessageNoticeStruct msgNotice;
 					msgNotice.nClient = NetBaseNetType_HttpClient_on_rtsp_replay;
 					sprintf(msgNotice.szMsg, "{\"eventName\":\"on_rtsp_replay\",\"app\":\"%s\",\"stream\":\"%s\",\"command\":\"play\",\"value\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu}", app, stream, "", ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient);
 					pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
@@ -1233,17 +1233,18 @@ bool  CNetRtspServer::SendPlayMessage()
 		}
 		else
 		{//倍速播放
-			char szScale[string_length_512] = { 0 };
-			GetFieldValue("Scale", szScale);
+ 		     char szScale[string_length_512] = { 0 };
+		     GetFieldValue("Scale", szScale);
 
-			MessageNoticeStruct msgNotice;
-			msgNotice.nClient = NetBaseNetType_HttpClient_on_rtsp_replay;
-			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_rtsp_replay\",\"app\":\"%s\",\"stream\":\"%s\",\"command\":\"scale\",\"value\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu}", app, stream, szScale, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient);
-			pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
-		}
-}
+		     MessageNoticeStruct msgNotice;
+		     msgNotice.nClient = NetBaseNetType_HttpClient_on_rtsp_replay;
+		     sprintf(msgNotice.szMsg, "{\"eventName\":\"on_rtsp_replay\",\"app\":\"%s\",\"stream\":\"%s\",\"command\":\"scale\",\"value\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu}", app, stream, szScale, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient);
+	      	 pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
+	     }
+	}
 	return true;
 }
+
 //处理rtsp数据
 void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 {
@@ -1258,7 +1259,7 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
  		GetFieldValue("CSeq", szCSeq);
 
 		sprintf(szResponseBuffer, "RTSP/1.0 200 OK\r\nCSeq: %s\r\nPublic: %s\r\n\r\n", szCSeq, RtspServerPublic);
-		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), ABL_MediaServerPort.nSyncWritePacket);
 		if (nSendRet != 0)
 			destroy();
    	}
@@ -1283,10 +1284,10 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 		if (pMediaSourceTemp != NULL || strstr(szMediaSourceURL, RecordFileReplaySplitter) != NULL )
 		{
 			sprintf(szResponseBuffer, "RTSP/1.0 406 Not Acceptable\r\nServer: %s\r\nCSeq: %s\r\n\r\n", MediaServerVerson, szCSeq);
-			nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+			nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), ABL_MediaServerPort.nSyncWritePacket);
 			WriteLog(Log_Debug, "ANNOUNCE 推流地址已经存在 %s ", szMediaSourceURL);
 
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return;
 		}
 
@@ -1301,7 +1302,7 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 		}
 		else
 		{
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return ;
 		}
 		
@@ -1309,10 +1310,10 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 
 		//200 OK 回复
 		sprintf(szResponseBuffer, "RTSP/1.0 200 OK\r\nServer: %s\r\nCSeq: %s\r\n\r\n", MediaServerVerson, szCSeq);
- 		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+ 		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), ABL_MediaServerPort.nSyncWritePacket);
 		if (nSendRet != 0)
 		{
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return ;
 		}
 
@@ -1325,10 +1326,10 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 		if (!GetMediaInfoFromRtspSDP())
 		{
 			sprintf(szResponseBuffer, "RTSP/1.0 415 Unsupport Media Type\r\nServer: %s\r\nCSeq: %s\r\n\r\n", MediaServerVerson, szCSeq);
-			nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+			nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer),ABL_MediaServerPort.nSyncWritePacket);
 
 			WriteLog(Log_Debug, "ANNOUNCE SDP 信息中没有合法的媒体数据 %s ", szRtspContentSDP);
- 			DeleteNetRevcBaseClient(nClient);
+ 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return ;
 		}
 
@@ -1391,10 +1392,10 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 			if (pMediaSource == NULL || !(strlen(pMediaSource->m_mediaCodecInfo.szVideoName) > 0 || strlen(pMediaSource->m_mediaCodecInfo.szAudioName) > 0))
 			{
  				sprintf(szResponseBuffer, "RTSP/1.0 404 Not FOUND\r\nServer: %s\r\nCSeq: %s\r\n\r\n", MediaServerVerson, szCSeq);
-				nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+				nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), ABL_MediaServerPort.nSyncWritePacket);
 				WriteLog(Log_Debug, "媒体流 %s 不存在 ,准备删除 nClient =%llu ", szMediaSourceURL, nClient);
 
-				DeleteNetRevcBaseClient(nClient);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 				return;
 			}
 
@@ -1412,9 +1413,9 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 			if (QueryRecordFileIsExiting(szMediaSourceURL) == false)
 			{
 				sprintf(szResponseBuffer, "RTSP/1.0 404 Not FOUND\r\nServer: %s\r\nCSeq: %s\r\n\r\n", MediaServerVerson, szCSeq);
-				nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+				nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), ABL_MediaServerPort.nSyncWritePacket);
 				WriteLog(Log_Debug, "录像文件 %s 不存在 ,准备删除 nClient = %llu ", szMediaSourceURL, nClient);
- 				DeleteNetRevcBaseClient(nClient);
+ 				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 				return;
 			}
 
@@ -1423,9 +1424,9 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 			if (pMediaSource == NULL)
 			{
 				sprintf(szResponseBuffer, "RTSP/1.0 404 Not FOUND\r\nServer: %s\r\nCSeq: %s\r\n\r\n", MediaServerVerson, szCSeq);
-				nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+				nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), ABL_MediaServerPort.nSyncWritePacket);
 				WriteLog(Log_Debug, "RTSP服务器创建录像文件点播失败 %s  nClient = %llu ", szMediaSourceURL, nClient);
-				DeleteNetRevcBaseClient(nClient);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 				return;
 			}
 
@@ -1450,17 +1451,17 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 		if (!GetRtspSDPFromMediaStreamSource(sdpContent,false))
 		{
 			sprintf(szResponseBuffer, "RTSP/1.0 404 Not FOUND\r\nServer: %s\r\nCSeq: %s\r\n\r\n", MediaServerVerson, szCSeq);
-			nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+			nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), ABL_MediaServerPort.nSyncWritePacket);
 			WriteLog(Log_Debug, "媒体流 %s 不存在 ,准备删除 nClient =%llu ", szMediaSourceURL, nClient);
 
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return;
 		}
 		sprintf(szResponseBuffer, "RTSP/1.0 200 OK\r\nContent-Length: %d\r\nContent-Type: application/sdp\r\nContent-Base: %s/\r\nServer: %s\r\nCSeq: %s\r\nSession: ABLMeidaServer_%llu\r\nx-Accept-Dynamic-Rate: 1\r\nx-Accept-Retransmit: our-retransmit\r\n\r\n%s", strlen(szRtspSDPContent), RtspProtectArray[0].szRtspURL,MediaServerVerson, szCSeq, currentSession, szRtspSDPContent);
-		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), ABL_MediaServerPort.nSyncWritePacket);
 		if (nSendRet != 0)
 		{
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return;
 		}
 
@@ -1559,7 +1560,7 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 				responseUdpSetup();
  			}
 		}
-		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), ABL_MediaServerPort.nSyncWritePacket);
 		if (nSendRet != 0)
 			destroy();
 
@@ -1570,7 +1571,7 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
    		GetFieldValue("CSeq", szCSeq);
 
 		sprintf(szResponseBuffer, "RTSP/1.0 200 OK\r\nServer: %s\r\nCSeq: %s\r\nSession: ABLMediaServer_%llu\r\nRTP-Info: %s\r\n\r\n", MediaServerVerson, szCSeq, currentSession, szCurRtspURL);
-		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), ABL_MediaServerPort.nSyncWritePacket);
 		if (nSendRet != 0)
 			destroy();
 	}
@@ -1580,7 +1581,7 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 		nRecvDataTimerBySecond = 0 ;
 
 		sprintf(szResponseBuffer, "RTSP/1.0 200 OK\r\nServer: %s\r\nCSeq: %s\r\nSession: ABLMediaServer_%llu\r\nRTP-Info: %s\r\n\r\n", MediaServerVerson, szCSeq, currentSession, szCurRtspURL);
-		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), ABL_MediaServerPort.nSyncWritePacket);
 		if (nSendRet != 0)
 		{
 			destroy();
@@ -1589,7 +1590,6 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 
 		//发送播放消息通知 
 		SendPlayMessage();
-
 
 		//没有暂停
 		m_bPauseFlag = false;
@@ -1679,7 +1679,7 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 	else if (memcmp(pRecvData, "PAUSE ", 6) == 0 && strstr((char*)pRecvData, "\r\n\r\n") != NULL)
 	{
 		m_bPauseFlag = true ;//暂停
-
+							 
 		if (ABL_MediaServerPort.hook_enable == 1 && strlen(ABL_MediaServerPort.on_rtsp_replay) > 0)
 		{
 			MessageNoticeStruct msgNotice;
@@ -1706,7 +1706,7 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 		GetFieldValue("CSeq", szCSeq);
 
 		sprintf(szResponseBuffer, "RTSP/1.0 200 OK\r\nServer: %s\r\nCSeq: %s\r\nSession: ABLMediaServer_%llu\r\nRTP-Info: %s\r\n\r\n", MediaServerVerson, szCSeq, currentSession, szCurRtspURL);
-		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), ABL_MediaServerPort.nSyncWritePacket);
 		if (nSendRet != 0)
 		{
 			destroy();
@@ -1719,7 +1719,7 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 	{
 		WriteLog(Log_Debug, "收到 TEARDOWN 命令，立即执行删除 nClient = %llu ", nClient);
 		bRunFlag.exchange(false);
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 	}
 	else if (memcmp(pRecvData, "GET_PARAMETER", 13) == 0 && strstr((char*)pRecvData, "\r\n\r\n") != NULL)
 	{
@@ -1727,7 +1727,7 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 		GetFieldValue("CSeq", szCSeq);
 
 		sprintf(szResponseBuffer, "RTSP/1.0 200 OK\r\nCSeq: %s\r\nPublic: %s\r\nx-Timeshift_Range: clock=20100318T021915.84Z-20100318T031915.84Z\r\nx-Timeshift_Current: clock=20100318T031915.84Z\r\n\r\n", szCSeq, RtspServerPublic);
-		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), 1);
+		nSendRet = XHNetSDK_Write(nClient, (unsigned char*)szResponseBuffer, strlen(szResponseBuffer), ABL_MediaServerPort.nSyncWritePacket);
 		if (nSendRet != 0)
 			destroy();
 
@@ -1736,7 +1736,7 @@ void  CNetRtspServer::InputRtspData(unsigned char* pRecvData, int nDataLength)
 	{
 		bIsInvalidConnectFlag = true; //确认为非法连接 
 		WriteLog(Log_Debug, "非法的rtsp 命令，立即执行删除 nClient = %llu ",nClient);
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 	}
 }
 
@@ -2199,7 +2199,7 @@ void  CNetRtspServer::ProcessRtcpData(char* szRtcpData, int nDataLength, int nCh
 	memcpy(szRtcpDataOverTCP + 2, (unsigned char*)&nRtpLen, sizeof(nRtpLen));
 
 	memcpy(szRtcpDataOverTCP + 4, szRtcpData, nDataLength);
-	XHNetSDK_Write(nClient, szRtcpDataOverTCP, nDataLength + 4, 1);
+	XHNetSDK_Write(nClient, szRtcpDataOverTCP, nDataLength + 4, ABL_MediaServerPort.nSyncWritePacket);
 }
 
 //发送第一个请求

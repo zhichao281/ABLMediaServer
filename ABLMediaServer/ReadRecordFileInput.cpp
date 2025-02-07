@@ -664,7 +664,7 @@ int CReadRecordFileInput::ProcessNetData()
 	if (nReadRet < 0)
 	{//文件读取出错 
 	    WriteLog(Log_Debug, "ProcessNetData 文件读取完毕 ,nClient = %llu ", nClient);
-	    DeleteNetRevcBaseClient(nClient);
+	    pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 	    return -1;
 	}
 	nOldAVType = nAVType;
@@ -726,7 +726,7 @@ bool  CReadRecordFileInput::ReaplyFileSeek(uint64_t nTimestamp)
 		WriteLog(Log_Debug, "ReaplyFileSeek 拖动时间戳超出文件最大时长 ,nClient = %llu ,nTimestamp = %llu ,duration = %d ", nClient, nTimestamp, duration );
 		return false; 
 	}
-	int nRet = av_seek_frame(pFormatCtx2, -1, nTimestamp * 1000000, AVSEEK_FLAG_BACKWARD);
+	int nRet = av_seek_frame(pFormatCtx2, -1, nTimestamp * AV_TIME_BASE + pFormatCtx2->start_time, AVSEEK_FLAG_BACKWARD);
 	oldDTS = 0;
 	nStartSeekTime = GetTickCount64();//开始seek时间点
 	bSeekTimeState = true ;//正处于Seek状态时间范围内

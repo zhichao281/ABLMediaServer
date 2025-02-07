@@ -222,7 +222,7 @@ int CNetServerHLS::ProcessNetData()
 	if (netDataCacheLength > string_length_4096 )
 	{
 		WriteLog(Log_Debug, "CNetServerHLS = %X , nClient = %llu ,netDataCacheLength = %d, 发送过来的url数据长度非法 ,立即删除 ", this, nClient, netDataCacheLength);
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 		return -1;
 	}
 
@@ -232,7 +232,7 @@ int CNetServerHLS::ProcessNetData()
 		if (memcmp(netDataCache, "GET ", 4) != 0)
 		{
 			WriteLog(Log_Debug, "CNetServerHLS = %X , nClient = %llu , 接收的数据非法 ",this, nClient);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 		}
 		return -1;
  	}
@@ -353,9 +353,9 @@ int CNetServerHLS::SendLiveHLS()
 		WriteLog(Log_Debug, "CNetServerHLS=%X, 没有推流对象的地址 %s nClient = %llu ", this, szPushName, nClient);
 
 		sprintf(httpResponseData, "HTTP/1.1 404 Not Found\r\nConnection: Close\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nAccess-Control-Allow-Origin: *\r\nServer: %s\r\n\r\n", MediaServerVerson);
-		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 		return -1;
 	}
 
@@ -372,9 +372,9 @@ int CNetServerHLS::SendLiveHLS()
 			WriteLog(Log_Debug, "CNetServerHLS=%X, m3u8文件尚未生成，即刚刚开始切片，但是还不够3个TS文件 %s nClient = %llu ", this, szPushName, nClient);
 
 			sprintf(httpResponseData, "HTTP/1.1 404 Not Found\r\nConnection: Close\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nAccess-Control-Allow-Origin: *\r\nServer: %s\r\n\r\n", MediaServerVerson);
-			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 
@@ -383,7 +383,7 @@ int CNetServerHLS::SendLiveHLS()
 		if (bRequestHeadFlag == true)
 		{//HEAD 请求
 			sprintf(httpResponseData, "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Credentials: true\r\nAccess-Control-Allow-Origin: %s\r\nConnection: close\r\nContent-Length: 0\r\nDate: %s\r\nServer: %s\r\n\r\n", szOrigin, szDateTime1, MediaServerVerson);
-			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 			WriteLog(Log_Debug, "CNetServerHLS=%X, 回复HEAD请求 httpResponseData = %s, nClient = %llu ", this, httpResponseData, nClient);
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 			return 0;
@@ -394,8 +394,8 @@ int CNetServerHLS::SendLiveHLS()
 				strlen(szM3u8Content), szDateTime1, MediaServerVerson, szCookieNumber, szDateTime2, szPushName);
 		}
 
-		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
-		nWriteRet2 = XHNetSDK_Write(nClient, (unsigned char*)szM3u8Content, strlen(szM3u8Content), 1);
+		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
+		nWriteRet2 = XHNetSDK_Write(nClient, (unsigned char*)szM3u8Content, strlen(szM3u8Content), ABL_MediaServerPort.nSyncWritePacket);
 		if (nWriteRet != 0 || nWriteRet2 != 0)
 		{
 			WriteLog(Log_Debug, "CNetServerHLS=%X, 回复http失败 szRequestFileName = %s, nClient = %llu ", this, szRequestFileName, nClient);
@@ -423,7 +423,7 @@ int CNetServerHLS::SendLiveHLS()
 			WriteLog(Log_Debug, "CNetServerHLS=%X, 文件打开失败 szReadFileName = %s nClient = %llu ", this, szReadFileName, nClient);
 
 			sprintf(httpResponseData, "HTTP/1.1 404 Not Found\r\nConnection: Close\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nAccess-Control-Allow-Origin: *\r\nServer: %s\r\n\r\n", MediaServerVerson);
-			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 			return -1;
@@ -451,7 +451,7 @@ int CNetServerHLS::SendLiveHLS()
 				WriteLog(Log_Debug, "CNetServerHLS=%X, 文件打开失败 szReadFileName = %s nClient = %llu ", this, szReadFileName, nClient);
 
 				sprintf(httpResponseData, "HTTP/1.1 404 Not Found\r\nConnection: Close\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nAccess-Control-Allow-Origin: *\r\nServer: %s\r\n\r\n", MediaServerVerson);
-				nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+				nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 
 				pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 				return -1;
@@ -472,7 +472,7 @@ int CNetServerHLS::SendLiveHLS()
 						WriteLog(Log_Debug, "CNetServerHLS=%X, fmp4 切片没有生成 0.mp4 文件 szReadFileName = %s nClient = %llu ", this, szReadFileName, nClient);
 
 						sprintf(httpResponseData, "HTTP/1.1 404 Not Found\r\nConnection: Close\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nAccess-Control-Allow-Origin: *\r\nServer: %s\r\n\r\n", MediaServerVerson);
-						nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+						nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 
 						pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 						return -1;
@@ -491,7 +491,7 @@ int CNetServerHLS::SendLiveHLS()
 			fFileByteCount,
 			szDateTime1,
 			MediaServerVerson);
-		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 
 		//发送TS码流 
 		int             nPos = 0;
@@ -499,13 +499,13 @@ int CNetServerHLS::SendLiveHLS()
 		{
 			if (fFileByteCount > Send_TsFile_MaxPacketCount)
 			{
-				nWriteRet2 = XHNetSDK_Write(nClient, (unsigned char*)pTsFileBuffer + nPos, Send_TsFile_MaxPacketCount, 1);
+				nWriteRet2 = XHNetSDK_Write(nClient, (unsigned char*)pTsFileBuffer + nPos, Send_TsFile_MaxPacketCount, ABL_MediaServerPort.nSyncWritePacket);
 				fFileByteCount -= Send_TsFile_MaxPacketCount;
 				nPos += Send_TsFile_MaxPacketCount;
 			}
 			else
 			{
-				nWriteRet2 = XHNetSDK_Write(nClient, (unsigned char*)pTsFileBuffer + nPos, fFileByteCount, 1);
+				nWriteRet2 = XHNetSDK_Write(nClient, (unsigned char*)pTsFileBuffer + nPos, fFileByteCount, ABL_MediaServerPort.nSyncWritePacket);
 				nPos += fFileByteCount;
 				fFileByteCount = 0;
 			}
@@ -552,9 +552,9 @@ int CNetServerHLS::SendRecordHLS()
 			WriteLog(Log_Debug, "CNetServerHLS=%X, nClient = %llu , 不存在文件 %s  ", this, nClient, szRequestFileName);
 
 			sprintf(httpResponseData, "HTTP/1.1 404 Not Found\r\nConnection: Close\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nAccess-Control-Allow-Origin: *\r\nServer: %s\r\n\r\n", MediaServerVerson);
-			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 
@@ -565,7 +565,7 @@ int CNetServerHLS::SendRecordHLS()
 		if (bRequestHeadFlag == true)
 		{//HEAD 请求
 			sprintf(httpResponseData, "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Credentials: true\r\nAccess-Control-Allow-Origin: %s\r\nConnection: close\r\nContent-Length: 0\r\nDate: %s\r\nServer: %s\r\n\r\n", szOrigin, szDateTime1, MediaServerVerson);
-			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 			WriteLog(Log_Debug, "CNetServerHLS=%X, 回复HEAD请求 httpResponseData = %s, nClient = %llu ", this, httpResponseData, nClient);
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 			return 0;
@@ -576,8 +576,8 @@ int CNetServerHLS::SendRecordHLS()
 				strlen(szM3u8Content), szDateTime1, MediaServerVerson, szCookieNumber, szDateTime2, szPushName);
 		}
 
-		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
-		nWriteRet2 = XHNetSDK_Write(nClient, (unsigned char*)szM3u8Content, strlen(szM3u8Content), 1);
+		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
+		nWriteRet2 = XHNetSDK_Write(nClient, (unsigned char*)szM3u8Content, strlen(szM3u8Content), ABL_MediaServerPort.nSyncWritePacket);
 		if (nWriteRet != 0 || nWriteRet2 != 0)
 		{
 			WriteLog(Log_Debug, "CNetServerHLS=%X, 回复http失败 szRequestFileName = %s, nClient = %llu ", this, szRequestFileName, nClient);
@@ -606,9 +606,9 @@ int CNetServerHLS::SendRecordHLS()
 			WriteLog(Log_Debug, "CNetServerHLS=%X, nClient = %llu , 不存在文件 %s  ", this, nClient, szRequestFileName);
 
 			sprintf(httpResponseData, "HTTP/1.1 404 Not Found\r\nConnection: Close\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nAccess-Control-Allow-Origin: *\r\nServer: %s\r\n\r\n", MediaServerVerson);
-			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 	
@@ -631,7 +631,7 @@ int CNetServerHLS::SendRecordHLS()
 			fFileByteCount,
 			szDateTime1,
 			MediaServerVerson);
-		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 
 		//发送TS码流 
 		int             nRead = 0;
@@ -640,7 +640,7 @@ int CNetServerHLS::SendRecordHLS()
 			nRead = fread(pTsFileBuffer, 1, 1024 * 1024 * 1, fReadMP4);
 			if (nRead > 0)
 			{
-				nWriteRet2 = XHNetSDK_Write(nClient, (unsigned char*)pTsFileBuffer, nRead, 1);
+				nWriteRet2 = XHNetSDK_Write(nClient, (unsigned char*)pTsFileBuffer, nRead, ABL_MediaServerPort.nSyncWritePacket);
  			}
 			else
 				break;

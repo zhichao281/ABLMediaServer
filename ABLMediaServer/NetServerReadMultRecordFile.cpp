@@ -120,6 +120,7 @@ int CNetServerReadMultRecordFile::open_codec_context(int *stream_idx,AVCodecCont
 
 CNetServerReadMultRecordFile::CNetServerReadMultRecordFile(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort, char* szShareMediaURL)
 {
+	memset(szCurrentDateTime, 0x00, sizeof(szCurrentDateTime));
     nStartSeekTime = GetTickCount64();//开始seek时间点
 	bSeekTimeState = false ;//正处于Seek状态时间范围内
 	nSeekSecond = oldDTS = 0   ;
@@ -324,18 +325,24 @@ CNetServerReadMultRecordFile::CNetServerReadMultRecordFile(NETHANDLE hServer, NE
 	//计算偏移的秒数量
 	char  szFirstRecordFileTime[string_length_256] = { 0 };
 	char  szStartPlayerTime[string_length_256] = { 0 };
+	char  szEndPlayerTime[string_length_256] = { 0 };
 
 	sprintf(szFirstRecordFileTime, "%llu", hServer);
 	memcpy(szStartPlayerTime, szShareMediaURL + (strlen(szShareMediaURL) - 29), 14);
-	uint64_t  nTime1, nTime2 ;
+	memcpy(szEndPlayerTime, szShareMediaURL + (strlen(szShareMediaURL) - 14), 14);
+	uint64_t  nTime1, nTime2,nTime3 ;
 	nTime1 = GetCurrentSecondByTime(szFirstRecordFileTime);
-	nTime2 = GetCurrentSecondByTime(szStartPlayerTime);
+	nStartPlayerSecond = nTime2 = GetCurrentSecondByTime(szStartPlayerTime);
+	nStopPlayerSecond  = nTime3 = GetCurrentSecondByTime(szEndPlayerTime);
+	duration = nTime3 - nTime2 ;
 	nSeekSecond = nTime2 - nTime1;
 	if (nSeekSecond > 0)
 	{
          int seekret = av_seek_frame(pFormatCtx2, -1, nSeekSecond * AV_TIME_BASE + pFormatCtx2->start_time, AVSEEK_FLAG_BACKWARD);
 		 WriteLog(Log_Debug, "CNetServerReadMultRecordFile = %X ,nClient = %llu , Seek %d 秒 , ok %d , start_time %d ", this, nClient, nSeekSecond, seekret, pFormatCtx2->start_time);
 	}
+
+	WriteLog(Log_Debug, "CNetServerReadMultRecordFile 播放当前文件 [ %d/%d ] ,nClient = %llu , ReadNextRecordFile = %s  ", nCurrrentPlayerOrder + 1, mutliRecordPlayNameList.size(), nClient, szIP);
 
 #ifdef WriteAACFileFlag
 	char aacFile[256] = { 0 };
@@ -391,7 +398,7 @@ int CNetServerReadMultRecordFile::ProcessNetData()
 	//创建录像点播媒体源 
 	if (pMediaSource == NULL)
 	{
-		pMediaSource = CreateMediaStreamSource(m_szShareMediaURL, nClient, MediaSourceType_LiveMedia, duration, m_h265ConvertH264Struct);
+		pMediaSource = CreateMediaStreamSource(m_szShareMediaURL, nClient, MediaSourceType_ReplayMedia, duration, m_h265ConvertH264Struct);
 		if (pMediaSource == NULL)
 		{
 			WriteLog(Log_Debug, "NetServerReadMultRecordFile 创建媒体源失败 =  %X ,nClient = %llu m_szShareMediaURL %s ", this, nClient, m_szShareMediaURL);
@@ -474,30 +481,25 @@ int CNetServerReadMultRecordFile::ProcessNetData()
 			bSeekTimeState = false;
 	}
 
-	//由于录像文件是覆盖方式，所以录像文件的结尾处，可能残留上一次录像的内容。
-	if (bSeekTimeState == false && oldDTS != 0 && nAVType == AVType_Video && packet2->dts > 0 &&  abs(packet2->dts - oldDTS) >= (3600 * ABL_MediaServerPort.fileSecond * 25 ) )
-	{
-		nReadRet = -1;
-		WriteLog(Log_Debug, "当前文件读取完毕 nClient = %llu , dts = %llu ,oldDTS == %llu", nClient, packet2->dts, oldDTS);
-	}
-
 	if (nAVType == AVType_Video && packet2->size > 0 && nReadRet == 0)
 	{//读取视频
 		if(packet2->dts > 0 )
 	      oldDTS = packet2->dts;
 
+		memcpy(s_packet, (unsigned char*)&nReadVideoFrameCount, sizeof(nReadVideoFrameCount));
+		memcpy(s_packet + sizeof(nReadVideoFrameCount), packet2->data, packet2->size);
 		if (abs(m_dScaleValue - 8.0) <= 0.01 || abs(m_dScaleValue - 16.0) <= 0.01)
 		{//抽帧
 			if (m_rtspPlayerType == RtspPlayerType_RecordReplay)
 			{//录像回放
 				if (CheckVideoIsIFrame(mediaCodecInfo.szVideoName, packet2->data, packet2->size))
-					pMediaSource->PushVideo(packet2->data, packet2->size , mediaCodecInfo.szVideoName);
+					pMediaSource->PushVideo(s_packet, packet2->size+4 , mediaCodecInfo.szVideoName);
 			}
 			else //录像下载
-				pMediaSource->PushVideo(packet2->data, packet2->size, mediaCodecInfo.szVideoName);
+				pMediaSource->PushVideo(s_packet, packet2->size+4, mediaCodecInfo.szVideoName);
 		}
 		else
-			pMediaSource->PushVideo(packet2->data, packet2->size, mediaCodecInfo.szVideoName);
+			pMediaSource->PushVideo(s_packet, packet2->size+4, mediaCodecInfo.szVideoName);
 
 		nReadVideoFrameCount ++;
 
@@ -507,7 +509,7 @@ int CNetServerReadMultRecordFile::ProcessNetData()
 		if (nCurrrentPlayerOrder == mutliRecordPlayNameList.size() - 1 && (( packet2->pts - nFirstTimestamp ) / 90000 ) >= nLastMp4FileDuration)
 		{//最后一个mp4文件，并且已经达到最后一个文件的播放时长 
 			WriteLog(Log_Debug, "ProcessNetData 最后一个mp4文件，并且已经达到最后一个文件的播放时长 %d 秒，需要执行关闭 ,nClient = %llu ", nLastMp4FileDuration, nClient);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 
@@ -630,7 +632,7 @@ int CNetServerReadMultRecordFile::ProcessNetData()
 		if (nCurrrentPlayerOrder == mutliRecordPlayNameList.size() - 1)
 		{//文件读取完毕
 			WriteLog(Log_Debug, "ProcessNetData 文件读取完毕 ,nClient = %llu ", nClient);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 		else
@@ -643,7 +645,7 @@ int CNetServerReadMultRecordFile::ProcessNetData()
 			else
 			{
 				WriteLog(Log_Debug, "ProcessNetData 文件读取出错 ,nClient = %llu ", nClient);
-				DeleteNetRevcBaseClient(nClient);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 				return -1;
 			}
 		}
@@ -710,7 +712,10 @@ BeginReadFile:
 	if (nCurrrentPlayerOrder >= mutliRecordPlayNameList.size() || nCurrrentPlayerOrder < 0 )
 		return false;
  	strcpy(szCurrentFileName, mutliRecordPlayNameList[nCurrrentPlayerOrder].c_str());
- 	WriteLog(Log_Debug, "CNetServerReadMultRecordFile 播放当前文件 [ %d/%d ] ,nClient = %llu , ReadNextRecordFile = %s ", nCurrrentPlayerOrder + 1, mutliRecordPlayNameList.size(), nClient, szCurrentFileName);
+	memcpy(szCurrentDateTime, szCurrentFileName + (strlen(szCurrentFileName) - 18), 14);
+	nCurrentFileDateTime = GetCurrentSecondByTime(szCurrentDateTime);
+	nReadVideoFrameCount = (nCurrentFileDateTime - nStartPlayerSecond) * mediaCodecInfo.nVideoFrameRate;
+ 	WriteLog(Log_Debug, "CNetServerReadMultRecordFile 播放当前文件 [ %d/%d ] ,nClient = %llu ,当前文件秒数量 %llu ， 当前视频帧数量 %d, ReadNextRecordFile = %s  ", nCurrrentPlayerOrder + 1, mutliRecordPlayNameList.size(), nClient, nCurrentFileDateTime, nReadVideoFrameCount, szCurrentFileName);
 
 #ifdef OS_System_Windows 
 	GBK2UTF8(szCurrentFileName, szFileNameUTF8, sizeof(szFileNameUTF8));
@@ -811,13 +816,65 @@ bool CNetServerReadMultRecordFile::UpdatePauseFlag(bool bFlag)
 	return true;
 }
 
+/*
+ 功能：根据拖拽的秒数量 ，定位到哪个文件序号，回调出当前文件的秒数量
+ 参数：
+    int        nSeekSecond,           拖拽到的秒数量
+	uint32_t&  nSecondOfCurrentFile   返回需要拖拽到该文件所指定的秒数量 
+ 返回值：
+    int                               需要拖拽到的文件序号   
+*/
+int  CNetServerReadMultRecordFile::GetFileOrderBySecond(int nSeekSecond, uint32_t& nSecondOfCurrentFile)
+{
+	int    nSize = mutliRecordPlayNameList.size();
+	int    nOrder = -1;
+	char   szTempFileName[string_length_512] = { 0 };
+ 
+	//超出开始时间、结束时间
+	if (nStartPlayerSecond + nSeekSecond > nStopPlayerSecond)
+		return nOrder; 
+
+	nSecondOfCurrentFile = 0; 
+	for (int i = 0; i < nSize; i++)
+	{
+		memcpy(szTempFileName, mutliRecordPlayNameList[i].c_str() + (mutliRecordPlayNameList[i].size() - 18), 14);
+
+		if ((nStartPlayerSecond + nSeekSecond) >= GetCurrentSecondByTime(szTempFileName) &&
+			(nStartPlayerSecond + nSeekSecond) <= GetCurrentSecondByTime(szTempFileName) + ABL_MediaServerPort.fileSecond)
+		{
+			nOrder = i;
+			nSecondOfCurrentFile = GetCurrentSecondByTime(szTempFileName) -  nStartPlayerSecond ;
+			break;
+		}
+	}
+
+	//找不到精准的mp4文件，进行找最近的mp4文件
+	if (nOrder == -1)
+	{
+		for (int i = 0; i < nSize; i++)
+		{
+			memcpy(szTempFileName, mutliRecordPlayNameList[i].c_str() + (mutliRecordPlayNameList[i].size() - 18), 14);
+
+			if (GetCurrentSecondByTime(szTempFileName) >= (nStartPlayerSecond + nSeekSecond))
+			{
+				nOrder = i;
+				nSecondOfCurrentFile = GetCurrentSecondByTime(szTempFileName) - nStartPlayerSecond;
+				break;
+			}
+		}
+	}
+
+	return nOrder;
+}
+
 bool  CNetServerReadMultRecordFile::ReaplyFileSeek(uint64_t nTimestamp)
 {
 	std::lock_guard<std::mutex> lock(readRecordFileInputLock);
 	if ( m_bPauseFlag == true || pFormatCtx2 == NULL )
  		return false;
 
-	int nTempOrder = nTimestamp / ABL_MediaServerPort.fileSecond;
+	uint32_t       nCurrentFileSeconds = 0;
+	int nTempOrder = GetFileOrderBySecond(nTimestamp, nCurrentFileSeconds);
 	if (nTempOrder >= mutliRecordPlayNameList.size() || nTempOrder <  0 )
 	{
 		WriteLog(Log_Debug, "ReaplyFileSeek 拖动时间戳超出文件最大时长 ,nClient = %llu ,nTimestamp = %llu ,duration = %d ", nClient, nTimestamp, ABL_MediaServerPort.fileSecond * mutliRecordPlayNameList.size());
@@ -828,17 +885,23 @@ bool  CNetServerReadMultRecordFile::ReaplyFileSeek(uint64_t nTimestamp)
 	  nCurrrentPlayerOrder = nTempOrder ;
 	  ReadNextRecordFile(); 
  	}
-	uint64_t  nSeek = nTimestamp - (nTempOrder * ABL_MediaServerPort.fileSecond);
+	int  nSeek = nTimestamp - nCurrentFileSeconds;
 	oldDTS = 0;
 	nStartSeekTime = GetTickCount64();//开始seek时间点
 	bSeekTimeState = true ;//正处于Seek状态时间范围内
 
+	 //精确找到对应mp4文件
+	if(nTimestamp > nCurrentFileSeconds)
+	  nReadVideoFrameCount = nTimestamp * mediaCodecInfo.nVideoFrameRate;
+	else //找到最近的mp4文件，需要用最近文件的时间点
+	  nReadVideoFrameCount = nCurrentFileSeconds * mediaCodecInfo.nVideoFrameRate;
+
 	int nRet = 0;
-	if(pFormatCtx2 != NULL )
+	if(pFormatCtx2 != NULL && nSeek > 0 )
 	 nRet = av_seek_frame(pFormatCtx2, -1, (nSeek + nSeekSecond - 1) * AV_TIME_BASE + pFormatCtx2->start_time , AVSEEK_FLAG_BACKWARD);
- 
+
 	bRestoreVideoFrameFlag = bRestoreAudioFrameFlag = true; //因为有拖到播放，需要重新计算已经播放视频，音频帧总数 
-	WriteLog(Log_Debug, "ReaplyFileSeek 拖动播放 ,nClient = %llu ,nTimestamp = %llu ,nRet = %d ", nClient, nTimestamp, nRet);
+	WriteLog(Log_Debug, "ReaplyFileSeek 拖动播放 ,nClient = %llu ,nTimestamp = %llu ,nRet = %d ,当前mp4文件序号 nCurrrentPlayerOrder = %d ,nSeek = %d 秒", nClient, nTimestamp, nRet, nCurrrentPlayerOrder, nSeek);
 }
 
 //追加adts信息头

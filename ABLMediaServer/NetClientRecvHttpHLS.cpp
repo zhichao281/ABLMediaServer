@@ -28,6 +28,7 @@ extern bool                                   DeleteMediaStreamSource(char* szUR
 
 
 #endif
+extern MediaServerPort                       ABL_MediaServerPort;
 extern void LIBNET_CALLMETHOD	onconnect(NETHANDLE clihandle,
 	uint8_t result, uint16_t nLocalPort);
 
@@ -530,33 +531,33 @@ int CNetClientRecvHttpHLS::SendFirstRequst()
 	nSendTsFileTime = GetTickCount();
 	nContentLength = 0; //实际长度
 	nRecvContentLength = 0;//已经收到的长度
- 	nNetStart = nNetEnd = netDataCacheLength = nRecvContentLength = 0;
+	nNetStart = nNetEnd = netDataCacheLength = nRecvContentLength = 0;
 	memset(netDataCache, 0x00, sizeof(netDataCache));
- 
+
 	pData = requestFileFifo.pop(&nLength);
 	if (pData != NULL && nLength > 0)
 	{
 		//创建媒体分发源
-		if (strlen(m_szShareMediaURL) > 0 && pMediaSource == NULL )
+		if (strlen(m_szShareMediaURL) > 0 && pMediaSource == NULL)
 		{
 			pMediaSource = CreateMediaStreamSource(m_szShareMediaURL, nClient, MediaSourceType_LiveMedia, 0, m_h265ConvertH264Struct);
-			if(pMediaSource == NULL)
+			if (pMediaSource == NULL)
 			{
-				DeleteNetRevcBaseClient(nClient);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 				return -1;
 			}
 			pMediaSource->enable_mp4 = (strcmp(m_addStreamProxyStruct.enable_mp4, "1") == 0) ? true : false;
 			pMediaSource->enable_hls = (strcmp(m_addStreamProxyStruct.enable_hls, "1") == 0) ? true : false;
 		}
 		bRecvHttpHeadFlag = false;//尚未接收完毕http头
-	    memset(szRequestFile, 0x00, sizeof(szRequestFile));
+		memset(szRequestFile, 0x00, sizeof(szRequestFile));
 		memcpy(szRequestFile, (char*)pData, nLength);
 		sprintf(szRequestBuffer, "GET %s HTTP/1.1\r\nHost: 10.0.0.239:9088\r\nAccept: */*\r\nConnection: keep-alive\r\nAccept-Language: zh_CN\r\nUser-Agent: %s\r\nRange: bytes=0-\r\n\r\n",
 			szRequestFile,
 			MediaServerVerson);
 
-		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)szRequestBuffer, strlen(szRequestBuffer), 1);
-		if (nWriteRet != 0 )
+		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)szRequestBuffer, strlen(szRequestBuffer), ABL_MediaServerPort.nSyncWritePacket);
+		if (nWriteRet != 0)
 		{
 			WriteLog(Log_Debug, "CNetClientRecvHttpHLS=%X, 发送请求文件失败 szRequestFileName = %s, nClient = %llu ", this, szRequestFile, nClient);
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
@@ -565,7 +566,7 @@ int CNetClientRecvHttpHLS::SendFirstRequst()
 
 		nHLSRequestFileStatus = HLSRequestFileStatus_SendRequest;
 
- 	    nSendTsFileTime = GetTickCount();
+		nSendTsFileTime = GetTickCount();
 
 		WriteLog(Log_Debug, "CNetClientRecvHttpHLS=%X, 发送文件请求 szRequestFileName = %s, nClient = %llu ", this, szRequestFile, nClient);
 	}

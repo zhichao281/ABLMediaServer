@@ -47,8 +47,8 @@ static int fmp4_hls_segment(void* param, const void* data, size_t bytes, int64_t
 	if (pNetServerHttpMp4 == NULL)
 		return 0;
 	
-	if (!pNetServerHttpMp4->bCheckHttpMP4Flag || !pNetServerHttpMp4->bRunFlag)
-		return -1;
+	if(!pNetServerHttpMp4->bCheckHttpMP4Flag || !pNetServerHttpMp4->bRunFlag.load())
+		return -1 ;
 
 	if (bytes > 0)
 	{
@@ -89,7 +89,6 @@ CNetServerHTTP_MP4::CNetServerHTTP_MP4(NETHANDLE hServer, NETHANDLE hClient, cha
 	bOn_playFlag = false;
 	memset((char*)&avc, 0x00, sizeof(avc));
 	memset((char*)&hevc, 0x00, sizeof(hevc));
-
 	strcpy(m_szShareMediaURL,szShareMediaURL);
  	netBaseNetType = NetBaseNetType_HttpMP4ServerSendPush;
 	nMediaClient = 0;
@@ -127,7 +126,7 @@ CNetServerHTTP_MP4::CNetServerHTTP_MP4(NETHANDLE hServer, NETHANDLE hClient, cha
 CNetServerHTTP_MP4::~CNetServerHTTP_MP4()
 {
 	bRunFlag.exchange(false);
-	bCheckHttpMP4Flag = false;
+    bCheckHttpMP4Flag = false ;
 	std::lock_guard<std::mutex> lock(mediaMP4MapLock);
 	
 	//删除fmp4切片句柄
@@ -183,8 +182,8 @@ int CNetServerHTTP_MP4::SendVideo()
 {
     std::lock_guard<std::mutex> lock(mediaMP4MapLock);
 	
-	if (!bCheckHttpMP4Flag || !bRunFlag.load())
-		return -1;
+	if(!bCheckHttpMP4Flag || !bRunFlag.load())
+		return -1 ;
 
 	nRecvDataTimerBySecond = 0;
 
@@ -217,8 +216,8 @@ int CNetServerHTTP_MP4::SendAudio()
 {
     std::lock_guard<std::mutex> lock(mediaMP4MapLock);
 
-	if (!bCheckHttpMP4Flag || !bRunFlag.load() || ABL_MediaServerPort.nEnableAudio == 0 || strcmp(mediaCodecInfo.szAudioName, "AAC") != 0)
-		return -1;
+	if(!bCheckHttpMP4Flag || !bRunFlag.load() || ABL_MediaServerPort.nEnableAudio == 0 || strcmp(mediaCodecInfo.szAudioName, "AAC") != 0)
+		return -1 ;
   
 	unsigned char* pData = NULL;
 	int            nLength = 0;
@@ -299,7 +298,7 @@ int CNetServerHTTP_MP4::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientH
 			{
 				nNetStart = nNetEnd = netDataCacheLength = 0;
 				WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X nClient = %llu 数据异常 , 执行删除", this, nClient);
-				DeleteNetRevcBaseClient(nClient);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 				return 0;
 			}
 		}
@@ -326,7 +325,7 @@ int CNetServerHTTP_MP4::ProcessNetData()
 		if (netDataCacheLength > string_length_4096 || strstr((char*)netDataCache, "%") != NULL)
 		{
 			WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X , nClient = %llu ,netDataCacheLength = %d, 发送过来的url数据长度非法 ,立即删除 ", this, nClient, netDataCacheLength);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 
@@ -336,7 +335,7 @@ int CNetServerHTTP_MP4::ProcessNetData()
 			if (memcmp(netDataCache, "GET ", 4) != 0)
 			{
 				WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X , nClient = %llu , 接收的数据非法 ", this, nClient);
-				DeleteNetRevcBaseClient(nClient);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			}
 			return -1;
 		}
@@ -356,7 +355,7 @@ int CNetServerHTTP_MP4::ProcessNetData()
 				if ((nPos2 - nPos1 - 4) > string_length_2048)
 				{
 					WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X,请求文件名称长度非法 nClient = %llu ", this, nClient);
-					DeleteNetRevcBaseClient(nClient);
+					pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 					return -1;
 				}
 				bFindMP4NameFlag = true;
@@ -374,7 +373,7 @@ int CNetServerHTTP_MP4::ProcessNetData()
 		if (!bFindMP4NameFlag)
 		{
 			WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X, 检测出 非法的 Http-mp4 协议数据包 nClient = %llu ", this, nClient);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 		WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X, setup -1  nClient = %llu ", this, nClient);
@@ -420,7 +419,7 @@ int CNetServerHTTP_MP4::ProcessNetData()
 		if (!(strstr(szMP4Name, ".mp4") != NULL || strstr(szMP4Name, ".MP4") != NULL))
 		{
 			WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X,  nClient = %llu ", this, nClient);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 		WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X, setup -4  nClient = %llu ", this, nClient);
@@ -514,7 +513,7 @@ int CNetServerHTTP_MP4::ProcessNetData()
  				}
 #endif
 				sprintf(httpResponseData, "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Credentials: true\r\nAccess-Control-Allow-Origin: %s\r\nConnection: close\r\nContent-Type: video/mp4\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=15\r\nContent-Length: %d\r\nServer: %s\r\nContent-Disposition: attachment;\r\n\r\n", szOrigin, nRecordFileSize, MediaServerVerson);
-				nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+				nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 
 				RecordReplayThreadPool->InsertIntoTask(nClient); //投递任务
 				return 0;
@@ -534,10 +533,10 @@ int CNetServerHTTP_MP4::ProcessNetData()
 		sprintf(m_addStreamProxyStruct.url, "http://%s:%d/%s/%s.mp4", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpFlvPort, m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream);
 
 		sprintf(httpResponseData, "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Credentials: true\r\nAccess-Control-Allow-Origin: %s\r\nConnection: keep-alive\r\nContent-Type: video/mp4; charset=utf-8\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nServer: %s\r\n\r\n", szOrigin, MediaServerVerson);
-		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 		if (nWriteRet != 0)
 		{
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 
@@ -562,11 +561,11 @@ int CNetServerHTTP_MP4::ProcessNetData()
 				nReadLength = fread(pFmp4SPSPPSBuffer, 1, Send_DownloadFile_MaxPacketCount, fFileMp4);
 				if (nReadLength > 0)
 				{
-					nWriteRet = XHNetSDK_Write(nClient, pFmp4SPSPPSBuffer, nReadLength, 1);
+					nWriteRet = XHNetSDK_Write(nClient, pFmp4SPSPPSBuffer, nReadLength, ABL_MediaServerPort.nSyncWritePacket);
 					if (nWriteRet != 0)
 					{
 						WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X, 下载录像时，文件发送失败 %s nClient = %llu ", this, szMP4Name, nClient);
-						DeleteNetRevcBaseClient(nClient);
+						pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 						return -1;
 					}
 				}
@@ -576,7 +575,7 @@ int CNetServerHTTP_MP4::ProcessNetData()
 					if (nCurrentRecordFileOrder >= mutliRecordPlayNameList.size())
 					{
  						WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X, 录像文件下载完毕 %s nClient = %llu , nCurrentRecordFileOrder = %d , mutliRecordPlayNameList.size() = %d ", this, szMP4Name, nClient, nCurrentRecordFileOrder, mutliRecordPlayNameList.size());
-						DeleteNetRevcBaseClient(nClient);
+						pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 						return -1;
 					}
 					else
@@ -588,7 +587,7 @@ int CNetServerHTTP_MP4::ProcessNetData()
 							if (fFileMp4 == NULL)
 							{//读取文件失败 
 								WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X,  nClient = %llu , 下载文件失败  %s ", this,  nClient, mutliRecordPlayNameList[nCurrentRecordFileOrder].c_str());
-								DeleteNetRevcBaseClient(nClient);
+								pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 								return -1;
 							}
 							else
@@ -621,9 +620,9 @@ bool   CNetServerHTTP_MP4::ResponseError(char* szErrorMsg)
 	WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X, %s %s nClient = %llu ", this, szErrorMsg,szMP4Name, nClient);
 
 	sprintf(httpResponseData, "HTTP/1.1 404 Not Found\r\nConnection: keep-alive\r\nDate: Thu, Feb 18 2021 01:57:15 GMT\r\nKeep-Alive: timeout=30, max=100\r\nAccess-Control-Allow-Origin: *\r\nServer: %s\r\n\r\n", MediaServerVerson);
-	nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), 1);
+	nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)httpResponseData, strlen(httpResponseData), ABL_MediaServerPort.nSyncWritePacket);
 
-	DeleteNetRevcBaseClient(nClient);
+	pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 	return true ;
 
 }
@@ -654,12 +653,12 @@ static int fmp4_hls_init_segment(hls_fmp4_t* hls, void* param)
 	{
 		memcpy(pNetServerHttpMp4->pFmp4SPSPPSBuffer, pNetServerHttpMp4->s_packet, bytes);
 
-		pNetServerHttpMp4->nWriteRet = XHNetSDK_Write(pNetServerHttpMp4->nClient, pNetServerHttpMp4->s_packet, bytes, 1);
+		pNetServerHttpMp4->nWriteRet = XHNetSDK_Write(pNetServerHttpMp4->nClient, pNetServerHttpMp4->s_packet, bytes, ABL_MediaServerPort.nSyncWritePacket);
 		if (pNetServerHttpMp4->nWriteRet != 0)
 		{
 			WriteLog(Log_Debug, "fmp4_hls_segment = %X 发送出错，准备删除 nClient = %llu ", pNetServerHttpMp4, pNetServerHttpMp4->nClient);
-			DeleteNetRevcBaseClient(pNetServerHttpMp4->nClient);
-			return 0 ;
+			pDisconnectBaseNetFifo.push((unsigned char*)&pNetServerHttpMp4->nClient, sizeof(pNetServerHttpMp4->nClient));
+ 			return 0 ;
 		}
 	}
 #ifdef WriteMp4BufferToFile
@@ -785,13 +784,13 @@ bool  CNetServerHTTP_MP4::SendTSBufferData(unsigned char* pTSData, int nLength)
 	{
 		if (nLength > Send_MP4File_MaxPacketCount)
 		{
-			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)pTSData + nPos, Send_MP4File_MaxPacketCount, 1);
+			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)pTSData + nPos, Send_MP4File_MaxPacketCount, ABL_MediaServerPort.nSyncWritePacket);
 			nLength -= Send_MP4File_MaxPacketCount;
 			nPos += Send_MP4File_MaxPacketCount;
 		}
 		else
 		{
-			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)pTSData + nPos, nLength, 1);
+			nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)pTSData + nPos, nLength, ABL_MediaServerPort.nSyncWritePacket);
 			nPos += nLength;
 			nLength = 0;
 		}
@@ -802,7 +801,7 @@ bool  CNetServerHTTP_MP4::SendTSBufferData(unsigned char* pTSData, int nLength)
 			if (nSendErrorCount >= 5)
 			{
 				WriteLog(Log_Debug, "CNetServerHTTP_MP4 = %X nClient = %llu 发送次数超过 %d 次 ，准备删除 ", this, nClient, nSendErrorCount);
-				DeleteNetRevcBaseClient(nClient);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 				return -1;
 			}
 		}

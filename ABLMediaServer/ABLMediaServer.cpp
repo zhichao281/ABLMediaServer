@@ -217,6 +217,7 @@ bool   DelClientToMapFromMutePacketList(uint64_t nClient)
 	return bRet;
 }
 
+//根据年月日转换为秒
 uint64_t GetCurrentSecondByTime(char* szDateTime)
 {
 	if (szDateTime == NULL || strlen(szDateTime) < 14)
@@ -232,6 +233,18 @@ uint64_t GetCurrentSecondByTime(char* szDateTime)
 	clock = mktime(&tm);
 	return clock;
 }
+
+//根据秒数量转换为年月日 
+char szCurrentDateTime[256] = { 0 };
+char* GetDateTimeBySeconds(uint64_t nSeconds)
+{
+	struct tm* local;
+	local = localtime((time_t*)&nSeconds);
+	sprintf(szCurrentDateTime, "%04d%02d%02d%02d%02d%02d", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+
+	return szCurrentDateTime;
+}
+
 
 #ifdef OS_System_Windows
 CSimpleIniA        ABL_ConfigFile;
@@ -767,7 +780,7 @@ int GetAllMediaStreamSource(char* szMediaSourceInfo, getMediaListStruct mediaLis
 
 					if (tmpMediaSource->nMediaSourceType == MediaSourceType_LiveMedia)
 					{//实况播放
-						sprintf(szTemp2, "{\"key\":%llu,\"port\":%d,\"app\":\"%s\",\"stream\":\"%s\",\"sim\":\"%s\",\"status\":%s,\"enable_hls\":%s,\"transcodingStatus\":%s,\"sourceURL\":\"%s\",\"networkType\":%d,\"readerCount\":%d,\"noneReaderDuration\":%llu,\"videoCodec\":\"%s\",\"videoFrameSpeed\":%d,\"width\":%d,\"height\":%d,\"videoBitrate\":%d,\"audioCodec\":\"%s\",\"audioChannels\":%d,\"audioSampleRate\":%d,\"audioBitrate\":%d,\"url\":{\"rtsp\":\"%s://%s:%d/%s/%s\",\"rtmp\":\"%s://%s:%d/%s/%s\",\"http-flv\":\"%s://%s:%d/%s/%s.flv\",\"ws-flv\":\"%s://%s:%d/%s/%s.flv\",\"http-mp4\":\"%s://%s:%d/%s/%s.mp4\",\"http-hls\":\"%s://%s:%d/%s/%s.m3u8\"}},", tmpMediaSource->nClient, nClientPort, szApp, szStream, tmpMediaSource->sim, tmpMediaSource->enable_mp4 == true ? "true" : "false", tmpMediaSource->enable_hls == true ? "true" : "false", tmpMediaSource->H265ConvertH264_enable == true ? "true" : "false", pClient->m_addStreamProxyStruct.url, pClient->netBaseNetType, tmpMediaSource->mediaSendMap.size(), nNoneReadDuration,
+						sprintf(szTemp2, "{\"key\":%llu,\"port\":%d,\"app\":\"%s\",\"stream\":\"%s\",\"sourceType\":%d,\"sim\":\"%s\",\"status\":%s,\"enable_hls\":%s,\"transcodingStatus\":%s,\"sourceURL\":\"%s\",\"networkType\":%d,\"readerCount\":%d,\"noneReaderDuration\":%llu,\"videoCodec\":\"%s\",\"videoFrameSpeed\":%d,\"width\":%d,\"height\":%d,\"videoBitrate\":%d,\"audioCodec\":\"%s\",\"audioChannels\":%d,\"audioSampleRate\":%d,\"audioBitrate\":%d,\"url\":{\"rtsp\":\"%s://%s:%d/%s/%s\",\"rtmp\":\"%s://%s:%d/%s/%s\",\"http-flv\":\"%s://%s:%d/%s/%s.flv\",\"ws-flv\":\"%s://%s:%d/%s/%s.flv\",\"http-mp4\":\"%s://%s:%d/%s/%s.mp4\",\"http-hls\":\"%s://%s:%d/%s/%s.m3u8\"}},", tmpMediaSource->nClient, nClientPort, szApp, szStream, tmpMediaSource->nMediaSourceType, tmpMediaSource->sim, tmpMediaSource->enable_mp4 == true ? "true" : "false", tmpMediaSource->enable_hls == true ? "true" : "false", tmpMediaSource->H265ConvertH264_enable == true ? "true" : "false", pClient->m_addStreamProxyStruct.url, pClient->netBaseNetType, tmpMediaSource->mediaSendMap.size(), nNoneReadDuration,
 							tmpMediaSource->m_mediaCodecInfo.szVideoName, tmpMediaSource->m_mediaCodecInfo.nVideoFrameRate, tmpMediaSource->m_mediaCodecInfo.nWidth, tmpMediaSource->m_mediaCodecInfo.nHeight, tmpMediaSource->m_mediaCodecInfo.nVideoBitrate, tmpMediaSource->m_mediaCodecInfo.szAudioName, tmpMediaSource->m_mediaCodecInfo.nChannels, tmpMediaSource->m_mediaCodecInfo.nSampleRate, tmpMediaSource->m_mediaCodecInfo.nAudioBitrate,
 							ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, szApp, szStream,
 							ABL_MediaServerPort.nRtmpPort % 2 == 1 ? "rtmps" : "rtmp", ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, szApp, szStream,
@@ -778,7 +791,7 @@ int GetAllMediaStreamSource(char* szMediaSourceInfo, getMediaListStruct mediaLis
 					}
 					else
 					{//录像点播
-						sprintf(szTemp2, "{\"key\":%llu,\"port\":%d,\"app\":\"%s\",\"stream\":\"%s\",\"sim\":\"%s\",\"status\":%s,\"enable_hls\":%s,\"transcodingStatus\":%s,\"sourceURL\":\"%s\",\"networkType\":%d,\"readerCount\":%d,\"noneReaderDuration\":%llu,\"videoCodec\":\"%s\",\"videoFrameSpeed\":%d,\"width\":%d,\"height\":%d,\"videoBitrate\":%d,\"audioCodec\":\"%s\",\"audioChannels\":%d,\"audioSampleRate\":%d,\"audioBitrate\":%d,\"url\":{\"rtsp\":\"%s://%s:%d/%s/%s\",\"rtmp\":\"%s://%s:%d/%s/%s\",\"http-flv\":\"%s://%s:%d/%s/%s.flv\",\"ws-flv\":\"%s://%s:%d/%s/%s.flv\",\"http-mp4\":\"%s://%s:%d/%s/%s.mp4\"}},", tmpMediaSource->nClient, nClientPort, szApp, szStream, tmpMediaSource->sim, tmpMediaSource->enable_mp4 == true ? "true" : "false", "false", tmpMediaSource->enable_mp4 == true ? "true" : "false", pClient->m_addStreamProxyStruct.url, pClient->netBaseNetType, tmpMediaSource->mediaSendMap.size(), nNoneReadDuration,
+						sprintf(szTemp2, "{\"key\":%llu,\"port\":%d,\"app\":\"%s\",\"stream\":\"%s\",\"sourceType\":%d,\"sim\":\"%s\",\"status\":%s,\"enable_hls\":%s,\"transcodingStatus\":%s,\"sourceURL\":\"%s\",\"networkType\":%d,\"readerCount\":%d,\"noneReaderDuration\":%llu,\"videoCodec\":\"%s\",\"videoFrameSpeed\":%d,\"width\":%d,\"height\":%d,\"videoBitrate\":%d,\"audioCodec\":\"%s\",\"audioChannels\":%d,\"audioSampleRate\":%d,\"audioBitrate\":%d,\"url\":{\"rtsp\":\"%s://%s:%d/%s/%s\",\"rtmp\":\"%s://%s:%d/%s/%s\",\"http-flv\":\"%s://%s:%d/%s/%s.flv\",\"ws-flv\":\"%s://%s:%d/%s/%s.flv\",\"http-mp4\":\"%s://%s:%d/%s/%s.mp4\"}},", tmpMediaSource->nClient, nClientPort, szApp, szStream, tmpMediaSource->nMediaSourceType, tmpMediaSource->sim, tmpMediaSource->enable_mp4 == true ? "true" : "false", "false", tmpMediaSource->enable_mp4 == true ? "true" : "false", pClient->m_addStreamProxyStruct.url, pClient->netBaseNetType, tmpMediaSource->mediaSendMap.size(), nNoneReadDuration,
 							tmpMediaSource->m_mediaCodecInfo.szVideoName, tmpMediaSource->m_mediaCodecInfo.nVideoFrameRate, tmpMediaSource->m_mediaCodecInfo.nWidth, tmpMediaSource->m_mediaCodecInfo.nHeight, tmpMediaSource->m_mediaCodecInfo.nVideoBitrate, tmpMediaSource->m_mediaCodecInfo.szAudioName, tmpMediaSource->m_mediaCodecInfo.nChannels, tmpMediaSource->m_mediaCodecInfo.nSampleRate, tmpMediaSource->m_mediaCodecInfo.nAudioBitrate,
 							ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, szApp, szStream,
 							ABL_MediaServerPort.nRtmpPort % 2 == 1 ? "rtmps" : "rtmp", ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, szApp, szStream,
@@ -1103,9 +1116,31 @@ bool AddRecordFileToRecordSource(char* szShareURL, char* szFileName)
 		return false;
 	}
 }
+#include <random>
+#include <string>
+#include <sstream>
+#include <iomanip>
+#include <iostream>
+std::string generate_uuid() {
+	// Use high-resolution clock for better seeding
+	auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+	std::mt19937 gen(static_cast<uint32_t>(seed));
+	std::uniform_int_distribution<uint32_t> dist(0, 0xFFFFFFFF);
+
+	std::stringstream ss;
+	ss << std::hex << std::setfill('0');
+
+	// Generate 32-bit random parts for UUID
+	ss << std::setw(8) << dist(gen) << "-";
+	ss << std::setw(4) << (dist(gen) >> 16) << "-";
+	ss << std::setw(4) << ((dist(gen) & 0x0FFF) | 0x4000) << "-"; // 4xxx indicates version 4 UUID
+	ss << std::setw(4) << ((dist(gen) & 0x3FFF) | 0x8000) << "-"; // 8xxx indicates variant 1 UUID
+	ss << std::setw(4) << dist(gen) << std::setw(8) << dist(gen);
+
+	return ss.str();
+}
 
 extern  const struct mov_buffer_t* mov_file_buffer(void);
-
 //查询录像
 int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct queryStruct)
 {
@@ -1136,9 +1171,21 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 	uint64_t       nTime1, nTime2;
 	bool           bFlag1 = false;
 	bool           bFlag2 = false;
+	uint64_t       tEndTime;
+	char           szDateTime[256] = { 0 };
+	uint64_t       tDuration;
+#ifdef USE_BOOST
+	boost::uuids::uuid a_uuid = boost::uuids::random_generator()();
+	string tmp_uuid = boost::uuids::to_string(a_uuid);
+#else
+	string tmp_uuid = generate_uuid();
+#endif //USE_BOOST
 
 	if (xh_ABLRecordFileSourceMap.size() > 0)
 	{
+		nTime1 = GetCurrentSecondByTime(queryStruct.starttime);
+		nTime2 = GetCurrentSecondByTime(queryStruct.endtime);
+		tDuration = nTime2 - nTime1;
 		if (ABL_MediaServerPort.videoFileFormat == 3)
 		{
 #ifdef  OS_System_Windows
@@ -1149,18 +1196,18 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 			sprintf(mapm3u8FileName, "/%s/%s/%s_%s.m3u8", queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime);
 #endif 
 			fileM3U8 = fopen(m3u8FileName, "wb");
-			sprintf(szTemp1, "\"http-hls\":\"http://%s:%d/%s/%s%s%s_%s.m3u8\"", ABL_szLocalIP, ABL_MediaServerPort.nHlsPort, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, queryStruct.starttime, queryStruct.endtime);
+			sprintf(szTemp1, "\"http-hls\":\"%s://%s:%d/%s/%s%s%s_%s.m3u8\"", ABL_MediaServerPort.nHlsPort % 2 == 1 ? "https" : "http", ABL_szLocalIP, ABL_MediaServerPort.nHlsPort, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, queryStruct.starttime, queryStruct.endtime);
 		}
 
 		if (fileM3U8 != NULL)
 		{//ts 切片
-			sprintf(szRecordURL, "\"url\":{\"rtsp\": \"rtsp://%s:%d/%s/%s_%s-%s\",\"rtmp\": \"rtmp://%s:%d/%s/%s_%s-%s\",\"http-flv\": \"http://%s:%d/%s/%s_%s-%s.flv\",\"ws-flv\": \"ws://%s:%d/%s/%s_%s-%s.flv\",\"http-mp4\": \"http://%s:%d/%s/%s_%s-%s.mp4\",\"download\": \"http://%s:%d/%s/%s_%s-%s.mp4?download_speed=%d\",%s}",
-				ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-				ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-				ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpFlvPort, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-				ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nWSFlvPort, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-				ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-				ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime, ABL_MediaServerPort.httpDownloadSpeed,
+			sprintf(szRecordURL, "\"url\":{\"rtsp\": \"%s://%s:%d/%s/%s_%s_%s-%s\",\"rtmp\": \"%s://%s:%d/%s/%s_%s_%s-%s\",\"http-flv\": \"%s://%s:%d/%s/%s_%s_%s-%s.flv\",\"ws-flv\": \"%s://%s:%d/%s/%s_%s_%s-%s.flv\",\"http-mp4\": \"%s://%s:%d/%s/%s_%s_%s-%s.mp4\",\"download\": \"%s://%s:%d/%s/%s_%s_%s-%s.mp4?download_speed=%d\",%s}",
+				ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+				ABL_MediaServerPort.nRtmpPort % 2 == 1 ? "rtmps" : "rtmp", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+				ABL_MediaServerPort.nHttpFlvPort % 2 == 1 ? "https" : "http", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpFlvPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+				ABL_MediaServerPort.nWSFlvPort % 2 == 1 ? "wss" : "ws", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nWSFlvPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+				ABL_MediaServerPort.nHttpMp4Port % 2 == 1 ? "https" : "http", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+				ABL_MediaServerPort.nHttpMp4Port % 2 == 1 ? "https" : "http", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime, ABL_MediaServerPort.httpDownloadSpeed,
 				szTemp1
 			);
 		}
@@ -1168,23 +1215,23 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 		{//非TS 
 			if (ABL_MediaServerPort.nHlsEnable == 1)
 			{//hls切片
-				sprintf(szRecordURL, "\"url\":{\"rtsp\": \"rtsp://%s:%d/%s/%s_%s-%s\",\"rtmp\": \"rtmp://%s:%d/%s/%s_%s-%s\",\"http-flv\": \"http://%s:%d/%s/%s_%s-%s.flv\",\"ws-flv\": \"ws://%s:%d/%s/%s_%s-%s.flv\",\"http-mp4\": \"http://%s:%d/%s/%s_%s-%s.mp4\",\"http-hls\": \"http://%s:%d/%s/%s_%s-%s.m3u8\"}",
-					ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-					ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-					ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpFlvPort, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-					ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nWSFlvPort, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-					ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-					ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHlsPort, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime
+				sprintf(szRecordURL, "\"url\":{\"rtsp\": \"%s://%s:%d/%s/%s_%s_%s-%s\",\"rtmp\": \"%s://%s:%d/%s/%s_%s_%s-%s\",\"http-flv\": \"%s://%s:%d/%s/%s_%s_%s-%s.flv\",\"ws-flv\": \"%s://%s:%d/%s/%s_%s_%s-%s.flv\",\"http-mp4\": \"%s://%s:%d/%s/%s_%s_%s-%s.mp4\",\"http-hls\": \"%s://%s:%d/%s/%s_%s_%s-%s.m3u8\"}",
+					ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+					ABL_MediaServerPort.nRtmpPort % 2 == 1 ? "rtmps" : "rtmp", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+					ABL_MediaServerPort.nHttpFlvPort % 2 == 1 ? "https" : "http", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpFlvPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+					ABL_MediaServerPort.nWSFlvPort % 2 == 1 ? "wss" : "ws", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nWSFlvPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+					ABL_MediaServerPort.nHttpMp4Port % 2 == 1 ? "https" : "http", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+					ABL_MediaServerPort.nHlsPort % 2 == 1 ? "https" : "http", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHlsPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime
 				);
 			}
 			else
 			{
-				sprintf(szRecordURL, "\"url\":{\"rtsp\": \"rtsp://%s:%d/%s/%s_%s-%s\",\"rtmp\": \"rtmp://%s:%d/%s/%s_%s-%s\",\"http-flv\": \"http://%s:%d/%s/%s_%s-%s.flv\",\"ws-flv\": \"ws://%s:%d/%s/%s_%s-%s.flv\",\"http-mp4\": \"http://%s:%d/%s/%s_%s-%s.mp4\"}",
-					ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-					ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-					ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpFlvPort, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-					ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nWSFlvPort, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime,
-					ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime
+				sprintf(szRecordURL, "\"url\":{\"rtsp\": \"%s://%s:%d/%s/%s_%s_%s-%s\",\"rtmp\": \"%s://%s:%d/%s/%s_%s_%s-%s\",\"http-flv\": \"%s://%s:%d/%s/%s_%s_%s-%s.flv\",\"ws-flv\": \"%s://%s:%d/%s/%s_%s_%s-%s.flv\",\"http-mp4\": \"%s://%s:%d/%s/%s_%s_%s-%s.mp4\"}",
+					ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+					ABL_MediaServerPort.nRtmpPort % 2 == 1 ? "rtmps" : "rtmp", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+					ABL_MediaServerPort.nHttpFlvPort % 2 == 1 ? "https" : "http", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpFlvPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+					ABL_MediaServerPort.nWSFlvPort % 2 == 1 ? "wss" : "ws", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nWSFlvPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
+					ABL_MediaServerPort.nHttpMp4Port % 2 == 1 ? "https" : "http", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime
 				);
 			}
 		}
@@ -1241,7 +1288,7 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 					sprintf(szTemp1, "#EXTINF:%d.000,\n/%s/%s%s%llu.mp4\n", ABL_MediaServerPort.fileSecond, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, *it2);
 					fwrite(szTemp1, 1, strlen(szTemp1), fileM3U8);
 					fflush(fileM3U8);
-				}
+					}
 
 #ifdef  OS_System_Windows
 				sprintf(szFileName, "%s%s\\%s\\%llu.mp4", ABL_MediaServerPort.recordPath, queryStruct.app, queryStruct.stream, *it2);
@@ -1250,7 +1297,7 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 #endif 
 				if (nFileOrder == 1)
 				{
-					sprintf(szRecordPlayURL, "/%s/%s_%s-%s", queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime);
+					sprintf(szRecordPlayURL, "/%s/%s_%s_%s-%s", queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime);
 
 					//没有存在媒体源再创建
 					if ((pMediaStreamPtr = GetMediaStreamSource(szRecordPlayURL, false)) == NULL)
@@ -1258,12 +1305,12 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 					if (mutlRecordPlay != NULL)
 					{
 						memcpy((char*)&mutlRecordPlay->m_queryRecordListStruct, (char*)&queryStruct, sizeof(queryStruct));
-						sprintf(szMediaSourceInfo, "{\"code\":0,\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s_%s-%s\",\"starttime\":\"%s\",\"endtime\":\"%s\",%s,\"recordFileList\":[", mutlRecordPlay->nClient, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime, queryStruct.starttime, queryStruct.endtime, szRecordURL);
+						sprintf(szMediaSourceInfo, "{\"code\":0,\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s_%s_%s-%s\",\"starttime\":\"%s\",\"endtime\":\"%s\",\"duration\":%llu,%s,\"recordFileList\":[", mutlRecordPlay->nClient, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime, queryStruct.starttime, queryStruct.endtime, tDuration, szRecordURL);
 					}
 					else
 					{
 						if (pMediaStreamPtr != NULL)
-							sprintf(szMediaSourceInfo, "{\"code\":0,\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s_%s-%s\",\"starttime\":\"%s\",\"endtime\":\"%s\",%s,\"recordFileList\":[", pMediaStreamPtr->nClient, queryStruct.app, queryStruct.stream, queryStruct.starttime, queryStruct.endtime, queryStruct.starttime, queryStruct.endtime, szRecordURL);
+							sprintf(szMediaSourceInfo, "{\"code\":0,\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s_%s_%s-%s\",\"starttime\":\"%s\",\"endtime\":\"%s\",%s,\"duration\":%llu,\"recordFileList\":[", pMediaStreamPtr->nClient, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime, queryStruct.starttime, queryStruct.endtime, tDuration, szRecordURL);
 					}
 				}
 				if (mutlRecordPlay != NULL)
@@ -1282,13 +1329,16 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 				else
 					duration = ABL_MediaServerPort.fileSecond * 1000;
 
-				sprintf(szTemp2, "{\"file\":\"%llu.mp4\",\"duration\":%llu,\"url\":{\"rtsp\":\"%s://%s:%d/%s/%s%s%llu\",\"rtmp\":\"%s://%s:%d/%s/%s%s%llu\",\"http-flv\":\"%s://%s:%d/%s/%s%s%llu.flv\",\"ws-flv\":\"%s://%s:%d/%s/%s%s%llu.flv\",\"http-mp4\":\"%s://%s:%d/%s/%s%s%llu.mp4\",\"download\":\"%s://%s:%d/%s/%s%s%llu.mp4?download_speed=%d\"}},", *it2, duration / 1000,
-					ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, * it2,
-					ABL_MediaServerPort.nRtmpPort % 2 == 1 ? "rtmps" : "rtmp", ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, * it2,
-					ABL_MediaServerPort.nHttpFlvPort % 2 == 1 ? "https" : "http", ABL_szLocalIP, ABL_MediaServerPort.nHttpFlvPort, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, * it2,
-					ABL_MediaServerPort.nWSFlvPort % 2 == 1 ? "wss" : "ws", ABL_szLocalIP, ABL_MediaServerPort.nWSFlvPort, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, * it2,
-					ABL_MediaServerPort.nHttpMp4Port % 2 == 1 ? "https" : "http", ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, * it2,
-					ABL_MediaServerPort.nHttpMp4Port % 2 == 1 ? "https" : "http", ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, * it2, ABL_MediaServerPort.httpDownloadSpeed);
+				sprintf(szDateTime, "%llu", *it2);
+				tEndTime = GetCurrentSecondByTime(szDateTime);
+				tEndTime += ABL_MediaServerPort.fileSecond;
+				sprintf(szTemp2, "{\"file\":\"%llu.mp4\",\"starttime\":\"%llu\",\"endtime\":\"%s\",\"duration\":%llu,\"url\":{\"rtsp\":\"%s://%s:%d/%s/%s%s%llu\",\"rtmp\":\"%s://%s:%d/%s/%s%s%llu\",\"http-flv\":\"%s://%s:%d/%s/%s%s%llu.flv\",\"ws-flv\":\"%s://%s:%d/%s/%s%s%llu.flv\",\"http-mp4\":\"%s://%s:%d/%s/%s%s%llu.mp4\",\"download\":\"%s://%s:%d/%s/%s%s%llu.mp4?download_speed=%d\"}},", *it2, *it2, GetDateTimeBySeconds(tEndTime), duration / 1000,
+					ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, *it2,
+					ABL_MediaServerPort.nRtmpPort % 2 == 1 ? "rtmps" : "rtmp", ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, *it2,
+					ABL_MediaServerPort.nHttpFlvPort % 2 == 1 ? "https" : "http", ABL_szLocalIP, ABL_MediaServerPort.nHttpFlvPort, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, *it2,
+					ABL_MediaServerPort.nWSFlvPort % 2 == 1 ? "wss" : "ws", ABL_szLocalIP, ABL_MediaServerPort.nWSFlvPort, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, *it2,
+					ABL_MediaServerPort.nHttpMp4Port % 2 == 1 ? "https" : "http", ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, *it2,
+					ABL_MediaServerPort.nHttpMp4Port % 2 == 1 ? "https" : "http", ABL_szLocalIP, ABL_MediaServerPort.nHttpMp4Port, queryStruct.app, queryStruct.stream, RecordFileReplaySplitter, *it2, ABL_MediaServerPort.httpDownloadSpeed);
 
 				strcat(szMediaSourceInfo, szTemp2);
 				nMediaCount++;
@@ -1300,7 +1350,7 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 					if (fp)
 						fclose(fp);
 				}
-			}
+				}
 
 			//后面的mp4文件不再符合条件 ，需要中断查询 
 			if (*it2 > atoll(queryStruct.endtime))
@@ -1308,8 +1358,8 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 				WriteLog(Log_Debug, "queryRecordListByTime() 后面的mp4文件不再符合条件 ，需要中断查询 *it2 = %llu , endtime = %s ", *it2, queryStruct.endtime);
 				break;
 			}
+			}
 		}
-	}
 	else
 	{
 		if (fileM3U8)
@@ -1347,7 +1397,8 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 	}
 
 	return nMediaCount;
-}
+	}
+
 
 //查询一个录像文件是否存在
 bool QureyRecordFileFromRecordSource(char* szShareURL, char* szFileName)
@@ -2462,14 +2513,14 @@ CNetRevcBase_ptr GetNetRevcBaseClient(NETHANDLE CltHandle)
 
 bool  DeleteNetRevcBaseClient(NETHANDLE CltHandle)
 {
-
 	std::lock_guard<std::mutex> lock(ABL_CNetRevcBase_ptrMapLock);
 
-	auto iterator1 = xh_ABLNetRevcBaseMap.find(CltHandle);
+	CNetRevcBase_ptrMap::iterator iterator1;
 
+	iterator1 = xh_ABLNetRevcBaseMap.find(CltHandle);
 	if (iterator1 != xh_ABLNetRevcBaseMap.end())
 	{
-		(*iterator1).second->bRunFlag.exchange(false);	
+		(*iterator1).second->bRunFlag.exchange(false);
 		if (((*iterator1).second->netBaseNetType == NetBaseNetType_RtspClientPush || (*iterator1).second->netBaseNetType == NetBaseNetType_RtmpClientPush ||
 			(*iterator1).second->netBaseNetType == NetBaseNetType_RtspClientRecv || (*iterator1).second->netBaseNetType == NetBaseNetType_RtmpClientRecv || (*iterator1).second->netBaseNetType == NetBaseNetType_FFmpegRecvNetworkMedia)
 			&& (*iterator1).second->bProxySuccessFlag == false)
@@ -2483,7 +2534,6 @@ bool  DeleteNetRevcBaseClient(NETHANDLE CltHandle)
 		//关闭国标监听 
 		if ((*iterator1).second->netBaseNetType == NetBaseNetType_NetGB28181RtpServerListen)
 		{
-			XHNetSDK_Unlisten((*iterator1).second->nClient);
 			if ((*iterator1).second->nMediaClient == 0)
 			{//码流没有达到通知
 				if (ABL_MediaServerPort.hook_enable == 1 && (*iterator1).second->bUpdateVideoFrameSpeedFlag == false)
@@ -2499,11 +2549,8 @@ bool  DeleteNetRevcBaseClient(NETHANDLE CltHandle)
 		}
 		else if ((*iterator1).second->netBaseNetType == NetBaseNetType_NetGB28181RtpSendListen)
 		{
-			XHNetSDK_Unlisten((*iterator1).second->nClient);
 			WriteLog(Log_Debug, " XHNetSDK_Unlisten() , nMediaClient = %llu  ", (*iterator1).second->nClient);
 		}
-		else //在此处关闭，确保boost:asio 单线程状态下 close(pSocket) ;
-			XHNetSDK_Disconnect((*iterator1).second->nClient);
 
 		//把依赖的父类删除掉
 		if ((*iterator1).second->hParent > 0)
@@ -2516,11 +2563,6 @@ bool  DeleteNetRevcBaseClient(NETHANDLE CltHandle)
 					pDisconnectBaseNetFifo.push((unsigned char*)&(*iterator1).second->hParent, sizeof((*iterator1).second->hParent));
 			}
 		}
-
-		//从线程池彻底移除
-		NetBaseThreadPool->DeleteFromTask((*iterator1).second->nClient);
-		RecordReplayThreadPool->DeleteFromTask((*iterator1).second->nClient);
-		MessageSendThreadPool->DeleteFromTask((*iterator1).second->nClient);
 
 		xh_ABLNetRevcBaseMap.erase(iterator1);
 		return true;
@@ -2845,7 +2887,7 @@ int  CheckNetRevcBaseClientDisconnect()
 				strcpy(szQuitText, "ABL_ANNOUNCE_QUIT:2021");
 				sprintf(((*iterator1).second)->szReponseTemp, "ANNOUNCE RTSP/1.0\r\nCSeq: %d\r\nUser-Agent: %s\r\nContent-Type: text/parameters\r\nContent-Length: %d\r\n\r\n%s", 8, MediaServerVerson, strlen(szQuitText), szQuitText);
 				WriteLog(Log_Debug, "CheckNetRevcBaseClientDisconnect() nClient = %llu 录像发送完毕", ((*iterator1).second)->nClient);
-				XHNetSDK_Write(((*iterator1).second)->nClient, (unsigned char*)((*iterator1).second)->szReponseTemp, strlen(((*iterator1).second)->szReponseTemp), 1);
+				XHNetSDK_Write(((*iterator1).second)->nClient, (unsigned char*)((*iterator1).second)->szReponseTemp, strlen(((*iterator1).second)->szReponseTemp), ABL_MediaServerPort.nSyncWritePacket);
 
 				pDisconnectBaseNetFifo.push((unsigned char*)&((*iterator1).second)->nClient, sizeof((unsigned char*)&((*iterator1).second)->nClient));
 			}
@@ -3044,10 +3086,18 @@ void LIBNET_CALLMETHOD onread(NETHANDLE srvhandle,
 void LIBNET_CALLMETHOD	onclose(NETHANDLE srvhandle,
 	NETHANDLE clihandle)
 {
-	WriteLog(Log_Debug, "onclose() nClient = %llu 客户端断开 srvhandle = %llu", clihandle, srvhandle);
+	//移除媒体拷贝
+	DeleteClientMediaStreamSource(clihandle);
 
+	//从线程池彻底移除
+	NetBaseThreadPool->DeleteFromTask(clihandle);
+	RecordReplayThreadPool->DeleteFromTask(clihandle);
+	MessageSendThreadPool->DeleteFromTask(clihandle);
+
+	//删除本服务资源对象
 	DeleteNetRevcBaseClient(clihandle);
 }
+
 
 void LIBNET_CALLMETHOD	onconnect(NETHANDLE clihandle,
 	uint8_t result, uint16_t nLocalPort)
@@ -3265,6 +3315,12 @@ void* ABLMedisServerProcessThread(void* lpVoid)
 			if (nClient >= 0)
 			{
 				DeleteClientMediaStreamSource(nClient);//移除媒体拷贝
+				//从线程池彻底移除
+				NetBaseThreadPool->DeleteFromTask(nClient);
+				RecordReplayThreadPool->DeleteFromTask(nClient);
+				MessageSendThreadPool->DeleteFromTask(nClient);
+
+				XHNetSDK_Disconnect(nClient);
 				DeleteNetRevcBaseClient(nClient);//执行删除 
 			}
 		}
@@ -3326,7 +3382,19 @@ void* ABLMedisServerFastDeleteThread(void* lpVoid)
 				memcpy((char*)&nClient, pData, sizeof(nClient));
 				if (nClient >= 0)
 				{
-					DeleteNetRevcBaseClient(nClient);//执行删除 
+					//移除媒体拷贝
+					DeleteClientMediaStreamSource(nClient);
+
+					//从线程池彻底移除
+					NetBaseThreadPool->DeleteFromTask(nClient);
+					RecordReplayThreadPool->DeleteFromTask(nClient);
+					MessageSendThreadPool->DeleteFromTask(nClient);
+
+					//删除网络SOCKET
+					XHNetSDK_Disconnect(nClient);
+
+					//执行删除本服务对象资源 
+					DeleteNetRevcBaseClient(nClient);
 				}
 			}
 
@@ -3347,7 +3415,7 @@ void* ABLMedisServerFastDeleteThread(void* lpVoid)
 			pDisconnectMediaSource.pop_front();
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 	}
 	return 0;
 }
@@ -3530,7 +3598,7 @@ void FindHistoryRecordFile(char* szRecordPath)
 						while (bFindFlag3 && pRecord)
 						{
 							bFindFlag3 = FindNextFile(hFind3, &fd3);
-							if (bFindFlag3 && !(strcmp(fd3.cFileName, ".") == 0 || strcmp(fd3.cFileName, "..") == 0) && fd3.dwFileAttributes == FILE_ATTRIBUTE_ARCHIVE)
+							if (bFindFlag3 && !(strcmp(fd3.cFileName, ".") == 0 || strcmp(fd3.cFileName, "..") == 0) /* && fd3.dwFileAttributes == FILE_ATTRIBUTE_ARCHIVE*/)
 							{
 								if (pRecord && strstr(fd3.cFileName, ".mp4") != NULL)
 								{
@@ -3604,7 +3672,7 @@ void FindHistoryPictureFile(char* szPicturePath)
 						while (bFindFlag3 && pPicture)
 						{
 							bFindFlag3 = FindNextFile(hFind3, &fd3);
-							if (bFindFlag3 && !(strcmp(fd3.cFileName, ".") == 0 || strcmp(fd3.cFileName, "..") == 0) && fd3.dwFileAttributes == FILE_ATTRIBUTE_ARCHIVE)
+							if (bFindFlag3 && !(strcmp(fd3.cFileName, ".") == 0 || strcmp(fd3.cFileName, "..") == 0) /*&& fd3.dwFileAttributes == FILE_ATTRIBUTE_ARCHIVE */)
 							{
 								if (pPicture)
 								{

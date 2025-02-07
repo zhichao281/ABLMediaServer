@@ -197,8 +197,8 @@ bool  CNetRevcBase::ParseRtspRtmpHttpURL(char* szURL)
 	ABL::to_lower(szSrcRtspPullUrl);
 #endif
 
-	if (!(memcmp(szSrcRtspPullUrl, "rtsp://", 7) == 0 || memcmp(szSrcRtspPullUrl, "rtmp://", 7) == 0 || memcmp(szSrcRtspPullUrl, "http://", 7) == 0 ||
-		memcmp(szSrcRtspPullUrl, "rtsps://", 8) == 0 || memcmp(szSrcRtspPullUrl, "rtmps://", 8) == 0 || memcmp(szSrcRtspPullUrl, "https://", 8) == 0))
+	if ( !(memcmp(szSrcRtspPullUrl, "rtsp://", 7) == 0 || memcmp(szSrcRtspPullUrl, "rtmp://", 7) == 0 || memcmp(szSrcRtspPullUrl, "http://", 7) == 0 || 
+		   memcmp(szSrcRtspPullUrl, "rtsps://", 8) == 0 || memcmp(szSrcRtspPullUrl, "rtmps://", 8) == 0 || memcmp(szSrcRtspPullUrl, "https://",8) == 0 ))
 		return false;
 
 	memset((char*)&m_rtspStruct, 0x00, sizeof(m_rtspStruct));
@@ -609,8 +609,8 @@ bool  CNetRevcBase::ResponseHttp(uint64_t nHttpClient,char* szSuccessInfo,bool b
 	else
 	  sprintf(szResponseHttpHead, "HTTP/1.1 200 OK\r\nServer: %s\r\nContent-Type: application/json;charset=utf-8\r\nAccess-Control-Allow-Origin: *\r\nConnection: %s\r\nContent-Length: %d\r\n\r\n", MediaServerVerson, "keep-alive", nLength);
  
-	XHNetSDK_Write(nHttpClient, (unsigned char*)szResponseHttpHead, strlen(szResponseHttpHead), 1);
-	XHNetSDK_Write(nHttpClient, (unsigned char*)szSuccessInfo, nLength, 1);
+	XHNetSDK_Write(nHttpClient, (unsigned char*)szResponseHttpHead, strlen(szResponseHttpHead), ABL_MediaServerPort.nSyncWritePacket);
+	XHNetSDK_Write(nHttpClient, (unsigned char*)szSuccessInfo, nLength, ABL_MediaServerPort.nSyncWritePacket);
 
 	pClient->bResponseHttpFlag = true;
 
@@ -650,8 +650,8 @@ bool  CNetRevcBase::ResponseHttp2(uint64_t nHttpClient, char* szSuccessInfo, boo
 	else
 		sprintf(szResponseHttpHead, "HTTP/1.1 200 OK\r\nServer: %s\r\nContent-Type: application/json;charset=utf-8\r\nAccess-Control-Allow-Origin: *\r\nConnection: %s\r\nContent-Length: %d\r\n\r\n", MediaServerVerson, "keep-alive", nLength);
 
-	XHNetSDK_Write(nHttpClient, (unsigned char*)szResponseHttpHead, strlen(szResponseHttpHead), 1);
-	XHNetSDK_Write(nHttpClient, (unsigned char*)szSuccessInfo, nLength, 1);
+	XHNetSDK_Write(nHttpClient, (unsigned char*)szResponseHttpHead, strlen(szResponseHttpHead), ABL_MediaServerPort.nSyncWritePacket);
+	XHNetSDK_Write(nHttpClient, (unsigned char*)szSuccessInfo, nLength, ABL_MediaServerPort.nSyncWritePacket);
 
 	WriteLog(Log_Debug, szSuccessInfo);
 	return true;
@@ -677,7 +677,7 @@ bool  CNetRevcBase::ResponseImage(uint64_t nHttpClient, HttpImageType imageType,
 		  sprintf(szResponseHttpHead, "HTTP/1.1 200 OK\r\nServer: %s\r\nContent-Type: image/png;charset=utf-8\r\nAccess-Control-Allow-Origin: *\r\nConnection: %s\r\nContent-Length: %d\r\n\r\n", MediaServerVerson, "keep-alive", nImageLength);
 	}
 
-	XHNetSDK_Write(nHttpClient, (unsigned char*)szResponseHttpHead, strlen(szResponseHttpHead), 1);
+	XHNetSDK_Write(nHttpClient, (unsigned char*)szResponseHttpHead, strlen(szResponseHttpHead), ABL_MediaServerPort.nSyncWritePacket);
 
 	int nPos = 0;
 	int nWriteRet ;
@@ -685,13 +685,13 @@ bool  CNetRevcBase::ResponseImage(uint64_t nHttpClient, HttpImageType imageType,
 	{
 		if (nImageLength > Send_ImageFile_MaxPacketCount)
 		{
-			nWriteRet = XHNetSDK_Write(nHttpClient, (unsigned char*)pImageBuffer + nPos, Send_ImageFile_MaxPacketCount, 1);
+			nWriteRet = XHNetSDK_Write(nHttpClient, (unsigned char*)pImageBuffer + nPos, Send_ImageFile_MaxPacketCount, ABL_MediaServerPort.nSyncWritePacket);
 			nImageLength -= Send_ImageFile_MaxPacketCount;
 			nPos += Send_ImageFile_MaxPacketCount;
 		}
 		else
 		{
-			nWriteRet = XHNetSDK_Write(nHttpClient, (unsigned char*)pImageBuffer + nPos, nImageLength, 1);
+			nWriteRet = XHNetSDK_Write(nHttpClient, (unsigned char*)pImageBuffer + nPos, nImageLength, ABL_MediaServerPort.nSyncWritePacket);
 			nPos += nImageLength;
 			nImageLength = 0;
 		}
@@ -832,20 +832,19 @@ std::shared_ptr<CMediaStreamSource>   CNetRevcBase::CreateReplayClient(char* szR
 	{
 		auto replayClient = CreateNetRevcBaseClient(ReadRecordFileInput_ReadFMP4File, 0, 0, szRequestReplayRecordFile, 0, szSplliterShareURL);
 		if (replayClient)//记录录像点播的client 
-			*nReturnReplayClient = replayClient->nClient;
+		 *nReturnReplayClient = replayClient->nClient;
 
 		int nWaitCount = 0;
-		while (true)
+ 		while (true)
 		{//等待录像文件创建好媒体源
-			nWaitCount++;
-			//Sleep(200);
-			std::this_thread::sleep_for(std::chrono::milliseconds(200));
-			pTempSource = GetMediaStreamSource(szReplayURL);
-			if (pTempSource != NULL)
-				break;
-			if (nWaitCount >= 30)
-				break;
-		}
+		   nWaitCount++;
+		   Sleep(200);
+		   pTempSource = GetMediaStreamSource(szReplayURL);
+		   if (pTempSource != NULL)
+			   break;
+		   if (nWaitCount >= 30)
+			   break;
+  		}
 		if (pTempSource == NULL)
 		{
 			if (replayClient)
@@ -853,7 +852,7 @@ std::shared_ptr<CMediaStreamSource>   CNetRevcBase::CreateReplayClient(char* szR
 			return NULL;
 		}
 
-		replayClient->hParent = nClient;
+	    replayClient->hParent = nClient ;
 	}
 	nMediaSourceType = MediaSourceType_ReplayMedia;
 	duration = pTempSource->nMediaDuration;
@@ -1158,3 +1157,34 @@ int  CNetRevcBase::FindSPSPositionPos(char* szVideoName, unsigned char* pVideo, 
 
 	return nPos;
 }
+#ifdef  OS_System_Windows
+//设置文件大小 
+bool CNetRevcBase::ftruncate(char* szFileName, DWORD nFileSize)
+{
+	HANDLE hFile = CreateFile(szFileName, GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE)
+	{
+		WriteLog(Log_Debug, "ftruncate::CreateFile() 失败 ，szFile = %s ", szFileName);
+		return false;
+	}
+
+	DWORD dwFileNewSize = SetFilePointer(hFile, nFileSize, NULL, FILE_BEGIN);
+	if (dwFileNewSize == INVALID_SET_FILE_POINTER)
+	{
+		CloseHandle(hFile);
+		WriteLog(Log_Debug, "ftruncate::SetFilePointer() 失败 ，szFile = %s ", szFileName);
+		return false;
+	}
+
+	if (!SetEndOfFile(hFile))
+	{
+		CloseHandle(hFile);
+		WriteLog(Log_Debug, "ftruncate::SetEndOfFile() 失败 ，szFile = %s ", szFileName);
+		return false;
+	}
+
+	CloseHandle(hFile); 
+	return true;
+}
+
+#endif

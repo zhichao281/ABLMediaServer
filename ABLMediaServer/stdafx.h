@@ -46,6 +46,7 @@
 #include <sys/stat.h>
 #include <malloc.h>
 #include <thread>
+#include <fcntl.h>
 
 #include<sys/types.h> 
 #include<sys/socket.h>
@@ -261,6 +262,7 @@ struct MediaServerPort
 	int        flvPlayAddMute;
 	int        GB28181RtpMinPort;
 	int        GB28181RtpMaxPort;
+	int        nSyncWritePacket;//发送网络数据包方式  
 
 	int         nUseWvp = 0; //是否参考wvp-zlm的接口返回  为1时候返回格式和ZLM的一致
 	char port_range[string_length_512]; //随机端口范围，最少确保36个端口
@@ -385,6 +387,7 @@ struct MediaServerPort
 		flvPlayAddMute = 1;
 		GB28181RtpMinPort = 35000;
 		GB28181RtpMaxPort = 40000;
+		nSyncWritePacket = 0;
 
 		nUseWvp = 0;
 		memset(port_range, 0x00, sizeof(port_range));
@@ -508,7 +511,7 @@ enum NetBaseNetType
 	NetBaseNetType_NetServerReadMultRecordFile     = 140,//连续读取多个录像文件
 };
 
-#define   MediaServerVerson                 "ABLMediaServer-6.3.6(2024-11-12)"
+#define   MediaServerVerson                 "ABLMediaServer-6.3.6(2024-12-13)"
 #define   RtspServerPublic                  "DESCRIBE, SETUP, TEARDOWN, PLAY, PAUSE, OPTIONS, ANNOUNCE, RECORD，GET_PARAMETER"
 #define   RecordFileReplaySplitter          "__ReplayFMP4RecordFile__"  //实况、录像区分的标志字符串，用于区分实况，放置在url中。
 
@@ -1386,6 +1389,7 @@ void malloc_trim(int n);
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/atomic.hpp>
 using namespace boost;
 #else

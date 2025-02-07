@@ -1,7 +1,7 @@
 /*
 功能：
-    负责接收GB28181Rtp码流，包括UDP、TCP模式 
-    增加 国标发送  （即国标接收的同时也支持国标发送）    2023-05-18
+	负责接收GB28181Rtp码流，包括UDP、TCP模式
+	增加 国标发送  （即国标接收的同时也支持国标发送）    2023-05-18
 	增加支持1078码流以 2016\2019版本接收                 2023-12-20
 日期    2021-08-08
 作者    罗家兄弟
@@ -63,17 +63,17 @@ static int NetGB28181RtpServer_ps_write(void* param, int stream, void* packet, s
 	if (!pThis->bRunFlag.load())
 		return -1;
 
-	 pThis->GB28181PsToRtPacket((unsigned char*)packet, bytes);
+	pThis->GB28181PsToRtPacket((unsigned char*)packet, bytes);
 
 #ifdef WriteSendPsFileFlag
 	if (pThis->fWriteSendPsFile)
 	{
-		fwrite((char*)packet,1,bytes,pThis->fWriteSendPsFile);
+		fwrite((char*)packet, 1, bytes, pThis->fWriteSendPsFile);
 		fflush(pThis->fWriteSendPsFile);
 	}
 #endif 
 
-	return 0 ;
+	return 0;
 }
 
 void RTP_DEPACKET_CALL_METHOD GB28181_rtppacket_callback_recv(_rtp_depacket_cb* cb)
@@ -82,7 +82,7 @@ void RTP_DEPACKET_CALL_METHOD GB28181_rtppacket_callback_recv(_rtp_depacket_cb* 
 	if (!pThis->bRunFlag.load())
 		return;
 
-	if(pThis != NULL)
+	if (pThis != NULL)
 	{
 		if (pThis->pMediaSource == NULL)
 		{//优先创建媒体源,因为 rtp + PS \ rtp + ES \ rtp + XHB 都要使用 
@@ -92,16 +92,16 @@ void RTP_DEPACKET_CALL_METHOD GB28181_rtppacket_callback_recv(_rtp_depacket_cb* 
 		}
 
 		if (pThis->nSSRC == 0)
-		   pThis->nSSRC = cb->ssrc; //默认第一个ssrc 
-		if (pThis->pMediaSource && pThis->nSSRC == cb->ssrc && pThis->m_addStreamProxyStruct.RtpPayloadDataType[0] >= 0x31 && pThis->m_addStreamProxyStruct.RtpPayloadDataType[0] <= 0x33 )
+			pThis->nSSRC = cb->ssrc; //默认第一个ssrc 
+		if (pThis->pMediaSource && pThis->nSSRC == cb->ssrc && pThis->m_addStreamProxyStruct.RtpPayloadDataType[0] >= 0x31 && pThis->m_addStreamProxyStruct.RtpPayloadDataType[0] <= 0x33)
 		{
- 			if (!pThis->bUpdateVideoFrameSpeedFlag && pThis->m_addStreamProxyStruct.RtpPayloadDataType[0] >= 0x32 && pThis->m_addStreamProxyStruct.RtpPayloadDataType[0] <= 0x33)
+			if (!pThis->bUpdateVideoFrameSpeedFlag && pThis->m_addStreamProxyStruct.RtpPayloadDataType[0] >= 0x32 && pThis->m_addStreamProxyStruct.RtpPayloadDataType[0] <= 0x33)
 			{//更新视频源的帧速度
 				int nVideoSpeed = 25;
 				if (nVideoSpeed > 0)
 				{
 					pThis->bUpdateVideoFrameSpeedFlag = true;
-  					//不管UDP、TCP都设置为码流已经到达 
+					//不管UDP、TCP都设置为码流已经到达 
 					auto  pGB28181Proxy = GetNetRevcBaseClient(pThis->hParent);
 					if (pGB28181Proxy != NULL)
 						pGB28181Proxy->bUpdateVideoFrameSpeedFlag = true;
@@ -121,49 +121,49 @@ void RTP_DEPACKET_CALL_METHOD GB28181_rtppacket_callback_recv(_rtp_depacket_cb* 
 			{//rtp + PS 
 				if (ABL_MediaServerPort.gb28181LibraryUse == 1)
 				{//自研
-				  ps_demux_input(pThis->psDeMuxHandle, cb->data, cb->datasize);
+					ps_demux_input(pThis->psDeMuxHandle, cb->data, cb->datasize);
 				}
 				else
 				{//北京老陈
-				   if(pThis->psBeiJingLaoChen)
-					 ps_demuxer_input(pThis->psBeiJingLaoChen, cb->data, cb->datasize);
+					if (pThis->psBeiJingLaoChen)
+						ps_demuxer_input(pThis->psBeiJingLaoChen, cb->data, cb->datasize);
 				}
 			}
 			else if (pThis->m_addStreamProxyStruct.RtpPayloadDataType[0] >= 0x32 && pThis->m_addStreamProxyStruct.RtpPayloadDataType[0] <= 0x33)
 			{// rtp + ES \ rtp + XHB 
-				 if(cb->payload == 98 )
-				    pThis->pMediaSource->PushVideo(cb->data, cb->datasize, "H264");
-				 else if(cb->payload == 99)
-				    pThis->pMediaSource->PushVideo(cb->data, cb->datasize, "H265");
-				 else if(cb->payload == 0)//g711u 
-					pThis->pMediaSource->PushAudio(cb->data, cb->datasize, "G711_U",1,8000);
-				 else if (cb->payload == 8)//g711a
-					 pThis->pMediaSource->PushAudio(cb->data, cb->datasize, "G711_A", 1, 8000);
-				 else if (cb->payload == 97)//aac
-				 {
+				if (cb->payload == 98)
+					pThis->pMediaSource->PushVideo(cb->data, cb->datasize, "H264");
+				else if (cb->payload == 99)
+					pThis->pMediaSource->PushVideo(cb->data, cb->datasize, "H265");
+				else if (cb->payload == 0)//g711u 
+					pThis->pMediaSource->PushAudio(cb->data, cb->datasize, "G711_U", 1, 8000);
+				else if (cb->payload == 8)//g711a
+					pThis->pMediaSource->PushAudio(cb->data, cb->datasize, "G711_A", 1, 8000);
+				else if (cb->payload == 97)//aac
+				{
 #ifdef WriteRecvAACDataFlag
-					 if (pThis->fWriteRecvAACFile)
-					 {
-						 fwrite(cb->data, 1, cb->datasize, pThis->fWriteRecvAACFile);
-						 fflush(pThis->fWriteRecvAACFile);
-					 }
+					if (pThis->fWriteRecvAACFile)
+					{
+						fwrite(cb->data, 1, cb->datasize, pThis->fWriteRecvAACFile);
+						fflush(pThis->fWriteRecvAACFile);
+					}
 #endif
-					 //获取AAC格式
- 					 if (pThis->nRecvChannels == 0 && pThis->nRecvSampleRate == 0)
-						 pThis->GetAACAudioInfo2(cb->data, cb->datasize, &pThis->nRecvSampleRate, &pThis->nRecvChannels);
+					//获取AAC格式
+					if (pThis->nRecvChannels == 0 && pThis->nRecvSampleRate == 0)
+						pThis->GetAACAudioInfo2(cb->data, cb->datasize, &pThis->nRecvSampleRate, &pThis->nRecvChannels);
 
- 					 if(cb->datasize > 0 &&  cb->datasize < 2048 )
-					    pThis->pMediaSource->PushAudio((unsigned char*)cb->data, cb->datasize,"AAC", pThis->nRecvChannels, pThis->nRecvSampleRate);
-				 }
+					if (cb->datasize > 0 && cb->datasize < 2048)
+						pThis->pMediaSource->PushAudio((unsigned char*)cb->data, cb->datasize, "AAC", pThis->nRecvChannels, pThis->nRecvSampleRate);
+				}
 			}
-  		}
+		}
 
-	   if (ABL_MediaServerPort.nSaveGB28181Rtp == 1 && pThis->fWritePsFile != NULL && (GetTickCount64() - pThis->nCreateDateTime) < 1000 * 180 )
- 	   {
-		   fwrite(cb->data,1,cb->datasize,pThis->fWritePsFile);
-		   fflush(pThis->fWritePsFile);
-	   }
- 	}
+		if (ABL_MediaServerPort.nSaveGB28181Rtp == 1 && pThis->fWritePsFile != NULL && (GetTickCount64() - pThis->nCreateDateTime) < 1000 * 180)
+		{
+			fwrite(cb->data, 1, cb->datasize, pThis->fWritePsFile);
+			fflush(pThis->fWritePsFile);
+		}
+	}
 }
 
 //对1078数据进行切割 
@@ -177,11 +177,11 @@ void  CNetGB28181RtpServer::SplitterJt1078CacheBuffer()
 			pMediaSource->netBaseNetType = netBaseNetType;
 	}
 
- 	Jt1078VideoRtpPacket_T*      p1078VideoHead;
-	Jt1078AudioRtpPacket_T*      p1078AudioHead;
-	Jt1078OtherRtpPacket_T*      pOtherHead;
- 
- 	n1078Pos = 0;
+	Jt1078VideoRtpPacket_T* p1078VideoHead;
+	Jt1078AudioRtpPacket_T* p1078AudioHead;
+	Jt1078OtherRtpPacket_T* pOtherHead;
+
+	n1078Pos = 0;
 	n1078CurrentProcCountLength = n1078CacheBufferLength;//当前处理的总长度 
 	while (n1078CacheBufferLength >= 4096)
 	{
@@ -198,7 +198,7 @@ void  CNetGB28181RtpServer::SplitterJt1078CacheBuffer()
 			}
 			else
 			{//找到标志位置，重新定位
-				n1078NewPosition = n1078Pos + nFind1078FlagPos ;// n1078Pos 为已经消费的数据位置、nFind1078FlagPos 因为丢包造成一些错乱数据 从而丢弃的数据 的新位置 
+				n1078NewPosition = n1078Pos + nFind1078FlagPos;// n1078Pos 为已经消费的数据位置、nFind1078FlagPos 因为丢包造成一些错乱数据 从而丢弃的数据 的新位置 
 				memmove(netDataCache, netDataCache + n1078NewPosition, n1078CurrentProcCountLength - n1078NewPosition);
 				return; //等待下一次对1078数据进行解包 
 			}
@@ -208,13 +208,13 @@ void  CNetGB28181RtpServer::SplitterJt1078CacheBuffer()
 		{//视频
 			nPayloadSize = ntohs(p1078VideoHead->payload_size);
 
-			if (nPayloadSize > 0 && (n1078CurrentProcCountLength - n1078Pos ) > nPayloadSize)
+			if (nPayloadSize > 0 && (n1078CurrentProcCountLength - n1078Pos) > nPayloadSize)
 			{
 #ifdef WriteJt1078VideoFlag
-				fwrite((unsigned char*)(netDataCache + (sizeof(Jt1078VideoRtpPacket_T) + n1078Pos)),1, nPayloadSize, fWrite1078File);
+				fwrite((unsigned char*)(netDataCache + (sizeof(Jt1078VideoRtpPacket_T) + n1078Pos)), 1, nPayloadSize, fWrite1078File);
 				fflush(fWrite1078File);
 #endif
- 				if (Ma1078CacheBufferLength - n1078VideoFrameBufferLength >= nPayloadSize)
+				if (Ma1078CacheBufferLength - n1078VideoFrameBufferLength >= nPayloadSize)
 				{
 					memcpy(p1078VideoFrameBuffer + n1078VideoFrameBufferLength, netDataCache + (sizeof(Jt1078VideoRtpPacket_T) + n1078Pos), nPayloadSize);
 					n1078VideoFrameBufferLength += nPayloadSize;
@@ -233,12 +233,12 @@ void  CNetGB28181RtpServer::SplitterJt1078CacheBuffer()
 					}
 					else if (p1078VideoHead->packet_type == 2)
 					{//最后1包
- 						if(nVideoPT == 98 )
+						if (nVideoPT == 98)
 							pMediaSource->PushVideo(p1078VideoFrameBuffer, n1078VideoFrameBufferLength, "H264");
 						else if (nVideoPT == 99)
 							pMediaSource->PushVideo(p1078VideoFrameBuffer, n1078VideoFrameBufferLength, "H265");
 
-						n1078VideoFrameBufferLength = 0 ;
+						n1078VideoFrameBufferLength = 0;
 					}
 
 					if (!bUpdateVideoFrameSpeedFlag)
@@ -252,36 +252,36 @@ void  CNetGB28181RtpServer::SplitterJt1078CacheBuffer()
 							if (pGB28181Proxy != NULL)
 								pGB28181Proxy->bUpdateVideoFrameSpeedFlag = true;
 						}
- 					}
+					}
 				}
 				else
 					n1078VideoFrameBufferLength = 0;
- 
+
 				n1078CacheBufferLength -= sizeof(Jt1078VideoRtpPacket_T) + nPayloadSize;
 				n1078Pos += sizeof(Jt1078VideoRtpPacket_T) + nPayloadSize;
 			}
- 		}
+		}
 		else if (p1078VideoHead->frame_type == 3)
 		{//音频 
 			Jt1078AudioRtpPacket_T* p1078AudioHead = (Jt1078AudioRtpPacket_T*)(netDataCache + n1078Pos);
 			nPayloadSize = ntohs(p1078AudioHead->payload_size);
 
- 			if (nPayloadSize > 0 && (n1078CurrentProcCountLength - n1078Pos) > nPayloadSize)
+			if (nPayloadSize > 0 && (n1078CurrentProcCountLength - n1078Pos) > nPayloadSize)
 			{
 				if (nAudioPT == -1)
 					nAudioPT = p1078AudioHead->pt;
 
-				if(nAudioPT == 6)
-					pMediaSource->PushAudio((unsigned char*)(netDataCache + (sizeof(Jt1078AudioRtpPacket_T) + n1078Pos)), nPayloadSize, "G711_A", 1,8000);
-				else if(nAudioPT == 7)
+				if (nAudioPT == 6)
+					pMediaSource->PushAudio((unsigned char*)(netDataCache + (sizeof(Jt1078AudioRtpPacket_T) + n1078Pos)), nPayloadSize, "G711_A", 1, 8000);
+				else if (nAudioPT == 7)
 					pMediaSource->PushAudio((unsigned char*)(netDataCache + (sizeof(Jt1078AudioRtpPacket_T) + n1078Pos)), nPayloadSize, "G711_U", 1, 8000);
-				else if (nAudioPT == 19) 
+				else if (nAudioPT == 19)
 				{//准确计算aac音频格式 
-					
+
 					//获取AAC格式
 					if (nRecvChannels == 0 && nRecvSampleRate == 0)
 						GetAACAudioInfo2((netDataCache + (sizeof(Jt1078AudioRtpPacket_T) + n1078Pos)), nPayloadSize, &nRecvSampleRate, &nRecvChannels);
- 
+
 					pMediaSource->PushAudio((unsigned char*)(netDataCache + (sizeof(Jt1078AudioRtpPacket_T) + n1078Pos)), nPayloadSize, "AAC", nRecvChannels, nRecvSampleRate);
 				}
 
@@ -296,15 +296,15 @@ void  CNetGB28181RtpServer::SplitterJt1078CacheBuffer()
 
 			if (nPayloadSize > 0 && (n1078CurrentProcCountLength - n1078Pos) > nPayloadSize)
 			{
- 
+
 				n1078CacheBufferLength -= sizeof(Jt1078OtherRtpPacket_T) + nPayloadSize;
 				n1078Pos += sizeof(Jt1078OtherRtpPacket_T) + nPayloadSize;
 			}
 		}
- 	}
+	}
 
 	//把剩余的数据移动过来
-	if (n1078CacheBufferLength > 0 && n1078Pos > 0 )
+	if (n1078CacheBufferLength > 0 && n1078Pos > 0)
 		memmove(netDataCache, netDataCache + n1078Pos, n1078CacheBufferLength);
 }
 
@@ -319,9 +319,9 @@ void  CNetGB28181RtpServer::SplitterJt1078CacheBuffer2019()
 			pMediaSource->netBaseNetType = netBaseNetType;
 	}
 
-	Jt1078VideoRtpPacket2019_T*      p1078VideoHead;
-	Jt1078AudioRtpPacket2019_T*      p1078AudioHead;
-	Jt1078OtherRtpPacket2019_T*      pOtherHead;
+	Jt1078VideoRtpPacket2019_T* p1078VideoHead;
+	Jt1078AudioRtpPacket2019_T* p1078AudioHead;
+	Jt1078OtherRtpPacket2019_T* pOtherHead;
 
 	n1078Pos = 0;
 	n1078CurrentProcCountLength = n1078CacheBufferLength;//当前处理的总长度 
@@ -390,7 +390,7 @@ void  CNetGB28181RtpServer::SplitterJt1078CacheBuffer2019()
 							sprintf(pMediaSource->sim, "%X%X%X%X%X%X%X%X%X%X", p1078VideoHead->sim[0], p1078VideoHead->sim[1], p1078VideoHead->sim[2], p1078VideoHead->sim[3], p1078VideoHead->sim[4], p1078VideoHead->sim[5], p1078VideoHead->sim[6], p1078VideoHead->sim[7], p1078VideoHead->sim[8], p1078VideoHead->sim[9]);
 							bUpdateVideoFrameSpeedFlag = true;
 							pMediaSource->UpdateVideoFrameSpeed(1000 / ntohs(p1078VideoHead->frame_interval), netBaseNetType);
-							auto  pGB28181Proxy = GetNetRevcBaseClient(hParent);
+							auto pGB28181Proxy = GetNetRevcBaseClient(hParent);
 							if (pGB28181Proxy != NULL)
 								pGB28181Proxy->bUpdateVideoFrameSpeedFlag = true;
 						}
@@ -422,10 +422,10 @@ void  CNetGB28181RtpServer::SplitterJt1078CacheBuffer2019()
 					//获取AAC格式
 					if (nRecvChannels == 0 && nRecvSampleRate == 0)
 						GetAACAudioInfo2((netDataCache + (sizeof(Jt1078AudioRtpPacket2019_T) + n1078Pos)), nPayloadSize, &nRecvSampleRate, &nRecvChannels);
- 
+
 					pMediaSource->PushAudio((unsigned char*)(netDataCache + (sizeof(Jt1078AudioRtpPacket2019_T) + n1078Pos)), nPayloadSize, "AAC", nRecvChannels, nRecvSampleRate);
 				}
- 
+
 				n1078CacheBufferLength -= sizeof(Jt1078AudioRtpPacket2019_T) + nPayloadSize;
 				n1078Pos += sizeof(Jt1078AudioRtpPacket2019_T) + nPayloadSize;
 			}
@@ -452,12 +452,12 @@ void  CNetGB28181RtpServer::SplitterJt1078CacheBuffer2019()
 //在缓存中查找1078标志 0x30 ,0x31 ,0x63, 0x64 
 int   CNetGB28181RtpServer::Find1078HeadFromCacheBuffer(unsigned char* pData, int nLength)
 {
-	if (nLength <= 4 || pData == NULL )
+	if (nLength <= 4 || pData == NULL)
 		return -1;
 
-	for (int i = 0; i < nLength - 4 ; i++)
+	for (int i = 0; i < nLength - 4; i++)
 	{
-		if (pData[i] == 0x30 && pData[i+1] == 0x31 && pData[i + 2] == 0x63 && pData[i + 3] == 0x64)
+		if (pData[i] == 0x30 && pData[i + 1] == 0x31 && pData[i + 2] == 0x63 && pData[i + 3] == 0x64)
 		{
 			return i;
 		}
@@ -474,18 +474,18 @@ static int on_gb28181_unpacket(void* param, int stream, int avtype, int flags, i
 	if (pThis->pMediaSource == NULL)
 	{
 		pThis->bRunFlag.exchange(false);
-		DeleteNetRevcBaseClient(pThis->nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&pThis->nClient, sizeof(pThis->nClient));
 		return -1;
 	}
 
- 	if ((PSI_STREAM_AAC == avtype || PSI_STREAM_AUDIO_G711A == avtype || PSI_STREAM_AUDIO_G711U == avtype) && pThis->m_addStreamProxyStruct.disableAudio[0] == 0x30)
+	if ((PSI_STREAM_AAC == avtype || PSI_STREAM_AUDIO_G711A == avtype || PSI_STREAM_AUDIO_G711U == avtype) && pThis->m_addStreamProxyStruct.disableAudio[0] == 0x30)
 	{
 		if (PSI_STREAM_AAC == avtype)
 		{//aac
-		    //获取AAC媒体信息
+			//获取AAC媒体信息
 			if (pThis->nRecvChannels == 0 && pThis->nRecvSampleRate == 0)
 				pThis->GetAACAudioInfo2((unsigned char*)data, bytes, &pThis->nRecvSampleRate, &pThis->nRecvChannels);
- 
+
 			pThis->pMediaSource->PushAudio((unsigned char*)data, bytes, "AAC", pThis->nRecvChannels, pThis->nRecvSampleRate);
 		}
 		else if (PSI_STREAM_AUDIO_G711A == avtype)
@@ -510,13 +510,13 @@ static int on_gb28181_unpacket(void* param, int stream, int avtype, int flags, i
 
 	if (!pThis->bUpdateVideoFrameSpeedFlag)
 	{//更新视频源的帧速度
-		int nVideoSpeed = 25 ;
+		int nVideoSpeed = 25;
 		if (nVideoSpeed > 0 && pThis->pMediaSource != NULL)
 		{
 			pThis->bUpdateVideoFrameSpeedFlag = true;
 
 			//不管UDP、TCP都设置为码流已经到达 
-			auto pGB28181Proxy = GetNetRevcBaseClient(pThis->hParent);
+			auto  pGB28181Proxy = GetNetRevcBaseClient(pThis->hParent);
 			if (pGB28181Proxy != NULL)
 				pGB28181Proxy->bUpdateVideoFrameSpeedFlag = true;
 
@@ -543,7 +543,7 @@ void PS_DEMUX_CALL_METHOD GB28181_RtpRecv_demux_callback(_ps_demux_cb* cb)
 	CNetGB28181RtpServer* pThis = (CNetGB28181RtpServer*)cb->userdata;
 	if (!pThis->bRunFlag.load())
 		return;
- 
+
 	if (pThis && cb->streamtype == e_rtpdepkt_st_h264 || cb->streamtype == e_rtpdepkt_st_h265 ||
 		cb->streamtype == e_rtpdepkt_st_mpeg4 || cb->streamtype == e_rtpdepkt_st_mjpeg)
 	{
@@ -553,17 +553,17 @@ void PS_DEMUX_CALL_METHOD GB28181_RtpRecv_demux_callback(_ps_demux_cb* cb)
 			if (pThis->pMediaSource != NULL)
 				pThis->pMediaSource->netBaseNetType = pThis->netBaseNetType;
 		}
-		
+
 		if (pThis->pMediaSource == NULL)
 		{
 			pThis->bRunFlag.exchange(false);
-			DeleteNetRevcBaseClient(pThis->nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&pThis->nClient, sizeof(pThis->nClient));
 			return;
 		}
 
 		if (pThis->m_addStreamProxyStruct.disableVideo[0] == 0x30)
 		{//国标接入没有过滤掉视频
- 			if (cb->streamtype == e_rtpdepkt_st_h264)
+			if (cb->streamtype == e_rtpdepkt_st_h264)
 				pThis->pMediaSource->PushVideo(cb->data, cb->datasize, "H264");
 			else if (cb->streamtype == e_rtpdepkt_st_h265)
 				pThis->pMediaSource->PushVideo(cb->data, cb->datasize, "H265");
@@ -592,7 +592,7 @@ void PS_DEMUX_CALL_METHOD GB28181_RtpRecv_demux_callback(_ps_demux_cb* cb)
 			}
 		}
 	}
-	else 
+	else
 	{
 		if (pThis->pMediaSource == NULL)
 		{
@@ -608,20 +608,20 @@ void PS_DEMUX_CALL_METHOD GB28181_RtpRecv_demux_callback(_ps_demux_cb* cb)
 		if (pThis->pMediaSource == NULL)
 		{
 			pThis->bRunFlag.exchange(false);
-			DeleteNetRevcBaseClient(pThis->nClient);
-			return ;
+			pDisconnectBaseNetFifo.push((unsigned char*)&pThis->nClient, sizeof(pThis->nClient));
+			return;
 		}
 
 		if (pThis->m_addStreamProxyStruct.disableAudio[0] == 0x30)
 		{//音频没有过滤
 			if (cb->streamtype == e_rtpdepkt_st_aac)
 			{//aac
-			     //获取AAC格式信息 
-				if(pThis->nRecvChannels == 0 && pThis->nRecvSampleRate == 0)
-				  pThis->GetAACAudioInfo2(cb->data, cb->datasize, &pThis->nRecvSampleRate,&pThis->nRecvChannels);
+				 //获取AAC格式信息 
+				if (pThis->nRecvChannels == 0 && pThis->nRecvSampleRate == 0)
+					pThis->GetAACAudioInfo2(cb->data, cb->datasize, &pThis->nRecvSampleRate, &pThis->nRecvChannels);
 
 				if (pThis->nRecvChannels > 0 && pThis->nRecvSampleRate > 0)
-				  pThis->pMediaSource->PushAudio(cb->data, cb->datasize, "AAC", pThis->nRecvChannels, pThis->nRecvSampleRate);
+					pThis->pMediaSource->PushAudio(cb->data, cb->datasize, "AAC", pThis->nRecvChannels, pThis->nRecvSampleRate);
 			}
 			else if (cb->streamtype == e_rtpdepkt_st_g711a)
 			{// G711A  
@@ -635,9 +635,9 @@ void PS_DEMUX_CALL_METHOD GB28181_RtpRecv_demux_callback(_ps_demux_cb* cb)
 	}
 }
 
-CNetGB28181RtpServer::CNetGB28181RtpServer(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort,char* szShareMediaURL)
+CNetGB28181RtpServer::CNetGB28181RtpServer(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort, char* szShareMediaURL)
 {
- #ifdef WriteRecvAACDataFlag
+#ifdef WriteRecvAACDataFlag
 	fWriteRecvAACFile = fopen("e:\\recvES.aac", "wb");
 #endif
 #ifdef WriteSendPsFileFlag
@@ -662,15 +662,15 @@ CNetGB28181RtpServer::CNetGB28181RtpServer(NETHANDLE hServer, NETHANDLE hClient,
 	fWrite1078File = fopen(szFileName, "wb");
 #endif
 	nAddSend_app_streamDatetime = GetTickCount64();
-	nRecvChannels =  nRecvSampleRate = 0;
+	nRecvChannels = nRecvSampleRate = 0;
 	nRecvRtpPacketCount = 0;
 	nMaxRtpLength = 0;
 
 	nVideoPT = nAudioPT = -1;
-	p1078VideoFrameBuffer = NULL ;
+	p1078VideoFrameBuffer = NULL;
 	n1078CacheBufferLength = n1078VideoFrameBufferLength = 0;;
 
- 	aacDataLength = 0;
+	aacDataLength = 0;
 	nMaxRtpSendVideoMediaBufferLength = 640;//默认累计640
 	nSendRtpVideoMediaBufferLength = 0; //已经积累的长度  视频
 	nStartVideoTimestamp = GB28181VideoStartTimestampFlag; //上一帧视频初始时间戳 ，
@@ -691,36 +691,36 @@ CNetGB28181RtpServer::CNetGB28181RtpServer(NETHANDLE hServer, NETHANDLE hClient,
 	nClientRtcp = hParent = 0;
 	fWritePsFile = NULL;
 	nRtpRtcpPacketType = 0;
-	strcpy(m_szShareMediaURL,szShareMediaURL);
+	strcpy(m_szShareMediaURL, szShareMediaURL);
 	nClient = hClient;
 	nServer = hServer;
 	m_gbPayload = 96;
-	hRtpHandle = psDeMuxHandle  = 0;
+	hRtpHandle = psDeMuxHandle = 0;
 	psBeiJingLaoChen = NULL;
 	memset((char*)&mediaCodecInfo, 0x00, sizeof(mediaCodecInfo));
 	bInitFifoFlag = false;
-	pMediaSource = NULL; 
-	netDataCache = NULL ; //网络数据缓存
+	pMediaSource = NULL;
+	netDataCache = NULL; //网络数据缓存
 	netDataCacheLength = 0;//网络数据缓存大小
 	nNetStart = nNetEnd = 0; //网络数据起始位置\结束位置
 	MaxNetDataCacheCount = MaxNetDataCacheBufferLength;
 	nSendRtcpTime = 0;
 	pRtpAddress = pSrcAddress = NULL;
 	bRunFlag.exchange(true);
-	fWritePsFile  = NULL ;
-	pWriteRtpFile = NULL ;
+	fWritePsFile = NULL;
+	pWriteRtpFile = NULL;
 	strcpy(szClientIP, szIP);
-	
+
 	if (ABL_MediaServerPort.nSaveGB28181Rtp == 1)
 	{
 		char szVFile[string_length_1024];
 		sprintf(szVFile, "%s%llu_%X.ps", ABL_MediaServerPort.debugPath, nClient, this);
- 	    fWritePsFile = fopen(szVFile,"wb") ;
+		fWritePsFile = fopen(szVFile, "wb");
 		sprintf(szVFile, "%s%llu_%X.rtp", ABL_MediaServerPort.debugPath, nClient, this);
 		pWriteRtpFile = fopen(szVFile, "wb");
 	}
 
- 	WriteLog(Log_Debug, "CNetGB28181RtpServer 构造 = %X  nClient = %llu ", this, nClient);
+	WriteLog(Log_Debug, "CNetGB28181RtpServer 构造 = %X  nClient = %llu ", this, nClient);
 }
 
 CNetGB28181RtpServer::~CNetGB28181RtpServer()
@@ -752,82 +752,82 @@ CNetGB28181RtpServer::~CNetGB28181RtpServer()
 			psBeiJingLaoChen = NULL;
 		}
 	}
- 
+
 	if (hRtpHandle > 0)
 	{
 		rtp_depacket_stop(hRtpHandle);
 		hRtpHandle = 0;
- 	}
+	}
 
 	if (netBaseNetType == NetBaseNetType_NetGB28181RtpServerUDP)
 	{
-	  if(bInitFifoFlag)
-	    NetDataFifo.FreeFifo();
+		if (bInitFifoFlag)
+			NetDataFifo.FreeFifo();
 	}
- 
-    SAFE_ARRAY_DELETE(netDataCache);
+
+	SAFE_ARRAY_DELETE(netDataCache);
 
 	if (fWritePsFile)
 	{
-	    fclose(fWritePsFile);
+		fclose(fWritePsFile);
 		fWritePsFile = NULL;
-	 }
-	 if (pWriteRtpFile)
-	 {
-		 fclose(pWriteRtpFile);
-		 pWriteRtpFile = NULL;
-	 }
- 
-	 if(hRtpPS > 0)
-	   rtp_packet_stop(hRtpPS);
-	 if (psBeiJingLaoChenMuxer != NULL)
-		 ps_muxer_destroy(psBeiJingLaoChenMuxer);
+	}
+	if (pWriteRtpFile)
+	{
+		fclose(pWriteRtpFile);
+		pWriteRtpFile = NULL;
+	}
 
-	 SAFE_DELETE(pRtpAddress);
-	 SAFE_DELETE(pSrcAddress);
-	 SAFE_ARRAY_DELETE(s_buffer);
-	 SAFE_ARRAY_DELETE(p1078VideoFrameBuffer);
-	 
- 	 malloc_trim(0);
+	if (hRtpPS > 0)
+		rtp_packet_stop(hRtpPS);
+	if (psBeiJingLaoChenMuxer != NULL)
+		ps_muxer_destroy(psBeiJingLaoChenMuxer);
 
-	 if (hParent > 0 && netBaseNetType != NetBaseNetType_NetGB28181RtpServerTCP_Active)
-	 {
-		 WriteLog(Log_Debug, "CNetGB28181RtpServer = %X 加入清理国标代理句柄号 hParent = %llu, nClient = %llu ,nMediaClient = %llu", this, hParent, nClient, nMediaClient);
-		 pDisconnectBaseNetFifo.push((unsigned char*)&hParent, sizeof(hParent));
-	 }
+	SAFE_DELETE(pRtpAddress);
+	SAFE_DELETE(pSrcAddress);
+	SAFE_ARRAY_DELETE(s_buffer);
+	SAFE_ARRAY_DELETE(p1078VideoFrameBuffer);
 
-	 //清理rtcp 
-	 if (nClientRtcp > 0)
-		 XHNetSDK_DestoryUdp(nClientRtcp); 
+	malloc_trim(0);
 
-	 //最后才删除媒体源
-	 if (strlen(m_szShareMediaURL) > 0 && pMediaSource != NULL)
-		 pDisconnectMediaSource.push((unsigned char*)m_szShareMediaURL, strlen(m_szShareMediaURL));
+	if (hParent > 0 && netBaseNetType != NetBaseNetType_NetGB28181RtpServerTCP_Active)
+	{
+		WriteLog(Log_Debug, "CNetGB28181RtpServer = %X 加入清理国标代理句柄号 hParent = %llu, nClient = %llu ,nMediaClient = %llu", this, hParent, nClient, nMediaClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&hParent, sizeof(hParent));
+	}
+
+	//清理rtcp 
+	if (nClientRtcp > 0)
+		XHNetSDK_DestoryUdp(nClientRtcp);
+
+	//最后才删除媒体源
+	if (strlen(m_szShareMediaURL) > 0 && pMediaSource != NULL)
+		pDisconnectMediaSource.push((unsigned char*)m_szShareMediaURL, strlen(m_szShareMediaURL));
 
 #ifdef WriteSendPsFileFlag
-	 if(fWriteSendPsFile)
- 	    fclose(fWriteSendPsFile);
+	if (fWriteSendPsFile)
+		fclose(fWriteSendPsFile);
 #endif 
 #ifdef  WriteRtpFileFlag
-	 if(fWriteRtpFile)
- 	   fclose(fWriteRtpFile);
+	if (fWriteRtpFile)
+		fclose(fWriteRtpFile);
 #endif
 #ifdef WriteRecvAACDataFlag
-	 fclose(fWriteRecvAACFile);
+	fclose(fWriteRecvAACFile);
 #endif
 #ifdef WriteJt1078VideoFlag
-	 fclose(fWrite1078File);
+	fclose(fWrite1078File);
 #endif
-	 //码流没有达到通知
-	 if (ABL_MediaServerPort.hook_enable == 1 && bUpdateVideoFrameSpeedFlag == false)
-	 {
-		 MessageNoticeStruct msgNotice;
-		 msgNotice.nClient = NetBaseNetType_HttpClient_on_stream_not_arrive;
-		 sprintf(msgNotice.szMsg, "{\"eventName\":\"on_stream_not_arrive\",\"mediaServerId\":\"%s\",\"app\":\"%s\",\"stream\":\"%s\",\"networkType\":%d,\"key\":%llu}", ABL_MediaServerPort.mediaServerID,m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream,  netBaseNetType, nClient);
-		 pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
-	 }
+	//码流没有达到通知
+	if (ABL_MediaServerPort.hook_enable == 1 && bUpdateVideoFrameSpeedFlag == false)
+	{
+		MessageNoticeStruct msgNotice;
+		msgNotice.nClient = NetBaseNetType_HttpClient_on_stream_not_arrive;
+		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_stream_not_arrive\",\"mediaServerId\":\"%s\",\"app\":\"%s\",\"stream\":\"%s\",\"networkType\":%d,\"key\":%llu}", ABL_MediaServerPort.mediaServerID, m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream, netBaseNetType, nClient);
+		pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
+	}
 
-	 WriteLog(Log_Debug, "CNetGB28181RtpServer 析构 = %X  nClient = %llu , hParent= %llu , app = %s ,stream = %s ,bUpdateVideoFrameSpeedFlag = %d ", this, nClient, hParent, m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream, bUpdateVideoFrameSpeedFlag);
+	WriteLog(Log_Debug, "CNetGB28181RtpServer 析构 = %X  nClient = %llu , hParent= %llu , app = %s ,stream = %s ,bUpdateVideoFrameSpeedFlag = %d ", this, nClient, hParent, m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream, bUpdateVideoFrameSpeedFlag);
 }
 
 int CNetGB28181RtpServer::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* szVideoCodec)
@@ -836,7 +836,6 @@ int CNetGB28181RtpServer::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, c
 
 	if (!bRunFlag.load() || m_openRtpServerStruct.send_disableVideo[0] == 0x31)
 		return -1;
-
 
 	if (m_openRtpServerStruct.RtpPayloadDataType[0] == 0x31)
 	{//PS 
@@ -853,7 +852,7 @@ int CNetGB28181RtpServer::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, c
 	}
 	else if (m_openRtpServerStruct.RtpPayloadDataType[0] == 0x32)
 	{//ES 
-		if (hRtpPS > 0 )
+		if (hRtpPS > 0)
 		{
 			inputPS.data = pVideoData;
 			inputPS.datasize = nDataLength;
@@ -872,7 +871,7 @@ int CNetGB28181RtpServer::PushAudio(uint8_t* pAudioData, uint32_t nDataLength, c
 
 	if (strlen(mediaCodecInfo.szAudioName) > 0)
 	{
-		if (m_openRtpServerStruct.RtpPayloadDataType[0] == 0x31 && nAudioStreamID != -1 &&  psBeiJingLaoChenMuxer != NULL )
+		if (m_openRtpServerStruct.RtpPayloadDataType[0] == 0x31 && nAudioStreamID != -1 && psBeiJingLaoChenMuxer != NULL)
 		{//PS 
 			ps_muxer_input((ps_muxer_t*)psBeiJingLaoChenMuxer, nAudioStreamID, 0, audioPTS, audioPTS, pAudioData, nDataLength);
 
@@ -908,7 +907,7 @@ int CNetGB28181RtpServer::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClien
 	if (!bRunFlag.load() || nDataLength <= 0)
 		return -1;
 	std::lock_guard<std::mutex> lock(netDataLock);
- 
+
 #ifdef  WriteRtpFileFlag
 	if (fWriteRtpFile)
 	{
@@ -916,7 +915,7 @@ int CNetGB28181RtpServer::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClien
 		fwrite(pData, 1, nDataLength, fWriteRtpFile);
 		fflush(fWriteRtpFile);
 		return 0;
-     }
+	}
 #endif
 
 	//增加保存原始的rtp数据，进行底层分析
@@ -932,24 +931,24 @@ int CNetGB28181RtpServer::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClien
 	if (m_openRtpServerStruct.RtpPayloadDataType[0] == 0x34)
 	{//jt 1078 码流，不是标准的 rtp 流 
 		if (p1078VideoFrameBuffer == NULL)
-  			p1078VideoFrameBuffer = new unsigned char[Ma1078CacheBufferLength];
-		if(netDataCache == NULL )
+			p1078VideoFrameBuffer = new unsigned char[Ma1078CacheBufferLength];
+		if (netDataCache == NULL)
 			netDataCache = new unsigned char[Ma1078CacheBufferLength];
 
- 		if (Ma1078CacheBufferLength - n1078CacheBufferLength >= nDataLength)
+		if (Ma1078CacheBufferLength - n1078CacheBufferLength >= nDataLength)
 		{
 			memcpy(netDataCache + n1078CacheBufferLength, pData, nDataLength);
 			n1078CacheBufferLength += nDataLength;
 		}
 		else
 			n1078CacheBufferLength = 0;
-		
-		return 0 ;
+
+		return 0;
 	}
 
 	if (netBaseNetType == NetBaseNetType_NetGB28181RtpServerUDP)
 	{//UDP
-		if (pRtpAddress == NULL && pSrcAddress == NULL )
+		if (pRtpAddress == NULL && pSrcAddress == NULL)
 		{
 			pRtpAddress = new sockaddr_in;
 			pSrcAddress = new sockaddr_in;
@@ -958,21 +957,22 @@ int CNetGB28181RtpServer::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClien
 			unsigned short nPort = ntohs(pRtpAddress->sin_port);
 			pRtpAddress->sin_port = htons(nPort + 1);
 			sprintf(m_addStreamProxyStruct.url, "rtp://%s:%d/%s/%s", inet_ntoa(pSrcAddress->sin_addr), ntohs(pSrcAddress->sin_port), m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream);
- 		}
+		}
 
 		//获取第一个ssrc 
-		if (nSSRC == 0 && pData != NULL &&  nDataLength > sizeof(rtpHeader) )
+		if (nSSRC == 0 && pData != NULL && nDataLength > sizeof(rtpHeader))
 		{
 			rtpHeaderPtr = (_rtp_header*)pData;
 			nSSRC = rtpHeaderPtr->ssrc;
-		}else 
+		}
+		else
 			rtpHeaderPtr = (_rtp_header*)pData;
 
 		if (!bInitFifoFlag)
 		{
-	        NetDataFifo.InitFifo(MaxLiveingVideoFifoBufferLength);
+			NetDataFifo.InitFifo(MaxLiveingVideoFifoBufferLength);
 			bInitFifoFlag = true;
-	    }
+		}
 
 		if (address && pRtpAddress)
 		{//保证只认第一个IP、端口进来的PS码流 
@@ -981,18 +981,18 @@ int CNetGB28181RtpServer::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClien
 				nSSRC == rtpHeaderPtr->ssrc  // ssrc 相同 
 				)
 			{
- 	         NetDataFifo.push((unsigned char*)pData, nDataLength);
-			 if (nClientPort == 0)
-			 {
-				 strcpy(szClientIP, inet_ntoa(pRtpAddress->sin_addr));
-				 nClientPort = ntohs(((sockaddr_in*)address)->sin_port);
-			 }
+				NetDataFifo.push((unsigned char*)pData, nDataLength);
+				if (nClientPort == 0)
+				{
+					strcpy(szClientIP, inet_ntoa(pRtpAddress->sin_addr));
+					nClientPort = ntohs(((sockaddr_in*)address)->sin_port);
+				}
 			}
- 		}
+		}
 	}
 	else if (netDataCache != NULL && (netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Server || netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Active || netBaseNetType == NetBaseNetType_GB28181TcpPSInputStream))
 	{//TCP 
- 		if (MaxNetDataCacheCount - nNetEnd >= nDataLength)
+		if (MaxNetDataCacheCount - nNetEnd >= nDataLength)
 		{//剩余空间足够
 			memcpy(netDataCache + nNetEnd, pData, nDataLength);
 			netDataCacheLength += nDataLength;
@@ -1017,14 +1017,14 @@ int CNetGB28181RtpServer::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClien
 			else
 			{//没有剩余，那么 首，尾指针都要复位 
 				nNetStart = nNetEnd = netDataCacheLength = 0;
- 			}
+			}
 			memcpy(netDataCache + nNetEnd, pData, nDataLength);
 			netDataCacheLength += nDataLength;
 			nNetEnd += nDataLength;
 		}
- 	}
+	}
 
-	 return 0;
+	return 0;
 }
 
 int CNetGB28181RtpServer::ProcessNetData()
@@ -1035,10 +1035,10 @@ int CNetGB28181RtpServer::ProcessNetData()
 
 	if (m_addStreamProxyStruct.RtpPayloadDataType[0] == 0x34)
 	{//jt1078
-		if(strcmp(m_openRtpServerStruct.jtt1078_version,"2013") == 0 || strcmp(m_openRtpServerStruct.jtt1078_version, "2016") == 0)
-		  SplitterJt1078CacheBuffer();
-		else if(strcmp(m_openRtpServerStruct.jtt1078_version, "2019") == 0)
-		  SplitterJt1078CacheBuffer2019();
+		if (strcmp(m_openRtpServerStruct.jtt1078_version, "2013") == 0 || strcmp(m_openRtpServerStruct.jtt1078_version, "2016") == 0)
+			SplitterJt1078CacheBuffer();
+		else if (strcmp(m_openRtpServerStruct.jtt1078_version, "2019") == 0)
+			SplitterJt1078CacheBuffer2019();
 
 		return 0;
 	}
@@ -1059,7 +1059,7 @@ int CNetGB28181RtpServer::ProcessNetData()
 				//采用rtp头里面的payload进行解包,有效防止用户填写错
 				if (hRtpHandle == 0)
 				{
-					rtpHeadPtr = (_rtp_header*)pData ;
+					rtpHeadPtr = (_rtp_header*)pData;
 					m_gbPayload = rtpHeadPtr->payload;
 				}
 
@@ -1070,7 +1070,7 @@ int CNetGB28181RtpServer::ProcessNetData()
 		}
 
 		//主动发送rtcp 包
-		if (GetTickCount64() - nSendRtcpTime >= 5 * 1000 && psBeiJingLaoChenMuxer == NULL ) // psBeiJingLaoChenMuxer == NULL 时 ，没有回复 /send_app/send_stream 
+		if (GetTickCount64() - nSendRtcpTime >= 5 * 1000 && psBeiJingLaoChenMuxer == NULL) // psBeiJingLaoChenMuxer == NULL 时 ，没有回复 /send_app/send_stream 
 		{
 			nSendRtcpTime = GetTickCount64();
 
@@ -1079,18 +1079,18 @@ int CNetGB28181RtpServer::ProcessNetData()
 			rtcpRR.BuildRtcpPacket(szRtcpSRBuffer, rtcpSRBufferLength, nSSRC);
 
 			XHNetSDK_Sendto(nClientRtcp, szRtcpSRBuffer, rtcpSRBufferLength, pRtpAddress);
- 		}
+		}
 	}
 	else if (netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Server || netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Active || netBaseNetType == NetBaseNetType_GB28181TcpPSInputStream)
 	{//TCP 方式的rtp包读取 
 		while (netDataCacheLength > 2048)
 		{//不能缓存太多buffer,否则造成接收国标流中只有音频流时，会造成延时很大 2048 比较合适 
 			memcpy(rtpHeadOfTCP, netDataCache + nNetStart, 2);
-			if ((rtpHeadOfTCP[0] == 0x24 && rtpHeadOfTCP[1] == 0x00) || (rtpHeadOfTCP[0] == 0x24 && rtpHeadOfTCP[1] == 0x01) || (rtpHeadOfTCP[0] == 0x24 ))
+			if ((rtpHeadOfTCP[0] == 0x24 && rtpHeadOfTCP[1] == 0x00) || (rtpHeadOfTCP[0] == 0x24 && rtpHeadOfTCP[1] == 0x01) || (rtpHeadOfTCP[0] == 0x24))
 			{
-			    nNetStart += 2;
+				nNetStart += 2;
 				memcpy((char*)&nRtpLength, netDataCache + nNetStart, 2);
-				nNetStart += 2; 
+				nNetStart += 2;
 				netDataCacheLength -= 4;
 
 				if (nRtpRtcpPacketType == 0)
@@ -1098,9 +1098,9 @@ int CNetGB28181RtpServer::ProcessNetData()
 			}
 			else
 			{
- 				memcpy((char*)&nRtpLength, netDataCache + nNetStart, 2);
+				memcpy((char*)&nRtpLength, netDataCache + nNetStart, 2);
 				nNetStart += 2;
-			    netDataCacheLength -= 2;
+				netDataCacheLength -= 2;
 
 				if (nRtpRtcpPacketType == 0)
 					nRtpRtcpPacketType = 1;//2个字节方式的
@@ -1110,10 +1110,10 @@ int CNetGB28181RtpServer::ProcessNetData()
 			rtpHeadPtr = (_rtp_header*)(netDataCache + nNetStart);
 
 			nRtpLength = ntohs(nRtpLength);
-			if (nRtpLength > 65535 )
+			if (nRtpLength > 65535)
 			{
 				WriteLog(Log_Debug, "CNetGB28181RtpServer = %X rtp包头长度有误  nClient = %llu ,nRtpLength = %llu", this, nClient, nRtpLength);
- 				DeleteNetRevcBaseClient(nClient);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 				return -1;
 			}
 
@@ -1132,26 +1132,26 @@ int CNetGB28181RtpServer::ProcessNetData()
 					sprintf(m_szShareMediaURL, "/rtp/%X", ntohl(rtpHeadPtr->ssrc));
 				}
 
-				if (nRecvRtpPacketCount < 1000 )
+				if (nRecvRtpPacketCount < 1000)
 				{
-					nRecvRtpPacketCount ++ ;
+					nRecvRtpPacketCount++;
 					if (nRtpLength > nMaxRtpLength)
 					{//记录rtp 包最大长度 
 						nMaxRtpLength = nRtpLength;
 						WriteLog(Log_Debug, "CNetGB28181RtpServer = %X  nClient = %llu , 获取到rtp最大长度 , nMaxRtpLength = %d ", this, nClient, nMaxRtpLength);
 					}
 				}
- 
+
 				//rtp 包长度正常才进行解包
-				if(nRtpLength <= nMaxRtpLength || nRtpLength < 1500 )
-				  RtpDepacket(netDataCache + nNetStart, nRtpLength);
+				if (nRtpLength <= nMaxRtpLength || nRtpLength < 1500)
+					RtpDepacket(netDataCache + nNetStart, nRtpLength);
 				else
 				{//rtp 包长度异常
 					WriteLog(Log_Debug, "CNetGB28181RtpServer = %X rtp包头长度有误  nClient = %llu ,nRtpLength = %llu , nMaxRtpLength = %d ", this, nClient, nRtpLength, nMaxRtpLength);
-					DeleteNetRevcBaseClient(nClient);
+					pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 					return -1;
 				}
- 			}
+			}
 
 			nNetStart += nRtpLength;
 			netDataCacheLength -= nRtpLength;
@@ -1168,14 +1168,14 @@ int CNetGB28181RtpServer::ProcessNetData()
 
 			ProcessRtcpData(szRtcpSRBuffer, rtcpSRBufferLength, 1);
 		}
- 	}
- 	return 0;
+	}
+	return 0;
 }
 
 //rtp 解包
-struct ps_demuxer_notify_t notify_NetGB28181RtpServer = { mpeg_ps_dec_testonstream,};
+struct ps_demuxer_notify_t notify_NetGB28181RtpServer = { mpeg_ps_dec_testonstream, };
 
-bool  CNetGB28181RtpServer::RtpDepacket(unsigned char* pData, int nDataLength) 
+bool  CNetGB28181RtpServer::RtpDepacket(unsigned char* pData, int nDataLength)
 {
 	if (pData == NULL || nDataLength >= 65536 || !bRunFlag.load() || nDataLength < 12)
 		return false;
@@ -1187,39 +1187,39 @@ bool  CNetGB28181RtpServer::RtpDepacket(unsigned char* pData, int nDataLength)
 
 		if (m_addStreamProxyStruct.RtpPayloadDataType[0] == 0x31)
 		{//rtp + PS
-		  rtp_depacket_setpayload(hRtpHandle, m_gbPayload, e_rtpdepkt_st_gbps);
- 		}
+			rtp_depacket_setpayload(hRtpHandle, m_gbPayload, e_rtpdepkt_st_gbps);
+		}
 		else if (m_addStreamProxyStruct.RtpPayloadDataType[0] == 0x32)
 		{//rtp + ES
-			if(m_gbPayload == 98)
-			  rtp_depacket_setpayload(hRtpHandle, m_gbPayload, e_rtpdepkt_st_h264);
-			else if(m_gbPayload == 99)
-			  rtp_depacket_setpayload(hRtpHandle, m_gbPayload, e_rtpdepkt_st_h265);
+			if (m_gbPayload == 98)
+				rtp_depacket_setpayload(hRtpHandle, m_gbPayload, e_rtpdepkt_st_h264);
+			else if (m_gbPayload == 99)
+				rtp_depacket_setpayload(hRtpHandle, m_gbPayload, e_rtpdepkt_st_h265);
 		}
 		else if (m_addStreamProxyStruct.RtpPayloadDataType[0] == 0x33)
 		{//rtp + xhb
 			rtp_depacket_setpayload(hRtpHandle, m_gbPayload, e_rtpdepkt_st_xhb);
 		}
- 
- 		WriteLog(Log_Debug, "CNetGB28181RtpServer = %X ,创建rtp解包 hRtpHandle = %d ,psDeMuxHandle = %d", this, hRtpHandle, psDeMuxHandle);
+
+		WriteLog(Log_Debug, "CNetGB28181RtpServer = %X ,创建rtp解包 hRtpHandle = %d ,psDeMuxHandle = %d", this, hRtpHandle, psDeMuxHandle);
 	}
 
 	if (ABL_MediaServerPort.gb28181LibraryUse == 1)
 	{//自研
-		if(psDeMuxHandle == 0)
-		  ps_demux_start(GB28181_RtpRecv_demux_callback, (void*)this, e_ps_dux_timestamp, &psDeMuxHandle);
+		if (psDeMuxHandle == 0)
+			ps_demux_start(GB28181_RtpRecv_demux_callback, (void*)this, e_ps_dux_timestamp, &psDeMuxHandle);
 	}
 	else
 	{//北京老陈
 		if (psBeiJingLaoChen == NULL)
 		{
 			psBeiJingLaoChen = ps_demuxer_create(on_gb28181_unpacket, this);
-			if(psBeiJingLaoChen != NULL )
-		      ps_demuxer_set_notify(psBeiJingLaoChen, &notify_NetGB28181RtpServer, this);
+			if (psBeiJingLaoChen != NULL)
+				ps_demuxer_set_notify(psBeiJingLaoChen, &notify_NetGB28181RtpServer, this);
 		}
 	}
 
-	if (hRtpHandle > 0 )
+	if (hRtpHandle > 0)
 	{
 		if (m_addStreamProxyStruct.RtpPayloadDataType[0] == 0x31 || m_addStreamProxyStruct.RtpPayloadDataType[0] == 0x32)
 		{//rtp + PS 、 rtp + ES 
@@ -1231,7 +1231,7 @@ bool  CNetGB28181RtpServer::RtpDepacket(unsigned char* pData, int nDataLength)
 					memcpy(szRtpDataArray[nRptDataArrayOrder], pData, nDataLength);
 					nRtpDataArrayLength[nRptDataArrayOrder] = nDataLength;
 				}
-				nRptDataArrayOrder ++;
+				nRptDataArrayOrder++;
 				if (nRptDataArrayOrder >= 3)
 				{//够3帧
 					bCheckRtpTimestamp = true;
@@ -1242,7 +1242,7 @@ bool  CNetGB28181RtpServer::RtpDepacket(unsigned char* pData, int nDataLength)
 
 						for (int i = 0; i < 3; i++)
 						{//把原来缓存的rtp包进行解包
- 							writeRtpHead = (_rtp_header*)szRtpDataArray[i];
+							writeRtpHead = (_rtp_header*)szRtpDataArray[i];
 							nWriteTimeStamp = nStartTimestap;
 							nWriteTimeStamp = htonl(nWriteTimeStamp);
 							memcpy(szRtpDataArray[i] + 4, (char*)&nWriteTimeStamp, sizeof(nWriteTimeStamp));
@@ -1254,24 +1254,24 @@ bool  CNetGB28181RtpServer::RtpDepacket(unsigned char* pData, int nDataLength)
 					else
 					{//正常的时间戳
 						nRtpTimestampType = 2;
- 						for (int i = 0; i < 3; i++)//把原来缓存的rtp包进行解包
- 							rtp_depacket_input(hRtpHandle, szRtpDataArray[i], nRtpDataArrayLength[i]);
-  					}
- 					return true ; //已经把缓存的3帧加入完毕
-  				}
+						for (int i = 0; i < 3; i++)//把原来缓存的rtp包进行解包
+							rtp_depacket_input(hRtpHandle, szRtpDataArray[i], nRtpDataArrayLength[i]);
+					}
+					return true; //已经把缓存的3帧加入完毕
+				}
 			}
- 
+
 			if (nRtpTimestampType == 1)
 			{
-			   writeRtpHead = (_rtp_header*)pData;
-			   nWriteTimeStamp = nStartTimestap;
-			   nWriteTimeStamp = htonl(nWriteTimeStamp);
-			   memcpy(pData + 4, (char*)&nWriteTimeStamp, sizeof(nWriteTimeStamp));
- 			   if(writeRtpHead->mark == 1)
-			      nStartTimestap += 3600;
-			   if(nStartTimestap >= 0xFFFFFFFF - (3600 * 25))
-				   nStartTimestap = 3600 ; //时间戳翻转
-  			}
+				writeRtpHead = (_rtp_header*)pData;
+				nWriteTimeStamp = nStartTimestap;
+				nWriteTimeStamp = htonl(nWriteTimeStamp);
+				memcpy(pData + 4, (char*)&nWriteTimeStamp, sizeof(nWriteTimeStamp));
+				if (writeRtpHead->mark == 1)
+					nStartTimestap += 3600;
+				if (nStartTimestap >= 0xFFFFFFFF - (3600 * 25))
+					nStartTimestap = 3600; //时间戳翻转
+			}
 			if (nRtpTimestampType >= 1)
 				rtp_depacket_input(hRtpHandle, pData, nDataLength);
 #else
@@ -1280,22 +1280,23 @@ bool  CNetGB28181RtpServer::RtpDepacket(unsigned char* pData, int nDataLength)
 		}
 		else if (m_addStreamProxyStruct.RtpPayloadDataType[0] == 0x33)
 		{// rtp + XHB  ，rtp 包头有拓展 
- 		   rtpHeaderXHB = (_rtp_header*)pData;
-		   if (rtpHeaderXHB->x == 1 && nDataLength > 16 )
-		   {
-			   memcpy((unsigned char*)&rtpExDataLength, pData + 12 + 2, sizeof(rtpExDataLength));
-			   rtpExDataLength = ntohs(rtpExDataLength) * 4 ;
+			rtpHeaderXHB = (_rtp_header*)pData;
+			if (rtpHeaderXHB->x == 1 && nDataLength > 16)
+			{
+				memcpy((unsigned char*)&rtpExDataLength, pData + 12 + 2, sizeof(rtpExDataLength));
+				rtpExDataLength = ntohs(rtpExDataLength) * 4;
 
-			   if (nDataLength - (12 + 4 + rtpExDataLength ) > 0  )
-			   {
-			     pData[0] = 0x80;
-			     memmove(pData + 12, pData + (12 + 4 + rtpExDataLength), nDataLength - (12 + 4 + rtpExDataLength));
-			     rtp_depacket_input(hRtpHandle, pData, nDataLength - ( 4 + rtpExDataLength) );
-			   }
-		   }else
-			   rtp_depacket_input(hRtpHandle, pData, nDataLength);
+				if (nDataLength - (12 + 4 + rtpExDataLength) > 0)
+				{
+					pData[0] = 0x80;
+					memmove(pData + 12, pData + (12 + 4 + rtpExDataLength), nDataLength - (12 + 4 + rtpExDataLength));
+					rtp_depacket_input(hRtpHandle, pData, nDataLength - (4 + rtpExDataLength));
+				}
+			}
+			else
+				rtp_depacket_input(hRtpHandle, pData, nDataLength);
 		}
-  	}
+	}
 
 	return true;
 }
@@ -1312,17 +1313,17 @@ void  CNetGB28181RtpServer::ProcessRtcpData(unsigned char* szRtcpData, int nData
 		memcpy(szRtcpDataOverTCP, (unsigned char*)&nRtpLen, sizeof(nRtpLen));
 
 		memcpy(szRtcpDataOverTCP + 2, szRtcpData, nDataLength);
-		XHNetSDK_Write(nClient, szRtcpDataOverTCP, nDataLength + 2 , 1);
+		XHNetSDK_Write(nClient, szRtcpDataOverTCP, nDataLength + 2, ABL_MediaServerPort.nSyncWritePacket);
 	}
 	else if (nRtpRtcpPacketType == 2)
 	{///4字节方式
-	  szRtcpDataOverTCP[0] = '$';
-	  szRtcpDataOverTCP[1] = nChan;
-	  unsigned short nRtpLen = htons(nDataLength);
-	  memcpy(szRtcpDataOverTCP + 2, (unsigned char*)&nRtpLen, sizeof(nRtpLen));
+		szRtcpDataOverTCP[0] = '$';
+		szRtcpDataOverTCP[1] = nChan;
+		unsigned short nRtpLen = htons(nDataLength);
+		memcpy(szRtcpDataOverTCP + 2, (unsigned char*)&nRtpLen, sizeof(nRtpLen));
 
-	  memcpy(szRtcpDataOverTCP + 4, szRtcpData, nDataLength);
-	  XHNetSDK_Write(nClient, szRtcpDataOverTCP, nDataLength + 4, 1);
+		memcpy(szRtcpDataOverTCP + 4, szRtcpData, nDataLength);
+		XHNetSDK_Write(nClient, szRtcpDataOverTCP, nDataLength + 4, ABL_MediaServerPort.nSyncWritePacket);
 	}
 }
 
@@ -1335,7 +1336,7 @@ void GB28181RtpServer_rtp_packet_callback_func_send(_rtp_packet_cb* cb)
 
 	if (pThis->netBaseNetType == NetBaseNetType_NetGB28181RtpServerUDP)
 	{//udp 直接发送 
-	    pThis->SendGBRtpPacketUDP(cb->data, cb->datasize);
+		pThis->SendGBRtpPacketUDP(cb->data, cb->datasize);
 	}
 	else if (pThis->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Server || pThis->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Active || pThis->netBaseNetType == NetBaseNetType_GB28181TcpPSInputStream)
 	{//TCP 需要拼接 包头
@@ -1346,13 +1347,13 @@ void GB28181RtpServer_rtp_packet_callback_func_send(_rtp_packet_cb* cb)
 //创建回复rtp\ps 
 void  CNetGB28181RtpServer::CreateSendRtpByPS()
 {
-	if (strlen(m_openRtpServerStruct.send_app) > 0 && strlen(m_openRtpServerStruct.send_stream_id) > 0 && addThreadPoolFlag == false  )
+	if (strlen(m_openRtpServerStruct.send_app) > 0 && strlen(m_openRtpServerStruct.send_stream_id) > 0 && addThreadPoolFlag == false)
 	{//保证加入线程池只有一次
 		if (m_openRtpServerStruct.detectSendAppStream[0] == 0x30)
 		{//openRtpServer 不检测
-			if (GetTickCount64() - nAddSend_app_streamDatetime > 1000 )
+			if (GetTickCount64() - nAddSend_app_streamDatetime > 1000)
 			{
-				nAddSend_app_streamDatetime = GetTickCount64(); 
+				nAddSend_app_streamDatetime = GetTickCount64();
 
 				char szMediaSource[string_length_1024] = { 0 };
 				sprintf(szMediaSource, "/%s/%s", m_openRtpServerStruct.send_app, m_openRtpServerStruct.send_stream_id);
@@ -1360,15 +1361,16 @@ void  CNetGB28181RtpServer::CreateSendRtpByPS()
 
 				if (pMediaSource != NULL)
 				{//把客户端 加入源流媒体拷贝队列
-					if ((GetTickCount64() - pMediaSource->tsCreateTime > 3000) || (strlen(pMediaSource->m_mediaCodecInfo.szVideoName) > 0 && strlen(pMediaSource->m_mediaCodecInfo.szAudioName) > 0) )
+					if ((GetTickCount64() - pMediaSource->tsCreateTime > 3000) || (strlen(pMediaSource->m_mediaCodecInfo.szVideoName) > 0 && strlen(pMediaSource->m_mediaCodecInfo.szAudioName) > 0))
 					{
-					   addThreadPoolFlag = true;
-					   pMediaSource->AddClientToMap(nClient);
-					   WriteLog(Log_Debug, "CNetGB28181RtpClient = %X ，给 nClient = %llu, 回复码流 %s 成功 ", this, nClient, szMediaSource);
- 					}
-				}else 
+						addThreadPoolFlag = true;
+						pMediaSource->AddClientToMap(nClient);
+						WriteLog(Log_Debug, "CNetGB28181RtpClient = %X ，给 nClient = %llu, 回复码流 %s 成功 ", this, nClient, szMediaSource);
+					}
+				}
+				else
 					WriteLog(Log_Debug, "CNetGB28181RtpClient = %X ，nClient = %llu, 码流 %s 尚未接入，请尽快接入才能回复成功 ", this, nClient, szMediaSource);
-			} 
+			}
 		}
 		else
 		{//接入时已经检测
@@ -1389,14 +1391,14 @@ void  CNetGB28181RtpServer::CreateSendRtpByPS()
 				WriteLog(Log_Debug, "CNetGB28181RtpClient = %X ，nClient = %llu, 码流 %s 尚未接入，请尽快接入才能回复成功 ", this, nClient, szMediaSource);
 		}
 	}
- 
-	if (strlen(m_openRtpServerStruct.send_app) > 0 && strlen(m_openRtpServerStruct.send_stream_id) > 0 &&  mediaCodecInfo.nVideoFrameRate > 0 && hRtpPS == 0 )
+
+	if (strlen(m_openRtpServerStruct.send_app) > 0 && strlen(m_openRtpServerStruct.send_stream_id) > 0 && mediaCodecInfo.nVideoFrameRate > 0 && hRtpPS == 0)
 	{
-		if (strlen(mediaCodecInfo.szVideoName) == 0 )
+		if (strlen(mediaCodecInfo.szVideoName) == 0)
 			nMaxRtpSendVideoMediaBufferLength = 640;
 		else
 			nMaxRtpSendVideoMediaBufferLength = MaxRtpSendVideoMediaBufferLength;
- 
+
 		//创建rtp 
 		int nRet = rtp_packet_start(GB28181RtpServer_rtp_packet_callback_func_send, (void*)this, &hRtpPS);
 		if (nRet != e_rtppkt_err_noerror)
@@ -1488,7 +1490,7 @@ void  CNetGB28181RtpServer::CreateSendRtpByPS()
 			inputPS.handle = hRtpPS;
 			inputPS.ssrc = optionPS.ssrc;
 		}//else if (m_openRtpServerStruct.RtpPayloadDataType[0] == 0x32)
- 	}
+	}
 }
 
 //PS 数据打包成rtp 
@@ -1509,7 +1511,6 @@ void  CNetGB28181RtpServer::SendGBRtpPacketUDP(unsigned char* pRtpData, int nLen
 		XHNetSDK_Sendto(nClient, pRtpData, nLength, pSrcAddress);
 }
 
-
 //国标28181PS码流TCP方式发送 
 void  CNetGB28181RtpServer::GB28181SentRtpVideoData(unsigned char* pRtpVideo, int nDataLength)
 {
@@ -1518,11 +1519,11 @@ void  CNetGB28181RtpServer::GB28181SentRtpVideoData(unsigned char* pRtpVideo, in
 
 	if ((nMaxRtpSendVideoMediaBufferLength - nSendRtpVideoMediaBufferLength < nDataLength + 4) && nSendRtpVideoMediaBufferLength > 0)
 	{//剩余空间不够存储 ,防止出错 
-		nSendRet = XHNetSDK_Write(nClient, szSendRtpVideoMediaBuffer, nSendRtpVideoMediaBufferLength, 1);
+		nSendRet = XHNetSDK_Write(nClient, szSendRtpVideoMediaBuffer, nSendRtpVideoMediaBufferLength, ABL_MediaServerPort.nSyncWritePacket);
 		if (nSendRet != 0)
 		{
 			bRunFlag.exchange(false);
- 			WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, 发送国标RTP码流出错 ，Length = %d ,nSendRet = %d", this, nSendRtpVideoMediaBufferLength, nSendRet);
+			WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, 发送国标RTP码流出错 ，Length = %d ,nSendRet = %d", this, nSendRtpVideoMediaBufferLength, nSendRet);
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 			return;
 		}
@@ -1531,9 +1532,9 @@ void  CNetGB28181RtpServer::GB28181SentRtpVideoData(unsigned char* pRtpVideo, in
 	}
 
 	memcpy((char*)&nCurrentVideoTimestamp, pRtpVideo + 4, sizeof(uint32_t));
-	if (nStartVideoTimestamp != GB28181VideoStartTimestampFlag &&  nStartVideoTimestamp != nCurrentVideoTimestamp && nSendRtpVideoMediaBufferLength > 0)
+	if (nStartVideoTimestamp != GB28181VideoStartTimestampFlag && nStartVideoTimestamp != nCurrentVideoTimestamp && nSendRtpVideoMediaBufferLength > 0)
 	{//产生一帧新的视频 
-		nSendRet = XHNetSDK_Write(nClient, szSendRtpVideoMediaBuffer, nSendRtpVideoMediaBufferLength, 1);
+		nSendRet = XHNetSDK_Write(nClient, szSendRtpVideoMediaBuffer, nSendRtpVideoMediaBufferLength, ABL_MediaServerPort.nSyncWritePacket);
 		if (nSendRet != 0)
 		{
 			WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, 发送国标RTP码流出错 ，Length = %d ,nSendRet = %d", this, nSendRtpVideoMediaBufferLength, nSendRet);
@@ -1569,14 +1570,14 @@ void  CNetGB28181RtpServer::GB28181SentRtpVideoData(unsigned char* pRtpVideo, in
 	{
 		bRunFlag.exchange(false);
 		WriteLog(Log_Debug, "CNetGB28181RtpClient = %X, 非法的国标TCP包头发送方式(必须为 1、2 )nGBRtpTCPHeadType = %d ", this, ABL_MediaServerPort.nGBRtpTCPHeadType);
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 	}
 }
 
 //追加adts信息头
 void  CNetGB28181RtpServer::AddADTSHeadToAAC(unsigned char* szData, int nAACLength)
 {
-	aacDataLength  = nAACLength + 7;
+	aacDataLength = nAACLength + 7;
 	uint8_t profile = 2;
 	uint8_t channel_configuration = mediaCodecInfo.nChannels;
 	aacData[0] = 0xFF; /* 12-syncword */

@@ -24,7 +24,7 @@ using namespace boost;
 
 
 #define     ReadRecordFileInput_MaxPacketCount     1024*1024*3 
-#define     OpenMp4FileToReadWaitMaxMilliSecond    300  //打开mp4文件，500毫秒后 才开始读取文件 
+#define     OpenMp4FileToReadWaitMaxMilliSecond    800  //打开mp4文件，500毫秒后 才开始读取文件 
 //#define     WriteAACFileFlag                       1    //是否保存AAC文件
 
 class CNetClientReadLocalMediaFile : public CNetRevcBase

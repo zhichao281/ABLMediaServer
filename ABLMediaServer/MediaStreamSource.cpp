@@ -7,6 +7,7 @@ QQ      79941308
 E-Mail  79941308@qq.com
 */
 #include "stdafx.h"
+#include "NetRecvBase.h"
 #include "MediaStreamSource.h"
 #ifdef USE_BOOST
 extern boost::shared_ptr<CNetRevcBase> GetNetRevcBaseClient(NETHANDLE CltHandle);
@@ -331,16 +332,16 @@ void  CMediaStreamSource::InitHlsResoure()
 void  CMediaStreamSource::addClientToDisconnectFifo()
 {
 	std::lock_guard<std::mutex> lock(mediaSendMapLock);
-
-	MediaSendMap::iterator it;
 	uint64_t nSendClient = 0;
-	for (it = mediaSendMap.begin(); it != mediaSendMap.end(); ++it)
+	for (auto it = mediaSendMap.begin(); it != mediaSendMap.end();)
 	{
-		nSendClient = (*it).second;
+		nSendClient = (*it).first;
+		mediaSendMap.erase(it++);
 		pDisconnectBaseNetFifo.push((unsigned char*)&nSendClient, sizeof(nSendClient));
 	}
 	mediaSendMap.clear();
 }
+
 
 CMediaStreamSource::~CMediaStreamSource()
 {
@@ -1510,8 +1511,7 @@ bool CMediaStreamSource::PushVideo(unsigned char* szVideo, int nLength, char* sz
 			mp4Client->key = nClient;
 
 			//加入媒体拷贝
-			mediaSendMap.insert(MediaSendMap::value_type(recordMP4, recordMP4));
-
+			mediaSendMap.insert(std::make_pair(recordMP4, mp4Client));
 		}
 	}
 
@@ -1580,11 +1580,11 @@ bool CMediaStreamSource::PushVideo(unsigned char* szVideo, int nLength, char* sz
 		tCopyVideoTime = GetTickCount64();
 	}
 
-	MediaSendMap::iterator it;
+	
 	uint64_t               nClient;
-	for (it = mediaSendMap.begin(); it != mediaSendMap.end(); )
+	for (auto it = mediaSendMap.begin(); it != mediaSendMap.end(); )
 	{
-		auto pClient = GetNetRevcBaseClient((*it).second);
+		auto pClient  = (*it).second;
 		if (pClient != NULL)
 		{
 			//发送播放事件通知，用于播放鉴权
@@ -1628,6 +1628,8 @@ bool CMediaStreamSource::PushVideo(unsigned char* szVideo, int nLength, char* sz
 			{//暂停发送 
 				if (!pClient->m_bPauseFlag)
 					pClient->m_bPauseFlag = true;
+
+				it++;
 				continue;
 			}
 			else
@@ -1703,7 +1705,7 @@ bool CMediaStreamSource::PushVideo(unsigned char* szVideo, int nLength, char* sz
 		}
 		else
 		{//加入失败，证明该链接已经断开 
-			nClient = (*it).second;
+	
 
 			mediaSendMap.erase(it++);
   		}
@@ -1896,11 +1898,11 @@ bool CMediaStreamSource::PushAudio(unsigned char* szAudio, int nLength, char* sz
 		return false;
 	}
 
-	MediaSendMap::iterator it;
+	
 	uint64_t   nClient;
-	for (it = mediaSendMap.begin(); it != mediaSendMap.end();)
+	for (auto it = mediaSendMap.begin(); it != mediaSendMap.end();)
 	{
-		auto pClient = GetNetRevcBaseClient((*it).second);
+		auto pClient = (*it).second;
 		if (pClient != NULL)
 		{
 			//把音频编码信息拷贝给分发对象
@@ -1919,8 +1921,10 @@ bool CMediaStreamSource::PushAudio(unsigned char* szAudio, int nLength, char* sz
 
 			if (m_bPauseFlag)
 			{//暂停发送 
-				if(!pClient->m_bPauseFlag)
-				   pClient->m_bPauseFlag = true;
+				if (!pClient->m_bPauseFlag)
+					pClient->m_bPauseFlag = true;
+
+				it++;
 				continue;
 			}
 			else
@@ -1994,7 +1998,7 @@ bool CMediaStreamSource::PushAudio(unsigned char* szAudio, int nLength, char* sz
 		}
 		else
 		{//加入失败，证明该链接已经断开 
-			nClient = (*it).second;
+
 
 			mediaSendMap.erase(it++);
   		}
@@ -2013,29 +2017,35 @@ bool CMediaStreamSource::AddClientToMap(NETHANDLE nClient)
 	}
 
 
-	MediaSendMap::iterator it;
-	it = mediaSendMap.find(nClient);
+	auto it = mediaSendMap.find(nClient);
 	if (it != mediaSendMap.end())
 	{
-		WriteLog(Log_Debug, "客户端 %llu 已经存在媒体资源 %s 拷贝线程中 ", nClient,m_szURL);
+		WriteLog(Log_Debug, "客户端 %llu 已经存在媒体资源 %s 拷贝线程中 ", nClient, m_szURL);
 		return false;
 	}
 
-	WriteLog(Log_Debug, "把一个客户端 %llu 加入到媒体资源 %s 拷贝线程中 ", nClient, m_szURL);
- 
-    mediaSendMap.insert(MediaSendMap::value_type(nClient, nClient));
-
 	nLastWatchTime = nLastWatchTimeDisconect = GetCurrentSecond();
-	return true;
- }
 
+	auto getClient = GetNetRevcBaseClient(nClient);
+	if (getClient)
+	{
+		mediaSendMap.insert(std::make_pair(nClient, getClient));
+		WriteLog(Log_Debug, "把一个客户端 nClient = %llu 加入到媒体资源 %s 拷贝线程中 ", nClient, m_szURL);
+		return true;
+	}
+	else
+	{
+		WriteLog(Log_Debug, "找不到客户端 nClient = %llu 加入到媒体资源 %s 失败 ", nClient, m_szURL);
+		return false;
+	}
+}
 bool CMediaStreamSource::DeleteClientFromMap(NETHANDLE nClient)
 {
  	std::lock_guard<std::mutex> lock(mediaSendMapLock);
 
 	bool       bRet = false;
-	MediaSendMap::iterator it;
-	it = mediaSendMap.find(nClient);
+
+	auto it = mediaSendMap.find(nClient);
 	if (it != mediaSendMap.end())
 	{
 		mediaSendMap.erase(it);

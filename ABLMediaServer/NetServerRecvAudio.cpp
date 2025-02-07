@@ -16,11 +16,12 @@ extern boost::shared_ptr<CMediaStreamSource> GetMediaStreamSource(char* szURL, b
 extern std::shared_ptr<CMediaStreamSource> CreateMediaStreamSource(char* szURL, uint64_t nClient, MediaSourceType nSourceType, uint32_t nDuration, H265ConvertH264Struct  h265ConvertH264Struct);
 extern std::shared_ptr<CMediaStreamSource> GetMediaStreamSource(char* szURL, bool bNoticeStreamNoFound = false);
 #endif
-
 extern bool                                  DeleteMediaStreamSource(char* szURL);
 extern             bool                      DeleteNetRevcBaseClient(NETHANDLE CltHandle);
 extern             char                      ABL_MediaSeverRunPath[256] ; //当前路径
 extern CMediaFifo                            pDisconnectMediaSource;      //清理断裂媒体源 
+extern MediaServerPort                       ABL_MediaServerPort;
+extern CMediaFifo                            pDisconnectBaseNetFifo; //清理断裂的链接 
 
 CNetServerRecvAudio::CNetServerRecvAudio(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort, char* szShareMediaURL)
 {
@@ -59,7 +60,6 @@ CNetServerRecvAudio::CNetServerRecvAudio(NETHANDLE hServer, NETHANDLE hClient, c
  
 	netBaseNetType = NetBaseNetType_WebSocektRecvAudio;
 
-
 	memset(szSec_WebSocket_Key, 0x00, sizeof(szSec_WebSocket_Key));
 	memset(szSec_WebSocket_Protocol, 0x00, sizeof(szSec_WebSocket_Protocol));
 	strcpy(szSec_WebSocket_Protocol, "Protocol1");
@@ -78,8 +78,6 @@ CNetServerRecvAudio::~CNetServerRecvAudio()
 {
 	bRunFlag.exchange(false);
 	std::lock_guard<std::mutex> lock(NetServerWS_FLVLock);
-
-	XHNetSDK_Disconnect(nClient);
 
 	if (netDataCache)
 	{
@@ -171,7 +169,7 @@ int CNetServerRecvAudio::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClient
 			if (MaxNetDataCacheCount - nNetEnd < nDataLength)
 			{
 				nNetStart = nNetEnd = netDataCacheLength = 0;
-				DeleteNetRevcBaseClient(nClient);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 				return 0;
 			}
  		}
@@ -212,12 +210,12 @@ int CNetServerRecvAudio::ProcessNetData()
 			nCommand = 0x0F & netDataCache[0];
 			if (nCommand == 0x08)
 			{//关闭命令
-				DeleteNetRevcBaseClient(nClient);
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 				nNetStart = nNetEnd = netDataCacheLength = 0;
 			}
 			else if (nCommand == 0x09)
 			{//客户端发送 ping 命令，需要回放 0x0A  {0x8A, 0x80} 
-				XHNetSDK_Write(nClient, szPong, 2, true);
+				XHNetSDK_Write(nClient, szPong, 2, ABL_MediaServerPort.nSyncWritePacket);
 				nNetStart = nNetEnd = netDataCacheLength = 0;
 			}
 			else
@@ -276,7 +274,7 @@ void   CNetServerRecvAudio::ProcessPcmCacheBuffer()
 	if (!(pcmHead.head[0] == 0xab && pcmHead.head[1] == 0xcd && pcmHead.head[2] == 0xef && pcmHead.head[3] == 0xab))
 	{
 		WriteLog(Log_Debug, "ProcessPcmCacheBuffer() = %X  nClient = %llu ,pcm 数据的包头不合法！ ", this, nClient);
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 		return;
 	}
 
@@ -303,7 +301,7 @@ void   CNetServerRecvAudio::ProcessPcmCacheBuffer()
 			  strcmp(audioRegisterStruct.targetAudioCodec, "aac") == 0  || strcmp(audioRegisterStruct.targetAudioCodec, "AAC") == 0   ))
 		{
 			WriteLog(Log_Debug, "ProcessPcmCacheBuffer() = %X  nClient = %llu , 不支持期望的音频编码格式 %s ", this, nClient,audioRegisterStruct.targetAudioCodec);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return;
 		}
 
@@ -315,14 +313,14 @@ void   CNetServerRecvAudio::ProcessPcmCacheBuffer()
 		if (pMediaSouce != NULL)
 		{
 			WriteLog(Log_Debug, "ProcessPcmCacheBuffer() = %X  nClient = %llu , 媒体源 %s 已经存在，重新启用新的名字", this, nClient, m_szShareMediaURL);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return;
 		}
 		pMediaSouce = CreateMediaStreamSource(m_szShareMediaURL, nClient, MediaSourceType_LiveMedia, 0, m_h265ConvertH264Struct);
 		if(pMediaSouce == NULL)
 		{
 			WriteLog(Log_Debug, "ProcessPcmCacheBuffer() = %X  nClient = %llu , 创建媒体源失败 %s ", this, nClient, m_szShareMediaURL);
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return;
 		}
 		WriteLog(Log_Debug, "ProcessPcmCacheBuffer() = %X  nClient = %llu , 创建媒体源成功  %s", this, nClient, m_szShareMediaURL);
@@ -379,7 +377,7 @@ void   CNetServerRecvAudio::ProcessPcmCacheBuffer()
 	else if (pcmHead.nType == 0x03)
 	{
 		WriteLog(Log_Debug, "ProcessPcmCacheBuffer() = %X  nClient = %llu , 接收到音频注销包", this, nClient);
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 		return;
 	}
 
@@ -485,7 +483,7 @@ bool  CNetServerRecvAudio::Create_WS_FLV_Handle()
 		{
  			if (memcmp(netDataCache, "GET ", 4) != 0)
 			{
- 				DeleteNetRevcBaseClient(nClient);
+ 				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			}
 			return -1;
 		}
@@ -512,7 +510,7 @@ bool  CNetServerRecvAudio::Create_WS_FLV_Handle()
 
 		if (!bFindFlvNameFlag)
 		{
- 			DeleteNetRevcBaseClient(nClient);
+ 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 
@@ -529,7 +527,7 @@ bool  CNetServerRecvAudio::Create_WS_FLV_Handle()
 
 		if (strcmp(szConnect, "Upgrade") != 0 || strcmp(szWebSocket, "websocket") != 0 || strlen(szSec_WebSocket_Key) == 0)
 		{
- 			DeleteNetRevcBaseClient(nClient);
+ 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 		}
 		nWebSocketCommStatus = WebSocketCommStatus_ShakeHands;
 
@@ -545,10 +543,10 @@ bool  CNetServerRecvAudio::Create_WS_FLV_Handle()
 
 		memset(szWebSocketResponse, 0x00, sizeof(szWebSocketResponse));
 		sprintf(szWebSocketResponse, "HTTP/1.1 101 Switching Protocol\r\nAccess-Control-Allow-Credentials: true\r\nAccess-Control-Allow-Origin: %s\r\nConnection: Upgrade\r\nDate: Mon, Nov 08 2021 01:52:45 GMT\r\nKeep-Alive: timeout=30, max=100\r\nSec-WebSocket-Accept: %s\r\nServer: %s\r\nUpgrade: websocket\r\nSec_WebSocket_Protocol: %s\r\n\r\n", szOrigin, szResponseClientKey, MediaServerVerson, szSec_WebSocket_Protocol);
-		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)szWebSocketResponse, strlen(szWebSocketResponse), true);
+		nWriteRet = XHNetSDK_Write(nClient, (unsigned char*)szWebSocketResponse, strlen(szWebSocketResponse), ABL_MediaServerPort.nSyncWritePacket);
 		if (nWriteRet != 0)
 		{
-			DeleteNetRevcBaseClient(nClient);
+			pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 			return -1;
 		}
 
@@ -584,8 +582,8 @@ bool  CNetServerRecvAudio::SendWebSocketData(unsigned char* pData, int nDataLeng
 		memset(webSocketHead, 0x00, sizeof(webSocketHead));
 		webSocketHead[0] = 0x81;
 		webSocketHead[1] = nDataLength;
-		nWriteRet = XHNetSDK_Write(nClient, webSocketHead, 2, true);
-		nWriteRet2 = XHNetSDK_Write(nClient, pData, nDataLength, true);
+		nWriteRet = XHNetSDK_Write(nClient, webSocketHead, 2, ABL_MediaServerPort.nSyncWritePacket);
+		nWriteRet2 = XHNetSDK_Write(nClient, pData, nDataLength, ABL_MediaServerPort.nSyncWritePacket);
 	}
 	else if (nDataLength >= 126 && nDataLength <= 0xFFFF)
 	{
@@ -596,8 +594,8 @@ bool  CNetServerRecvAudio::SendWebSocketData(unsigned char* pData, int nDataLeng
 		wsLength16 = nDataLength;
 		wsLength16 = htons(wsLength16);
 		memcpy(webSocketHead + 2, (unsigned char*)&wsLength16, sizeof(wsLength16));
-		nWriteRet = XHNetSDK_Write(nClient, webSocketHead, 4, true);
-		nWriteRet2 = XHNetSDK_Write(nClient, pData, nDataLength, true);
+		nWriteRet = XHNetSDK_Write(nClient, webSocketHead, 4, ABL_MediaServerPort.nSyncWritePacket);
+		nWriteRet2 = XHNetSDK_Write(nClient, pData, nDataLength, ABL_MediaServerPort.nSyncWritePacket);
  	}
 	else if (nDataLength > 0xFFFF)
 	{
@@ -608,8 +606,8 @@ bool  CNetServerRecvAudio::SendWebSocketData(unsigned char* pData, int nDataLeng
 		wsLenght64 = nDataLength;
 		wsLenght64 = htonl(wsLenght64);
 		memcpy(webSocketHead + 2+4, (unsigned char*)&wsLenght64, sizeof(wsLenght64));
-		nWriteRet = XHNetSDK_Write(nClient, webSocketHead, 10, true);
-		nWriteRet2 = XHNetSDK_Write(nClient, pData, nDataLength, true);
+		nWriteRet = XHNetSDK_Write(nClient, webSocketHead, 10, ABL_MediaServerPort.nSyncWritePacket);
+		nWriteRet2 = XHNetSDK_Write(nClient, pData, nDataLength, ABL_MediaServerPort.nSyncWritePacket);
 	}
 	else
 		return false;
@@ -618,7 +616,7 @@ bool  CNetServerRecvAudio::SendWebSocketData(unsigned char* pData, int nDataLeng
 	  return true ;
 	else 
 	{
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 		return false;
 	}
 }

@@ -26,7 +26,7 @@ extern bool                                  DeleteClientMediaStreamSource(uint6
 
 #endif
 
-
+extern MediaServerPort                       ABL_MediaServerPort;
 extern CMediaFifo                            pDisconnectBaseNetFifo; //清理断裂的链接 
 extern int                                   SampleRateArray[] ;
 extern char                                  ABL_MediaSeverRunPath[256]; //当前路径
@@ -381,7 +381,7 @@ int CNetClientRecvFLV::SendFirstRequst()
 			//创建媒体分发资源
 			if (strlen(m_szShareMediaURL) > 0)
 			{
-				pMediaSource = CreateMediaStreamSource(m_szShareMediaURL, hParent, MediaSourceType_LiveMedia,0, m_h265ConvertH264Struct);
+				pMediaSource = CreateMediaStreamSource(m_szShareMediaURL, hParent, MediaSourceType_LiveMedia, 0, m_h265ConvertH264Struct);
 				if (pMediaSource)
 				{
 					pMediaSource->netBaseNetType = netBaseNetType;
@@ -390,17 +390,19 @@ int CNetClientRecvFLV::SendFirstRequst()
 				}
 				else
 				{
-					DeleteNetRevcBaseClient(nClient);
+					pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 					return -1;
 				}
-  			}
+			}
 
 			memcpy(szSubPath, m_rtspStruct.szSrcRtspPullUrl + nPos2, strlen(m_rtspStruct.szSrcRtspPullUrl) - nPos2);
 			sprintf(szRequestFLVFile, "GET %s HTTP/1.1\r\nUser-Agent: %s\r\nAccept: */*\r\nRange: bytes=0-\r\nConnection: keep-alive\r\nHost: 190.15.240.11:8088\r\nIcy-MetaData: 1\r\n\r\n", szSubPath, MediaServerVerson);
-			XHNetSDK_Write(nClient, (unsigned char*)szRequestFLVFile, strlen(szRequestFLVFile), 1);
-		}else
+			XHNetSDK_Write(nClient, (unsigned char*)szRequestFLVFile, strlen(szRequestFLVFile), ABL_MediaServerPort.nSyncWritePacket);
+		}
+		else
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
-	}else
+	}
+	else
 		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 
 #ifdef  SaveNetDataToFlvFile

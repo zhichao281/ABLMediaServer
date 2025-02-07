@@ -26,6 +26,9 @@ public:
    virtual int   SendFirstRequst() = 0;//发送第一个请求
    virtual bool  RequestM3u8File() = 0 ;
 
+#ifdef  OS_System_Windows
+   bool                   ftruncate(char* szFileName, DWORD nFileSize);
+#endif
    uint64_t               nRecordDateTime;//录像文件秒数
    bool                   bCreateNewRecordFile;//创建新的录像文件
    int64_t                oldDTS;//上一次dts值，用于判断是否读取录像文件完毕 

@@ -543,7 +543,7 @@ int CNetClientFFmpegRecv::ProcessNetData()
 	{//文件读取出错 
 		av_strerror(nReadRet, szFFmpegErrorMsg, sizeof(szFFmpegErrorMsg));
 		WriteLog(Log_Debug, "ProcessNetData 读取完毕 ,nClient = %llu \r\n%s", nClient, szFFmpegErrorMsg);
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 		return -1;
 	}
 	nOldAVType = nAVType;
@@ -600,7 +600,7 @@ bool  CNetClientFFmpegRecv::ReaplyFileSeek(uint64_t nTimestamp)
 		WriteLog(Log_Debug, "ReaplyFileSeek 拖动时间戳超出文件最大时长 ,nClient = %llu ,nTimestamp = %llu ,duration = %d ", nClient, nTimestamp, duration );
 		return false; 
 	}
-	int nRet = av_seek_frame(pFormatCtx2, -1, nTimestamp * 1000000, AVSEEK_FLAG_BACKWARD);
+	int nRet = av_seek_frame(pFormatCtx2, -1, nTimestamp * AV_TIME_BASE + pFormatCtx2->start_time, AVSEEK_FLAG_BACKWARD);
 
 	bRestoreVideoFrameFlag = bRestoreAudioFrameFlag = true; //因为有拖到播放，需要重新计算已经播放视频，音频帧总数 
 	WriteLog(Log_Debug, "ReaplyFileSeek 拖动播放 ,nClient = %llu ,nTimestamp = %llu ,nRet = %d ", nClient, nTimestamp, nRet);

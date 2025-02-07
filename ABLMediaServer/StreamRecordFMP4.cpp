@@ -51,9 +51,9 @@ static int StreamRecordFMP4_hls_segment(void* param, const void* data, size_t by
 	CStreamRecordFMP4* pNetServerHttpMp4 = (CStreamRecordFMP4*)param;
 	if (pNetServerHttpMp4 == NULL)
 		return 0;
-
-	if (!pNetServerHttpMp4->bCheckHttpMP4Flag || !pNetServerHttpMp4->bRunFlag.load())
-		return -1;
+	
+	if(!pNetServerHttpMp4->bCheckHttpMP4Flag || !pNetServerHttpMp4->bRunFlag.load())
+		return -1 ;
 
 	if (bytes > 0)
 	{
@@ -63,7 +63,7 @@ static int StreamRecordFMP4_hls_segment(void* param, const void* data, size_t by
 	return 0;
 }
 
-CStreamRecordFMP4::CStreamRecordFMP4(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort, char* szShareMediaURL)
+CStreamRecordFMP4::CStreamRecordFMP4(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort,char* szShareMediaURL)
 {
 	bCreateNewRecordFile = false;
 	nRecordDateTime = GetTickCount64();
@@ -106,7 +106,7 @@ CStreamRecordFMP4::CStreamRecordFMP4(NETHANDLE hServer, NETHANDLE hClient, char*
 
 CStreamRecordFMP4::~CStreamRecordFMP4()
 {
-	bCheckHttpMP4Flag = false;
+	bCheckHttpMP4Flag = false ;
 	bRunFlag.exchange(false);
 	std::lock_guard<std::mutex> lock(mediaMP4MapLock);
 
@@ -124,7 +124,11 @@ CStreamRecordFMP4::~CStreamRecordFMP4()
 	{
  		fclose(fWriteMP4);
 		fWriteMP4 = NULL;
-
+#ifdef  OS_System_Windows
+		ftruncate(szFileName, nWriteRecordByteSize);
+#else
+		truncate(szFileName, nWriteRecordByteSize);
+#endif 
 		//完成一个fmp4切片文件通知 
 		if (ABL_MediaServerPort.hook_enable == 1 )
 		{
@@ -162,7 +166,7 @@ int CStreamRecordFMP4::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char
 
 int CStreamRecordFMP4::PushAudio(uint8_t* pAudioData, uint32_t nDataLength, char* szAudioCodec, int nChannels, int SampleRate)
 {
-	if (ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag.load() || !(strcmp(szAudioCodec, "AAC") == 0 || strcmp(szAudioCodec, "MP3") == 0))
+	if (ABL_MediaServerPort.nEnableAudio == 0 || !bRunFlag.load() || !(strcmp(szAudioCodec,"AAC") == 0 || strcmp(szAudioCodec, "MP3") == 0))
 		return -1;
 
 	m_audioFifo.push(pAudioData, nDataLength);
@@ -463,7 +467,6 @@ bool  CStreamRecordFMP4::VideoFrameToFMP4File(unsigned char* szVideoData, int nL
 	return true;
 }
 
-
 bool CStreamRecordFMP4::writeTSBufferToMP4File(unsigned char* pTSData, int nLength)
 {
 	bool bUpdateFlag = false;
@@ -473,27 +476,31 @@ bool CStreamRecordFMP4::writeTSBufferToMP4File(unsigned char* pTSData, int nLeng
 		fflush(fWriteMP4);
 		nWriteRecordByteSize += nLength;
 
-		if (ABL_MediaServerPort.recordFileCutType == 1)
-		{//按照服务器本地时间长达到 fileSecond 这个参数的秒数量
-			if ((GetTickCount64() - nRecordDateTime) / 1000 >= ABL_MediaServerPort.fileSecond)
-			{
-				bCreateNewRecordFile = true;
-				nRecordDateTime = GetTickCount64();
-			}
-		}
-		else
-		{//根据录像文件的视频帧总数量 和 视频帧速度计算出录像时长达到 fileSecond 这个参数的秒数量
-			if ((nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate) >= ABL_MediaServerPort.fileSecond)
-				bCreateNewRecordFile = true;
-		}
-
-		if (bCreateNewRecordFile == true)
+	if (ABL_MediaServerPort.recordFileCutType == 1)
+	{//按照服务器本地时间长达到 fileSecond 这个参数的秒数量
+		if ((GetTickCount64() - nRecordDateTime) / 1000 >= ABL_MediaServerPort.fileSecond)
 		{
-			fclose(fWriteMP4);
-			bCreateNewRecordFile = false;
+			bCreateNewRecordFile = true;
+			nRecordDateTime = GetTickCount64();
+		}
+	}
+	else
+	{//根据录像文件的视频帧总数量 和 视频帧速度计算出录像时长达到 fileSecond 这个参数的秒数量
+		if ((nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate) >= ABL_MediaServerPort.fileSecond)
+			bCreateNewRecordFile = true; 
+	}
 
+	if (bCreateNewRecordFile == true )
+	{
+			fclose(fWriteMP4);
+            bCreateNewRecordFile = false ;
+#ifdef  OS_System_Windows
+			ftruncate(szFileName, nWriteRecordByteSize);
+#else
+			truncate(szFileName, nWriteRecordByteSize);
+#endif 		
 			//完成一个fmp4切片文件通知 
-			if (ABL_MediaServerPort.hook_enable == 1)
+			if (ABL_MediaServerPort.hook_enable == 1 )
 			{
 				MessageNoticeStruct msgNotice;
 				msgNotice.nClient = NetBaseNetType_HttpClient_Record_mp4;
@@ -507,15 +514,15 @@ bool CStreamRecordFMP4::writeTSBufferToMP4File(unsigned char* pTSData, int nLeng
 			SYSTEMTIME st;
 			GetLocalTime(&st);
 			sprintf(szFileName, "%s%04d%02d%02d%02d%02d%02d.mp4", szRecordPath, st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
-			sprintf(szFileNameOrder, "%04d%02d%02d%02d%02d%02d.mp4", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);;
+		    sprintf(szFileNameOrder,"%04d%02d%02d%02d%02d%02d.mp4", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);;
 			sprintf(szStartDateTime, "%04d%02d%02d%02d%02d%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);;
 #else
 			time_t now;
 			time(&now);
-			struct tm* local;
+			struct tm *local;
 			local = localtime(&now);
-			sprintf(szFileName, "%s%04d%02d%02d%02d%02d%02d.mp4", szRecordPath, local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
-			sprintf(szFileNameOrder, "%04d%02d%02d%02d%02d%02d.mp4", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);;
+			sprintf(szFileName, "%s%04d%02d%02d%02d%02d%02d.mp4", szRecordPath, local->tm_year + 1900, local->tm_mon+1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+		    sprintf(szFileNameOrder, "%04d%02d%02d%02d%02d%02d.mp4", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);;
 			sprintf(szStartDateTime, "%04d%02d%02d%02d%02d%02d", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);;
 #endif
 
@@ -523,7 +530,7 @@ bool CStreamRecordFMP4::writeTSBufferToMP4File(unsigned char* pTSData, int nLeng
 			if (pRecord)
 			{
 				nStartDateTime = GetCurrentSecond();
-				bUpdateFlag = pRecord->UpdateExpireRecordFile(szFileName);
+ 				bUpdateFlag = pRecord->UpdateExpireRecordFile(szFileName);
 				if (bUpdateFlag)
 				{
 					fWriteMP4 = fopen(szFileName, "r+b");
@@ -537,12 +544,12 @@ bool CStreamRecordFMP4::writeTSBufferToMP4File(unsigned char* pTSData, int nLeng
 				{
 					fwrite(s_packet, 1, s_packetLength, fWriteMP4);
 					fflush(fWriteMP4);
-					nWriteRecordByteSize += s_packetLength;
+					nWriteRecordByteSize += s_packetLength ;
 				}
 				pRecord->AddRecordFile(szFileNameOrder);
 				WriteLog(Log_Debug, "CStreamRecordFMP4 = %X %s 增加录像文件 nClient = %llu ,nMediaClient = %llu szFileNameOrder %s ", this, m_szShareMediaURL, nClient, nMediaClient, szFileNameOrder);
-			}
-
+ 			}				
+ 
 			nCreateDateTime = GetTickCount64();
 		}
 
