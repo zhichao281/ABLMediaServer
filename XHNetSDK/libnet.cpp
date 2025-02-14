@@ -757,7 +757,7 @@ LIBNET_API int32_t XHNetSDK_Connect(int8_t* remoteip,
 		if (bSSLFlag)
 		{//客户端连接需要SSL
 			char  path[1024] = { 0 };
-			sprintf_s(path, sizeof(path), "%sserver.pem", szXHNetSDK_CurrentPath);
+			snprintf(path, sizeof(path), "%sserver.pem", szXHNetSDK_CurrentPath);
 			m_context.load_verify_file(path);
 		}
 

@@ -3,7 +3,7 @@
 // 这还将影响 IntelliSense 性能，包括代码完成和许多代码浏览功能。
 // 但是，如果此处列出的文件中的任何一个在生成之间有更新，它们全部都将被重新编译。
 // 请勿在此处添加要频繁更新的文件，这将使得性能优势无效。
-
+#if (defined _WIN32 || defined _WIN64)
 #pragma once
 #define _WIN32_WINNT 0x0A00 
 
@@ -23,3 +23,4 @@
 
 
 
+#endif

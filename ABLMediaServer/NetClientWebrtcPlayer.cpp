@@ -95,7 +95,7 @@ CNetClientWebrtcPlayer::CNetClientWebrtcPlayer(NETHANDLE hServer, NETHANDLE hCli
 
 		m_AudioDecder = FFmpegAudioDecoderAPI::CreateDecoder(streamInfo);
 		// 处理音频数据的线程函数
-		ABL::ThreadPool::getInstance().append([&]()
+	/*	ABL::ThreadPool::getInstance().append([&]()
 			{
 				stopThread.store(false);
 				while (!stopThread.load())
@@ -133,7 +133,7 @@ CNetClientWebrtcPlayer::CNetClientWebrtcPlayer(NETHANDLE hServer, NETHANDLE hCli
 					}
 					continue;
 				}
-			});
+			});*/
 
 
 	}

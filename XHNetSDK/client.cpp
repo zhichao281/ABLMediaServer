@@ -734,7 +734,7 @@ void client::handle_connect_timeout(const boost::system::error_code& ec)
 #include "identifier_generator.h"
 #include <malloc.h>
 #include <iostream>
-
+#include <cstdio>
 
 client::client(asio::io_context& ioc,
 	asio::ssl::context& context,
@@ -1024,7 +1024,7 @@ int32_t client::connect(int8_t* remoteip,
 	else
 	{//SSL 
 		char szPort[256] = { 0 };
-		sprintf_s(szPort, sizeof(szPort), "%d", remoteport);
+		snprintf(szPort, sizeof(szPort), "%d", remoteport);
 		asio::ip::tcp::resolver::results_type endpoints = resolver.resolve((char*)remoteip, szPort);
 
 		//set callback function

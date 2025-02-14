@@ -296,7 +296,7 @@ void server::init_SSL()
 
 	char  path[1024] = { 0 };
 
-	sprintf_s(path, sizeof(path), "%sserver.pem", szXHNetSDK_CurrentPath);
+	snprintf(path, sizeof(path), "%sserver.pem", szXHNetSDK_CurrentPath);
 
 
 	m_context.use_certificate_chain_file(path);

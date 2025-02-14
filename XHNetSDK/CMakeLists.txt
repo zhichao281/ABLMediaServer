@@ -6,17 +6,23 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 添加选项，用于选择生成动态库、静态库或可执行文件
-option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
-option(BUILD_STATIC_LIBS "Build using static libraries" ON)
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+option(BUILD_STATIC_LIBS "Build using static libraries" OFF)
 option(BUILD_EXECUTABLE "Build executable" OFF)
+option(BUILD_OPENSSL "Build SSL" ON)
 
-# 含 当前 文件夹下的头文件目录
-include_directories(${CMAKE_SOURCE_DIR})
-# 包含 asio 文件夹下的头文件目录
-include_directories(${CMAKE_SOURCE_DIR}/asio/include)
+add_definitions(-DASIO_STANDALONE)
 
-# 包含 thread_pool 文件夹下的头文件目录
-include_directories(${CMAKE_SOURCE_DIR}/thread_pool)
+include_directories(
+        ${CMAKE_CURRENT_SOURCE_DIR}           # 含 当前 文件夹下的头文件目录
+        ${CMAKE_CURRENT_SOURCE_DIR}/asio/include   # 包含 asio 文件夹下的头文件目录
+        ${CMAKE_CURRENT_SOURCE_DIR}/asio/include/asio
+        ${CMAKE_CURRENT_SOURCE_DIR}/thread_pool
+        ${CMAKE_CURRENT_SOURCE_DIR}/openssl/include/openssl
+        ${CMAKE_CURRENT_SOURCE_DIR}/openssl/include/
+  )
+
+
 
 # 设置项目的目标
 FILE(GLOB XHNetSDK_SRC_LIST
@@ -28,13 +34,17 @@ FILE(GLOB XHNetSDK_SRC_LIST
 # 设置安装路径
 if (UNIX AND NOT APPLE)
     if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
-        set(INSTALL_BIN_DIR "${CMAKE_CURRENT_LIST_DIR}/../bin/arm64" CACHE PATH "exe和dll的安装路径")
+        set(INSTALL_BIN_DIR "${CMAKE_CURRENT_LIST_DIR}/bin/arm64" CACHE PATH "exe和dll的安装路径")
         set(INSTALL_LIB_DIR "${CMAKE_CURRENT_LIST_DIR}/../bin/arm64" CACHE PATH "lib的安装路径")
+        set(SYSTEM_NAME_LOWER "arm64")   # 自定义系统名称
     else()
-        set(INSTALL_BIN_DIR "${CMAKE_CURRENT_LIST_DIR}/../bin/linux86" CACHE PATH "exe和dll的安装路径")
-        set(INSTALL_LIB_DIR "${CMAKE_CURRENT_LIST_DIR}/../bin/linux86" CACHE PATH "lib的安装路径")
+        set(INSTALL_BIN_DIR "${CMAKE_CURRENT_LIST_DIR}/bin/linux86" CACHE PATH "exe和dll的安装路径")
+        set(INSTALL_LIB_DIR "${CMAKE_CURRENT_LIST_DIR}/bin/linux86" CACHE PATH "lib的安装路径")
+        set(SYSTEM_NAME_LOWER "linux86")   # 自定义系统名称
     endif()
 endif()
+
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/openssl/lib/${SYSTEM_NAME_LOWER})
 
 # 设置输出目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${INSTALL_BIN_DIR})
@@ -58,7 +68,7 @@ endif()
 # 链接当前文件夹下的 asio 头文件目录
 target_include_directories(${PROJECT_NAME} PRIVATE asio/include)
 
-target_link_libraries(${PROJECT_NAME} pthread)
+target_link_libraries(${PROJECT_NAME} libssl.a libcrypto.a pthread)
 
 # 安装目标文件到 Bin 文件夹中
 install(TARGETS ${PROJECT_NAME}
