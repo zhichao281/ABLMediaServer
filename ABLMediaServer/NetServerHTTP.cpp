@@ -878,7 +878,9 @@ bool CNetServerHTTP::ResponseHttpRequest(char* szModem, char* httpURL, char* req
 	{
 		if (strcmp(szConnection, "close") == 0 || strcmp(szConnection, "Close") == 0 || ABL_MediaServerPort.httqRequstClose == 1)
 		{
-			Sleep(500);
+			//Sleep(500);
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 		}
 	}

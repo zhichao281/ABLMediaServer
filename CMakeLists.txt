@@ -1,20 +1,19 @@
 cmake_minimum_required(VERSION 3.12)
 
 project(ABLMediaServer)
+# 判断是否启用了 USE_BOOST 选项
+option(USE_BOOST "Use Boost library" OFF)
 
 # 设置编译选项
 set(CMAKE_CXX_STANDARD 11)
 #set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O0 -Wall")
-
-# 添加宏定义
-add_definitions(-DFFMPEG6)
-
 # 允许相对路径
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
-# 判断是否启用了 USE_BOOST 选项
-option(USE_BOOST "Use Boost library" OFF)
+
+# 添加宏定义
+add_definitions(-DFFMPEG6)
 
 if(USE_BOOST)
     add_definitions(-DUSE_BOOST)
@@ -39,7 +38,7 @@ if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
     # 设置链接目录
 set(LIBRARY_DIR
     ${CMAKE_CURRENT_SOURCE_DIR}/bin/linux86
-    ${CMAKE_CURRENT_SOURCE_DIR}/media-server-master/${SYSTEM_NAME_LOWER}
+    ${CMAKE_CURRENT_SOURCE_DIR}/media-server-master/${CMAKE_SYSTEM_PROCESSOR}
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/linux86
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd/boost/linux86
 )

@@ -1,27 +1,27 @@
 /*
-¹¦ÄÜ£º
-		¸ßĞÔÄÜÁ÷Ã½Ìå·şÎñÆ÷(ABLMediaServer)Ö÷¿ò¼Ü
+åŠŸèƒ½ï¼š
+		é«˜æ€§èƒ½æµåª’ä½“æœåŠ¡å™¨(ABLMediaServer)ä¸»æ¡†æ¶
 
-		Ã½ÌåÊäÈë·½Ê½             Ö§³ÖÒôÊÓÆµ¸ñÊ½
+		åª’ä½“è¾“å…¥æ–¹å¼             æ”¯æŒéŸ³è§†é¢‘æ ¼å¼
 ----------------------------------------------------------------------------------------
-				1¡¢rtsp          ÊÓÆµH264¡¢H265£¬ÒôÆµAAC¡¢G711A¡¢G711U)
-				2¡¢rtmp          ÊÓÆµH264£¬      ÒôÆµAAC¡¢G711A¡¢G711U)
-				3¡¢¹ú±êGB28181   ÊÓÆµH264¡¢H265£¬ÒôÆµAAC¡¢G711A¡¢G711U)
-				4¡¢WebRTC        ÊÓÆµH264¡¢H265£¬ÒôÆµAAC¡¢G711A¡¢G711U)
-				5¡¢
-		Ã½ÌåÊäÊä³ö·½Ê½
+				1ã€rtsp          è§†é¢‘H264ã€H265ï¼ŒéŸ³é¢‘AACã€G711Aã€G711U)
+				2ã€rtmp          è§†é¢‘H264ï¼Œ      éŸ³é¢‘AACã€G711Aã€G711U)
+				3ã€å›½æ ‡GB28181   è§†é¢‘H264ã€H265ï¼ŒéŸ³é¢‘AACã€G711Aã€G711U)
+				4ã€WebRTC        è§†é¢‘H264ã€H265ï¼ŒéŸ³é¢‘AACã€G711Aã€G711U)
+				5ã€
+		åª’ä½“è¾“è¾“å‡ºæ–¹å¼
 ----------------------------------------------------------------------------------------
-				1¡¢rtsp          ÊÓÆµH264¡¢H265£¬ÒôÆµAAC¡¢G711A¡¢G711U)
-				2¡¢rtmp          ÊÓÆµH264¡¢H265£¬ÒôÆµAAC¡¢G711A¡¢G711U)
-				3¡¢http-flv      ÊÓÆµH264¡¢H265£¬ÒôÆµAAC¡¢G711A¡¢G711U)
-				4¡¢m3u8          ÊÓÆµH264¡¢H265£¬ÒôÆµAAC¡¢G711A¡¢G711U)
-				5¡¢fmp4          ÊÓÆµH264¡¢H265£¬ÒôÆµAAC¡¢G711A¡¢G711U)
-				6¡¢¹ú±êGB28181   ÊÓÆµH264¡¢H265£¬ÒôÆµAAC¡¢G711A¡¢G711U)
-				7¡¢WebRTC        ÊÓÆµH264¡¢H265£¬ÒôÆµAAC¡¢G711A¡¢G711U)
-				8¡¢ws-flv        ÊÓÆµH264¡¢H265£¬ÒôÆµAAC¡¢G711A¡¢G711U)
+				1ã€rtsp          è§†é¢‘H264ã€H265ï¼ŒéŸ³é¢‘AACã€G711Aã€G711U)
+				2ã€rtmp          è§†é¢‘H264ã€H265ï¼ŒéŸ³é¢‘AACã€G711Aã€G711U)
+				3ã€http-flv      è§†é¢‘H264ã€H265ï¼ŒéŸ³é¢‘AACã€G711Aã€G711U)
+				4ã€m3u8          è§†é¢‘H264ã€H265ï¼ŒéŸ³é¢‘AACã€G711Aã€G711U)
+				5ã€fmp4          è§†é¢‘H264ã€H265ï¼ŒéŸ³é¢‘AACã€G711Aã€G711U)
+				6ã€å›½æ ‡GB28181   è§†é¢‘H264ã€H265ï¼ŒéŸ³é¢‘AACã€G711Aã€G711U)
+				7ã€WebRTC        è§†é¢‘H264ã€H265ï¼ŒéŸ³é¢‘AACã€G711Aã€G711U)
+				8ã€ws-flv        è§†é¢‘H264ã€H265ï¼ŒéŸ³é¢‘AACã€G711Aã€G711U)
 
-ÈÕÆÚ    2021-04-02
-×÷Õß    ÂŞ¼ÒĞÖµÜ
+æ—¥æœŸ    2021-04-02
+ä½œè€…    ç½—å®¶å…„å¼Ÿ
 QQ      79941308
 E-Mail  79941308@qq.com
 */
@@ -36,43 +36,43 @@ typedef boost::unordered_map<NETHANDLE, CNetRevcBase_ptr>        CNetRevcBase_pt
 CNetRevcBase_ptrMap                                              xh_ABLNetRevcBaseMap;
 std::mutex                                                       ABL_CNetRevcBase_ptrMapLock;
 CNetBaseThreadPool* NetBaseThreadPool;
-CNetBaseThreadPool* RecordReplayThreadPool;//Â¼Ïñ»Ø·ÅÏß³Ì³Ø
-CNetBaseThreadPool* MessageSendThreadPool;//ÏûÏ¢·¢ËÍÏß³Ì³Ø
+CNetBaseThreadPool* RecordReplayThreadPool;//å½•åƒå›æ”¾çº¿ç¨‹æ± 
+CNetBaseThreadPool* MessageSendThreadPool;//æ¶ˆæ¯å‘é€çº¿ç¨‹æ± 
 
-/* Ã½ÌåÊı¾İ´æ´¢ -------------------------------------------------------------------------------------*/
+/* åª’ä½“æ•°æ®å­˜å‚¨ -------------------------------------------------------------------------------------*/
 typedef boost::shared_ptr<CMediaStreamSource>                    CMediaStreamSource_ptr;
 typedef boost::unordered_map<string, CMediaStreamSource_ptr>     CMediaStreamSource_ptrMap;
 CMediaStreamSource_ptrMap                                        xh_ABLMediaStreamSourceMap;
 std::mutex                                                       ABL_CMediaStreamSourceMapLock;
 
-/* Â¼ÏñÎÄ¼ş´æ´¢ -------------------------------------------------------------------------------------*/
+/* å½•åƒæ–‡ä»¶å­˜å‚¨ -------------------------------------------------------------------------------------*/
 typedef boost::shared_ptr<CRecordFileSource>                     CRecordFileSource_ptr;
 typedef boost::unordered_map<string, CRecordFileSource_ptr>      CRecordFileSource_ptrMap;
 CRecordFileSource_ptrMap                                         xh_ABLRecordFileSourceMap;
 std::mutex                                                       ABL_CRecordFileSourceMapLock;
 
-/* Í¼Æ¬ÎÄ¼ş´æ´¢ -------------------------------------------------------------------------------------*/
+/* å›¾ç‰‡æ–‡ä»¶å­˜å‚¨ -------------------------------------------------------------------------------------*/
 typedef boost::shared_ptr<CPictureFileSource>                    CPictureFileSource_ptr;
 typedef boost::unordered_map<string, CPictureFileSource_ptr>     CPictureFileSource_ptrMap;
 CPictureFileSource_ptrMap                                        xh_ABLPictureFileSourceMap;
 std::mutex                                                       ABL_CPictureFileSourceMapLock;
 
-uint64_t                                                         ArrayAddMutePacketList[8192];//Ôö¼Ó¾²Òô°üµÄÁĞ±í
-uint64_t                                                         nMaxAddMuteListNumber = 0; //×îºóÒ»¸ö¾²Òô¶ÔÏóËùÔÚµÄĞòºÅ
+uint64_t                                                         ArrayAddMutePacketList[8192];//å¢åŠ é™éŸ³åŒ…çš„åˆ—è¡¨
+uint64_t                                                         nMaxAddMuteListNumber = 0; //æœ€åä¸€ä¸ªé™éŸ³å¯¹è±¡æ‰€åœ¨çš„åºå·
 
 volatile bool                                                    ABL_bMediaServerRunFlag = true;
-volatile bool                                                    ABL_bExitMediaServerRunFlag = false; //ÍË³ö´¦ÀíÏß³Ì±êÖ¾ 
-CMediaFifo                                                       pDisconnectBaseNetFifo;             //ÇåÀí¶ÏÁÑµÄÁ´½Ó 
-CMediaFifo                                                       pReConnectStreamProxyFifo;          //ĞèÒªÖØĞÂÁ¬½Ó´úÀíID 
-CMediaFifo                                                       pMessageNoticeFifo;          //ÏûÏ¢Í¨ÖªFIFO
-CMediaFifo                                                       pNetBaseObjectFifo;          //´æ´¢»ùÀà¶ÔÏóID
-CMediaFifo                                                       pDisconnectMediaSource;      //ÇåÀí¶ÏÁÑÃ½ÌåÔ´ 
-char                                                             ABL_MediaSeverRunPath[256] = { 0 }; //µ±Ç°Â·¾¶
-char                                                             ABL_wwwMediaPath[256] = { 0 }; //www ×ÓÂ·¾¶
-uint64_t                                                         ABL_nBaseCookieNumber = 100; //Cookie ĞòºÅ 
+volatile bool                                                    ABL_bExitMediaServerRunFlag = false; //é€€å‡ºå¤„ç†çº¿ç¨‹æ ‡å¿— 
+CMediaFifo                                                       pDisconnectBaseNetFifo;             //æ¸…ç†æ–­è£‚çš„é“¾æ¥ 
+CMediaFifo                                                       pReConnectStreamProxyFifo;          //éœ€è¦é‡æ–°è¿æ¥ä»£ç†ID 
+CMediaFifo                                                       pMessageNoticeFifo;          //æ¶ˆæ¯é€šçŸ¥FIFO
+CMediaFifo                                                       pNetBaseObjectFifo;          //å­˜å‚¨åŸºç±»å¯¹è±¡ID
+CMediaFifo                                                       pDisconnectMediaSource;      //æ¸…ç†æ–­è£‚åª’ä½“æº 
+char                                                             ABL_MediaSeverRunPath[256] = { 0 }; //å½“å‰è·¯å¾„
+char                                                             ABL_wwwMediaPath[256] = { 0 }; //www å­è·¯å¾„
+uint64_t                                                         ABL_nBaseCookieNumber = 100; //Cookie åºå· 
 char                                                             ABL_szLocalIP[128] = { 0 };
 uint64_t                                                         ABL_nPrintCheckNetRevcBaseClientDisconnect = 0;
-unsigned int                                                     ABL_nCurrentSystemCpuCount = 4;//µ±Ç°ÏµÍ³cpuÎïÀíºËĞÄÊı 
+unsigned int                                                     ABL_nCurrentSystemCpuCount = 4;//å½“å‰ç³»ç»Ÿcpuç‰©ç†æ ¸å¿ƒæ•° 
 CNetRevcBase_ptr                                                 GetNetRevcBaseClient(NETHANDLE CltHandle);
 bool 	                                                         ABL_bCudaFlag = false;
 int                                                              ABL_nCudaCount = 0;
@@ -90,43 +90,43 @@ typedef std::unordered_map<NETHANDLE, CNetRevcBase_ptr>        CNetRevcBase_ptrM
 CNetRevcBase_ptrMap                                              xh_ABLNetRevcBaseMap;
 std::mutex                                                       ABL_CNetRevcBase_ptrMapLock;
 CNetBaseThreadPool* NetBaseThreadPool;
-CNetBaseThreadPool* RecordReplayThreadPool;//Â¼Ïñ»Ø·ÅÏß³Ì³Ø
-CNetBaseThreadPool* MessageSendThreadPool;//ÏûÏ¢·¢ËÍÏß³Ì³Ø
+CNetBaseThreadPool* RecordReplayThreadPool;//å½•åƒå›æ”¾çº¿ç¨‹æ± 
+CNetBaseThreadPool* MessageSendThreadPool;//æ¶ˆæ¯å‘é€çº¿ç¨‹æ± 
 
-/* Ã½ÌåÊı¾İ´æ´¢ -------------------------------------------------------------------------------------*/
+/* åª’ä½“æ•°æ®å­˜å‚¨ -------------------------------------------------------------------------------------*/
 typedef std::shared_ptr<CMediaStreamSource>                    CMediaStreamSource_ptr;
 typedef std::unordered_map<string, CMediaStreamSource_ptr>     CMediaStreamSource_ptrMap;
 CMediaStreamSource_ptrMap                                        xh_ABLMediaStreamSourceMap;
 std::mutex                                                       ABL_CMediaStreamSourceMapLock;
 
-/* Â¼ÏñÎÄ¼ş´æ´¢ -------------------------------------------------------------------------------------*/
+/* å½•åƒæ–‡ä»¶å­˜å‚¨ -------------------------------------------------------------------------------------*/
 typedef std::shared_ptr<CRecordFileSource>                     CRecordFileSource_ptr;
 typedef std::unordered_map<string, CRecordFileSource_ptr>      CRecordFileSource_ptrMap;
 CRecordFileSource_ptrMap                                         xh_ABLRecordFileSourceMap;
 std::mutex                                                       ABL_CRecordFileSourceMapLock;
 
-/* Í¼Æ¬ÎÄ¼ş´æ´¢ -------------------------------------------------------------------------------------*/
+/* å›¾ç‰‡æ–‡ä»¶å­˜å‚¨ -------------------------------------------------------------------------------------*/
 typedef std::shared_ptr<CPictureFileSource>                    CPictureFileSource_ptr;
 typedef std::unordered_map<string, CPictureFileSource_ptr>     CPictureFileSource_ptrMap;
 CPictureFileSource_ptrMap                                        xh_ABLPictureFileSourceMap;
 std::mutex                                                       ABL_CPictureFileSourceMapLock;
 
-uint64_t                                                         ArrayAddMutePacketList[8192];//Ôö¼Ó¾²Òô°üµÄÁĞ±í
-uint64_t                                                         nMaxAddMuteListNumber = 0; //×îºóÒ»¸ö¾²Òô¶ÔÏóËùÔÚµÄĞòºÅ
+uint64_t                                                         ArrayAddMutePacketList[8192];//å¢åŠ é™éŸ³åŒ…çš„åˆ—è¡¨
+uint64_t                                                         nMaxAddMuteListNumber = 0; //æœ€åä¸€ä¸ªé™éŸ³å¯¹è±¡æ‰€åœ¨çš„åºå·
 
 volatile bool                                                    ABL_bMediaServerRunFlag = true;
-volatile bool                                                    ABL_bExitMediaServerRunFlag = false; //ÍË³ö´¦ÀíÏß³Ì±êÖ¾ 
-CMediaFifo                                                       pDisconnectBaseNetFifo;             //ÇåÀí¶ÏÁÑµÄÁ´½Ó 
-CMediaFifo                                                       pReConnectStreamProxyFifo;          //ĞèÒªÖØĞÂÁ¬½Ó´úÀíID 
-CMediaFifo                                                       pMessageNoticeFifo;          //ÏûÏ¢Í¨ÖªFIFO
-CMediaFifo                                                       pNetBaseObjectFifo;          //´æ´¢»ùÀà¶ÔÏóID
-CMediaFifo                                                       pDisconnectMediaSource;      //ÇåÀí¶ÏÁÑÃ½ÌåÔ´ 
-char                                                             ABL_MediaSeverRunPath[256] = { 0 }; //µ±Ç°Â·¾¶
-char                                                             ABL_wwwMediaPath[256] = { 0 }; //www ×ÓÂ·¾¶
-uint64_t                                                         ABL_nBaseCookieNumber = 100; //Cookie ĞòºÅ 
+volatile bool                                                    ABL_bExitMediaServerRunFlag = false; //é€€å‡ºå¤„ç†çº¿ç¨‹æ ‡å¿— 
+CMediaFifo                                                       pDisconnectBaseNetFifo;             //æ¸…ç†æ–­è£‚çš„é“¾æ¥ 
+CMediaFifo                                                       pReConnectStreamProxyFifo;          //éœ€è¦é‡æ–°è¿æ¥ä»£ç†ID 
+CMediaFifo                                                       pMessageNoticeFifo;          //æ¶ˆæ¯é€šçŸ¥FIFO
+CMediaFifo                                                       pNetBaseObjectFifo;          //å­˜å‚¨åŸºç±»å¯¹è±¡ID
+CMediaFifo                                                       pDisconnectMediaSource;      //æ¸…ç†æ–­è£‚åª’ä½“æº 
+char                                                             ABL_MediaSeverRunPath[256] = { 0 }; //å½“å‰è·¯å¾„
+char                                                             ABL_wwwMediaPath[256] = { 0 }; //www å­è·¯å¾„
+uint64_t                                                         ABL_nBaseCookieNumber = 100; //Cookie åºå· 
 char                                                             ABL_szLocalIP[128] = { 0 };
 uint64_t                                                         ABL_nPrintCheckNetRevcBaseClientDisconnect = 0;
-unsigned int                                                     ABL_nCurrentSystemCpuCount = 4;//µ±Ç°ÏµÍ³cpuÎïÀíºËĞÄÊı 
+unsigned int                                                     ABL_nCurrentSystemCpuCount = 4;//å½“å‰ç³»ç»Ÿcpuç‰©ç†æ ¸å¿ƒæ•° 
 CNetRevcBase_ptr                                                 GetNetRevcBaseClient(NETHANDLE CltHandle);
 bool 	                                                         ABL_bCudaFlag = false;
 int                                                              ABL_nCudaCount = 0;
@@ -140,7 +140,7 @@ CMediaStreamSource_ptr                                           GetMediaStreamS
 #endif  //USE_BOOST
 
 #ifdef OS_System_Windows
-//cuda ½âÂë 
+//cuda è§£ç  
 HINSTANCE            hCudaDecodeInstance;
 ABL_cudaDecode_Init cudaCodec_Init = NULL;
 ABL_cudaDecode_GetDeviceGetCount  cudaCodec_GetDeviceGetCount = NULL;
@@ -175,7 +175,7 @@ ABL_cudaEncode_UnInit cudaEncode_UnInit  = NULL;
 
 #endif
 
-//°ÑĞèÒªÔö¼Ó
+//æŠŠéœ€è¦å¢åŠ 
 bool   AddClientToMapAddMutePacketList(uint64_t nClient)
 {
 	bool bRet = false;
@@ -188,7 +188,7 @@ bool   AddClientToMapAddMutePacketList(uint64_t nClient)
 			bRet = true;
 		}
 
-		//²éÕÒ×î´óµÄĞòºÅ
+		//æŸ¥æ‰¾æœ€å¤§çš„åºå·
 		if (ArrayAddMutePacketList[i] > 0 && (i + 1) > nMaxAddMuteListNumber)
 			nMaxAddMuteListNumber = i + 1;
 	}
@@ -208,7 +208,7 @@ bool   DelClientToMapFromMutePacketList(uint64_t nClient)
 			bRet = true;
 		}
 
-		//²éÕÒ×î´óµÄĞòºÅ
+		//æŸ¥æ‰¾æœ€å¤§çš„åºå·
 		if (ArrayAddMutePacketList[i] > 0 && (i + 1) > nMaxNumber)
 			nMaxNumber = i + 1;
 	}
@@ -217,7 +217,7 @@ bool   DelClientToMapFromMutePacketList(uint64_t nClient)
 	return bRet;
 }
 
-//¸ù¾İÄêÔÂÈÕ×ª»»ÎªÃë
+//æ ¹æ®å¹´æœˆæ—¥è½¬æ¢ä¸ºç§’
 uint64_t GetCurrentSecondByTime(char* szDateTime)
 {
 	if (szDateTime == NULL || strlen(szDateTime) < 14)
@@ -234,7 +234,7 @@ uint64_t GetCurrentSecondByTime(char* szDateTime)
 	return clock;
 }
 
-//¸ù¾İÃëÊıÁ¿×ª»»ÎªÄêÔÂÈÕ 
+//æ ¹æ®ç§’æ•°é‡è½¬æ¢ä¸ºå¹´æœˆæ—¥ 
 char szCurrentDateTime[256] = { 0 };
 char* GetDateTimeBySeconds(uint64_t nSeconds)
 {
@@ -267,21 +267,21 @@ uint64_t GetCurrentSecond()
 
 BOOL GBK2UTF8(char* szGbk, char* szUtf8, int Len)
 {
-	// ÏÈ½«¶à×Ö½ÚGBK£¨CP_ACP»òANSI£©×ª»»³É¿í×Ö·ûUTF-16  
-	// µÃµ½×ª»»ºó£¬ËùĞèÒªµÄÄÚ´æ×Ö·ûÊı  
+	// å…ˆå°†å¤šå­—èŠ‚GBKï¼ˆCP_ACPæˆ–ANSIï¼‰è½¬æ¢æˆå®½å­—ç¬¦UTF-16  
+	// å¾—åˆ°è½¬æ¢åï¼Œæ‰€éœ€è¦çš„å†…å­˜å­—ç¬¦æ•°  
 	int n = MultiByteToWideChar(CP_ACP, 0, szGbk, -1, NULL, 0);
-	// ×Ö·ûÊı³ËÒÔ sizeof(WCHAR) µÃµ½×Ö½ÚÊı  
+	// å­—ç¬¦æ•°ä¹˜ä»¥ sizeof(WCHAR) å¾—åˆ°å­—èŠ‚æ•°  
 	WCHAR* str1 = new WCHAR[sizeof(WCHAR) * n];
-	// ×ª»»  
-	MultiByteToWideChar(CP_ACP,  // MultiByteµÄ´úÂëÒ³Code Page  
-		0,            //¸½¼Ó±êÖ¾£¬ÓëÒô±êÓĞ¹Ø  
-		szGbk,        // ÊäÈëµÄGBK×Ö·û´®  
-		-1,           // ÊäÈë×Ö·û´®³¤¶È£¬-1±íÊ¾ÓÉº¯ÊıÄÚ²¿¼ÆËã  
-		str1,         // Êä³ö  
-		n             // Êä³öËùĞè·ÖÅäµÄÄÚ´æ  
+	// è½¬æ¢  
+	MultiByteToWideChar(CP_ACP,  // MultiByteçš„ä»£ç é¡µCode Page  
+		0,            //é™„åŠ æ ‡å¿—ï¼Œä¸éŸ³æ ‡æœ‰å…³  
+		szGbk,        // è¾“å…¥çš„GBKå­—ç¬¦ä¸²  
+		-1,           // è¾“å…¥å­—ç¬¦ä¸²é•¿åº¦ï¼Œ-1è¡¨ç¤ºç”±å‡½æ•°å†…éƒ¨è®¡ç®—  
+		str1,         // è¾“å‡º  
+		n             // è¾“å‡ºæ‰€éœ€åˆ†é…çš„å†…å­˜  
 	);
 
-	// ÔÙ½«¿í×Ö·û£¨UTF-16£©×ª»»¶à×Ö½Ú£¨UTF-8£©  
+	// å†å°†å®½å­—ç¬¦ï¼ˆUTF-16ï¼‰è½¬æ¢å¤šå­—èŠ‚ï¼ˆUTF-8ï¼‰  
 	n = WideCharToMultiByte(CP_UTF8, 0, str1, -1, NULL, 0, NULL, NULL);
 	if (n > Len)
 	{
@@ -305,7 +305,7 @@ unsigned short                                                   ABL_nGB28181Por
 
 #ifndef OS_System_Windows
 
-//ÉèÖÃÂ·¾¶È¨ÏŞ 
+//è®¾ç½®è·¯å¾„æƒé™ 
 void  ABL_SetPathAuthority(char* szPath)
 {
 	char szCmd[2048] = { 0 };
@@ -353,7 +353,7 @@ uint64_t GetCurrentSecond()
 	return (tv.tv_sec);
 }
 
-//ÑÓÊ±
+//å»¶æ—¶
 void  Sleep(int mMicroSecond)
 {
 	if (mMicroSecond > 0)
@@ -372,23 +372,23 @@ bool GetLocalAdaptersInfo(string& strIPList)
 	char host[NI_MAXHOST] = { 0 };
 
 	if (getifaddrs(&ifaddr) == -1)
-	{ //Í¨¹ıgetifaddrsº¯ÊıµÃµ½ËùÓĞÍø¿¨ĞÅÏ¢
+	{ //é€šè¿‡getifaddrså‡½æ•°å¾—åˆ°æ‰€æœ‰ç½‘å¡ä¿¡æ¯
 		return false;
 	}
 
 	for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
-	{ //×öÁ´±í×öÑ­»·
+	{ //åšé“¾è¡¨åšå¾ªç¯
 
-		if (ifa->ifa_addr == NULL) //ÅĞ¶ÏµØÖ·ÊÇ·ñÎª¿Õ
+		if (ifa->ifa_addr == NULL) //åˆ¤æ–­åœ°å€æ˜¯å¦ä¸ºç©º
 			continue;
 
-		family = ifa->ifa_addr->sa_family; //µÃµ½IPµØÖ·µÄĞ­Òé×å
+		family = ifa->ifa_addr->sa_family; //å¾—åˆ°IPåœ°å€çš„åè®®æ—
 
 		if (family == AF_INET)
-		{ //ÅĞ¶ÏĞ­Òé×åÊÇAF_INET»¹ÊÇAF_INET6
+		{ //åˆ¤æ–­åè®®æ—æ˜¯AF_INETè¿˜æ˜¯AF_INET6
 			memset(host, 0x00, NI_MAXHOST);
 
-			//Í¨¹ıgetnameinfoº¯ÊıµÃµ½¶ÔÓ¦µÄIPµØÖ·¡£NI_MAXHOSTÎªºê¶¨Òå£¬ÖµÎª1025. NI_NUMERICHOSTºê¶¨Òå£¬ºÍNI_NUMERICSERV¶ÔÓ¦£¬¶¼ÊÔÒ»ÏÂ¾ÍÖªµÀÁË¡£
+			//é€šè¿‡getnameinfoå‡½æ•°å¾—åˆ°å¯¹åº”çš„IPåœ°å€ã€‚NI_MAXHOSTä¸ºå®å®šä¹‰ï¼Œå€¼ä¸º1025. NI_NUMERICHOSTå®å®šä¹‰ï¼Œå’ŒNI_NUMERICSERVå¯¹åº”ï¼Œéƒ½è¯•ä¸€ä¸‹å°±çŸ¥é“äº†ã€‚
 			s = getnameinfo(ifa->ifa_addr,
 				(family == AF_INET) ? sizeof(struct sockaddr_in) :
 				sizeof(struct sockaddr_in6),
@@ -414,7 +414,7 @@ bool GetLocalAdaptersInfo(string& strIPList)
 
 #endif
 
-//ÎŞËø²éÕÒ£¬ÔÚÍâ²ãÒÑ¾­ÓĞËø
+//æ— é”æŸ¥æ‰¾ï¼Œåœ¨å¤–å±‚å·²ç»æœ‰é”
 CNetRevcBase_ptr GetNetRevcBaseClientNoLock(NETHANDLE CltHandle)
 {
 	
@@ -434,11 +434,11 @@ CNetRevcBase_ptr GetNetRevcBaseClientNoLock(NETHANDLE CltHandle)
 
 CMediaStreamSource_ptr CreateMediaStreamSource(char* szURL, uint64_t nClient, MediaSourceType nSourceType, uint32_t nDuration, H265ConvertH264Struct  h265ConvertH264Struct)
 {
-	//»ñÈ¡Ìá¹©Ô´
+	//è·å–æä¾›æº
 	CNetRevcBase_ptr pSourceClient = GetNetRevcBaseClient(nClient);
 	if (pSourceClient == NULL)
 	{
-		WriteLog(Log_Debug, "Ã½ÌåÔ´Ìá¹©Õß²»´æÔÚ  nClient = %llu ", nClient);
+		WriteLog(Log_Debug, "åª’ä½“æºæä¾›è€…ä¸å­˜åœ¨  nClient = %llu ", nClient);
 		return NULL;
 	}
 	strcpy(pSourceClient->m_szShareMediaURL, szURL);
@@ -450,7 +450,7 @@ CMediaStreamSource_ptr CreateMediaStreamSource(char* szURL, uint64_t nClient, Me
 	CMediaStreamSource_ptr pXHClient = NULL;
 	string                 strURL = szURL;
  
-	//ÏÈ²éÕÒÊÇ·ñ´æÔÚ£¬Èç¹û´æÔÚÔò·µ»ØÔ­À´´æÔÚµÄ£¬±£Ö¤²»»á¿ÕÖ¸ÕëÔì³É±ÀÀ£
+	//å…ˆæŸ¥æ‰¾æ˜¯å¦å­˜åœ¨ï¼Œå¦‚æœå­˜åœ¨åˆ™è¿”å›åŸæ¥å­˜åœ¨çš„ï¼Œä¿è¯ä¸ä¼šç©ºæŒ‡é’ˆé€ æˆå´©æºƒ
 	auto iterator1 = xh_ABLMediaStreamSourceMap.find(szURL);
 	if (iterator1 != xh_ABLMediaStreamSourceMap.end())
 	{
@@ -500,7 +500,7 @@ CMediaStreamSource_ptr GetMediaStreamSource(char* szURL, bool bNoticeStreamNoFou
 	}
 	else
 	{
-		//ÂëÁ÷ÕÒ²»µ½
+		//ç æµæ‰¾ä¸åˆ°
 		if (ABL_MediaServerPort.hook_enable == 1 && bNoticeStreamNoFound && strstr(szURL, RecordFileReplaySplitter) == NULL)
 		{
 			int      nPos2 = 0;
@@ -553,10 +553,10 @@ bool  DeleteMediaStreamSource(char* szURL)
 	{
 		(*iterator1).second->bEnableFlag = false;
 
-		//É¾³ıËùÓĞÏû·ÑÕß
+		//åˆ é™¤æ‰€æœ‰æ¶ˆè´¹è€…
 		(*iterator1).second->addClientToDisconnectFifo();
 
-		//Ã½Ìå¶ÏÏßÊ±Í¨Öª
+		//åª’ä½“æ–­çº¿æ—¶é€šçŸ¥
 		if (ABL_MediaServerPort.hook_enable == 1 && (strlen((*iterator1).second->m_mediaCodecInfo.szVideoName) > 0 || strlen((*iterator1).second->m_mediaCodecInfo.szAudioName) > 0))
 		{
 			MessageNoticeStruct msgNotice;
@@ -574,7 +574,7 @@ bool  DeleteMediaStreamSource(char* szURL)
 	}
 }
 
-//°Ñ¿Í»§¶ËID£¬´ÓÃ½Ìå×ÊÔ´ÒÆ³ı£¬²»ÔÙ¿½±´ 
+//æŠŠå®¢æˆ·ç«¯IDï¼Œä»åª’ä½“èµ„æºç§»é™¤ï¼Œä¸å†æ‹·è´ 
 bool DeleteClientMediaStreamSource(uint64_t nClient)
 {
 	std::lock_guard<std::mutex> lock(ABL_CMediaStreamSourceMapLock);
@@ -594,7 +594,7 @@ bool DeleteClientMediaStreamSource(uint64_t nClient)
 	return bDeleteFlag;
 }
 
-//É¾³ıÃ½ÌåÔ´
+//åˆ é™¤åª’ä½“æº
 int  CloseMediaStreamSource(closeStreamsStruct closeStruct)
 {
 	std::lock_guard<std::mutex> lock(ABL_CNetRevcBase_ptrMapLock);
@@ -630,7 +630,7 @@ int  CloseMediaStreamSource(closeStreamsStruct closeStruct)
 			)
 		{
 			if (strlen(closeStruct.app) > 0 && strlen(closeStruct.stream) > 0)
-			{//Ç¿ÖÆ¹Ø±Õ
+			{//å¼ºåˆ¶å…³é—­
 				if (strcmp(pClient->app, closeStruct.app) == 0 && strcmp(pClient->stream, closeStruct.stream) == 0)
 				{
 					nDeleteCount++;
@@ -638,7 +638,7 @@ int  CloseMediaStreamSource(closeStreamsStruct closeStruct)
 				}
 			}
 			else if (strlen(closeStruct.app) > 0 && strlen(closeStruct.stream) == 0)
-			{//Ç¿ÖÆ¹Ø±Õ
+			{//å¼ºåˆ¶å…³é—­
 				if (strcmp(pClient->app, closeStruct.app) == 0)
 				{
 					nDeleteCount++;
@@ -646,7 +646,7 @@ int  CloseMediaStreamSource(closeStreamsStruct closeStruct)
 				}
 			}
 			else if (strlen(closeStruct.app) == 0 && strlen(closeStruct.stream) > 0)
-			{//Ç¿ÖÆ¹Ø±Õ
+			{//å¼ºåˆ¶å…³é—­
 				if (strcmp(pClient->stream, closeStruct.stream) == 0)
 				{
 					nDeleteCount++;
@@ -654,7 +654,7 @@ int  CloseMediaStreamSource(closeStreamsStruct closeStruct)
 				}
 			}
 			else if (strlen(closeStruct.app) == 0 && strlen(closeStruct.stream) == 0 && !(pClient->netBaseNetType == NetBaseNetType_GB28181TcpPSInputStream || pClient->netBaseNetType == NetBaseNetType_NetGB28181RecvRtpPS_TS))
-			{//Ç¿ÖÆ¹Ø±Õ
+			{//å¼ºåˆ¶å…³é—­
 				nDeleteCount++;
 				bDeleteFlag = true;
 			}
@@ -670,7 +670,7 @@ int  CloseMediaStreamSource(closeStreamsStruct closeStruct)
 	return  nDeleteCount;
 }
 
-//ÏÈ°Ñ»ùÀàµÄÊÓÆµ½ÓÈë¶ÔÏóIDÈ«²¿×°ÈëFIFO£¬ÕâÑù¼õÉÙÒ»¸ölock£¬¶Å¾øÍâ²¿»ìÂÒµ÷ÓÃhttp api º¯ÊıÔì³ÉËÀËø 
+//å…ˆæŠŠåŸºç±»çš„è§†é¢‘æ¥å…¥å¯¹è±¡IDå…¨éƒ¨è£…å…¥FIFOï¼Œè¿™æ ·å‡å°‘ä¸€ä¸ªlockï¼Œæœç»å¤–éƒ¨æ··ä¹±è°ƒç”¨http api å‡½æ•°é€ æˆæ­»é” 
 int   GetAllNetBaseObjectToFifo()
 {
 	std::lock_guard<std::mutex> lock(ABL_CNetRevcBase_ptrMapLock);
@@ -684,7 +684,7 @@ int   GetAllNetBaseObjectToFifo()
 			pClient->netBaseNetType == NetBaseNetType_NetGB28181RtpServerUDP || pClient->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Server || pClient->netBaseNetType == ReadRecordFileInput_ReadFMP4File || pClient->netBaseNetType == NetBaseNetType_NetGB28181UDPTSStreamInput || pClient->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Active ||
 			pClient->netBaseNetType == NetBaseNetType_NetGB28181UDPPSStreamInput || (pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpUDP && strlen(pClient->m_startSendRtpStruct.recv_app) > 0 && strlen(pClient->m_startSendRtpStruct.recv_stream) > 0) || (pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Connect && strlen(pClient->m_startSendRtpStruct.recv_app) > 0 && strlen(pClient->m_startSendRtpStruct.recv_stream) > 0) ||
 			(pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Passive && strlen(pClient->m_startSendRtpStruct.recv_app) > 0 && strlen(pClient->m_startSendRtpStruct.recv_stream) > 0) || pClient->netBaseNetType == NetBaseNetType_GB28181TcpPSInputStream)
-		{//´úÀíÀ­Á÷£¨rtsp,rtmp,flv,hls £©,rtspÍÆÁ÷£¬rtmpÍÆÁ÷£¬gb28181£¬webrtc 
+		{//ä»£ç†æ‹‰æµï¼ˆrtsp,rtmp,flv,hls ï¼‰,rtspæ¨æµï¼Œrtmpæ¨æµï¼Œgb28181ï¼Œwebrtc 
 			pNetBaseObjectFifo.push((unsigned char*)&(*iterator1).second->nClient, sizeof((*iterator1).second->nClient));
 		}
 	}
@@ -692,7 +692,7 @@ int   GetAllNetBaseObjectToFifo()
 	return pNetBaseObjectFifo.GetSize();
 }
 
-//»ñÈ¡Ã½ÌåÔ´
+//è·å–åª’ä½“æº
 int GetAllMediaStreamSource(char* szMediaSourceInfo, getMediaListStruct mediaListStruct)
 {
 	int              nMediaCount = 0;
@@ -707,7 +707,7 @@ int GetAllMediaStreamSource(char* szMediaSourceInfo, getMediaListStruct mediaLis
 	uint64_t         nClient;
 	int              nLength;
 
-	//»ñÈ¡»ùÀàµÄÊÓÆµ½ÓÈë¶ÔÏóID
+	//è·å–åŸºç±»çš„è§†é¢‘æ¥å…¥å¯¹è±¡ID
 	GetAllNetBaseObjectToFifo();
 
 	if (xh_ABLMediaStreamSourceMap.size() > 0)
@@ -722,7 +722,7 @@ int GetAllMediaStreamSource(char* szMediaSourceInfo, getMediaListStruct mediaLis
 		{
 			if (pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpUDP || pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Connect || pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Passive)
 			{
-				sprintf(szShareMediaURL, "/%s/%s", pClient->m_startSendRtpStruct.recv_app, pClient->m_startSendRtpStruct.recv_stream); //¹ú±êÈ«Ë«¹¤
+				sprintf(szShareMediaURL, "/%s/%s", pClient->m_startSendRtpStruct.recv_app, pClient->m_startSendRtpStruct.recv_stream); //å›½æ ‡å…¨åŒå·¥
 				strcpy(szApp, pClient->m_startSendRtpStruct.recv_app);
 				strcpy(szStream, pClient->m_startSendRtpStruct.recv_stream);
 			}
@@ -768,7 +768,7 @@ int GetAllMediaStreamSource(char* szMediaSourceInfo, getMediaListStruct mediaLis
 						nNoneReadDuration = GetCurrentSecond() - tmpMediaSource->nLastWatchTimeDisconect;
 
 					nClientPort = pClient->nClientPort;
-					if (pClient->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Server)//¹ú±êTCP½ÓÈë£¬ĞèÒªÌæ»»Îª°ó¶¨µÄ¶Ë¿Ú 
+					if (pClient->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Server)//å›½æ ‡TCPæ¥å…¥ï¼Œéœ€è¦æ›¿æ¢ä¸ºç»‘å®šçš„ç«¯å£ 
 					{
 						CNetRevcBase_ptr pParent = GetNetRevcBaseClient(pClient->hParent);
 						if (pParent != NULL)
@@ -779,7 +779,7 @@ int GetAllMediaStreamSource(char* szMediaSourceInfo, getMediaListStruct mediaLis
 					}
 
 					if (tmpMediaSource->nMediaSourceType == MediaSourceType_LiveMedia)
-					{//Êµ¿ö²¥·Å
+					{//å®å†µæ’­æ”¾
 						sprintf(szTemp2, "{\"key\":%llu,\"port\":%d,\"app\":\"%s\",\"stream\":\"%s\",\"sourceType\":%d,\"sim\":\"%s\",\"status\":%s,\"enable_hls\":%s,\"transcodingStatus\":%s,\"sourceURL\":\"%s\",\"networkType\":%d,\"readerCount\":%d,\"noneReaderDuration\":%llu,\"videoCodec\":\"%s\",\"videoFrameSpeed\":%d,\"width\":%d,\"height\":%d,\"videoBitrate\":%d,\"audioCodec\":\"%s\",\"audioChannels\":%d,\"audioSampleRate\":%d,\"audioBitrate\":%d,\"url\":{\"rtsp\":\"%s://%s:%d/%s/%s\",\"rtmp\":\"%s://%s:%d/%s/%s\",\"http-flv\":\"%s://%s:%d/%s/%s.flv\",\"ws-flv\":\"%s://%s:%d/%s/%s.flv\",\"http-mp4\":\"%s://%s:%d/%s/%s.mp4\",\"http-hls\":\"%s://%s:%d/%s/%s.m3u8\"}},", tmpMediaSource->nClient, nClientPort, szApp, szStream, tmpMediaSource->nMediaSourceType, tmpMediaSource->sim, tmpMediaSource->enable_mp4 == true ? "true" : "false", tmpMediaSource->enable_hls == true ? "true" : "false", tmpMediaSource->H265ConvertH264_enable == true ? "true" : "false", pClient->m_addStreamProxyStruct.url, pClient->netBaseNetType, tmpMediaSource->mediaSendMap.size(), nNoneReadDuration,
 							tmpMediaSource->m_mediaCodecInfo.szVideoName, tmpMediaSource->m_mediaCodecInfo.nVideoFrameRate, tmpMediaSource->m_mediaCodecInfo.nWidth, tmpMediaSource->m_mediaCodecInfo.nHeight, tmpMediaSource->m_mediaCodecInfo.nVideoBitrate, tmpMediaSource->m_mediaCodecInfo.szAudioName, tmpMediaSource->m_mediaCodecInfo.nChannels, tmpMediaSource->m_mediaCodecInfo.nSampleRate, tmpMediaSource->m_mediaCodecInfo.nAudioBitrate,
 							ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, szApp, szStream,
@@ -790,7 +790,7 @@ int GetAllMediaStreamSource(char* szMediaSourceInfo, getMediaListStruct mediaLis
 							ABL_MediaServerPort.nHlsPort % 2 == 1 ? "https" : "http", ABL_szLocalIP, ABL_MediaServerPort.nHlsPort, szApp, szStream);
 					}
 					else
-					{//Â¼Ïñµã²¥
+					{//å½•åƒç‚¹æ’­
 						sprintf(szTemp2, "{\"key\":%llu,\"port\":%d,\"app\":\"%s\",\"stream\":\"%s\",\"sourceType\":%d,\"sim\":\"%s\",\"status\":%s,\"enable_hls\":%s,\"transcodingStatus\":%s,\"sourceURL\":\"%s\",\"networkType\":%d,\"readerCount\":%d,\"noneReaderDuration\":%llu,\"videoCodec\":\"%s\",\"videoFrameSpeed\":%d,\"width\":%d,\"height\":%d,\"videoBitrate\":%d,\"audioCodec\":\"%s\",\"audioChannels\":%d,\"audioSampleRate\":%d,\"audioBitrate\":%d,\"url\":{\"rtsp\":\"%s://%s:%d/%s/%s\",\"rtmp\":\"%s://%s:%d/%s/%s\",\"http-flv\":\"%s://%s:%d/%s/%s.flv\",\"ws-flv\":\"%s://%s:%d/%s/%s.flv\",\"http-mp4\":\"%s://%s:%d/%s/%s.mp4\"}},", tmpMediaSource->nClient, nClientPort, szApp, szStream, tmpMediaSource->nMediaSourceType, tmpMediaSource->sim, tmpMediaSource->enable_mp4 == true ? "true" : "false", "false", tmpMediaSource->enable_mp4 == true ? "true" : "false", pClient->m_addStreamProxyStruct.url, pClient->netBaseNetType, tmpMediaSource->mediaSendMap.size(), nNoneReadDuration,
 							tmpMediaSource->m_mediaCodecInfo.szVideoName, tmpMediaSource->m_mediaCodecInfo.nVideoFrameRate, tmpMediaSource->m_mediaCodecInfo.nWidth, tmpMediaSource->m_mediaCodecInfo.nHeight, tmpMediaSource->m_mediaCodecInfo.nVideoBitrate, tmpMediaSource->m_mediaCodecInfo.szAudioName, tmpMediaSource->m_mediaCodecInfo.nChannels, tmpMediaSource->m_mediaCodecInfo.nSampleRate, tmpMediaSource->m_mediaCodecInfo.nAudioBitrate,
 							ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, szApp, szStream,
@@ -822,7 +822,7 @@ int GetAllMediaStreamSource(char* szMediaSourceInfo, getMediaListStruct mediaLis
 	return nMediaCount;
 }
 
-//»ñÈ¡·şÎñÆ÷Õ¼ÓÃ¶Ë¿Ú
+//è·å–æœåŠ¡å™¨å ç”¨ç«¯å£
 int GetALLListServerPort(char* szMediaSourceInfo, ListServerPortStruct  listServerPortStruct)
 {
 	std::lock_guard<std::mutex> lock(ABL_CNetRevcBase_ptrMapLock);
@@ -853,7 +853,7 @@ int GetALLListServerPort(char* szMediaSourceInfo, ListServerPortStruct  listServ
 				memset(szTemp2, 0x00, sizeof(szTemp2));
 
 				if (pClient->netBaseNetType >= NetBaseNetType_RtspClientRecv && pClient->netBaseNetType <= NetBaseNetType_GB28181ClientPushUDP)
-					nClient = pClient->hParent;//ÓĞ´úÀíÀàµÄ¶¼ĞèÒª ·µ»Ø¸¸ÀàID 
+					nClient = pClient->hParent;//æœ‰ä»£ç†ç±»çš„éƒ½éœ€è¦ è¿”å›çˆ¶ç±»ID 
 				else
 					nClient = pClient->nClient;
 
@@ -898,7 +898,7 @@ int GetALLListServerPort(char* szMediaSourceInfo, ListServerPortStruct  listServ
 	return nMediaCount;
 }
 
-//»ñÈ¡ËùÓĞÍùÍâ·¢ËÍµÄÁĞ
+//è·å–æ‰€æœ‰å¾€å¤–å‘é€çš„åˆ—
 int GetAllOutList(char* szMediaSourceInfo, char* szOutType)
 {
 	std::lock_guard<std::mutex> lock(ABL_CNetRevcBase_ptrMapLock);
@@ -924,7 +924,7 @@ int GetAllOutList(char* szMediaSourceInfo, char* szOutType)
 			pClient->netBaseNetType == NetBaseNetType_HttpMP4ServerSendPush || pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Passive || pClient->netBaseNetType == NetBaseNetType_NetClientWebrtcPlayer)
 		{
 			if (pClient->netBaseNetType >= NetBaseNetType_RtspClientRecv && pClient->netBaseNetType <= NetBaseNetType_GB28181ClientPushUDP)
-				nClient = pClient->hParent;//ÓĞ´úÀíÀàµÄ¶¼ĞèÒª ·µ»Ø¸¸ÀàID 
+				nClient = pClient->hParent;//æœ‰ä»£ç†ç±»çš„éƒ½éœ€è¦ è¿”å›çˆ¶ç±»ID 
 			else
 				nClient = pClient->nClient;
 
@@ -954,7 +954,7 @@ int GetAllOutList(char* szMediaSourceInfo, char* szOutType)
 	return nMediaCount;
 }
 
-//¼ì²âapp,stream ÊÇ·ñ±»Õ¼ÓÃ 
+//æ£€æµ‹app,stream æ˜¯å¦è¢«å ç”¨ 
 bool CheckAppStreamExisting(char* szAppStreamURL)
 {
 	std::lock_guard<std::mutex> lock(ABL_CNetRevcBase_ptrMapLock);
@@ -988,21 +988,21 @@ bool CheckAppStreamExisting(char* szAppStreamURL)
 			if (strcmp(szTemp2, szAppStreamURL) == 0)
 			{
 				bAppStreamExisting = true;
-				WriteLog(Log_Debug, "CheckAppStreamExisting(), nClient = %llu  ,netBaseNetType = %d,url = %s ÒÑ¾­´æÔÚ ,ÕıÔÚ½ÓÈë !", pClient->nClient, pClient->netBaseNetType, szAppStreamURL);
+				WriteLog(Log_Debug, "CheckAppStreamExisting(), nClient = %llu  ,netBaseNetType = %d,url = %s å·²ç»å­˜åœ¨ ,æ­£åœ¨æ¥å…¥ !", pClient->nClient, pClient->netBaseNetType, szAppStreamURL);
 				break;
 			}
 		}
 	}
 	if (!bAppStreamExisting)
-		WriteLog(Log_Debug, "CheckAppStreamExisting(), url = %s  ÉĞÎ´Ê¹ÓÃ !", szAppStreamURL);
+		WriteLog(Log_Debug, "CheckAppStreamExisting(), url = %s  å°šæœªä½¿ç”¨ !", szAppStreamURL);
 
 	return bAppStreamExisting;
 }
 
-/* Ã½ÌåÊı¾İ´æ´¢ -------------------------------------------------------------------------------------*/
+/* åª’ä½“æ•°æ®å­˜å‚¨ -------------------------------------------------------------------------------------*/
 
-/* Â¼ÏñÎÄ¼ş´æ´¢ -------------------------------------------------------------------------------------*/
-//É¾³ı¹ıÆÚµÄm3u8ÎÄ¼ş
+/* å½•åƒæ–‡ä»¶å­˜å‚¨ -------------------------------------------------------------------------------------*/
+//åˆ é™¤è¿‡æœŸçš„m3u8æ–‡ä»¶
 int  DeleteExpireM3u8File()
 {
 	std::lock_guard<std::mutex> lock(ABL_CRecordFileSourceMapLock);
@@ -1046,7 +1046,7 @@ CRecordFileSource_ptr CreateRecordFileSource(char* app, char* stream)
 	CRecordFileSource_ptr pReordFile = GetRecordFileSource(szShareURL);
 	if (pReordFile != NULL)
 	{
-		WriteLog(Log_Debug, "CreateRecordFileSource Ê§°Ü , app = %s ,stream = %s ÒÑ¾­´æÔÚ ", app, stream);
+		WriteLog(Log_Debug, "CreateRecordFileSource å¤±è´¥ , app = %s ,stream = %s å·²ç»å­˜åœ¨ ", app, stream);
 		return NULL;
 	}
 
@@ -1099,7 +1099,7 @@ bool  DeleteRecordFileSource(char* szURL)
 	}
 }
 
-//Ôö¼ÓÒ»¸öÂ¼ÏñÎÄ¼şµ½Â¼ÏñÃ½ÌåÔ´
+//å¢åŠ ä¸€ä¸ªå½•åƒæ–‡ä»¶åˆ°å½•åƒåª’ä½“æº
 bool AddRecordFileToRecordSource(char* szShareURL, char* szFileName)
 {
 	std::lock_guard<std::mutex> lock(ABL_CRecordFileSourceMapLock);
@@ -1141,7 +1141,7 @@ std::string generate_uuid() {
 }
 
 extern  const struct mov_buffer_t* mov_file_buffer(void);
-//²éÑ¯Â¼Ïñ
+//æŸ¥è¯¢å½•åƒ
 int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct queryStruct)
 {
 	std::lock_guard<std::mutex> lock(ABL_CRecordFileSourceMapLock);
@@ -1158,7 +1158,7 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 	FILE* fp = NULL;
 	char           szFileName[string_length_1024] = { 0 };
 	mov_reader_t* mov = NULL;
-	uint64_t       duration = 0;//Â¼Ïñ»Ø·ÅÊ±¶ÁÈ¡µ½Â¼ÏñÎÄ¼ş³¤¶È
+	uint64_t       duration = 0;//å½•åƒå›æ”¾æ—¶è¯»å–åˆ°å½•åƒæ–‡ä»¶é•¿åº¦
 	FILE* fileM3U8 = NULL;
 	char           m3u8FileName[string_length_512] = { 0 };
 	char           mapm3u8FileName[string_length_512] = { 0 };
@@ -1200,7 +1200,7 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 		}
 
 		if (fileM3U8 != NULL)
-		{//ts ÇĞÆ¬
+		{//ts åˆ‡ç‰‡
 			sprintf(szRecordURL, "\"url\":{\"rtsp\": \"%s://%s:%d/%s/%s_%s_%s-%s\",\"rtmp\": \"%s://%s:%d/%s/%s_%s_%s-%s\",\"http-flv\": \"%s://%s:%d/%s/%s_%s_%s-%s.flv\",\"ws-flv\": \"%s://%s:%d/%s/%s_%s_%s-%s.flv\",\"http-mp4\": \"%s://%s:%d/%s/%s_%s_%s-%s.mp4\",\"download\": \"%s://%s:%d/%s/%s_%s_%s-%s.mp4?download_speed=%d\",%s}",
 				ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
 				ABL_MediaServerPort.nRtmpPort % 2 == 1 ? "rtmps" : "rtmp", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
@@ -1212,9 +1212,9 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 			);
 		}
 		else
-		{//·ÇTS 
+		{//éTS 
 			if (ABL_MediaServerPort.nHlsEnable == 1)
-			{//hlsÇĞÆ¬
+			{//hlsåˆ‡ç‰‡
 				sprintf(szRecordURL, "\"url\":{\"rtsp\": \"%s://%s:%d/%s/%s_%s_%s-%s\",\"rtmp\": \"%s://%s:%d/%s/%s_%s_%s-%s\",\"http-flv\": \"%s://%s:%d/%s/%s_%s_%s-%s.flv\",\"ws-flv\": \"%s://%s:%d/%s/%s_%s_%s-%s.flv\",\"http-mp4\": \"%s://%s:%d/%s/%s_%s_%s-%s.mp4\",\"http-hls\": \"%s://%s:%d/%s/%s_%s_%s-%s.m3u8\"}",
 					ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtspPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
 					ABL_MediaServerPort.nRtmpPort % 2 == 1 ? "rtmps" : "rtmp", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime,
@@ -1259,18 +1259,18 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 				if (nTime1 >= nTime2 || (nTime1 + ABL_MediaServerPort.fileSecond) >= nTime2) {
 
 					if (nTime1 <= nTime3) {
-						bFlag1 = true;//µÚÒ»¸ö·ûºÏÌõ¼şµÄÎÄ¼ş 
+						bFlag1 = true;//ç¬¬ä¸€ä¸ªç¬¦åˆæ¡ä»¶çš„æ–‡ä»¶ 
 					}
 					else if ((nTime1 + ABL_MediaServerPort.fileSecond) <= nTime3) {
-						bFlag1 = true;//µÚÒ»¸ö·ûºÏÌõ¼şµÄÎÄ¼ş 
+						bFlag1 = true;//ç¬¬ä¸€ä¸ªç¬¦åˆæ¡ä»¶çš„æ–‡ä»¶ 
 					}
 				}
 			}
 			if (nFileOrder >= 1 && *it2 <= atoll(queryStruct.endtime)) {
-				bFlag2 = true;//ºóÃæ·ûºÏÌõ¼şµÄÎÄ¼ş
+				bFlag2 = true;//åé¢ç¬¦åˆæ¡ä»¶çš„æ–‡ä»¶
 			}
 
-			//·ûºÏÌõ¼şµÄmp4ÎÄ¼ş 
+			//ç¬¦åˆæ¡ä»¶çš„mp4æ–‡ä»¶ 
 			if (bFlag1 || bFlag2)
 			{
 				memset(szTemp2, 0x00, sizeof(szTemp2));
@@ -1278,7 +1278,7 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 				nFileOrder++;
 
 				if (fileM3U8 != NULL)
-				{//Éú³Ém3u8ÎÄ¼ş
+				{//ç”Ÿæˆm3u8æ–‡ä»¶
 					if (nFileOrder == 1)
 					{
 						sprintf(szTemp2, "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:%d\n#EXT-X-MEDIA-SEQUENCE:%llu\n#EXT-X-ALLOW-CACHE:NO\n", ABL_MediaServerPort.fileSecond, *it2);
@@ -1299,7 +1299,7 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 				{
 					sprintf(szRecordPlayURL, "/%s/%s_%s_%s-%s", queryStruct.app, queryStruct.stream, tmp_uuid.c_str(), queryStruct.starttime, queryStruct.endtime);
 
-					//Ã»ÓĞ´æÔÚÃ½ÌåÔ´ÔÙ´´½¨
+					//æ²¡æœ‰å­˜åœ¨åª’ä½“æºå†åˆ›å»º
 					if ((pMediaStreamPtr = GetMediaStreamSource(szRecordPlayURL, false)) == NULL)
 						mutlRecordPlay = CreateNetRevcBaseClient(NetBaseNetType_NetServerReadMultRecordFile, *it2, 0, szFileName, 0, szRecordPlayURL);
 					if (mutlRecordPlay != NULL)
@@ -1317,7 +1317,7 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 					mutlRecordPlay->mutliRecordPlayNameList.push_back(szFileName);
 
 				if (ABL_MediaServerPort.enable_GetFileDuration != 0)
-				{//ĞèÒª»ñÈ¡Â¼ÏñÎÄ¼şÕæÊµÊ±³¤ 
+				{//éœ€è¦è·å–å½•åƒæ–‡ä»¶çœŸå®æ—¶é•¿ 
 					fp = fopen(szFileName, "rb");
 					if (fp)
 					{
@@ -1352,10 +1352,10 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 				}
 				}
 
-			//ºóÃæµÄmp4ÎÄ¼ş²»ÔÙ·ûºÏÌõ¼ş £¬ĞèÒªÖĞ¶Ï²éÑ¯ 
+			//åé¢çš„mp4æ–‡ä»¶ä¸å†ç¬¦åˆæ¡ä»¶ ï¼Œéœ€è¦ä¸­æ–­æŸ¥è¯¢ 
 			if (*it2 > atoll(queryStruct.endtime))
 			{
-				WriteLog(Log_Debug, "queryRecordListByTime() ºóÃæµÄmp4ÎÄ¼ş²»ÔÙ·ûºÏÌõ¼ş £¬ĞèÒªÖĞ¶Ï²éÑ¯ *it2 = %llu , endtime = %s ", *it2, queryStruct.endtime);
+				WriteLog(Log_Debug, "queryRecordListByTime() åé¢çš„mp4æ–‡ä»¶ä¸å†ç¬¦åˆæ¡ä»¶ ï¼Œéœ€è¦ä¸­æ–­æŸ¥è¯¢ *it2 = %llu , endtime = %s ", *it2, queryStruct.endtime);
 				break;
 			}
 			}
@@ -1369,7 +1369,7 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 
 	if (nMediaCount > 0)
 	{
-		//¼ÆËã×îºóÒ»¸ömp4µÄ²¥·ÅÊ±³¤ 
+		//è®¡ç®—æœ€åä¸€ä¸ªmp4çš„æ’­æ”¾æ—¶é•¿ 
 		if (mutlRecordPlay != NULL)
 		{
 			CNetServerReadMultRecordFile* pReadMp4File = (CNetServerReadMultRecordFile*)mutlRecordPlay.get();
@@ -1400,7 +1400,7 @@ int queryRecordListByTime(char* szMediaSourceInfo, queryRecordListStruct querySt
 	}
 
 
-//²éÑ¯Ò»¸öÂ¼ÏñÎÄ¼şÊÇ·ñ´æÔÚ
+//æŸ¥è¯¢ä¸€ä¸ªå½•åƒæ–‡ä»¶æ˜¯å¦å­˜åœ¨
 bool QureyRecordFileFromRecordSource(char* szShareURL, char* szFileName)
 {
 	std::lock_guard<std::mutex> lock(ABL_CRecordFileSourceMapLock);
@@ -1418,9 +1418,9 @@ bool QureyRecordFileFromRecordSource(char* szShareURL, char* szFileName)
 	}
 }
 
-/* Â¼ÏñÎÄ¼ş´æ´¢ -------------------------------------------------------------------------------------*/
+/* å½•åƒæ–‡ä»¶å­˜å‚¨ -------------------------------------------------------------------------------------*/
 
-/* Í¼Æ¬ÎÄ¼ş´æ´¢ -------------------------------------------------------------------------------------*/
+/* å›¾ç‰‡æ–‡ä»¶å­˜å‚¨ -------------------------------------------------------------------------------------*/
 CPictureFileSource_ptr GetPictureFileSource(char* szShareURL, bool bLock)
 {
 	if (bLock)
@@ -1448,7 +1448,7 @@ CPictureFileSource_ptr CreatePictureFileSource(char* app, char* stream)
 	CPictureFileSource_ptr pReordFile = GetPictureFileSource(szShareURL, true);
 	if (pReordFile != NULL)
 	{
-		WriteLog(Log_Debug, "CreatePictureFileSource Ê§°Ü , app = %s ,stream = %s ÒÑ¾­´æÔÚ ", app, stream);
+		WriteLog(Log_Debug, "CreatePictureFileSource å¤±è´¥ , app = %s ,stream = %s å·²ç»å­˜åœ¨ ", app, stream);
 		return NULL;
 	}
 
@@ -1501,7 +1501,7 @@ bool  DeletePictureFileSource(char* szURL)
 	}
 }
 
-//Ôö¼ÓÒ»¸öÂ¼ÏñÎÄ¼şµ½Â¼ÏñÃ½ÌåÔ´
+//å¢åŠ ä¸€ä¸ªå½•åƒæ–‡ä»¶åˆ°å½•åƒåª’ä½“æº
 bool AddPictureFileToPictureSource(char* szShareURL, char* szFileName)
 {
 	std::lock_guard<std::mutex> lock(ABL_CPictureFileSourceMapLock);
@@ -1519,7 +1519,7 @@ bool AddPictureFileToPictureSource(char* szShareURL, char* szFileName)
 	}
 }
 
-//²éÑ¯Â¼Ïñ
+//æŸ¥è¯¢å½•åƒ
 int queryPictureListByTime(char* szMediaSourceInfo, queryPictureListStruct queryStruct)
 {
 	std::lock_guard<std::mutex> lock(ABL_CPictureFileSourceMapLock);
@@ -1577,7 +1577,7 @@ int queryPictureListByTime(char* szMediaSourceInfo, queryPictureListStruct query
 	return nMediaCount;
 }
 
-//²éÑ¯Ò»¸öÍ¼Æ¬ÎÄ¼şÊÇ·ñ´æÔÚ
+//æŸ¥è¯¢ä¸€ä¸ªå›¾ç‰‡æ–‡ä»¶æ˜¯å¦å­˜åœ¨
 bool QureyPictureFileFromPictureSource(char* szShareURL, char* szFileName)
 {
 	std::lock_guard<std::mutex> lock(ABL_CPictureFileSourceMapLock);
@@ -1594,7 +1594,7 @@ bool QureyPictureFileFromPictureSource(char* szShareURL, char* szFileName)
 		return false;
 	}
 }
-/* Í¼Æ¬ÎÄ¼ş´æ´¢ -------------------------------------------------------------------------------------*/
+/* å›¾ç‰‡æ–‡ä»¶å­˜å‚¨ -------------------------------------------------------------------------------------*/
 
 void LIBNET_CALLMETHOD	onaccept(NETHANDLE srvhandle,
 	NETHANDLE clihandle,
@@ -1641,7 +1641,7 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				else if (serverHandle == srvhandle_9298)
 					pXHClient = boost::make_shared<CNetServerRecvAudio>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				else if (serverHandle == srvhandle_10000)
-				{//¹ú±êµ¥¶Ë¿ÚÊäÈë
+				{//å›½æ ‡å•ç«¯å£è¾“å…¥
 					pXHClient = boost::make_shared<CNetGB28181RtpServer>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient != NULL)
 					{
@@ -1650,46 +1650,46 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 						pXHClient->hParent = CltHandle;
 						gb28181TCP->netDataCache = new unsigned char[MaxNetDataCacheBufferLength];
 						gb28181TCP->m_addStreamProxyStruct.RtpPayloadDataType[0] = 0x31;//PS  
-						gb28181TCP->m_addStreamProxyStruct.disableVideo[0] = 0x30;//Ã»ÓĞÆÁ±ÎÊÓÆµ
-						gb28181TCP->m_addStreamProxyStruct.disableAudio[0] = 0x30;//Ã»ÓĞÆÁ±ÎÒôÆµ
+						gb28181TCP->m_addStreamProxyStruct.disableVideo[0] = 0x30;//æ²¡æœ‰å±è”½è§†é¢‘
+						gb28181TCP->m_addStreamProxyStruct.disableAudio[0] = 0x30;//æ²¡æœ‰å±è”½éŸ³é¢‘
 					}
 				}
 				else
 				{
 					CNetRevcBase_ptr gb28181Listen = GetNetRevcBaseClientNoLock(serverHandle);
 					if (gb28181Listen && gb28181Listen->netBaseNetType == NetBaseNetType_NetGB28181RtpServerListen && gb28181Listen->nMediaClient == 0)
-					{//¹ú±êTCP ±»¶¯·½Ê½½ÓÈë 
+					{//å›½æ ‡TCP è¢«åŠ¨æ–¹å¼æ¥å…¥ 
 						CNetGB28181RtpServer* gb28181TCP = NULL;
 						pXHClient = boost::make_shared<CNetGB28181RtpServer>(serverHandle, CltHandle, szIP, nPort, gb28181Listen->m_szShareMediaURL);
 						if (pXHClient != NULL)
 						{
-							pXHClient->netBaseNetType = NetBaseNetType_NetGB28181RtpServerTCP_Server;//¹ú±ê28181 tcp ·½Ê½½ÓÊÕÂëÁ÷ 
-							gb28181Listen->nMediaClient = CltHandle; //ÒÑ¾­ÓĞÈËÁ¬½Ó½øÀ´
+							pXHClient->netBaseNetType = NetBaseNetType_NetGB28181RtpServerTCP_Server;//å›½æ ‡28181 tcp æ–¹å¼æ¥æ”¶ç æµ 
+							gb28181Listen->nMediaClient = CltHandle; //å·²ç»æœ‰äººè¿æ¥è¿›æ¥
 
 							gb28181TCP = (CNetGB28181RtpServer*)pXHClient.get();
 							if (gb28181TCP)
 							{
 								strcpy(gb28181TCP->szClientIP, szIP);
 								gb28181TCP->nClientPort = nPort;
-								gb28181TCP->netDataCache = new unsigned char[MaxNetDataCacheBufferLength]; //ÔÚÊ¹ÓÃÇ°ÏÈ×¼±¸ºÃÄÚ´æ 
+								gb28181TCP->netDataCache = new unsigned char[MaxNetDataCacheBufferLength]; //åœ¨ä½¿ç”¨å‰å…ˆå‡†å¤‡å¥½å†…å­˜ 
 							}
 
-							pXHClient->hParent = gb28181Listen->nClient;//¼ÇÂ¼¹ú±ê´úÀí¾ä±úºÅ
-							pXHClient->m_gbPayload = atoi(gb28181Listen->m_openRtpServerStruct.payload);//¸üĞÂpaylad 
+							pXHClient->hParent = gb28181Listen->nClient;//è®°å½•å›½æ ‡ä»£ç†å¥æŸ„å·
+							pXHClient->m_gbPayload = atoi(gb28181Listen->m_openRtpServerStruct.payload);//æ›´æ–°paylad 
 							memcpy((char*)&pXHClient->m_addStreamProxyStruct, (char*)&gb28181Listen->m_addStreamProxyStruct, sizeof(gb28181Listen->m_addStreamProxyStruct));
 							memcpy((char*)&pXHClient->m_openRtpServerStruct, (char*)&gb28181Listen->m_openRtpServerStruct, sizeof(gb28181Listen->m_openRtpServerStruct));
-							memcpy((char*)&pXHClient->m_h265ConvertH264Struct, (char*)&gb28181Listen->m_h265ConvertH264Struct, sizeof(gb28181Listen->m_h265ConvertH264Struct));//µ¥¶ÀÖ¸¶¨×ªÂë²ÎÊı
+							memcpy((char*)&pXHClient->m_h265ConvertH264Struct, (char*)&gb28181Listen->m_h265ConvertH264Struct, sizeof(gb28181Listen->m_h265ConvertH264Struct));//å•ç‹¬æŒ‡å®šè½¬ç å‚æ•°
 						}
 					}
 					else if (gb28181Listen && gb28181Listen->netBaseNetType == NetBaseNetType_NetGB28181RtpSendListen && gb28181Listen->nMediaClient == 0)
-					{//¹ú±ê tcp ±»¶¯·½Ê½ ·¢ËÍ 
+					{//å›½æ ‡ tcp è¢«åŠ¨æ–¹å¼ å‘é€ 
 						pXHClient = boost::make_shared<CNetGB28181RtpClient>(serverHandle, CltHandle, szIP, nPort, gb28181Listen->m_szShareMediaURL);
 						if (pXHClient != NULL)
 						{
-							pXHClient->hParent = gb28181Listen->nClient;//¼ÇÂ¼listenµÄID 
-							pXHClient->netBaseNetType = NetBaseNetType_NetGB28181SendRtpTCP_Passive;//¹ú±ê28181 tcp ±»¶¯·½Ê½·¢ËÍÂëÁ÷ 
-							gb28181Listen->nMediaClient = CltHandle; //ÒÑ¾­ÓĞÈËÁ¬½Ó½øÀ´£¬Ö»ÔÊĞíÒ»¸öÁ¬½Ó½øÀ´ 
-							memcpy((char*)&pXHClient->m_startSendRtpStruct, (char*)&gb28181Listen->m_startSendRtpStruct, sizeof(pXHClient->m_startSendRtpStruct)); //°Ñlisten¶ÔÏóµÄ m_startSendRtpStruct ¿½±´¸øCNetGB28181RtpClient¶ÔÏóµÄ m_startSendRtpStruct
+							pXHClient->hParent = gb28181Listen->nClient;//è®°å½•listençš„ID 
+							pXHClient->netBaseNetType = NetBaseNetType_NetGB28181SendRtpTCP_Passive;//å›½æ ‡28181 tcp è¢«åŠ¨æ–¹å¼å‘é€ç æµ 
+							gb28181Listen->nMediaClient = CltHandle; //å·²ç»æœ‰äººè¿æ¥è¿›æ¥ï¼Œåªå…è®¸ä¸€ä¸ªè¿æ¥è¿›æ¥ 
+							memcpy((char*)&pXHClient->m_startSendRtpStruct, (char*)&gb28181Listen->m_startSendRtpStruct, sizeof(pXHClient->m_startSendRtpStruct)); //æŠŠlistenå¯¹è±¡çš„ m_startSendRtpStruct æ‹·è´ç»™CNetGB28181RtpClientå¯¹è±¡çš„ m_startSendRtpStruct
 					
 						}
 					}
@@ -1698,41 +1698,41 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				}
 			}
 			else if (netClientType == NetRevcBaseClient_addStreamProxyControl || netClientType == NetRevcBaseClient_addFFmpegProxyControl)
-			{//´úÀíÀ­Á÷¿ØÖÆ°üÀ¨×ÔÑĞ¡¢µ÷ÓÃffmepg 
+			{//ä»£ç†æ‹‰æµæ§åˆ¶åŒ…æ‹¬è‡ªç ”ã€è°ƒç”¨ffmepg 
 				CltHandle = XHNetSDK_GenerateIdentifier();
 				pXHClient = boost::make_shared<CNetClientAddStreamProxy>(netClientType, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->nClient = CltHandle;
 			}
 			else if (netClientType == NetRevcBaseClient_addPushProxyControl)
-			{//´úÀíÍÆÁ÷¿ØÖÆ 
+			{//ä»£ç†æ¨æµæ§åˆ¶ 
 				CltHandle = XHNetSDK_GenerateIdentifier();
 				pXHClient = boost::make_shared<CNetClientAddPushProxy>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->nClient = CltHandle;
 			}
 			else if (netClientType == NetRevcBaseClient_addStreamProxy)
-			{//´úÀíÀ­Á÷
+			{//ä»£ç†æ‹‰æµ
 				if (memcmp(szIP, "http://", 7) == 0 && strstr(szIP, ".m3u8") != NULL)
-				{//hls ÔİÊ±²»Ö§³Ö hls À­Á÷ 
+				{//hls æš‚æ—¶ä¸æ”¯æŒ hls æ‹‰æµ 
 					pXHClient = boost::make_shared<CNetClientRecvHttpHLS>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 				}
 				else if (memcmp(szIP, "http://", 7) == 0 && strstr(szIP, ".flv") != NULL)
 				{//flv 
 					pXHClient = boost::make_shared<CNetClientRecvFLV>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 				}
 				else if (memcmp(szIP, "rtsp://", 7) == 0)
 				{//rtsp 
 					pXHClient = boost::make_shared<CNetClientRecvRtsp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 					if (CltHandle == 0)
-					{//Á¬½ÓÊ§°Ü
-						WriteLog(Log_Debug, "CreateNetRevcBaseClient()£¬Á¬½Ó rtsp ·şÎñÆ÷ Ê§°Ü szURL = %s , szIP = %s ,port = %s ", szIP, pXHClient->m_rtspStruct.szIP, pXHClient->m_rtspStruct.szPort);
+					{//è¿æ¥å¤±è´¥
+						WriteLog(Log_Debug, "CreateNetRevcBaseClient()ï¼Œè¿æ¥ rtsp æœåŠ¡å™¨ å¤±è´¥ szURL = %s , szIP = %s ,port = %s ", szIP, pXHClient->m_rtspStruct.szIP, pXHClient->m_rtspStruct.szPort);
 						pDisconnectBaseNetFifo.push((unsigned char*)&pXHClient->nClient, sizeof(pXHClient->nClient));
 					}
 				}
@@ -1740,10 +1740,10 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				{//rtmp
 					pXHClient = boost::make_shared<CNetClientRecvRtmp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 				}
 				else if (strstr(szIP, ".mp4") != NULL || strstr(szIP, ".mov") != NULL || strstr(szIP, ".mkv") != NULL || strstr(szIP, ".ts") != NULL || strstr(szIP, ".ps") != NULL || strstr(szIP, ".flv") != NULL || strstr(szIP, ".264") != NULL || strstr(szIP, ".265") != NULL)
-				{//±¾µØÎÄ¼ş
+				{//æœ¬åœ°æ–‡ä»¶
 					CltHandle = XHNetSDK_GenerateIdentifier();
 					pXHClient = boost::make_shared<CNetClientReadLocalMediaFile>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
@@ -1753,9 +1753,9 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 					return NULL;
 			}
 			else if (netClientType == NetRevcBaseClient_addFFmpegProxy)
-			{//ffmpeg ´úÀíÀ­Á÷
+			{//ffmpeg ä»£ç†æ‹‰æµ
 				if (strstr(szIP, "rtsp://") != NULL || strstr(szIP, "rtmp://") != NULL || strstr(szIP, "http://") != NULL || strstr(szIP, "https://") != NULL || strstr(szIP, ".mp4") != NULL || strstr(szIP, ".mov") != NULL || strstr(szIP, ".mkv") != NULL || strstr(szIP, ".ts") != NULL || strstr(szIP, ".ps") != NULL || strstr(szIP, ".flv") != NULL || strstr(szIP, ".264") != NULL || strstr(szIP, ".265") != NULL)
-				{//±¾µØÎÄ¼ş
+				{//æœ¬åœ°æ–‡ä»¶
 					CltHandle = XHNetSDK_GenerateIdentifier();
 					pXHClient = boost::make_shared<CNetClientFFmpegRecv>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
@@ -1763,223 +1763,223 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				}
 			}
 			else if (netClientType == NetRevcBaseClient_addPushStreamProxy)
-			{//´úÀíÍÆÁ÷
+			{//ä»£ç†æ¨æµ
 				if (memcmp(szIP, "rtsp://", 7) == 0)
-				{//hls ÔİÊ±²»Ö§³Ö hls À­Á÷ 
+				{//hls æš‚æ—¶ä¸æ”¯æŒ hls æ‹‰æµ 
 					pXHClient = boost::make_shared<CNetClientSendRtsp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 				}
 				else if (memcmp(szIP, "rtmp://", 7) == 0)
 				{
 					pXHClient = boost::make_shared<CNetClientSendRtmp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 				}
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181RtpServerUDP)
-			{//´´½¨GB28181 µÄudp½ÓÊÕ
+			{//åˆ›å»ºGB28181 çš„udpæ¥æ”¶
 				pXHClient = boost::make_shared<CNetGB28181RtpServer>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->netBaseNetType = NetBaseNetType_NetGB28181RtpServerUDP;
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181RtpServerTCP_Active)
-			{//´´½¨GB28181 µÄTCP Ö÷¶¯Á¬½Ó·½Ê½ 
+			{//åˆ›å»ºGB28181 çš„TCP ä¸»åŠ¨è¿æ¥æ–¹å¼ 
 				pXHClient = boost::make_shared<CNetGB28181RtpServer>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient != NULL)
 				{
 					CNetGB28181RtpServer* gb28181TCP = (CNetGB28181RtpServer*)pXHClient.get();
-					gb28181TCP->netDataCache = new unsigned char[MaxNetDataCacheBufferLength]; //ÔÚÊ¹ÓÃÇ°ÏÈ×¼±¸ºÃÄÚ´æ 
+					gb28181TCP->netDataCache = new unsigned char[MaxNetDataCacheBufferLength]; //åœ¨ä½¿ç”¨å‰å…ˆå‡†å¤‡å¥½å†…å­˜ 
 					pXHClient->netBaseNetType = NetBaseNetType_NetGB28181RtpServerTCP_Active;
 					pXHClient->hParent = CltHandle;
 				}
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181SendRtpUDP)
-			{//´´½¨GB28181 µÄudp·¢ËÍ
+			{//åˆ›å»ºGB28181 çš„udpå‘é€
 				pXHClient = boost::make_shared<CNetGB28181RtpClient>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->netBaseNetType = NetBaseNetType_NetGB28181SendRtpUDP;
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181SendRtpTCP_Connect)
-			{//´´½¨GB28181 µÄtcp·¢ËÍ 
+			{//åˆ›å»ºGB28181 çš„tcpå‘é€ 
 				pXHClient = boost::make_shared<CNetGB28181RtpClient>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->netBaseNetType = NetBaseNetType_NetGB28181SendRtpTCP_Connect;
 			}
 			else if (netClientType == NetBaseNetType_RecordFile_FMP4)
-			{//fmp4Â¼Ïñ
+			{//fmp4å½•åƒ
 				pXHClient = boost::make_shared<CStreamRecordFMP4>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->netBaseNetType = NetBaseNetType_RecordFile_FMP4;
 			}
 			else if (netClientType == NetBaseNetType_RecordFile_MP4)
-			{//mp4Â¼Ïñ
+			{//mp4å½•åƒ
 				pXHClient = boost::make_shared<CStreamRecordMP4>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->netBaseNetType = NetBaseNetType_RecordFile_MP4;
 			}
 			else if (netClientType == NetBaseNetType_RecordFile_TS)
-			{//tsÂ¼Ïñ
+			{//tså½•åƒ
 				pXHClient = boost::make_shared<CStreamRecordTS>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 			}
 			else if (netClientType == ReadRecordFileInput_ReadFMP4File)
-			{//¶ÁÈ¡fmp4ÎÄ¼ş
+			{//è¯»å–fmp4æ–‡ä»¶
 				CltHandle = XHNetSDK_GenerateIdentifier();
 				pXHClient = boost::make_shared<CReadRecordFileInput>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->netBaseNetType = ReadRecordFileInput_ReadFMP4File;
 			}
 			else if (netClientType == NetBaseNetType_SnapPicture_JPEG)
-			{//×¥ÅÄÍ¼Æ¬
+			{//æŠ“æ‹å›¾ç‰‡
 				CltHandle = XHNetSDK_GenerateIdentifier();
 				pXHClient = boost::make_shared<CNetClientSnap>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_None_reader)
-			{//ÊÂ¼şÍ¨Öª1
+			{//äº‹ä»¶é€šçŸ¥1
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientNoneReader = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ  
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹  
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_Not_found)
-			{//ÊÂ¼şÍ¨Öª2
+			{//äº‹ä»¶é€šçŸ¥2
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientNotFound = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_Record_mp4)
-			{//ÊÂ¼şÍ¨Öª3
+			{//äº‹ä»¶é€šçŸ¥3
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientRecordMp4 = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_stream_arrive)
-			{//ÊÂ¼şÍ¨Öª4
+			{//äº‹ä»¶é€šçŸ¥4
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientArrive = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_stream_not_arrive)
-			{//ÊÂ¼şÍ¨Öª5
+			{//äº‹ä»¶é€šçŸ¥5
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientNotArrive = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_stream_disconnect)
-			{//ÊÂ¼şÍ¨Öª6
+			{//äº‹ä»¶é€šçŸ¥6
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientDisconnect = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_record_ts)
-			{//ÊÂ¼şÍ¨Öª7
+			{//äº‹ä»¶é€šçŸ¥7
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientRecordTS = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_Record_Progress)
-			{//ÊÂ¼şÍ¨Öª8
+			{//äº‹ä»¶é€šçŸ¥8
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientRecordProgress = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_ServerStarted)
-			{//ÊÂ¼şÍ¨Öª9
+			{//äº‹ä»¶é€šçŸ¥9
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nServerStarted = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_ServerKeepalive)
-			{//ÊÂ¼şÍ¨Öª10
+			{//äº‹ä»¶é€šçŸ¥10
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nServerKeepalive = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_DeleteRecordMp4)
-			{//ÊÂ¼şÍ¨Öª11
+			{//äº‹ä»¶é€šçŸ¥11
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientDeleteRecordMp4 = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_play)
-			{//ÊÂ¼şÍ¨Öª12
+			{//äº‹ä»¶é€šçŸ¥12
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nPlay = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_publish)
-			{//ÊÂ¼şÍ¨Öª13
+			{//äº‹ä»¶é€šçŸ¥13
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nPublish = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_iframe_arrive)
-			{//ÊÂ¼şÍ¨Öª14
+			{//äº‹ä»¶é€šçŸ¥14
 				pXHClient = boost::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nFrameArrive = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181RecvRtpPS_TS)
-			{//µ¥¶Ë¿Ú½ÓÊÕ¹ú±ê 
+			{//å•ç«¯å£æ¥æ”¶å›½æ ‡ 
 				pXHClient = boost::make_shared<CNetServerRecvRtpTS_PS>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					CltHandle = pXHClient->nClient;
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181UDPTSStreamInput)
-			{//TS ½â°üĞÎ³ÉÃ½ÌåÔ´
+			{//TS è§£åŒ…å½¢æˆåª’ä½“æº
 				pXHClient = boost::make_shared<CRtpTSStreamInput>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					CltHandle = pXHClient->nClient;
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181UDPPSStreamInput)
-			{//PS ½â°üĞÎ³ÉÃ½ÌåÔ´
+			{//PS è§£åŒ…å½¢æˆåª’ä½“æº
 				pXHClient = boost::make_shared<CRtpPSStreamInput>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					CltHandle = pXHClient->nClient;
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181RtpServerListen)
-			{//¹ú±êTCP±»¶¯½ÓÊÕµÄListen 
+			{//å›½æ ‡TCPè¢«åŠ¨æ¥æ”¶çš„Listen 
 				pXHClient = boost::make_shared<CNetGB28181Listen>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
@@ -1988,7 +1988,7 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				}
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181RtpSendListen)
-			{//¹ú±êTCP±»¶¯·¢ËÍµÄListen
+			{//å›½æ ‡TCPè¢«åŠ¨å‘é€çš„Listen
 				pXHClient = boost::make_shared<CNetGB28181Listen>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
@@ -1997,7 +1997,7 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				}
 			}
 			else if (netClientType == NetBaseNetType_RtspServerRecvPushVideo)
-			{//½ÓÊÕrtspÍÆÁ÷udp·½Ê½ÊÓÆµÂëÁ÷
+			{//æ¥æ”¶rtspæ¨æµudpæ–¹å¼è§†é¢‘ç æµ
 				pXHClient = boost::make_shared<CNetRtspServerUDP>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
@@ -2006,7 +2006,7 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				}
 			}
 			else if (netClientType == NetBaseNetType_RtspServerRecvPushAudio)
-			{//½ÓÊÕrtspÍÆÁ÷udp·½Ê½ÒôÆµÂëÁ÷
+			{//æ¥æ”¶rtspæ¨æµudpæ–¹å¼éŸ³é¢‘ç æµ
 				pXHClient = boost::make_shared<CNetRtspServerUDP>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
@@ -2015,12 +2015,12 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				}
 			}
 			else if (netClientType == NetBaseNetType_NetServerReadMultRecordFile)
-			{//Á¬Ğø¶ÁÈ¡¶à¸öÂ¼ÏñÎÄ¼ş
+			{//è¿ç»­è¯»å–å¤šä¸ªå½•åƒæ–‡ä»¶
 				CltHandle = XHNetSDK_GenerateIdentifier();
 				pXHClient = boost::make_shared<CNetServerReadMultRecordFile>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 			}
 			else if (netClientType == NetBaseNetType_NetClientWebrtcPlayer)
-			{//webrtc²¥·Å 
+			{//webrtcæ’­æ”¾ 
 				CltHandle = XHNetSDK_GenerateIdentifier();
 				pXHClient = boost::make_shared<CNetClientWebrtcPlayer>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 			}
@@ -2071,7 +2071,7 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				else if (serverHandle == srvhandle_9298)
 					pXHClient = std::make_shared<CNetServerRecvAudio>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				else if (serverHandle == srvhandle_10000)
-				{//¹ú±êµ¥¶Ë¿ÚÊäÈë
+				{//å›½æ ‡å•ç«¯å£è¾“å…¥
 					pXHClient = std::make_shared<CNetGB28181RtpServer>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient != NULL)
 					{
@@ -2080,46 +2080,46 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 						pXHClient->hParent = CltHandle;
 						gb28181TCP->netDataCache = new unsigned char[MaxNetDataCacheBufferLength];
 						gb28181TCP->m_addStreamProxyStruct.RtpPayloadDataType[0] = 0x31;//PS  
-						gb28181TCP->m_addStreamProxyStruct.disableVideo[0] = 0x30;//Ã»ÓĞÆÁ±ÎÊÓÆµ
-						gb28181TCP->m_addStreamProxyStruct.disableAudio[0] = 0x30;//Ã»ÓĞÆÁ±ÎÒôÆµ
+						gb28181TCP->m_addStreamProxyStruct.disableVideo[0] = 0x30;//æ²¡æœ‰å±è”½è§†é¢‘
+						gb28181TCP->m_addStreamProxyStruct.disableAudio[0] = 0x30;//æ²¡æœ‰å±è”½éŸ³é¢‘
 					}
 				}
 				else
 				{
 					CNetRevcBase_ptr gb28181Listen = GetNetRevcBaseClientNoLock(serverHandle);
 					if (gb28181Listen && gb28181Listen->netBaseNetType == NetBaseNetType_NetGB28181RtpServerListen && gb28181Listen->nMediaClient == 0)
-					{//¹ú±êTCP ±»¶¯·½Ê½½ÓÈë 
+					{//å›½æ ‡TCP è¢«åŠ¨æ–¹å¼æ¥å…¥ 
 						CNetGB28181RtpServer* gb28181TCP = NULL;
 						pXHClient = std::make_shared<CNetGB28181RtpServer>(serverHandle, CltHandle, szIP, nPort, gb28181Listen->m_szShareMediaURL);
 						if (pXHClient != NULL)
 						{
-							pXHClient->netBaseNetType = NetBaseNetType_NetGB28181RtpServerTCP_Server;//¹ú±ê28181 tcp ·½Ê½½ÓÊÕÂëÁ÷ 
-							gb28181Listen->nMediaClient = CltHandle; //ÒÑ¾­ÓĞÈËÁ¬½Ó½øÀ´
+							pXHClient->netBaseNetType = NetBaseNetType_NetGB28181RtpServerTCP_Server;//å›½æ ‡28181 tcp æ–¹å¼æ¥æ”¶ç æµ 
+							gb28181Listen->nMediaClient = CltHandle; //å·²ç»æœ‰äººè¿æ¥è¿›æ¥
 
 							gb28181TCP = (CNetGB28181RtpServer*)pXHClient.get();
 							if (gb28181TCP)
 							{
 								strcpy(gb28181TCP->szClientIP, szIP);
 								gb28181TCP->nClientPort = nPort;
-								gb28181TCP->netDataCache = new unsigned char[MaxNetDataCacheBufferLength]; //ÔÚÊ¹ÓÃÇ°ÏÈ×¼±¸ºÃÄÚ´æ 
+								gb28181TCP->netDataCache = new unsigned char[MaxNetDataCacheBufferLength]; //åœ¨ä½¿ç”¨å‰å…ˆå‡†å¤‡å¥½å†…å­˜ 
 							}
 
-							pXHClient->hParent = gb28181Listen->nClient;//¼ÇÂ¼¹ú±ê´úÀí¾ä±úºÅ
-							pXHClient->m_gbPayload = atoi(gb28181Listen->m_openRtpServerStruct.payload);//¸üĞÂpaylad 
+							pXHClient->hParent = gb28181Listen->nClient;//è®°å½•å›½æ ‡ä»£ç†å¥æŸ„å·
+							pXHClient->m_gbPayload = atoi(gb28181Listen->m_openRtpServerStruct.payload);//æ›´æ–°paylad 
 							memcpy((char*)&pXHClient->m_addStreamProxyStruct, (char*)&gb28181Listen->m_addStreamProxyStruct, sizeof(gb28181Listen->m_addStreamProxyStruct));
 							memcpy((char*)&pXHClient->m_openRtpServerStruct, (char*)&gb28181Listen->m_openRtpServerStruct, sizeof(gb28181Listen->m_openRtpServerStruct));
-							memcpy((char*)&pXHClient->m_h265ConvertH264Struct, (char*)&gb28181Listen->m_h265ConvertH264Struct, sizeof(gb28181Listen->m_h265ConvertH264Struct));//µ¥¶ÀÖ¸¶¨×ªÂë²ÎÊı
+							memcpy((char*)&pXHClient->m_h265ConvertH264Struct, (char*)&gb28181Listen->m_h265ConvertH264Struct, sizeof(gb28181Listen->m_h265ConvertH264Struct));//å•ç‹¬æŒ‡å®šè½¬ç å‚æ•°
 						}
 					}
 					else if (gb28181Listen && gb28181Listen->netBaseNetType == NetBaseNetType_NetGB28181RtpSendListen && gb28181Listen->nMediaClient == 0)
-					{//¹ú±ê tcp ±»¶¯·½Ê½ ·¢ËÍ 
+					{//å›½æ ‡ tcp è¢«åŠ¨æ–¹å¼ å‘é€ 
 						pXHClient = std::make_shared<CNetGB28181RtpClient>(serverHandle, CltHandle, szIP, nPort, gb28181Listen->m_szShareMediaURL);
 						if (pXHClient != NULL)
 						{
-							pXHClient->hParent = gb28181Listen->nClient;//¼ÇÂ¼listenµÄID 
-							pXHClient->netBaseNetType = NetBaseNetType_NetGB28181SendRtpTCP_Passive;//¹ú±ê28181 tcp ±»¶¯·½Ê½·¢ËÍÂëÁ÷ 
-							gb28181Listen->nMediaClient = CltHandle; //ÒÑ¾­ÓĞÈËÁ¬½Ó½øÀ´£¬Ö»ÔÊĞíÒ»¸öÁ¬½Ó½øÀ´ 
-							memcpy((char*)&pXHClient->m_startSendRtpStruct, (char*)&gb28181Listen->m_startSendRtpStruct, sizeof(pXHClient->m_startSendRtpStruct)); //°Ñlisten¶ÔÏóµÄ m_startSendRtpStruct ¿½±´¸øCNetGB28181RtpClient¶ÔÏóµÄ m_startSendRtpStruct
+							pXHClient->hParent = gb28181Listen->nClient;//è®°å½•listençš„ID 
+							pXHClient->netBaseNetType = NetBaseNetType_NetGB28181SendRtpTCP_Passive;//å›½æ ‡28181 tcp è¢«åŠ¨æ–¹å¼å‘é€ç æµ 
+							gb28181Listen->nMediaClient = CltHandle; //å·²ç»æœ‰äººè¿æ¥è¿›æ¥ï¼Œåªå…è®¸ä¸€ä¸ªè¿æ¥è¿›æ¥ 
+							memcpy((char*)&pXHClient->m_startSendRtpStruct, (char*)&gb28181Listen->m_startSendRtpStruct, sizeof(pXHClient->m_startSendRtpStruct)); //æŠŠlistenå¯¹è±¡çš„ m_startSendRtpStruct æ‹·è´ç»™CNetGB28181RtpClientå¯¹è±¡çš„ m_startSendRtpStruct
 						
 						}
 					}
@@ -2128,47 +2128,47 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				}
 			}
 			else if (netClientType == NetRevcBaseClient_addStreamProxyControl || netClientType == NetRevcBaseClient_addFFmpegProxyControl)
-			{//´úÀíÀ­Á÷¿ØÖÆ°üÀ¨×ÔÑĞ¡¢µ÷ÓÃffmepg 
+			{//ä»£ç†æ‹‰æµæ§åˆ¶åŒ…æ‹¬è‡ªç ”ã€è°ƒç”¨ffmepg 
 				CltHandle = XHNetSDK_GenerateIdentifier();
 				pXHClient = std::make_shared<CNetClientAddStreamProxy>(netClientType, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->nClient = CltHandle;
 			}
 			else if (netClientType == NetRevcBaseClient_addPushProxyControl)
-			{//´úÀíÍÆÁ÷¿ØÖÆ 
+			{//ä»£ç†æ¨æµæ§åˆ¶ 
 				CltHandle = XHNetSDK_GenerateIdentifier();
 				pXHClient = std::make_shared<CNetClientAddPushProxy>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->nClient = CltHandle;
 			}
 			else if (netClientType == NetRevcBaseClient_addStreamProxy)
-			{//´úÀíÀ­Á÷
+			{//ä»£ç†æ‹‰æµ
 				if (memcmp(szIP, "http://", 7) == 0 && strstr(szIP, ".m3u8") != NULL)
-				{//hls ÔİÊ±²»Ö§³Ö hls À­Á÷ 
+				{//hls æš‚æ—¶ä¸æ”¯æŒ hls æ‹‰æµ 
 					pXHClient = std::make_shared<CNetClientRecvHttpHLS>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 				}
 				else if ((memcmp(szIP, "http://", 7) == 0 || memcmp(szIP, "https://", 8) == 0) && strstr(szIP, ".flv") != NULL)
 				{//flv 
 					pXHClient = std::make_shared<CNetClientRecvFLV>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 				}
 				else if (memcmp(szIP, "rtsp://", 7) == 0 || memcmp(szIP, "rtsps://", 8) == 0)
 				{//rtsp 
 					pXHClient = std::make_shared<CNetClientRecvRtsp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 				}
 				else if (memcmp(szIP, "rtmp://", 7) == 0 || memcmp(szIP, "rtmps://", 8) == 0)
 				{//rtmp
 					pXHClient = std::make_shared<CNetClientRecvRtmp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 				}
 				else if (strstr(szIP, ".mp4") != NULL || strstr(szIP, ".mov") != NULL || strstr(szIP, ".mkv") != NULL || strstr(szIP, ".ts") != NULL || strstr(szIP, ".ps") != NULL || strstr(szIP, ".flv") != NULL || strstr(szIP, ".264") != NULL || strstr(szIP, ".265") != NULL)
-				{//±¾µØÎÄ¼ş
+				{//æœ¬åœ°æ–‡ä»¶
 					CltHandle = XHNetSDK_GenerateIdentifier();
 					pXHClient = std::make_shared<CNetClientReadLocalMediaFile>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
@@ -2178,9 +2178,9 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 					return NULL;
 			}
 			else if (netClientType == NetRevcBaseClient_addFFmpegProxy)
-			{//ffmpeg ´úÀíÀ­Á÷
+			{//ffmpeg ä»£ç†æ‹‰æµ
 				if (strstr(szIP, "rtsp://") != NULL || strstr(szIP, "rtsps://") != NULL || strstr(szIP, "rtmp://") != NULL || strstr(szIP, "rtmps://") != NULL || strstr(szIP, "http://") != NULL || strstr(szIP, "https://") != NULL || strstr(szIP, ".mp4") != NULL || strstr(szIP, ".mov") != NULL || strstr(szIP, ".mkv") != NULL || strstr(szIP, ".ts") != NULL || strstr(szIP, ".ps") != NULL || strstr(szIP, ".flv") != NULL || strstr(szIP, ".264") != NULL || strstr(szIP, ".265") != NULL)
-				{//±¾µØÎÄ¼ş
+				{//æœ¬åœ°æ–‡ä»¶
 					CltHandle = XHNetSDK_GenerateIdentifier();
 					pXHClient = std::make_shared<CNetClientFFmpegRecv>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
@@ -2188,247 +2188,247 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				}
 			}
 			else if (netClientType == NetRevcBaseClient_addPushStreamProxy)
-			{//´úÀíÍÆÁ÷
+			{//ä»£ç†æ¨æµ
 				if (memcmp(szIP, "rtsp://", 7) == 0 || memcmp(szIP, "rtsps://", 8) == 0)
-				{//hls ÔİÊ±²»Ö§³Ö hls À­Á÷ 
+				{//hls æš‚æ—¶ä¸æ”¯æŒ hls æ‹‰æµ 
 					pXHClient = std::make_shared<CNetClientSendRtsp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 				}
 				else if (memcmp(szIP, "rtmp://", 7) == 0 || memcmp(szIP, "rtmps://", 8) == 0)
 				{
 					pXHClient = std::make_shared<CNetClientSendRtmp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 				}
 			}
 			else if (netClientType == NetRevcBaseClient_addPushStreamProxy)
-			{//´úÀíÍÆÁ÷
+			{//ä»£ç†æ¨æµ
 				if (memcmp(szIP, "rtsp://", 7) == 0)
-				{//hls ÔİÊ±²»Ö§³Ö hls À­Á÷ 
+				{//hls æš‚æ—¶ä¸æ”¯æŒ hls æ‹‰æµ 
 					pXHClient = std::make_shared<CNetClientSendRtsp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 				}
 				else if (memcmp(szIP, "rtmp://", 7) == 0)
 				{
 					pXHClient = std::make_shared<CNetClientSendRtmp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 					if (pXHClient)
-						CltHandle = pXHClient->nClient; //°ÑnClient¸³Öµ¸ø CltHandle ,×÷Îª¹Ø¼ü×Ö £¬Èç¹ûÁ¬½ÓÊ§°Ü£¬»áÊÕµ½»Øµ÷Í¨Öª£¬ÔÚ»Øµ÷Í¨Öª½øĞĞÉ¾³ı¼´¿É 
+						CltHandle = pXHClient->nClient; //æŠŠnClientèµ‹å€¼ç»™ CltHandle ,ä½œä¸ºå…³é”®å­— ï¼Œå¦‚æœè¿æ¥å¤±è´¥ï¼Œä¼šæ”¶åˆ°å›è°ƒé€šçŸ¥ï¼Œåœ¨å›è°ƒé€šçŸ¥è¿›è¡Œåˆ é™¤å³å¯ 
 				}
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181RtpServerUDP)
-			{//´´½¨GB28181 µÄudp½ÓÊÕ
+			{//åˆ›å»ºGB28181 çš„udpæ¥æ”¶
 				pXHClient = std::make_shared<CNetGB28181RtpServer>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->netBaseNetType = NetBaseNetType_NetGB28181RtpServerUDP;
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181RtpServerTCP_Active)
-			{//´´½¨GB28181 µÄTCP Ö÷¶¯Á¬½Ó·½Ê½ 
+			{//åˆ›å»ºGB28181 çš„TCP ä¸»åŠ¨è¿æ¥æ–¹å¼ 
 				pXHClient = std::make_shared<CNetGB28181RtpServer>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient != NULL)
 				{
 					CNetGB28181RtpServer* gb28181TCP = (CNetGB28181RtpServer*)pXHClient.get();
-					gb28181TCP->netDataCache = new unsigned char[MaxNetDataCacheBufferLength]; //ÔÚÊ¹ÓÃÇ°ÏÈ×¼±¸ºÃÄÚ´æ 
+					gb28181TCP->netDataCache = new unsigned char[MaxNetDataCacheBufferLength]; //åœ¨ä½¿ç”¨å‰å…ˆå‡†å¤‡å¥½å†…å­˜ 
 					pXHClient->netBaseNetType = NetBaseNetType_NetGB28181RtpServerTCP_Active;
 					pXHClient->hParent = CltHandle;
 				}
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181SendRtpUDP)
-			{//´´½¨GB28181 µÄudp·¢ËÍ
+			{//åˆ›å»ºGB28181 çš„udpå‘é€
 				pXHClient = std::make_shared<CNetGB28181RtpClient>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->netBaseNetType = NetBaseNetType_NetGB28181SendRtpUDP;
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181SendRtpTCP_Connect)
-			{//´´½¨GB28181 µÄtcp·¢ËÍ 
+			{//åˆ›å»ºGB28181 çš„tcpå‘é€ 
 				pXHClient = std::make_shared<CNetGB28181RtpClient>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->netBaseNetType = NetBaseNetType_NetGB28181SendRtpTCP_Connect;
 			}
 			else if (netClientType == NetBaseNetType_RecordFile_FMP4)
-			{//fmp4Â¼Ïñ
+			{//fmp4å½•åƒ
 				pXHClient = std::make_shared<CStreamRecordFMP4>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->netBaseNetType = NetBaseNetType_RecordFile_FMP4;
 			}
 			else if (netClientType == NetBaseNetType_RecordFile_MP4)
-			{//mp4Â¼Ïñ
+			{//mp4å½•åƒ
 				pXHClient = std::make_shared<CStreamRecordMP4>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->netBaseNetType = NetBaseNetType_RecordFile_MP4;
 			}
 			else if (netClientType == NetBaseNetType_RecordFile_TS)
-			{//tsÂ¼Ïñ
+			{//tså½•åƒ
 				pXHClient = std::make_shared<CStreamRecordTS>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 			}
 			else if (netClientType == ReadRecordFileInput_ReadFMP4File)
-			{//¶ÁÈ¡fmp4ÎÄ¼ş
+			{//è¯»å–fmp4æ–‡ä»¶
 				CltHandle = XHNetSDK_GenerateIdentifier();
 				pXHClient = std::make_shared<CReadRecordFileInput>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					pXHClient->netBaseNetType = ReadRecordFileInput_ReadFMP4File;
 			}
 			else if (netClientType == NetBaseNetType_SnapPicture_JPEG)
-			{//×¥ÅÄÍ¼Æ¬
+			{//æŠ“æ‹å›¾ç‰‡
 				CltHandle = XHNetSDK_GenerateIdentifier();
 				pXHClient = std::make_shared<CNetClientSnap>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_None_reader)
-			{//ÊÂ¼şÍ¨Öª1
+			{//äº‹ä»¶é€šçŸ¥1
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientNoneReader = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ  
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹  
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_Not_found)
-			{//ÊÂ¼şÍ¨Öª2
+			{//äº‹ä»¶é€šçŸ¥2
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientNotFound = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_Record_mp4)
-			{//ÊÂ¼şÍ¨Öª3
+			{//äº‹ä»¶é€šçŸ¥3
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientRecordMp4 = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_stream_arrive)
-			{//ÊÂ¼şÍ¨Öª4
+			{//äº‹ä»¶é€šçŸ¥4
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientArrive = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_stream_not_arrive)
-			{//ÊÂ¼şÍ¨Öª5
+			{//äº‹ä»¶é€šçŸ¥5
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientNotArrive = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_stream_disconnect)
-			{//ÊÂ¼şÍ¨Öª6
+			{//äº‹ä»¶é€šçŸ¥6
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientDisconnect = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_record_ts)
-			{//ÊÂ¼şÍ¨Öª7
+			{//äº‹ä»¶é€šçŸ¥7
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientRecordTS = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_Record_Progress)
-			{//ÊÂ¼şÍ¨Öª8
+			{//äº‹ä»¶é€šçŸ¥8
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientRecordProgress = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_ServerStarted)
-			{//ÊÂ¼şÍ¨Öª9
+			{//äº‹ä»¶é€šçŸ¥9
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nServerStarted = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_ServerKeepalive)
-			{//ÊÂ¼şÍ¨Öª10
+			{//äº‹ä»¶é€šçŸ¥10
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nServerKeepalive = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_DeleteRecordMp4)
-			{//ÊÂ¼şÍ¨Öª11
+			{//äº‹ä»¶é€šçŸ¥11
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nClientDeleteRecordMp4 = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_play)
-			{//ÊÂ¼şÍ¨Öª12
+			{//äº‹ä»¶é€šçŸ¥12
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nPlay = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_publish)
-			{//ÊÂ¼şÍ¨Öª13
+			{//äº‹ä»¶é€šçŸ¥13
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nPublish = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_iframe_arrive)
-			{//ÊÂ¼şÍ¨Öª14
+			{//äº‹ä»¶é€šçŸ¥14
 				pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
 					CltHandle = ABL_MediaServerPort.nFrameArrive = pXHClient->nClient;
-					pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+					pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 				}
 			}
 			else if (netClientType == NetBaseNetType_HttpClient_on_rtsp_replay)
-			{//ÊÂ¼şÍ¨Öª15
+			{//äº‹ä»¶é€šçŸ¥15
 			pXHClient = std::make_shared<CNetClientHttp>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 			if (pXHClient)
 			{
 				CltHandle = ABL_MediaServerPort.nRtspReplay = pXHClient->nClient;
-				pXHClient->netBaseNetType = netClientType; //¸üĞÂÍøÂçÀàĞÍ
+				pXHClient->netBaseNetType = netClientType; //æ›´æ–°ç½‘ç»œç±»å‹
 			}
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181RecvRtpPS_TS)
-			{//µ¥¶Ë¿Ú½ÓÊÕ¹ú±ê 
+			{//å•ç«¯å£æ¥æ”¶å›½æ ‡ 
 				pXHClient = std::make_shared<CNetServerRecvRtpTS_PS>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					CltHandle = pXHClient->nClient;
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181UDPTSStreamInput)
-			{//TS ½â°üĞÎ³ÉÃ½ÌåÔ´
+			{//TS è§£åŒ…å½¢æˆåª’ä½“æº
 				pXHClient = std::make_shared<CRtpTSStreamInput>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					CltHandle = pXHClient->nClient;
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181UDPPSStreamInput)
-			{//PS ½â°üĞÎ³ÉÃ½ÌåÔ´
+			{//PS è§£åŒ…å½¢æˆåª’ä½“æº
 				pXHClient = std::make_shared<CRtpPSStreamInput>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 					CltHandle = pXHClient->nClient;
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181RtpServerListen)
-			{//¹ú±êTCP±»¶¯½ÓÊÕµÄListen 
+			{//å›½æ ‡TCPè¢«åŠ¨æ¥æ”¶çš„Listen 
 				pXHClient = std::make_shared<CNetGB28181Listen>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
@@ -2437,7 +2437,7 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				}
 			}
 			else if (netClientType == NetBaseNetType_NetGB28181RtpSendListen)
-			{//¹ú±êTCP±»¶¯·¢ËÍµÄListen
+			{//å›½æ ‡TCPè¢«åŠ¨å‘é€çš„Listen
 				pXHClient = std::make_shared<CNetGB28181Listen>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
@@ -2446,7 +2446,7 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				}
 			}
 			else if (netClientType == NetBaseNetType_RtspServerRecvPushVideo)
-			{//½ÓÊÕrtspÍÆÁ÷udp·½Ê½ÊÓÆµÂëÁ÷
+			{//æ¥æ”¶rtspæ¨æµudpæ–¹å¼è§†é¢‘ç æµ
 				pXHClient = std::make_shared<CNetRtspServerUDP>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
@@ -2455,7 +2455,7 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				}
 			}
 			else if (netClientType == NetBaseNetType_RtspServerRecvPushAudio)
-			{//½ÓÊÕrtspÍÆÁ÷udp·½Ê½ÒôÆµÂëÁ÷
+			{//æ¥æ”¶rtspæ¨æµudpæ–¹å¼éŸ³é¢‘ç æµ
 				pXHClient = std::make_shared<CNetRtspServerUDP>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 				if (pXHClient)
 				{
@@ -2464,12 +2464,12 @@ CNetRevcBase_ptr CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHand
 				}
 			}
 			else if (netClientType == NetBaseNetType_NetServerReadMultRecordFile)
-			{//Á¬Ğø¶ÁÈ¡¶à¸öÂ¼ÏñÎÄ¼ş, serverHandle Îªmp4Â¼ÏñÎÄ¼şÃû×Ö
+			{//è¿ç»­è¯»å–å¤šä¸ªå½•åƒæ–‡ä»¶, serverHandle ä¸ºmp4å½•åƒæ–‡ä»¶åå­—
 				CltHandle = XHNetSDK_GenerateIdentifier();
 				pXHClient = std::make_shared<CNetServerReadMultRecordFile>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 			}
 			else if (netClientType == NetBaseNetType_NetClientWebrtcPlayer)
-			{//webrtc²¥·Å 
+			{//webrtcæ’­æ”¾ 
 				CltHandle = XHNetSDK_GenerateIdentifier();
 				pXHClient = std::make_shared<CNetClientWebrtcPlayer>(serverHandle, CltHandle, szIP, nPort, szShareMediaURL);
 			}
@@ -2524,18 +2524,18 @@ bool  DeleteNetRevcBaseClient(NETHANDLE CltHandle)
 		if (((*iterator1).second->netBaseNetType == NetBaseNetType_RtspClientPush || (*iterator1).second->netBaseNetType == NetBaseNetType_RtmpClientPush ||
 			(*iterator1).second->netBaseNetType == NetBaseNetType_RtspClientRecv || (*iterator1).second->netBaseNetType == NetBaseNetType_RtmpClientRecv || (*iterator1).second->netBaseNetType == NetBaseNetType_FFmpegRecvNetworkMedia)
 			&& (*iterator1).second->bProxySuccessFlag == false)
-		{//rtsp\rtmp ´úÀíÀ­Á÷£¬rtsp \ rtmp ´úÀíÍÆÁ÷
-			//Èç¹ûÃ»ÓĞ³É¹¦¹ıÔòĞèÒªÉ¾³ı¸¸Àà 
+		{//rtsp\rtmp ä»£ç†æ‹‰æµï¼Œrtsp \ rtmp ä»£ç†æ¨æµ
+			//å¦‚æœæ²¡æœ‰æˆåŠŸè¿‡åˆ™éœ€è¦åˆ é™¤çˆ¶ç±» 
 			auto  pParentPtr = GetNetRevcBaseClientNoLock((*iterator1).second->hParent);
 			if (pParentPtr && pParentPtr->bProxySuccessFlag == false || (*iterator1).second->m_nXHRtspURLType == XHRtspURLType_RecordPlay)
 				pDisconnectBaseNetFifo.push((unsigned char*)&(*iterator1).second->hParent, sizeof((*iterator1).second->hParent));
 		}
 
-		//¹Ø±Õ¹ú±ê¼àÌı 
+		//å…³é—­å›½æ ‡ç›‘å¬ 
 		if ((*iterator1).second->netBaseNetType == NetBaseNetType_NetGB28181RtpServerListen)
 		{
 			if ((*iterator1).second->nMediaClient == 0)
-			{//ÂëÁ÷Ã»ÓĞ´ïµ½Í¨Öª
+			{//ç æµæ²¡æœ‰è¾¾åˆ°é€šçŸ¥
 				if (ABL_MediaServerPort.hook_enable == 1 && (*iterator1).second->bUpdateVideoFrameSpeedFlag == false)
 				{
 					MessageNoticeStruct msgNotice;
@@ -2552,13 +2552,13 @@ bool  DeleteNetRevcBaseClient(NETHANDLE CltHandle)
 			WriteLog(Log_Debug, " XHNetSDK_Unlisten() , nMediaClient = %llu  ", (*iterator1).second->nClient);
 		}
 
-		//°ÑÒÀÀµµÄ¸¸ÀàÉ¾³ıµô
+		//æŠŠä¾èµ–çš„çˆ¶ç±»åˆ é™¤æ‰
 		if ((*iterator1).second->hParent > 0)
 		{
 			auto  pParentPtr = GetNetRevcBaseClientNoLock((*iterator1).second->hParent);
 
 			if (pParentPtr != NULL)
-			{//²»ÊÇ´úÀíÍÆÁ÷¡¢´úÀíÀ­Á÷µÄ¾Í¿ÉÒÔÉ¾³ı¸¸Àà,´úÀíÀ­Á÷¡¢´úÀíÍÆÁ÷µÄ²»ÄÜÉ¾³ı £¬ĞèÒªÖØÁ¬´ÎÊı´ïµ½ÅäÖÃÎÄ¼şËùÅäÖÃµÄÊıÁ¿ 
+			{//ä¸æ˜¯ä»£ç†æ¨æµã€ä»£ç†æ‹‰æµçš„å°±å¯ä»¥åˆ é™¤çˆ¶ç±»,ä»£ç†æ‹‰æµã€ä»£ç†æ¨æµçš„ä¸èƒ½åˆ é™¤ ï¼Œéœ€è¦é‡è¿æ¬¡æ•°è¾¾åˆ°é…ç½®æ–‡ä»¶æ‰€é…ç½®çš„æ•°é‡ 
 				if (!(pParentPtr->netBaseNetType == NetBaseNetType_addStreamProxyControl || pParentPtr->netBaseNetType == NetBaseNetType_addPushProxyControl))
 					pDisconnectBaseNetFifo.push((unsigned char*)&(*iterator1).second->hParent, sizeof((*iterator1).second->hParent));
 			}
@@ -2574,12 +2574,12 @@ bool  DeleteNetRevcBaseClient(NETHANDLE CltHandle)
 }
 
 /*
- ¹¦ÄÜ£º
-	¼ì²é¶Ë¿ÚÊÇ·ñÒÑ¾­Ê¹ÓÃ
-²ÎÊı£º
-  int   nPort,      ¶Ë¿Ú
-  int   nPortType,  ÀàĞÍ  1 openRtpServe , 2 sartSendRtp
-  bool  bLockFlag   ÊÇ·ñËø×¡
+ åŠŸèƒ½ï¼š
+	æ£€æŸ¥ç«¯å£æ˜¯å¦å·²ç»ä½¿ç”¨
+å‚æ•°ï¼š
+  int   nPort,      ç«¯å£
+  int   nPortType,  ç±»å‹  1 openRtpServe , 2 sartSendRtp
+  bool  bLockFlag   æ˜¯å¦é”ä½
 */
 bool  CheckPortAlreadyUsed(int nPort, int nPortType, bool bLockFlag)
 {
@@ -2598,7 +2598,7 @@ bool  CheckPortAlreadyUsed(int nPort, int nPortType, bool bLockFlag)
 			if (pClient->netBaseNetType == NetRevcBaseClient__NetGB28181Proxy &&
 				atoi(pClient->m_openRtpServerStruct.port) == nPort
 				)
-			{//ÒÑ¾­Õ¼ÓÃÁË nPort;
+			{//å·²ç»å ç”¨äº† nPort;
 				bRet = true;
 				break;
 			}
@@ -2608,7 +2608,7 @@ bool  CheckPortAlreadyUsed(int nPort, int nPortType, bool bLockFlag)
 			if ((pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpUDP || pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Connect) &&
 				atoi(pClient->m_startSendRtpStruct.src_port) == nPort
 				)
-			{//ÒÑ¾­Õ¼ÓÃÁË nPort;
+			{//å·²ç»å ç”¨äº† nPort;
 				bRet = true;
 				break;
 			}
@@ -2619,11 +2619,11 @@ bool  CheckPortAlreadyUsed(int nPort, int nPortType, bool bLockFlag)
 }
 
 /*
-¹¦ÄÜ£º
-   ¼ì²éSSRCÊÇ·ñÒÑ¾­Ê¹ÓÃ
-²ÎÊı£º
+åŠŸèƒ½ï¼š
+   æ£€æŸ¥SSRCæ˜¯å¦å·²ç»ä½¿ç”¨
+å‚æ•°ï¼š
 	int   nSSRC,      ssrc
-	bool  bLockFlag   ÊÇ·ñËø×¡
+	bool  bLockFlag   æ˜¯å¦é”ä½
 */
 bool  CheckSSRCAlreadyUsed(int nSSRC, bool bLockFlag)
 {
@@ -2640,7 +2640,7 @@ bool  CheckSSRCAlreadyUsed(int nSSRC, bool bLockFlag)
 		if ((pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpUDP || pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Connect) &&
 			atoi(pClient->m_startSendRtpStruct.ssrc) == nSSRC
 			)
-		{//ÒÑ¾­Õ¼ÓÃÁË nPort;
+		{//å·²ç»å ç”¨äº† nPort;
 			bRet = true;
 			break;
 		}
@@ -2650,12 +2650,12 @@ bool  CheckSSRCAlreadyUsed(int nSSRC, bool bLockFlag)
 }
 
 /*
-¹¦ÄÜ£º
-¼ì²é dst_url ¡¢ dst_port ÊÇ·ñÒÑ¾­Ê¹ÓÃ
-²ÎÊı£º
-char  dst_url,    Ä¿±êIP
-int   dst_port    Ä¿±ê¶Ë¿Ú
-bool  bLockFlag   ÊÇ·ñËø×¡
+åŠŸèƒ½ï¼š
+æ£€æŸ¥ dst_url ã€ dst_port æ˜¯å¦å·²ç»ä½¿ç”¨
+å‚æ•°ï¼š
+char  dst_url,    ç›®æ ‡IP
+int   dst_port    ç›®æ ‡ç«¯å£
+bool  bLockFlag   æ˜¯å¦é”ä½
 */
 bool  CheckDst_url_portAlreadyUsed(char* dst_url, int dst_port, bool bLockFlag)
 {
@@ -2672,7 +2672,7 @@ bool  CheckDst_url_portAlreadyUsed(char* dst_url, int dst_port, bool bLockFlag)
 		if ((pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpUDP || pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Connect) &&
 			atoi(pClient->m_startSendRtpStruct.dst_port) == dst_port && strcmp(pClient->m_startSendRtpStruct.dst_url, dst_url) == 0
 			)
-		{//ÒÑ¾­Õ¼ÓÃÁË nPort;
+		{//å·²ç»å ç”¨äº† nPort;
 			bRet = true;
 			break;
 		}
@@ -2681,7 +2681,7 @@ bool  CheckDst_url_portAlreadyUsed(char* dst_url, int dst_port, bool bLockFlag)
 	return bRet;
 }
 
-//²éÕÒÄ³Ò»¸öÍøÂçÀàĞÍµÄ¶ÔÏó×ÜÊı
+//æŸ¥æ‰¾æŸä¸€ä¸ªç½‘ç»œç±»å‹çš„å¯¹è±¡æ€»æ•°
 int  GetNetRevcBaseClientCountByNetType(NetBaseNetType netType, bool bLockFlag)
 {
 	if (bLockFlag)
@@ -2695,7 +2695,7 @@ int  GetNetRevcBaseClientCountByNetType(NetBaseNetType netType, bool bLockFlag)
 	{
 		pClient = (*iterator1).second;
 		if (pClient->netBaseNetType == netType && pClient->bSnapSuccessFlag == false)
-		{//ÊÇ×¥ÅÄ¶ÔÏó£¬²¢ÇÒÉĞÎ´×¥ÅÄ³É¹¦
+		{//æ˜¯æŠ“æ‹å¯¹è±¡ï¼Œå¹¶ä¸”å°šæœªæŠ“æ‹æˆåŠŸ
 			nCount++;
 		}
 	}
@@ -2703,7 +2703,7 @@ int  GetNetRevcBaseClientCountByNetType(NetBaseNetType netType, bool bLockFlag)
 	return nCount;
 }
 
-//°ÑËùÓĞ¶ÔÏó×°ÈëÁ´±í£¬×¼±¸É¾³ı 
+//æŠŠæ‰€æœ‰å¯¹è±¡è£…å…¥é“¾è¡¨ï¼Œå‡†å¤‡åˆ é™¤ 
 int  FillNetRevcBaseClientFifo()
 {
 	std::lock_guard<std::mutex> lock(ABL_CNetRevcBase_ptrMapLock);
@@ -2720,7 +2720,7 @@ int  FillNetRevcBaseClientFifo()
 	return nCount;
 }
 
-//¸ù¾İShareMediaURL¡¢NetBaseNetType ²éÕÒ¶ÔÏó 
+//æ ¹æ®ShareMediaURLã€NetBaseNetType æŸ¥æ‰¾å¯¹è±¡ 
 CNetRevcBase_ptr  GetNetRevcBaseClientByNetTypeShareMediaURL(NetBaseNetType netType, char* ShareMediaURL, bool bLockFlag)
 {
 	if (bLockFlag)
@@ -2741,7 +2741,7 @@ CNetRevcBase_ptr  GetNetRevcBaseClientByNetTypeShareMediaURL(NetBaseNetType netT
 	return  NULL;
 }
 
-//²éÕÒÍÆÁ÷urlÊÇ·ñ´æÔÚ
+//æŸ¥æ‰¾æ¨æµurlæ˜¯å¦å­˜åœ¨
 bool  QueryMediaSource(char* pushURL)
 {
 	std::lock_guard<std::mutex> lock(ABL_CNetRevcBase_ptrMapLock);
@@ -2758,7 +2758,7 @@ bool  QueryMediaSource(char* pushURL)
 			if (strcmp(pushURL, pClient->m_addPushProxyStruct.url) == 0)
 			{
 				bFind = true;
-				WriteLog(Log_Debug, "QueryMediaSource() ÍÆÁ÷µØÖ·ÒÑ¾­´æÔÚ url = %s ", pushURL);
+				WriteLog(Log_Debug, "QueryMediaSource() æ¨æµåœ°å€å·²ç»å­˜åœ¨ url = %s ", pushURL);
 				break;
 			}
 		}
@@ -2766,7 +2766,7 @@ bool  QueryMediaSource(char* pushURL)
 	return bFind;
 }
 
-//¼ì²âÍøÂç¶ÏÏß £¬·¢ËÍM3u8ÇëÇó 
+//æ£€æµ‹ç½‘ç»œæ–­çº¿ ï¼Œå‘é€M3u8è¯·æ±‚ 
 int  CheckNetRevcBaseClientDisconnect()
 {
 	std::lock_guard<std::mutex> lock(ABL_CNetRevcBase_ptrMapLock);
@@ -2779,84 +2779,84 @@ int  CheckNetRevcBaseClientDisconnect()
 	int                           netBaseNetType;
 
 	ABL_nPrintCheckNetRevcBaseClientDisconnect++;
-	if (ABL_nPrintCheckNetRevcBaseClientDisconnect % 20 == 0)//1·ÖÖÓ´òÓ¡Ò»´Î
-		WriteLog(Log_Debug, "CheckNetRevcBaseClientDisconnect() µ±Ç°·şÎñÆ÷¶ÔÏó×ÜÊı nSize = %llu ", xh_ABLNetRevcBaseMap.size());
+	if (ABL_nPrintCheckNetRevcBaseClientDisconnect % 20 == 0)//1åˆ†é’Ÿæ‰“å°ä¸€æ¬¡
+		WriteLog(Log_Debug, "CheckNetRevcBaseClientDisconnect() å½“å‰æœåŠ¡å™¨å¯¹è±¡æ€»æ•° nSize = %llu ", xh_ABLNetRevcBaseMap.size());
 
 	for (iterator1 = xh_ABLNetRevcBaseMap.begin(); iterator1 != xh_ABLNetRevcBaseMap.end(); ++iterator1)
 	{
 		netBaseNetType = ((*iterator1).second)->netBaseNetType;
-		if (ABL_nPrintCheckNetRevcBaseClientDisconnect % 30 == 0)//1·ÖÖÓ´òÓ¡Ò»´Î
+		if (ABL_nPrintCheckNetRevcBaseClientDisconnect % 30 == 0)//1åˆ†é’Ÿæ‰“å°ä¸€æ¬¡
 		{
 			nPrintCount++;
 			sprintf(szTemp, "[ nClient = %llu netType = %d ] , ", ((*iterator1).second)->nClient, ((*iterator1).second)->netBaseNetType);
 			strcat(szLine, szTemp);
 			if (nPrintCount >= 4)
 			{
-				WriteLog(Log_Debug, "µ±Ç°¶ÔÏóĞÅÏ¢ %s ", szLine);
+				WriteLog(Log_Debug, "å½“å‰å¯¹è±¡ä¿¡æ¯ %s ", szLine);
 				memset(szLine, 0x00, sizeof(szLine));
 				nPrintCount = 0;
 			}
 		}
 
-		//¼ì²éÊÂ¼şÁ¬½Ó£¬Èç¹ûÉèÖÃhook_enable = 0 Á¢¼´É¾³ı
+		//æ£€æŸ¥äº‹ä»¶è¿æ¥ï¼Œå¦‚æœè®¾ç½®hook_enable = 0 ç«‹å³åˆ é™¤
 		if (ABL_MediaServerPort.hook_enable == 0 && ((((*iterator1).second)->netBaseNetType >= NetBaseNetType_HttpClient_None_reader && ((*iterator1).second)->netBaseNetType <= NetBaseNetType_HttpClient_Record_Progress) ||
 			(((*iterator1).second)->netBaseNetType >= NetBaseNetType_HttpClient_ServerStarted && ((*iterator1).second)->netBaseNetType <= NetBaseNetType_HttpClient_on_publish)))
 			pDisconnectBaseNetFifo.push((unsigned char*)&((*iterator1).second)->nClient, sizeof((unsigned char*)&((*iterator1).second)->nClient));
 
 		if (
-			(((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspServerRecvPush && ((*iterator1).second)->m_RtspNetworkType == RtspNetworkType_TCP) ||   //½ÓÊÕrtspÍÆÁ÷ÉÏÀ´(tcp£©·½Ê½
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspServerRecvPushVideo || //rtsp ½ÓÊÕÊÓÆµ
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspServerRecvPushAudio || //rtsp ½ÓÊÕÒôÆµ
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspServerSendPush ||   //rtsp ·¢ËÍ
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtmpServerRecvPush ||   //½ÓÊÕRTMPÍÆÁ÷
+			(((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspServerRecvPush && ((*iterator1).second)->m_RtspNetworkType == RtspNetworkType_TCP) ||   //æ¥æ”¶rtspæ¨æµä¸Šæ¥(tcpï¼‰æ–¹å¼
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspServerRecvPushVideo || //rtsp æ¥æ”¶è§†é¢‘
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspServerRecvPushAudio || //rtsp æ¥æ”¶éŸ³é¢‘
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspServerSendPush ||   //rtsp å‘é€
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtmpServerRecvPush ||   //æ¥æ”¶RTMPæ¨æµ
 
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspClientPush ||   //rtsp ÍÆÁ÷
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtmpClientPush ||   //rtmp ÍÆÁ÷
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspClientPush ||   //rtsp æ¨æµ
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtmpClientPush ||   //rtmp æ¨æµ
 
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspClientRecv ||      //´úÀí½ÓÊÕRtspÍÆÁ÷
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtmpClientRecv ||      //´úÀí½ÓÊÕRtmpÍÆÁ÷
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_HttpFlvClientRecv ||   //´úÀí½ÓÊÕHttpFlvÍÆÁ÷
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_HttpHLSClientRecv ||    //´úÀí½ÓÊÕHttpHLSÍÆÁ÷
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspClientRecv ||      //ä»£ç†æ¥æ”¶Rtspæ¨æµ
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtmpClientRecv ||      //ä»£ç†æ¥æ”¶Rtmpæ¨æµ
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_HttpFlvClientRecv ||   //ä»£ç†æ¥æ”¶HttpFlvæ¨æµ
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_HttpHLSClientRecv ||    //ä»£ç†æ¥æ”¶HttpHLSæ¨æµ
 
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181RtpServerUDP ||   //GB28181 ÒÔUDP·½Ê½½ÓÊÕ 
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Server || //GB28181 ÒÔTCP·½Ê½½ÓÊÕ 
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181RtpServerUDP ||   //GB28181 ä»¥UDPæ–¹å¼æ¥æ”¶ 
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Server || //GB28181 ä»¥TCPæ–¹å¼æ¥æ”¶ 
 
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181SendRtpUDP || //¹ú±êUDPÍÆÁ÷
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Connect ||//¹ú±êTCPÍÆÁ÷ 
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181SendRtpUDP || //å›½æ ‡UDPæ¨æµ
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Connect ||//å›½æ ‡TCPæ¨æµ 
 
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_HttpFLVServerSendPush ||//¼à²âhttp-flv·¢Á÷ 
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_WsFLVServerSendPush ||//¼à²âws-flv·¢Á÷ 
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_HttpMP4ServerSendPush || //¼à²âMP4·¢Á÷ 
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtmpServerSendPush ||  //¼ì²ârtmp·¢Á÷ 
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181UDPTSStreamInput || // µ¥¶Ë¿Ú TS Á÷½ÓÈë
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181UDPPSStreamInput || // µ¥¶Ë¿Ú PS Á÷½ÓÈë
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Active || //¹ú±êTCP·½Ê½½ÓÊÕ tcpÖ÷¶¯Á¬½Ó·½Ê½ 
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_SnapPicture_JPEG || //×¥ÅÄ¶ÔÏó³¬Ê±¼ì²â
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_WebSocektRecvAudio || //websocketĞ­Òé½ÓÈëpcmÒôÆµÁ÷
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_GB28181TcpPSInputStream ||//Í¨¹ı10000¶Ë¿ÚTCP·½Ê½½ÓÊÕ¹ú±êPSÁ÷½ÓÈë
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_FFmpegRecvNetworkMedia ||//Í¨¹ıµ÷ÓÃffmpegÀ­È¡ rtmp,flv,mp4,hls ÂëÁ÷ ½ÓÈë
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetClientWebrtcPlayer || //webRTC ²¥·Å 
-			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspProtectBaseState // rtsp Ğ­Òé³õÊ¼×´Ì¬
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_HttpFLVServerSendPush ||//ç›‘æµ‹http-flvå‘æµ 
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_WsFLVServerSendPush ||//ç›‘æµ‹ws-flvå‘æµ 
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_HttpMP4ServerSendPush || //ç›‘æµ‹MP4å‘æµ 
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtmpServerSendPush ||  //æ£€æµ‹rtmpå‘æµ 
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181UDPTSStreamInput || // å•ç«¯å£ TS æµæ¥å…¥
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181UDPPSStreamInput || // å•ç«¯å£ PS æµæ¥å…¥
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Active || //å›½æ ‡TCPæ–¹å¼æ¥æ”¶ tcpä¸»åŠ¨è¿æ¥æ–¹å¼ 
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_SnapPicture_JPEG || //æŠ“æ‹å¯¹è±¡è¶…æ—¶æ£€æµ‹
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_WebSocektRecvAudio || //websocketåè®®æ¥å…¥pcméŸ³é¢‘æµ
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_GB28181TcpPSInputStream ||//é€šè¿‡10000ç«¯å£TCPæ–¹å¼æ¥æ”¶å›½æ ‡PSæµæ¥å…¥
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_FFmpegRecvNetworkMedia ||//é€šè¿‡è°ƒç”¨ffmpegæ‹‰å– rtmp,flv,mp4,hls ç æµ æ¥å…¥
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_NetClientWebrtcPlayer || //webRTC æ’­æ”¾ 
+			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspProtectBaseState // rtsp åè®®åˆå§‹çŠ¶æ€
 			
 			)
-		{//ÏÖÔÚ¼ì²â HLS ÍøÂç¶ÏÏß £¬»¹¿ÉÒÔÔö¼Ó±ğµÄÀàĞÍ¼ì²â 
+		{//ç°åœ¨æ£€æµ‹ HLS ç½‘ç»œæ–­çº¿ ï¼Œè¿˜å¯ä»¥å¢åŠ åˆ«çš„ç±»å‹æ£€æµ‹ 
 			if (((*iterator1).second)->netBaseNetType == NetBaseNetType_HttpHLSClientRecv)
-			{//Hls Ö÷¶¯À­Á÷
+			{//Hls ä¸»åŠ¨æ‹‰æµ
 				((*iterator1).second)->RequestM3u8File();
 			}
 
 			if (((*iterator1).second)->m_bPauseFlag == false && ((*iterator1).second)->nRecvDataTimerBySecond >= (ABL_MediaServerPort.MaxDiconnectTimeoutSecond / 2))
-			{//²»ÊÇ¹ú±ê»Ø·ÅÔİÍ£¡¢Ò²²»ÊÇrtsp»Ø·ÅÔİÍ£
+			{//ä¸æ˜¯å›½æ ‡å›æ”¾æš‚åœã€ä¹Ÿä¸æ˜¯rtspå›æ”¾æš‚åœ
 				nDiconnectCount++;
 				((*iterator1).second)->bRunFlag = false;
-				WriteLog(Log_Debug, "CheckNetRevcBaseClientDisconnect() nClient = %llu ¼ì²âµ½ÍøÂçÒì³£¶Ï¿ª1 ", ((*iterator1).second)->nClient);
+				WriteLog(Log_Debug, "CheckNetRevcBaseClientDisconnect() nClient = %llu æ£€æµ‹åˆ°ç½‘ç»œå¼‚å¸¸æ–­å¼€1 ", ((*iterator1).second)->nClient);
 
 				pDisconnectBaseNetFifo.push((unsigned char*)&((*iterator1).second)->nClient, sizeof((unsigned char*)&((*iterator1).second)->nClient));
 
 				if (((*iterator1).second)->m_nXHRtspURLType == XHRtspURLType_RecordPlay)
 					pDisconnectBaseNetFifo.push((unsigned char*)&((*iterator1).second)->hParent, sizeof((unsigned char*)&((*iterator1).second)->hParent));
 			}
-			//·¢ËÍrtcp°ü
+			//å‘é€rtcpåŒ…
 			if (((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspClientRecv)
 			{
 				CNetClientRecvRtsp* pRtspClient = (CNetClientRecvRtsp*)(*iterator1).second.get();
@@ -2868,56 +2868,56 @@ int  CheckNetRevcBaseClientDisconnect()
 					}
 				}
 
-				//·¢ËÍoptions ĞÄÌø°ü 
+				//å‘é€options å¿ƒè·³åŒ… 
 				if (atoi(pRtspClient->m_addStreamProxyStruct.optionsHeartbeat) == 1)
 					pRtspClient->SendOptionsHeartbeat();
 			}
 
-			//¶¨ÆÚ¸üĞÂ¶¯Ì¬ÓòÃûµÄIP
+			//å®šæœŸæ›´æ–°åŠ¨æ€åŸŸåçš„IP
 			if (((*iterator1).second)->tUpdateIPTime - GetTickCount64() >= 1000 * 15)
 			{
 				((*iterator1).second)->tUpdateIPTime = GetTickCount64();
 				((*iterator1).second)->ConvertDemainToIPAddress();
 			}
 
-			//¿ìËÙ¼ì²âÂ¼ÏñÏÂÔØÍê±Ï
+			//å¿«é€Ÿæ£€æµ‹å½•åƒä¸‹è½½å®Œæ¯•
 			if (((*iterator1).second)->nRecvDataTimerBySecond >= 3 && ((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspServerSendPush && ((*iterator1).second)->m_bPauseFlag == false && ((*iterator1).second)->nReplayClient > 0)
 			{
 				char szQuitText[128] = { 0 };
 				strcpy(szQuitText, "ABL_ANNOUNCE_QUIT:2021");
 				sprintf(((*iterator1).second)->szReponseTemp, "ANNOUNCE RTSP/1.0\r\nCSeq: %d\r\nUser-Agent: %s\r\nContent-Type: text/parameters\r\nContent-Length: %d\r\n\r\n%s", 8, MediaServerVerson, strlen(szQuitText), szQuitText);
-				WriteLog(Log_Debug, "CheckNetRevcBaseClientDisconnect() nClient = %llu Â¼Ïñ·¢ËÍÍê±Ï", ((*iterator1).second)->nClient);
+				WriteLog(Log_Debug, "CheckNetRevcBaseClientDisconnect() nClient = %llu å½•åƒå‘é€å®Œæ¯•", ((*iterator1).second)->nClient);
 				XHNetSDK_Write(((*iterator1).second)->nClient, (unsigned char*)((*iterator1).second)->szReponseTemp, strlen(((*iterator1).second)->szReponseTemp), ABL_MediaServerPort.nSyncWritePacket);
 
 				pDisconnectBaseNetFifo.push((unsigned char*)&((*iterator1).second)->nClient, sizeof((unsigned char*)&((*iterator1).second)->nClient));
 			}
 
 			if (((*iterator1).second)->m_bPauseFlag == false)
-				((*iterator1).second)->nRecvDataTimerBySecond++;  //²»ÊÇÔİÍ££¬¼ÆÊ±
+				((*iterator1).second)->nRecvDataTimerBySecond++;  //ä¸æ˜¯æš‚åœï¼Œè®¡æ—¶
 			else
-				((*iterator1).second)->nRecvDataTimerBySecond = 0;//ÒÑ¾­ÔİÍ££¬²»ÔÙ¼ÆÊ±
+				((*iterator1).second)->nRecvDataTimerBySecond = 0;//å·²ç»æš‚åœï¼Œä¸å†è®¡æ—¶
 		}
 		else if (((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181RtpServerListen && ((*iterator1).second)->bUpdateVideoFrameSpeedFlag == false)
-		{//¼ì²â¹ú±ê´úÀíÀ­Á÷ TCP 
+		{//æ£€æµ‹å›½æ ‡ä»£ç†æ‹‰æµ TCP 
 			if ((GetTickCount64() - ((*iterator1).second)->nCreateDateTime) >= (1000 * (ABL_MediaServerPort.MaxDiconnectTimeoutSecond / 2)))
-			{//ÔÚ³¬Ê±µÄÊ±¼ä·¶Î§ÄÚ£¬ÂëÁ÷ÉĞÎ´µ½´ï 
-				WriteLog(Log_Debug, "¹ú±êTCP½ÓÊÕ³¬Ê± nClient = %llu , app = %s ,stream = %s , port = %s ", ((*iterator1).second)->nClient, ((*iterator1).second)->m_openRtpServerStruct.app, ((*iterator1).second)->m_openRtpServerStruct.stream_id, ((*iterator1).second)->m_openRtpServerStruct.port);
+			{//åœ¨è¶…æ—¶çš„æ—¶é—´èŒƒå›´å†…ï¼Œç æµå°šæœªåˆ°è¾¾ 
+				WriteLog(Log_Debug, "å›½æ ‡TCPæ¥æ”¶è¶…æ—¶ nClient = %llu , app = %s ,stream = %s , port = %s ", ((*iterator1).second)->nClient, ((*iterator1).second)->m_openRtpServerStruct.app, ((*iterator1).second)->m_openRtpServerStruct.stream_id, ((*iterator1).second)->m_openRtpServerStruct.port);
 				pDisconnectBaseNetFifo.push((unsigned char*)&((*iterator1).second)->nClient, sizeof((unsigned char*)&((*iterator1).second)->nClient));
 			}
 		}
 		else if (((*iterator1).second)->netBaseNetType == NetBaseNetType_NetGB28181RtpSendListen && ((*iterator1).second)->nMediaClient == 0)
-		{//¼ì²â¹ú±êtcp±»¶¯·½Ê½·¢Á÷
+		{//æ£€æµ‹å›½æ ‡tcpè¢«åŠ¨æ–¹å¼å‘æµ
 			if ((GetTickCount64() - ((*iterator1).second)->nCreateDateTime) >= (1000 * (ABL_MediaServerPort.MaxDiconnectTimeoutSecond / 2)))
-			{//ÔÚ³¬Ê±µÄÊ±¼ä·¶Î§ÄÚ,Ã»ÓĞÁ¬½Ó½øÀ´
-				WriteLog(Log_Debug, "¹ú±êgb28181 tcp ±»¶¯·½Ê½·¢Á÷³¬Ê± nClient = %llu , app = %s ,stream = %s , port = %s ", ((*iterator1).second)->nClient, ((*iterator1).second)->m_startSendRtpStruct.app, ((*iterator1).second)->m_startSendRtpStruct.stream, ((*iterator1).second)->m_startSendRtpStruct.src_port);
+			{//åœ¨è¶…æ—¶çš„æ—¶é—´èŒƒå›´å†…,æ²¡æœ‰è¿æ¥è¿›æ¥
+				WriteLog(Log_Debug, "å›½æ ‡gb28181 tcp è¢«åŠ¨æ–¹å¼å‘æµè¶…æ—¶ nClient = %llu , app = %s ,stream = %s , port = %s ", ((*iterator1).second)->nClient, ((*iterator1).second)->m_startSendRtpStruct.app, ((*iterator1).second)->m_startSendRtpStruct.stream, ((*iterator1).second)->m_startSendRtpStruct.src_port);
 				pDisconnectBaseNetFifo.push((unsigned char*)&((*iterator1).second)->nClient, sizeof((unsigned char*)&((*iterator1).second)->nClient));
 			}
 		}
 		else if (((*iterator1).second)->netBaseNetType == NetBaseNetType_addStreamProxyControl || ((*iterator1).second)->netBaseNetType == NetBaseNetType_addPushProxyControl)
-		{//¿ØÖÆ´úÀíÀ­Á÷¡¢´úÀíÍÆÁ÷,¼ì²â´úÀíÀ­Á÷ÊÇ·ñÓĞ¶ÏÏß
+		{//æ§åˆ¶ä»£ç†æ‹‰æµã€ä»£ç†æ¨æµ,æ£€æµ‹ä»£ç†æ‹‰æµæ˜¯å¦æœ‰æ–­çº¿
 			CNetRevcBase_ptr pClient = GetNetRevcBaseClientNoLock(((*iterator1).second)->nMediaClient);
 			if (pClient == NULL)
-			{//ÒÑ¾­¶ÏÏß£¬ĞèÒªÖØĞÂÁ¬½Ó 
+			{//å·²ç»æ–­çº¿ï¼Œéœ€è¦é‡æ–°è¿æ¥ 
 				if (((*iterator1).second)->bRecordProxyDisconnectTimeFlag == false)
 				{
 					((*iterator1).second)->nProxyDisconnectTime = GetTickCount64();
@@ -2928,11 +2928,11 @@ int  CheckNetRevcBaseClientDisconnect()
 				{
 					((*iterator1).second)->bRecordProxyDisconnectTimeFlag = false;
 
-					((*iterator1).second)->nReConnectingCount++; //ÖØÁ¬´ÎÊıÀÛ»ı 
+					((*iterator1).second)->nReConnectingCount++; //é‡è¿æ¬¡æ•°ç´¯ç§¯ 
 
 					if (((*iterator1).second)->nReConnectingCount > ABL_MediaServerPort.nReConnectingCount)
 					{
-						WriteLog(Log_Debug, "nClient = %llu , nMediaClient = %llu ,url: %s ÖØÁ¬´ÎÊıÒÑ¾­´ïµ½ %llu ´Î£¬ĞèÒª¶Ï¿ª ", ((*iterator1).second)->nClient, ((*iterator1).second)->nMediaClient, ((*iterator1).second)->m_addStreamProxyStruct.url, ((*iterator1).second)->nReConnectingCount);
+						WriteLog(Log_Debug, "nClient = %llu , nMediaClient = %llu ,url: %s é‡è¿æ¬¡æ•°å·²ç»è¾¾åˆ° %llu æ¬¡ï¼Œéœ€è¦æ–­å¼€ ", ((*iterator1).second)->nClient, ((*iterator1).second)->nMediaClient, ((*iterator1).second)->m_addStreamProxyStruct.url, ((*iterator1).second)->nReConnectingCount);
 						pDisconnectBaseNetFifo.push((unsigned char*)&((*iterator1).second)->nClient, sizeof(((*iterator1).second)->nClient));
 					}
 					else
@@ -2940,10 +2940,10 @@ int  CheckNetRevcBaseClientDisconnect()
 						sprintf(((*iterator1).second)->szResponseBody, "{\"code\":%d,\"memo\":\"Network Connnect[ %s ] Timeout .\",\"key\":%llu}", IndexApiCode_ConnectTimeout, ((*iterator1).second)->m_addStreamProxyStruct.url, ((*iterator1).second)->nClient);
 						((*iterator1).second)->ResponseHttp(((*iterator1).second)->nClient_http, ((*iterator1).second)->szResponseBody, false);
 
-						//Èç¹û´ÓÎ´³É¹¦¹ıÔòÉ¾³ı´úÀí¶ÔÏó¾ä±ú
+						//å¦‚æœä»æœªæˆåŠŸè¿‡åˆ™åˆ é™¤ä»£ç†å¯¹è±¡å¥æŸ„
 						if (((*iterator1).second)->bProxySuccessFlag == true && ((*iterator1).second)->m_nXHRtspURLType != XHRtspURLType_RecordPlay)
 						{
-							WriteLog(Log_Debug, "nClient = %llu , nMediaClient = %llu ¼ì²âµ½ÍøÂçÒì³£¶Ï¿ª2 , %s £¬ÏÖÔÚÖ´ĞĞµÚ %llu ´ÎÖØÁ¬  ", ((*iterator1).second)->nClient, ((*iterator1).second)->nMediaClient, ((*iterator1).second)->m_addStreamProxyStruct.url, ((*iterator1).second)->nReConnectingCount);
+							WriteLog(Log_Debug, "nClient = %llu , nMediaClient = %llu æ£€æµ‹åˆ°ç½‘ç»œå¼‚å¸¸æ–­å¼€2 , %s ï¼Œç°åœ¨æ‰§è¡Œç¬¬ %llu æ¬¡é‡è¿  ", ((*iterator1).second)->nClient, ((*iterator1).second)->nMediaClient, ((*iterator1).second)->m_addStreamProxyStruct.url, ((*iterator1).second)->nReConnectingCount);
 							pReConnectStreamProxyFifo.push((unsigned char*)&((*iterator1).second)->nClient, sizeof(((*iterator1).second)->nClient));
 						}
 						else
@@ -2953,30 +2953,30 @@ int  CheckNetRevcBaseClientDisconnect()
 			}
 			else
 			{
-				//Èç¹ûÊÇ³¬Ê±¶Ï¿ªµÄ£¬ÍùÍù¾ÍÊÇÔ­À´´úÀí³É¹¦¹ıµÄ£¬ĞèÒªÎŞÏŞ´ÎÖØÁ¬ 
+				//å¦‚æœæ˜¯è¶…æ—¶æ–­å¼€çš„ï¼Œå¾€å¾€å°±æ˜¯åŸæ¥ä»£ç†æˆåŠŸè¿‡çš„ï¼Œéœ€è¦æ— é™æ¬¡é‡è¿ 
 				if (((*iterator1).second)->bProxySuccessFlag == false && pClient->bUpdateVideoFrameSpeedFlag == true)
 					((*iterator1).second)->bProxySuccessFlag = true;
 
-				//Èç¹û³É¹¦£¬ÖØÁ¬´ÎÊı¸´Î» 
+				//å¦‚æœæˆåŠŸï¼Œé‡è¿æ¬¡æ•°å¤ä½ 
 				if (((*iterator1).second)->nReConnectingCount != 0 && pClient->bUpdateVideoFrameSpeedFlag == true)
 				{
 					((*iterator1).second)->nReConnectingCount = 0;
-					WriteLog(Log_Debug, "nClient = %llu , nMediaClient = %llu ,url %s £¬ÖØÁ¬´ÎÊı¸´Î»Îª 0 ", ((*iterator1).second)->nClient, ((*iterator1).second)->nMediaClient, ((*iterator1).second)->m_addStreamProxyStruct.url);
+					WriteLog(Log_Debug, "nClient = %llu , nMediaClient = %llu ,url %s ï¼Œé‡è¿æ¬¡æ•°å¤ä½ä¸º 0 ", ((*iterator1).second)->nClient, ((*iterator1).second)->nMediaClient, ((*iterator1).second)->m_addStreamProxyStruct.url);
 				}
 			}
 		}
 
-		//µ¥¶À´¦Àí¸÷ÖÖ´úÀíÀ­Á÷¡¢ÍÆÁ÷Ê±£¬Á¬½Ó³¬Ê±»Ø¸´httpÇëÇó
+		//å•ç‹¬å¤„ç†å„ç§ä»£ç†æ‹‰æµã€æ¨æµæ—¶ï¼Œè¿æ¥è¶…æ—¶å›å¤httpè¯·æ±‚
 		if (((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspClientRecv || ((*iterator1).second)->netBaseNetType == NetBaseNetType_RtmpClientRecv || ((*iterator1).second)->netBaseNetType == NetBaseNetType_HttpFlvClientRecv || ((*iterator1).second)->netBaseNetType == NetBaseNetType_HttpHLSClientRecv ||
 			((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspClientPush || ((*iterator1).second)->netBaseNetType == NetBaseNetType_RtmpClientPush
 			)
 		{
 			if (!((*iterator1).second)->bResponseHttpFlag && GetTickCount64() - ((*iterator1).second)->nCreateDateTime >= 15000)
-			{//Á¬½Ó³¬Ê±9Ãë£¬ÉĞÎ´»Ø¸´httpÇëÇó£¬Ò»ÂÉ»Ø¸´Á¬½Ó³¬Ê±
+			{//è¿æ¥è¶…æ—¶9ç§’ï¼Œå°šæœªå›å¤httpè¯·æ±‚ï¼Œä¸€å¾‹å›å¤è¿æ¥è¶…æ—¶
 				sprintf(((*iterator1).second)->szResponseBody, "{\"code\":%d,\"memo\":\"Network Connnect[ %s : %s ] Timeout .\",\"key\":%d}", IndexApiCode_ConnectTimeout, ((*iterator1).second)->m_rtspStruct.szIP, ((*iterator1).second)->m_rtspStruct.szPort, 0);
 				((*iterator1).second)->ResponseHttp(((*iterator1).second)->nClient_http, ((*iterator1).second)->szResponseBody, false);
 
-				//É¾³ıµô´úÀíÀ­Á÷¡¢ÍÆÁ÷
+				//åˆ é™¤æ‰ä»£ç†æ‹‰æµã€æ¨æµ
 				CNetRevcBase_ptr pParentPtr = GetNetRevcBaseClientNoLock(((*iterator1).second)->hParent);
 				if (pParentPtr)
 				{
@@ -2986,30 +2986,30 @@ int  CheckNetRevcBaseClientDisconnect()
 			}
 		}
 
-		//×¥ÅÄ³¬Ê±¼ì²â 
+		//æŠ“æ‹è¶…æ—¶æ£€æµ‹ 
 		if (((*iterator1).second)->netBaseNetType == NetBaseNetType_SnapPicture_JPEG && ((*iterator1).second)->bSnapSuccessFlag == false)
 		{
 			if (GetTickCount64() - ((*iterator1).second)->nPrintTime >= 1000 * ((*iterator1).second)->timeout_sec)
 				pDisconnectBaseNetFifo.push((unsigned char*)&((*iterator1).second)->nClient, sizeof(((*iterator1).second)->nClient));
 		}
 
-		//×¥ÅÄ¶ÔÏó³¬¹ıÉú´æÊ±³¤¼ì²â
+		//æŠ“æ‹å¯¹è±¡è¶…è¿‡ç”Ÿå­˜æ—¶é•¿æ£€æµ‹
 		if (((*iterator1).second)->netBaseNetType == NetBaseNetType_SnapPicture_JPEG && (GetTickCount64() - ((*iterator1).second)->nPrintTime) >= 1000 * ABL_MediaServerPort.snapObjectDuration)
 		{
-			WriteLog(Log_Debug, "×¥ÅÄ¶ÔÏóÒÑ¾­³¬¹ı×î³¤µÄÉú´æÊ±³¤ %d Ãë ,¼ÓÈëÉ¾³ıÁ´±íµÈ´ıÏú»Ù£¬nClient = %llu ", ABL_MediaServerPort.snapObjectDuration, ((*iterator1).second)->nClient);
+			WriteLog(Log_Debug, "æŠ“æ‹å¯¹è±¡å·²ç»è¶…è¿‡æœ€é•¿çš„ç”Ÿå­˜æ—¶é•¿ %d ç§’ ,åŠ å…¥åˆ é™¤é“¾è¡¨ç­‰å¾…é”€æ¯ï¼ŒnClient = %llu ", ABL_MediaServerPort.snapObjectDuration, ((*iterator1).second)->nClient);
 			pDisconnectBaseNetFifo.push((unsigned char*)&((*iterator1).second)->nClient, sizeof(((*iterator1).second)->nClient));
 		}
-		//¼ì²ârtsp³õÊ¼×´Ì¬²»ÄÜ³¬¹ı30Ãë£¬·ñÔòÉ¾³ı
+		//æ£€æµ‹rtspåˆå§‹çŠ¶æ€ä¸èƒ½è¶…è¿‡30ç§’ï¼Œå¦åˆ™åˆ é™¤
 		if (((*iterator1).second)->netBaseNetType == NetBaseNetType_RtspProtectBaseState && (GetTickCount64() - ((*iterator1).second)->nCreateDateTime) >= 1000 * 30)
 		{
-			WriteLog(Log_Debug, "rtspĞ­ÒéÁ¬½Ó¶ÔÏóÒÑ¾­³¬Ê± 30 Ãë ,¼ÓÈëÉ¾³ıÁ´±íµÈ´ıÏú»Ù£¬nClient = %llu ", ((*iterator1).second)->nClient);
+			WriteLog(Log_Debug, "rtspåè®®è¿æ¥å¯¹è±¡å·²ç»è¶…æ—¶ 30 ç§’ ,åŠ å…¥åˆ é™¤é“¾è¡¨ç­‰å¾…é”€æ¯ï¼ŒnClient = %llu ", ((*iterator1).second)->nClient);
 			pDisconnectBaseNetFifo.push((unsigned char*)&((*iterator1).second)->nClient, sizeof(((*iterator1).second)->nClient));
 		}
 
 	
 	}
 
-	//·şÎñÆ÷ĞÄÌø
+	//æœåŠ¡å™¨å¿ƒè·³
 	if (ABL_MediaServerPort.hook_enable == 1 && (GetTickCount64() - ABL_MediaServerPort.nServerKeepaliveTime) >= 1000 * ABL_MediaServerPort.keepaliveDuration)
 	{
 		ABL_MediaServerPort.nServerKeepaliveTime = GetTickCount64();
@@ -3032,11 +3032,11 @@ int  CheckNetRevcBaseClientDisconnect()
 	}
 
 	if (strlen(szLine))
-		WriteLog(Log_Debug, "µ±Ç°¶ÔÏóĞÅÏ¢ %s ", szLine);
+		WriteLog(Log_Debug, "å½“å‰å¯¹è±¡ä¿¡æ¯ %s ", szLine);
 
 	return nDiconnectCount;
 }
-
+#include <arpa/inet.h> 
 void LIBNET_CALLMETHOD	onaccept(NETHANDLE srvhandle,
 	NETHANDLE clihandle,
 	void* address)
@@ -3051,7 +3051,7 @@ void LIBNET_CALLMETHOD	onaccept(NETHANDLE srvhandle,
 	{
 		sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(address);
 		sprintf(temp, "%s", ::inet_ntoa(addr->sin_addr));
-		nPort = ::ntohs(addr->sin_port);
+		nPort = ntohs(addr->sin_port);
 	}
 
 	if ((pNetRevcBase_ptr = CreateNetRevcBaseClient(NetRevcBaseClient_ServerAccept, srvhandle, clihandle, temp, nPort, "")) == NULL)
@@ -3061,7 +3061,7 @@ void LIBNET_CALLMETHOD	onaccept(NETHANDLE srvhandle,
 	{
 		pNetRevcBase_ptr->bRunFlag.exchange(true);
 		if (pNetRevcBase_ptr->netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Passive)
-		{//¹ú±ê28181 tcp ±»¶¯·½Ê½·¢ËÍÂëÁ÷ 
+		{//å›½æ ‡28181 tcp è¢«åŠ¨æ–¹å¼å‘é€ç æµ 
 			pNetRevcBase_ptr->SendFirstRequst();
 		}
 	}
@@ -3077,8 +3077,8 @@ void LIBNET_CALLMETHOD onread(NETHANDLE srvhandle,
 	if (pBasePtr != NULL)
 	{
 		pBasePtr->InputNetData(srvhandle, clihandle, data, datasize, address);
-		NetBaseThreadPool->InsertIntoTask(clihandle);//Window¡¢Linux Æ½Ì¨Ê¹ÓÃ 
-		//pBasePtr->ProcessNetData();//armÆ½Ì¨ Ê¹ÓÃ 
+		NetBaseThreadPool->InsertIntoTask(clihandle);//Windowã€Linux å¹³å°ä½¿ç”¨ 
+		//pBasePtr->ProcessNetData();//armå¹³å° ä½¿ç”¨ 
 	}
 }
 
@@ -3086,15 +3086,15 @@ void LIBNET_CALLMETHOD onread(NETHANDLE srvhandle,
 void LIBNET_CALLMETHOD	onclose(NETHANDLE srvhandle,
 	NETHANDLE clihandle)
 {
-	//ÒÆ³ıÃ½Ìå¿½±´
+	//ç§»é™¤åª’ä½“æ‹·è´
 	DeleteClientMediaStreamSource(clihandle);
 
-	//´ÓÏß³Ì³Ø³¹µ×ÒÆ³ı
+	//ä»çº¿ç¨‹æ± å½»åº•ç§»é™¤
 	NetBaseThreadPool->DeleteFromTask(clihandle);
 	RecordReplayThreadPool->DeleteFromTask(clihandle);
 	MessageSendThreadPool->DeleteFromTask(clihandle);
 
-	//É¾³ı±¾·şÎñ×ÊÔ´¶ÔÏó
+	//åˆ é™¤æœ¬æœåŠ¡èµ„æºå¯¹è±¡
 	DeleteNetRevcBaseClient(clihandle);
 }
 
@@ -3107,15 +3107,15 @@ void LIBNET_CALLMETHOD	onconnect(NETHANDLE clihandle,
 		CNetRevcBase_ptr pClient = GetNetRevcBaseClient(clihandle);
 		if (pClient)
 		{
-			WriteLog(Log_Debug, "clihandle = %llu ,URL: %s ,Á¬½ÓÊ§°Ü result: %d ", clihandle, pClient->m_rtspStruct.szSrcRtspPullUrl, result);
+			WriteLog(Log_Debug, "clihandle = %llu ,URL: %s ,è¿æ¥å¤±è´¥ result: %d ", clihandle, pClient->m_rtspStruct.szSrcRtspPullUrl, result);
 			if (pClient->netBaseNetType == NetBaseNetType_RtspClientRecv || pClient->netBaseNetType == NetBaseNetType_RtmpClientRecv || pClient->netBaseNetType == NetBaseNetType_HttpFlvClientRecv ||
 				pClient->netBaseNetType == NetBaseNetType_HttpHLSClientRecv || pClient->netBaseNetType == NetBaseNetType_RtspClientPush || pClient->netBaseNetType == NetBaseNetType_RtmpClientPush ||
 				pClient->netBaseNetType == NetBaseNetType_NetGB28181SendRtpTCP_Connect || pClient->netBaseNetType == NetBaseNetType_NetGB28181RtpServerTCP_Active)
-			{//rtsp ´úÀíÀ­Á÷Ê§°Ü
+			{//rtsp ä»£ç†æ‹‰æµå¤±è´¥
 				sprintf(pClient->szResponseBody, "{\"code\":%d,\"memo\":\"Network Connect [%s : %s] Failed .\",\"key\":%llu}", IndexApiCode_ConnectFail, pClient->m_rtspStruct.szIP, pClient->m_rtspStruct.szPort, pClient->hParent);
 				pClient->ResponseHttp(pClient->nClient_http, pClient->szResponseBody, false);
 
-				//ÅĞ¶ÏÊÇ·ñ³É¹¦¹ı£¬Èç¹ûÉĞÎ´³É¹¦£¬ÔòÁ¢¼´É¾³ı £¬Èç¹û³É¹¦¹ıÔòÎŞÏŞ´ÎÖØÁ¬
+				//åˆ¤æ–­æ˜¯å¦æˆåŠŸè¿‡ï¼Œå¦‚æœå°šæœªæˆåŠŸï¼Œåˆ™ç«‹å³åˆ é™¤ ï¼Œå¦‚æœæˆåŠŸè¿‡åˆ™æ— é™æ¬¡é‡è¿
 				CNetRevcBase_ptr pParent = GetNetRevcBaseClient(pClient->hParent);
 				if (pParent != NULL)
 				{
@@ -3128,25 +3128,25 @@ void LIBNET_CALLMETHOD	onconnect(NETHANDLE clihandle,
 		pDisconnectBaseNetFifo.push((unsigned char*)&clihandle, sizeof(clihandle));
 	}
 	else if (result == 1)
-	{//Èç¹ûÁ´½Ó³É¹¦£¬·¢ËÍµÚÒ»¸öÇëÇó
+	{//å¦‚æœé“¾æ¥æˆåŠŸï¼Œå‘é€ç¬¬ä¸€ä¸ªè¯·æ±‚
 		CNetRevcBase_ptr pClient = GetNetRevcBaseClient(clihandle);
 		if (pClient)
 		{
 			pClient->bRunFlag.exchange(true);
-			WriteLog(Log_Debug, "clihandle = %llu ,URL: %s , Á¬½Ó³É¹¦ result: %d ", clihandle, pClient->m_rtspStruct.szSrcRtspPullUrl, result);
-			pClient->bConnectSuccessFlag = true;//Á¬½Ó³É¹¦
-			pClient->nClientPort = ntohs(nLocalPort);//¼ÇÏÂ±¾µØ¶Ë¿ÚºÅ
+			WriteLog(Log_Debug, "clihandle = %llu ,URL: %s , è¿æ¥æˆåŠŸ result: %d ", clihandle, pClient->m_rtspStruct.szSrcRtspPullUrl, result);
+			pClient->bConnectSuccessFlag = true;//è¿æ¥æˆåŠŸ
+			pClient->nClientPort = ntohs(nLocalPort);//è®°ä¸‹æœ¬åœ°ç«¯å£å·
 			pClient->SendFirstRequst();
 		}
 	}
 }
 #ifdef USE_BOOST
-//´´½¨ ÊÂ¼şÍ¨Öªhttp Client ¶ÔÏó 
+//åˆ›å»º äº‹ä»¶é€šçŸ¥http Client å¯¹è±¡ 
 boost::shared_ptr<CNetRevcBase> CreateHttpClientFunc(int nMsgType)
 {
 	boost::shared_ptr<CNetRevcBase> pMsgClient = NULL;
 #else
-//´´½¨ ÊÂ¼şÍ¨Öªhttp Client ¶ÔÏó 
+//åˆ›å»º äº‹ä»¶é€šçŸ¥http Client å¯¹è±¡ 
 std::shared_ptr<CNetRevcBase> CreateHttpClientFunc(int nMsgType)
 {
 	std::shared_ptr<CNetRevcBase> pMsgClient = NULL;
@@ -3199,7 +3199,7 @@ std::shared_ptr<CNetRevcBase> CreateHttpClientFunc(int nMsgType)
 	return pMsgClient;;
 }
 
-//¸ù¾İNetBaseNetType ²éÕÒ¶ÔÏó 
+//æ ¹æ®NetBaseNetType æŸ¥æ‰¾å¯¹è±¡ 
 CNetRevcBase_ptr  GetNetRevcBaseClientByNetType(NetBaseNetType netType)
 {
 	std::lock_guard<std::mutex> lock(ABL_CNetRevcBase_ptrMapLock);
@@ -3218,7 +3218,7 @@ CNetRevcBase_ptr  GetNetRevcBaseClientByNetType(NetBaseNetType netType)
 	return  NULL;
 }
 
-//Ò»Ğ©ÊÂÎñ´¦Àí 
+//ä¸€äº›äº‹åŠ¡å¤„ç† 
 void* ABLMedisServerProcessThread(void* lpVoid)
 {
 	int nDeleteBreakTimer = 0;
@@ -3235,14 +3235,14 @@ void* ABLMedisServerProcessThread(void* lpVoid)
 
 	while (ABL_bMediaServerRunFlag)
 	{
-		//¼ì²âÍøÂçÒì³£¶Ï¿ª£¬Ö´ĞĞÒ»Ğ©ÇåÀí¹¤×÷ 
+		//æ£€æµ‹ç½‘ç»œå¼‚å¸¸æ–­å¼€ï¼Œæ‰§è¡Œä¸€äº›æ¸…ç†å·¥ä½œ 
 		if (nCheckNetRevcBaseClientDisconnectTime >= 20)
 		{
 			nCheckNetRevcBaseClientDisconnectTime = 0;
 			CheckNetRevcBaseClientDisconnect();
 		}
 
-		//´¦ÀíÏûÏ¢Í¨Öª
+		//å¤„ç†æ¶ˆæ¯é€šçŸ¥
 		while ((pData = pMessageNoticeFifo.pop(&nLength)) != NULL)
 		{
 			if (nLength > 0)
@@ -3268,7 +3268,7 @@ void* ABLMedisServerProcessThread(void* lpVoid)
 			pMessageNoticeFifo.pop_front();
 		}
 
-		//´úÀíÀ­Á÷ÖØÁ¬
+		//ä»£ç†æ‹‰æµé‡è¿
 		if (nReConnectStreamProxyTimer >= 10)
 		{
 			nReConnectStreamProxyTimer = 0;
@@ -3281,7 +3281,7 @@ void* ABLMedisServerProcessThread(void* lpVoid)
 					{
 						CNetRevcBase_ptr pClient = GetNetRevcBaseClient(nClient);
 						if (pClient)
-							pClient->SendFirstRequst(); //Ö´ĞĞÖØÁ¬
+							pClient->SendFirstRequst(); //æ‰§è¡Œé‡è¿
 					}
 				}
 
@@ -3289,7 +3289,7 @@ void* ABLMedisServerProcessThread(void* lpVoid)
 			}
 		}
 
-		//É¾³ı¹ıÆÚµÄM3u8ÎÄ¼ş 
+		//åˆ é™¤è¿‡æœŸçš„M3u8æ–‡ä»¶ 
 		if (DeleteExpireM3u8FileTimer >= 10 * 180)
 		{
 			DeleteExpireM3u8FileTimer = 0;
@@ -3305,7 +3305,7 @@ void* ABLMedisServerProcessThread(void* lpVoid)
 		//Sleep(100);
 	}
 
-	FillNetRevcBaseClientFifo();//°ÑËùÓĞ¶ÔÏó×°ÈëÁ´±í£¬×¼±¸É¾³ı
+	FillNetRevcBaseClientFifo();//æŠŠæ‰€æœ‰å¯¹è±¡è£…å…¥é“¾è¡¨ï¼Œå‡†å¤‡åˆ é™¤
 
 	while ((pData = pDisconnectBaseNetFifo.pop(&nLength)) != NULL)
 	{
@@ -3314,14 +3314,14 @@ void* ABLMedisServerProcessThread(void* lpVoid)
 			memcpy((char*)&nClient, pData, sizeof(nClient));
 			if (nClient >= 0)
 			{
-				DeleteClientMediaStreamSource(nClient);//ÒÆ³ıÃ½Ìå¿½±´
-				//´ÓÏß³Ì³Ø³¹µ×ÒÆ³ı
+				DeleteClientMediaStreamSource(nClient);//ç§»é™¤åª’ä½“æ‹·è´
+				//ä»çº¿ç¨‹æ± å½»åº•ç§»é™¤
 				NetBaseThreadPool->DeleteFromTask(nClient);
 				RecordReplayThreadPool->DeleteFromTask(nClient);
 				MessageSendThreadPool->DeleteFromTask(nClient);
 
 				XHNetSDK_Disconnect(nClient);
-				DeleteNetRevcBaseClient(nClient);//Ö´ĞĞÉ¾³ı 
+				DeleteNetRevcBaseClient(nClient);//æ‰§è¡Œåˆ é™¤ 
 			}
 		}
 
@@ -3329,7 +3329,7 @@ void* ABLMedisServerProcessThread(void* lpVoid)
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		//Sleep(5);
 	}
-	//¿ìËÙÉ¾³ıÃ½ÌåÔ´
+	//å¿«é€Ÿåˆ é™¤åª’ä½“æº
 	while ((pData = pDisconnectMediaSource.pop(&nLength)) != NULL)
 	{
 		if (nLength > 0 && nLength < 1024)
@@ -3337,7 +3337,7 @@ void* ABLMedisServerProcessThread(void* lpVoid)
 			memset(szDelMediaSource, 0x00, sizeof(szDelMediaSource));
 			memcpy(szDelMediaSource, pData, nLength);
 
-			DeleteMediaStreamSource(szDelMediaSource);//Ö´ĞĞÉ¾³ı 
+			DeleteMediaStreamSource(szDelMediaSource);//æ‰§è¡Œåˆ é™¤ 
 		}
 
 		pDisconnectMediaSource.pop_front();
@@ -3347,7 +3347,7 @@ void* ABLMedisServerProcessThread(void* lpVoid)
 	return 0;
 }
 
-//ÁĞ±íÀïÃæµÄ¶ÔÏóÔö¼Ó¾²Òô
+//åˆ—è¡¨é‡Œé¢çš„å¯¹è±¡å¢åŠ é™éŸ³
 void  SendToMapFromMutePacketList()
 {
 	for (int i = 0; i < nMaxAddMuteListNumber; i++)
@@ -3364,7 +3364,7 @@ void  SendToMapFromMutePacketList()
 	}
 }
 
-//¿ìËÙÉ¾³ı×ÊÔ´Ïß³Ì
+//å¿«é€Ÿåˆ é™¤èµ„æºçº¿ç¨‹
 void* ABLMedisServerFastDeleteThread(void* lpVoid)
 {
 	unsigned char* pData = NULL;
@@ -3374,7 +3374,7 @@ void* ABLMedisServerFastDeleteThread(void* lpVoid)
 
 	while (ABL_bMediaServerRunFlag)
 	{
-		//¿ìËÙÉ¾³ı
+		//å¿«é€Ÿåˆ é™¤
 		while ((pData = pDisconnectBaseNetFifo.pop(&nLength)) != NULL)
 		{
 			if (nLength == sizeof(nClient))
@@ -3382,18 +3382,18 @@ void* ABLMedisServerFastDeleteThread(void* lpVoid)
 				memcpy((char*)&nClient, pData, sizeof(nClient));
 				if (nClient >= 0)
 				{
-					//ÒÆ³ıÃ½Ìå¿½±´
+					//ç§»é™¤åª’ä½“æ‹·è´
 					DeleteClientMediaStreamSource(nClient);
 
-					//´ÓÏß³Ì³Ø³¹µ×ÒÆ³ı
+					//ä»çº¿ç¨‹æ± å½»åº•ç§»é™¤
 					NetBaseThreadPool->DeleteFromTask(nClient);
 					RecordReplayThreadPool->DeleteFromTask(nClient);
 					MessageSendThreadPool->DeleteFromTask(nClient);
 
-					//É¾³ıÍøÂçSOCKET
+					//åˆ é™¤ç½‘ç»œSOCKET
 					XHNetSDK_Disconnect(nClient);
 
-					//Ö´ĞĞÉ¾³ı±¾·şÎñ¶ÔÏó×ÊÔ´ 
+					//æ‰§è¡Œåˆ é™¤æœ¬æœåŠ¡å¯¹è±¡èµ„æº 
 					DeleteNetRevcBaseClient(nClient);
 				}
 			}
@@ -3401,7 +3401,7 @@ void* ABLMedisServerFastDeleteThread(void* lpVoid)
 			pDisconnectBaseNetFifo.pop_front();
 		}
 
-		//¿ìËÙÉ¾³ıÃ½ÌåÔ´
+		//å¿«é€Ÿåˆ é™¤åª’ä½“æº
 		while ((pData = pDisconnectMediaSource.pop(&nLength)) != NULL)
 		{
 			if (nLength > 0 && nLength < 1024)
@@ -3409,7 +3409,7 @@ void* ABLMedisServerFastDeleteThread(void* lpVoid)
 				memset(szDelMediaSource, 0x00, sizeof(szDelMediaSource));
 				memcpy(szDelMediaSource, pData, nLength);
 
-				DeleteMediaStreamSource(szDelMediaSource);//Ö´ĞĞÉ¾³ı 
+				DeleteMediaStreamSource(szDelMediaSource);//æ‰§è¡Œåˆ é™¤ 
 			}
 
 			pDisconnectMediaSource.pop_front();
@@ -3419,7 +3419,7 @@ void* ABLMedisServerFastDeleteThread(void* lpVoid)
 	}
 	return 0;
 }
-//»ñÈ¡µ±Ç°Â·¾¶
+//è·å–å½“å‰è·¯å¾„
 #ifdef OS_System_Windows
 
 void malloc_trim(int n)
@@ -3452,28 +3452,28 @@ bool GetMediaServerCurrentPath(char* szCurPath)
 
 bool GetLocalAdaptersInfo(string& strIPList)
 {
-	//IP_ADAPTER_INFO½á¹¹Ìå
+	//IP_ADAPTER_INFOç»“æ„ä½“
 	PIP_ADAPTER_INFO pIpAdapterInfo = NULL;
 	pIpAdapterInfo = new IP_ADAPTER_INFO;
 
-	//½á¹¹Ìå´óĞ¡
+	//ç»“æ„ä½“å¤§å°
 	unsigned long ulSize = sizeof(IP_ADAPTER_INFO);
 
-	//»ñÈ¡ÊÊÅäÆ÷ĞÅÏ¢
+	//è·å–é€‚é…å™¨ä¿¡æ¯
 	int nRet = GetAdaptersInfo(pIpAdapterInfo, &ulSize);
 
 	if (ERROR_BUFFER_OVERFLOW == nRet)
 	{
-		//¿Õ¼ä²»×ã£¬É¾³ıÖ®Ç°·ÖÅäµÄ¿Õ¼ä
+		//ç©ºé—´ä¸è¶³ï¼Œåˆ é™¤ä¹‹å‰åˆ†é…çš„ç©ºé—´
 		delete[]pIpAdapterInfo;
 
-		//ÖØĞÂ·ÖÅä´óĞ¡
+		//é‡æ–°åˆ†é…å¤§å°
 		pIpAdapterInfo = (PIP_ADAPTER_INFO) new BYTE[ulSize];
 
-		//»ñÈ¡ÊÊÅäÆ÷ĞÅÏ¢
+		//è·å–é€‚é…å™¨ä¿¡æ¯
 		nRet = GetAdaptersInfo(pIpAdapterInfo, &ulSize);
 
-		//»ñÈ¡Ê§°Ü
+		//è·å–å¤±è´¥
 		if (ERROR_SUCCESS != nRet)
 		{
 			if (pIpAdapterInfo != NULL)
@@ -3484,15 +3484,15 @@ bool GetLocalAdaptersInfo(string& strIPList)
 		}
 	}
 
-	//MAC µØÖ·ĞÅÏ¢
+	//MAC åœ°å€ä¿¡æ¯
 	char szMacAddr[20];
-	//¸³ÖµÖ¸Õë
+	//èµ‹å€¼æŒ‡é’ˆ
 	PIP_ADAPTER_INFO pIterater = pIpAdapterInfo;
 	while (pIterater)
 	{
-		//cout << "Íø¿¨Ãû³Æ£º" << pIterater->AdapterName << endl;
+		//cout << "ç½‘å¡åç§°ï¼š" << pIterater->AdapterName << endl;
 
-		//cout << "Íø¿¨ÃèÊö£º" << pIterater->Description << endl;
+		//cout << "ç½‘å¡æè¿°ï¼š" << pIterater->Description << endl;
 
 		sprintf_s(szMacAddr, 20, "%02X-%02X-%02X-%02X-%02X-%02X",
 			pIterater->Address[0],
@@ -3502,15 +3502,15 @@ bool GetLocalAdaptersInfo(string& strIPList)
 			pIterater->Address[4],
 			pIterater->Address[5]);
 
-		//cout << "MAC µØÖ·£º" << szMacAddr << endl;
-		//cout << "IPµØÖ·ÁĞ±í£º" << endl << endl;
+		//cout << "MAC åœ°å€ï¼š" << szMacAddr << endl;
+		//cout << "IPåœ°å€åˆ—è¡¨ï¼š" << endl << endl;
 
-		//Ö¸ÏòIPµØÖ·ÁĞ±í
+		//æŒ‡å‘IPåœ°å€åˆ—è¡¨
 		PIP_ADDR_STRING pIpAddr = &pIterater->IpAddressList;
 		while (pIpAddr)
 		{
-			//cout << "IPµØÖ·£º  " << pIpAddr->IpAddress.String << endl;
-			//cout << "×ÓÍøÑÚÂë£º" << pIpAddr->IpMask.String << endl;
+			//cout << "IPåœ°å€ï¼š  " << pIpAddr->IpAddress.String << endl;
+			//cout << "å­ç½‘æ©ç ï¼š" << pIpAddr->IpMask.String << endl;
 
 			if (!(strcmp(pIpAddr->IpAddress.String, "127.0.0.1") == 0 || strcmp(pIpAddr->IpAddress.String, "0.0.0.0") == 0))
 			{
@@ -3518,11 +3518,11 @@ bool GetLocalAdaptersInfo(string& strIPList)
 				strIPList += ",";
 			}
 
-			//Ö¸ÏòÍø¹ØÁĞ±í
+			//æŒ‡å‘ç½‘å…³åˆ—è¡¨
 			PIP_ADDR_STRING pGateAwayList = &pIterater->GatewayList;
 			while (pGateAwayList)
 			{
-				//cout << "Íø¹Ø£º    " << pGateAwayList->IpAddress.String << endl;
+				//cout << "ç½‘å…³ï¼š    " << pGateAwayList->IpAddress.String << endl;
 				pGateAwayList = pGateAwayList->Next;
 			}
 			pIpAddr = pIpAddr->Next;
@@ -3531,7 +3531,7 @@ bool GetLocalAdaptersInfo(string& strIPList)
 		pIterater = pIterater->Next;
 	}
 
-	//ÇåÀí
+	//æ¸…ç†
 	if (pIpAdapterInfo)
 	{
 		delete[]pIpAdapterInfo;
@@ -3541,7 +3541,7 @@ bool GetLocalAdaptersInfo(string& strIPList)
 	return true;
 }
 
-//¸ù¾İÂ¼ÏñÂ·¾¶²éÕÒËùÓĞÂ¼ÏñÎÄ¼ş - windows
+//æ ¹æ®å½•åƒè·¯å¾„æŸ¥æ‰¾æ‰€æœ‰å½•åƒæ–‡ä»¶ - windows
 void FindHistoryRecordFile(char* szRecordPath)
 {
 	char tempFileFind[MAX_PATH];
@@ -3549,16 +3549,16 @@ void FindHistoryRecordFile(char* szRecordPath)
 	WIN32_FIND_DATA fd2 = { 0 };
 	WIN32_FIND_DATA fd3 = { 0 };
 	bool bFindFlag = true;
-	char szApp[256] = { 0 }, szStream[string_length_512] = { 0 };//ÏÖÔÚÖ»Ö§³Ö2¼¶Â·¾¶
+	char szApp[256] = { 0 }, szStream[string_length_512] = { 0 };//ç°åœ¨åªæ”¯æŒ2çº§è·¯å¾„
 	char szDeleteFile[string_length_512] = { 0 };
 
-	//²éÕÒÎÄ¼ş
+	//æŸ¥æ‰¾æ–‡ä»¶
 	sprintf(tempFileFind, "%s%s", szRecordPath, "*.*");
 
 	HANDLE hFind = FindFirstFile(tempFileFind, &fd);
 	if (INVALID_HANDLE_VALUE == hFind)
 	{
-		WriteLog(Log_Debug, "FindHistoryRecordFile £¬ÅäÖÃµÄÂ¼ÏñÂ·¾¶ %s ,Ã»ÓĞÕÒµ½ÈÎºÎÎÄ¼ş£¡ ", szRecordPath);
+		WriteLog(Log_Debug, "FindHistoryRecordFile ï¼Œé…ç½®çš„å½•åƒè·¯å¾„ %s ,æ²¡æœ‰æ‰¾åˆ°ä»»ä½•æ–‡ä»¶ï¼ ", szRecordPath);
 		return;
 	}
 
@@ -3567,7 +3567,7 @@ void FindHistoryRecordFile(char* szRecordPath)
 		bFindFlag = FindNextFile(hFind, &fd);
 		if (bFindFlag && !(strcmp(fd.cFileName, ".") == 0 || strcmp(fd.cFileName, "..") == 0) && fd.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY)
 		{
-			//WriteLog(Log_Debug, "FindHistoryRecordFile £¬Â·¾¶ %s%s  ", szRecordPath, fd.cFileName);
+			//WriteLog(Log_Debug, "FindHistoryRecordFile ï¼Œè·¯å¾„ %s%s  ", szRecordPath, fd.cFileName);
 
 			sprintf(tempFileFind, "%s%s\\%s", szRecordPath, fd.cFileName, "*.*");
 			HANDLE hFind2 = FindFirstFile(tempFileFind, &fd2);
@@ -3578,7 +3578,7 @@ void FindHistoryRecordFile(char* szRecordPath)
 				{
 					if (bFindFlag2 && !(strcmp(fd2.cFileName, ".") == 0 || strcmp(fd2.cFileName, "..") == 0) && fd2.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY)
 					{
-						//WriteLog(Log_Debug, "FindHistoryRecordFile £¬Â·¾¶ %s%s\\%s  ", szRecordPath, fd.cFileName, fd2.cFileName);
+						//WriteLog(Log_Debug, "FindHistoryRecordFile ï¼Œè·¯å¾„ %s%s\\%s  ", szRecordPath, fd.cFileName, fd2.cFileName);
 
 						sprintf(tempFileFind, "%s%s\\%s\\%s", szRecordPath, fd.cFileName, fd2.cFileName, "*.*");
 						HANDLE hFind3 = FindFirstFile(tempFileFind, &fd3);
@@ -3588,7 +3588,7 @@ void FindHistoryRecordFile(char* szRecordPath)
 						if (hFind3 && pRecord && strstr(fd3.cFileName, ".mp4") != NULL)
 							pRecord->AddRecordFile(fd3.cFileName);
 
-						//É¾³ıµô .m3u8 ÎÄ¼ş
+						//åˆ é™¤æ‰ .m3u8 æ–‡ä»¶
 						if (hFind3 && strstr(fd3.cFileName, ".m3u8") != NULL)
 						{
 							sprintf(szDeleteFile, "%s%s\\%s\\%s", szRecordPath, fd.cFileName, fd2.cFileName, fd3.cFileName);
@@ -3604,13 +3604,13 @@ void FindHistoryRecordFile(char* szRecordPath)
 								{
 									pRecord->AddRecordFile(fd3.cFileName);
 								}
-								//É¾³ıµô .m3u8 ÎÄ¼ş
+								//åˆ é™¤æ‰ .m3u8 æ–‡ä»¶
 								if (bFindFlag3 && strstr(fd3.cFileName, ".m3u8") != NULL)
 								{
 									sprintf(szDeleteFile, "%s%s\\%s\\%s", szRecordPath, fd.cFileName, fd2.cFileName, fd3.cFileName);
 									ABLDeleteFile(szDeleteFile);
 								}
-								//WriteLog(Log_Debug, "FindHistoryRecordFile £¬ÎÄ¼ş %s%s\\%s\\%s  ", szRecordPath, fd.cFileName, fd2.cFileName, fd3.cFileName);
+								//WriteLog(Log_Debug, "FindHistoryRecordFile ï¼Œæ–‡ä»¶ %s%s\\%s\\%s  ", szRecordPath, fd.cFileName, fd2.cFileName, fd3.cFileName);
 							}
 						}
 						FindClose(hFind3);
@@ -3626,7 +3626,7 @@ void FindHistoryRecordFile(char* szRecordPath)
 	FindClose(hFind);
 }
 
-//¸ù¾İÍ¼Æ¬Â·¾¶²éÕÒËùÓĞÍ¼Æ¬ÎÄ¼ş - windows
+//æ ¹æ®å›¾ç‰‡è·¯å¾„æŸ¥æ‰¾æ‰€æœ‰å›¾ç‰‡æ–‡ä»¶ - windows
 void FindHistoryPictureFile(char* szPicturePath)
 {
 	char tempFileFind[MAX_PATH];
@@ -3634,14 +3634,14 @@ void FindHistoryPictureFile(char* szPicturePath)
 	WIN32_FIND_DATA fd2 = { 0 };
 	WIN32_FIND_DATA fd3 = { 0 };
 	bool bFindFlag = true;
-	char szApp[256] = { 0 }, szStream[string_length_512] = { 0 };//ÏÖÔÚÖ»Ö§³Ö2¼¶Â·¾¶
-												   //²éÕÒÎÄ¼ş
+	char szApp[256] = { 0 }, szStream[string_length_512] = { 0 };//ç°åœ¨åªæ”¯æŒ2çº§è·¯å¾„
+												   //æŸ¥æ‰¾æ–‡ä»¶
 	sprintf(tempFileFind, "%s%s", szPicturePath, "*.*");
 
 	HANDLE hFind = FindFirstFile(tempFileFind, &fd);
 	if (INVALID_HANDLE_VALUE == hFind)
 	{
-		WriteLog(Log_Debug, "FindHistoryPictureFile £¬ÅäÖÃµÄÂ¼ÏñÂ·¾¶ %s ,Ã»ÓĞÕÒµ½ÈÎºÎÎÄ¼ş£¡ ", szPicturePath);
+		WriteLog(Log_Debug, "FindHistoryPictureFile ï¼Œé…ç½®çš„å½•åƒè·¯å¾„ %s ,æ²¡æœ‰æ‰¾åˆ°ä»»ä½•æ–‡ä»¶ï¼ ", szPicturePath);
 		return;
 	}
 
@@ -3650,7 +3650,7 @@ void FindHistoryPictureFile(char* szPicturePath)
 		bFindFlag = FindNextFile(hFind, &fd);
 		if (bFindFlag && !(strcmp(fd.cFileName, ".") == 0 || strcmp(fd.cFileName, "..") == 0) && fd.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY)
 		{
-			//WriteLog(Log_Debug, "FindHistoryPictureFile £¬Â·¾¶ %s%s  ", szPicturePath, fd.cFileName);
+			//WriteLog(Log_Debug, "FindHistoryPictureFile ï¼Œè·¯å¾„ %s%s  ", szPicturePath, fd.cFileName);
 
 			sprintf(tempFileFind, "%s%s\\%s", szPicturePath, fd.cFileName, "*.*");
 			HANDLE hFind2 = FindFirstFile(tempFileFind, &fd2);
@@ -3661,7 +3661,7 @@ void FindHistoryPictureFile(char* szPicturePath)
 				{
 					if (bFindFlag2 && !(strcmp(fd2.cFileName, ".") == 0 || strcmp(fd2.cFileName, "..") == 0) && fd2.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY)
 					{
-						//WriteLog(Log_Debug, "FindHistoryPictureFile £¬Â·¾¶ %s%s\\%s  ", szPicturePath, fd.cFileName, fd2.cFileName);
+						//WriteLog(Log_Debug, "FindHistoryPictureFile ï¼Œè·¯å¾„ %s%s\\%s  ", szPicturePath, fd.cFileName, fd2.cFileName);
 
 						sprintf(tempFileFind, "%s%s\\%s\\%s", szPicturePath, fd.cFileName, fd2.cFileName, "*.*");
 						HANDLE hFind3 = FindFirstFile(tempFileFind, &fd3);
@@ -3678,7 +3678,7 @@ void FindHistoryPictureFile(char* szPicturePath)
 								{
 									pPicture->AddPictureFile(fd3.cFileName);
 								}
-								//WriteLog(Log_Debug, "FindHistoryPictureFile £¬ÎÄ¼ş %s%s\\%s\\%s  ", szPicturePath, fd.cFileName, fd2.cFileName, fd3.cFileName);
+								//WriteLog(Log_Debug, "FindHistoryPictureFile ï¼Œæ–‡ä»¶ %s%s\\%s\\%s  ", szPicturePath, fd.cFileName, fd2.cFileName, fd3.cFileName);
 							}
 						}
 						FindClose(hFind3);
@@ -3696,14 +3696,14 @@ void FindHistoryPictureFile(char* szPicturePath)
 
 #else
 
-//É¾³ıÎÄ¼ş
+//åˆ é™¤æ–‡ä»¶
 bool  ABLDeleteFile(char* szFileName)
 {
 	int nRet = unlink(szFileName);
 	return (nRet == 0) ? true : false;
 }
 
-//¸ù¾İÂ¼ÏñÂ·¾¶²éÕÒËùÓĞÂ¼ÏñÎÄ¼ş - linux 
+//æ ¹æ®å½•åƒè·¯å¾„æŸ¥æ‰¾æ‰€æœ‰å½•åƒæ–‡ä»¶ - linux 
 void FindHistoryRecordFile(char* szRecordPath)
 {
 	struct dirent* filename;    // return value for readdir()
@@ -3721,7 +3721,7 @@ void FindHistoryRecordFile(char* szRecordPath)
 
 		if (strlen(filename->d_name) > 0)
 		{
-			//WriteLog(Log_Debug, "FindHistoryRecordFile £¬Â·¾¶ %s ", filename->d_name);
+			//WriteLog(Log_Debug, "FindHistoryRecordFile ï¼Œè·¯å¾„ %s ", filename->d_name);
 
 			struct dirent* filename2;
 			DIR* dir2;
@@ -3733,7 +3733,7 @@ void FindHistoryRecordFile(char* szRecordPath)
 			{
 				if (!(strcmp(filename2->d_name, ".") == 0 || strcmp(filename2->d_name, "..") == 0))
 				{
-					//WriteLog(Log_Debug, "FindHistoryRecordFile £¬µÚ2¼¶Â·¾¶ %s ", filename2->d_name);
+					//WriteLog(Log_Debug, "FindHistoryRecordFile ï¼Œç¬¬2çº§è·¯å¾„ %s ", filename2->d_name);
 
 					struct dirent* filename3;
 					DIR* dir3;
@@ -3747,13 +3747,13 @@ void FindHistoryRecordFile(char* szRecordPath)
 					{
 						if (!(strcmp(filename3->d_name, ".") == 0 || strcmp(filename3->d_name, "..") == 0))
 						{
-							//WriteLog(Log_Debug, "FindHistoryRecordFile ,Â¼ÏñÎÄ¼şÃû×Ö %s ", filename3->d_name);
+							//WriteLog(Log_Debug, "FindHistoryRecordFile ,å½•åƒæ–‡ä»¶åå­— %s ", filename3->d_name);
 							if (pRecord && strstr(filename3->d_name, ".mp4") != NULL)
 							{
 								pRecord->AddRecordFile(filename3->d_name);
 							}
 							else if (strstr(filename3->d_name, ".m3u8") != NULL)
-							{//É¾³ı·ÏÆúµÄ m3u8 ÎÄ¼ş 
+							{//åˆ é™¤åºŸå¼ƒçš„ m3u8 æ–‡ä»¶ 
 								sprintf(szDeleteFile, "%s%s/%s/%s", szRecordPath, filename->d_name, filename2->d_name, filename3->d_name);
 								ABLDeleteFile(szDeleteFile);
 							}
@@ -3772,7 +3772,7 @@ void FindHistoryRecordFile(char* szRecordPath)
 	closedir(dir);
 }
 
-//¸ù¾İÍ¼Æ¬Â·¾¶²éÕÒËùÓĞÍ¼Æ¬ÎÄ¼ş - linux 
+//æ ¹æ®å›¾ç‰‡è·¯å¾„æŸ¥æ‰¾æ‰€æœ‰å›¾ç‰‡æ–‡ä»¶ - linux 
 void FindHistoryPictureFile(char* szPicturePath)
 {
 	struct dirent* filename;    // return value for readdir()
@@ -3789,7 +3789,7 @@ void FindHistoryPictureFile(char* szPicturePath)
 
 		if (strlen(filename->d_name) > 0)
 		{
-			//WriteLog(Log_Debug, "FindHistoryPictureFile £¬Â·¾¶ %s ", filename->d_name);
+			//WriteLog(Log_Debug, "FindHistoryPictureFile ï¼Œè·¯å¾„ %s ", filename->d_name);
 
 			struct dirent* filename2;
 			DIR* dir2;
@@ -3801,7 +3801,7 @@ void FindHistoryPictureFile(char* szPicturePath)
 			{
 				if (!(strcmp(filename2->d_name, ".") == 0 || strcmp(filename2->d_name, "..") == 0))
 				{
-					//WriteLog(Log_Debug, "FindHistoryPictureFile £¬µÚ2¼¶Â·¾¶ %s ", filename2->d_name);
+					//WriteLog(Log_Debug, "FindHistoryPictureFile ï¼Œç¬¬2çº§è·¯å¾„ %s ", filename2->d_name);
 
 					struct dirent* filename3;
 					DIR* dir3;
@@ -3815,7 +3815,7 @@ void FindHistoryPictureFile(char* szPicturePath)
 					{
 						if (!(strcmp(filename3->d_name, ".") == 0 || strcmp(filename3->d_name, "..") == 0))
 						{
-							//WriteLog(Log_Debug, "FindHistoryPictureFile ,Â¼ÏñÎÄ¼şÃû×Ö %s ", filename3->d_name);
+							//WriteLog(Log_Debug, "FindHistoryPictureFile ,å½•åƒæ–‡ä»¶åå­— %s ", filename3->d_name);
 							if (pPicture)
 							{
 								pPicture->AddPictureFile(filename3->d_name);
@@ -3838,7 +3838,7 @@ void FindHistoryPictureFile(char* szPicturePath)
 
 void WebRtcCallBack(const char* callbackJson, void* pUserHandle)
 {
-	WriteLog(Log_Debug, " ----- WebRtcCallBack ----- £º\r\n%s ", callbackJson);
+	WriteLog(Log_Debug, " ----- WebRtcCallBack ----- ï¼š\r\n%s ", callbackJson);
 	if (strlen(callbackJson) > 0 /* && callbackJson[0] == '{' && callbackJson[strlen(callbackJson) - 1] == '}' */)
 	{
 		WebRtcCallStruct callbackStruct;
@@ -3858,10 +3858,10 @@ void WebRtcCallBack(const char* callbackJson, void* pUserHandle)
 		}
 
 		if (callbackStruct.eventID == 2)
-		{//´´½¨webrtc²¥·Å
+		{//åˆ›å»ºwebrtcæ’­æ”¾
 			CMediaStreamSource_ptr pMediaSource = GetMediaStreamSource(callbackStruct.stream, true);
 			if (pMediaSource == NULL)
-				WriteLog(Log_Debug, "²»´æÔÚÁ÷ %s ", callbackStruct.stream);
+				WriteLog(Log_Debug, "ä¸å­˜åœ¨æµ %s ", callbackStruct.stream);
 			else
 			{
 				if ( pMediaSource->bCreateWebRtcPlaySourceFlag.load() == false)
@@ -3869,7 +3869,7 @@ void WebRtcCallBack(const char* callbackJson, void* pUserHandle)
 					CNetRevcBase_ptr pClient = CreateNetRevcBaseClient(NetBaseNetType_NetClientWebrtcPlayer, 0, 0, "", 0, callbackStruct.stream);
 					if (pClient != NULL)
 					{
-						WriteLog(Log_Debug, "´´½¨webrtc²¥·Å  %s ", callbackStruct.stream);
+						WriteLog(Log_Debug, "åˆ›å»ºwebrtcæ’­æ”¾  %s ", callbackStruct.stream);
 						memcpy((char*)&pClient->webRtcCallStruct, (char*)&callbackStruct, sizeof(WebRtcCallStruct));
 					}
 					pMediaSource->nWebRtcPlayerCount++;
@@ -3879,33 +3879,33 @@ void WebRtcCallBack(const char* callbackJson, void* pUserHandle)
 					if (pMediaSource->bCreateWebRtcPlaySourceFlag.load() == true)
 					{
 						pMediaSource->nWebRtcPlayerCount++;
-						WriteLog(Log_Debug, "Ã½ÌåÔ´ %s µÄÊÓÆµ¸ñÊ½Îª %s ,ÒÑ¾­´´½¨ÁËwebrtc ²¥·ÅÃ½ÌåÔ´ ", callbackStruct.stream, pMediaSource->m_mediaCodecInfo.szVideoName);
+						WriteLog(Log_Debug, "åª’ä½“æº %s çš„è§†é¢‘æ ¼å¼ä¸º %s ,å·²ç»åˆ›å»ºäº†webrtc æ’­æ”¾åª’ä½“æº ", callbackStruct.stream, pMediaSource->m_mediaCodecInfo.szVideoName);
 					}
 					else
-						WriteLog(Log_Debug, "Ã½ÌåÔ´ %s µÄÊÓÆµ¸ñÊ½Îª %s ,²»Ö§³ÖWebRTC²¥·Å£¬±ØĞëÎªH264 ", callbackStruct.stream, pMediaSource->m_mediaCodecInfo.szVideoName);
+						WriteLog(Log_Debug, "åª’ä½“æº %s çš„è§†é¢‘æ ¼å¼ä¸º %s ,ä¸æ”¯æŒWebRTCæ’­æ”¾ï¼Œå¿…é¡»ä¸ºH264 ", callbackStruct.stream, pMediaSource->m_mediaCodecInfo.szVideoName);
 				}
 			}
 		}
 		else if (callbackStruct.eventID == 5)
-		{//É¾³ıwebrtc²¥·Å
+		{//åˆ é™¤webrtcæ’­æ”¾
 			CMediaStreamSource_ptr pMediaSource = GetMediaStreamSource(callbackStruct.stream, false);
 			if (pMediaSource != NULL)
 			{
 				pMediaSource->nWebRtcPlayerCount--;
 				if (pMediaSource->nWebRtcPlayerCount <= 0)
-				{//Í³¼Æ³öÎŞÈË¹Û¿´Ê±
+				{//ç»Ÿè®¡å‡ºæ— äººè§‚çœ‹æ—¶
 					pMediaSource->nWebRtcPlayerCount = 0;
-					WriteLog(Log_Debug, "Ã½ÌåÔ´ %s , pMediaSource->nWebRtcPlayerCount = %d  ÒÑ¾­ÎŞÈË¹Û¿´£¬°Ñ nClient = %llu ´Ó ·¢ËÍÏß³Ì³ØÒÆ³ı  ", callbackStruct.stream, pMediaSource->nWebRtcPlayerCount, pMediaSource->nWebRtcPushStreamID);
+					WriteLog(Log_Debug, "åª’ä½“æº %s , pMediaSource->nWebRtcPlayerCount = %d  å·²ç»æ— äººè§‚çœ‹ï¼ŒæŠŠ nClient = %llu ä» å‘é€çº¿ç¨‹æ± ç§»é™¤  ", callbackStruct.stream, pMediaSource->nWebRtcPlayerCount, pMediaSource->nWebRtcPushStreamID);
 				}
 			}
 		}
 		else if (callbackStruct.eventID == 7)
-		{//É¾³ıwebrtcÃ½ÌåÔ´
+		{//åˆ é™¤webrtcåª’ä½“æº
 
 		}
 	}
 };
-#define VERSION	 "1.0.001.0425" //   001ÊÇµ±ÈÕµÚ¼¸¸ö°æ±¾       ×îºóµÄÊÇÈÕÆÚddsfsdgsdgsdgsdgsdgsdgsgdsg
+#define VERSION	 "1.0.001.0425" //   001æ˜¯å½“æ—¥ç¬¬å‡ ä¸ªç‰ˆæœ¬       æœ€åçš„æ˜¯æ—¥æœŸddsfsdgsdgsdgsdgsdgsdgsgdsg
 void  printfVersion()
 {
 
@@ -3915,7 +3915,7 @@ void  printfVersion()
 	WriteLog(Log_Debug, "*                                        *");
 	WriteLog(Log_Debug, "*                                        *");
 	WriteLog(Log_Debug, "*                                        *");
-	WriteLog(Log_Debug, "*           µ±Ç°°æ±¾ : %s      *", VERSION);
+	WriteLog(Log_Debug, "*           å½“å‰ç‰ˆæœ¬ : %s      *", VERSION);
 	WriteLog(Log_Debug, "*    %s    *", MediaServerVerson);
 	WriteLog(Log_Debug, "*                                        *");
 	WriteLog(Log_Debug, "*                                        *");
@@ -3935,7 +3935,7 @@ int main(int argc, char* argv[])
 	pcm16_alaw_tableinit();
 	pcm16_ulaw_tableinit();
 
-	//»ñÈ¡cpuÎïÀíºËĞÄÊı 
+	//è·å–cpuç‰©ç†æ ¸å¿ƒæ•° 
 	ABL_nCurrentSystemCpuCount = std::thread::hardware_concurrency();
 	if (ABL_nCurrentSystemCpuCount <= 4)
 		ABL_nCurrentSystemCpuCount = 4;
@@ -3956,7 +3956,7 @@ ABL_Restart:
 
 #ifdef OS_System_Windows
 
-	//Êó±êµã»÷¿ØÖÆÌ¨´°¿Ú£¬²»»áÔÙ¿¨×¡ 
+	//é¼ æ ‡ç‚¹å‡»æ§åˆ¶å°çª—å£ï¼Œä¸ä¼šå†å¡ä½ 
 	DWORD mode;
 	HANDLE hstdin = GetStdHandle(STD_INPUT_HANDLE);
 	GetConsoleMode(hstdin, &mode);
@@ -3980,17 +3980,17 @@ ABL_Restart:
 	sprintf(szConfigFileName, "%s%s", ABL_MediaSeverRunPath, "ABLMediaServer.ini");
 	if (ABL_ConfigFile.LoadFile(szConfigFileName) != SI_OK)
 	{
-		WriteLog(Log_Error, "Ã»ÓĞÕÒµ½ÅäÖÃÎÄ¼ş £º%s ", szConfigFileName);
+		WriteLog(Log_Error, "æ²¡æœ‰æ‰¾åˆ°é…ç½®æ–‡ä»¶ ï¼š%s ", szConfigFileName);
 		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 		return -1;
 	}
 
 
 
-	//»ñÈ¡ÓÃ»§ÅäÖÃµÄIPµØÖ· 
+	//è·å–ç”¨æˆ·é…ç½®çš„IPåœ°å€ 
 	strcpy(ABL_szLocalIP, ABL_ConfigFile.GetValue("ABLMediaServer", "localipAddress", ""));
 
-	//×Ô¶¯»ñÈ¡IPµØÖ·
+	//è‡ªåŠ¨è·å–IPåœ°å€
 	if (strlen(ABL_szLocalIP) == 0)
 	{
 		string strIPTemp;
@@ -4002,8 +4002,8 @@ ABL_Restart:
 			strcpy(ABL_szLocalIP, "127.0.0.1");
 	}
 	strcpy(ABL_MediaServerPort.ABL_szLocalIP, ABL_szLocalIP);
-	WriteLog(Log_Debug, "±¾»úIPµØÖ· ABL_szLocalIP : %s ", ABL_szLocalIP);
-	WriteLog(Log_Debug, "±¾»úcpuÎïÀíºËĞÄÊıÁ¿ nCurrentSystemCpuCount %d ", ABL_nCurrentSystemCpuCount);
+	WriteLog(Log_Debug, "æœ¬æœºIPåœ°å€ ABL_szLocalIP : %s ", ABL_szLocalIP);
+	WriteLog(Log_Debug, "æœ¬æœºcpuç‰©ç†æ ¸å¿ƒæ•°é‡ nCurrentSystemCpuCount %d ", ABL_nCurrentSystemCpuCount);
 
 
 	strcpy(ABL_MediaServerPort.secret, ABL_ConfigFile.GetValue("ABLMediaServer", "secret", "035c73f7-bb6b-4889-a715-d9eb2d1925cc111"));
@@ -4078,7 +4078,7 @@ ABL_Restart:
 	ABL_MediaServerPort.httqRequstClose = ABL_ConfigFile.GetLongValue("ABLMediaServer", "httqRequstClose", 0);
 	ABL_MediaServerPort.flvPlayAddMute = ABL_ConfigFile.GetLongValue("ABLMediaServer", "flvPlayAddMute", 1);
 
-	//¶ÁÈ¡ÊÂ¼şÍ¨ÖªÅäÖÃ
+	//è¯»å–äº‹ä»¶é€šçŸ¥é…ç½®
 	ABL_MediaServerPort.hook_enable = ABL_ConfigFile.GetLongValue("ABLMediaServer", "hook_enable", 0);
 	ABL_MediaServerPort.noneReaderDuration = ABL_ConfigFile.GetLongValue("ABLMediaServer", "noneReaderDuration", 32);
 	strcpy(ABL_MediaServerPort.on_server_started, ABL_ConfigFile.GetValue("ABLMediaServer", "on_server_started", ""));
@@ -4124,7 +4124,7 @@ ABL_Restart:
 	if (strlen(ABL_MediaServerPort.recordPath) == 0)
 		strcpy(ABL_MediaServerPort.recordPath, ABL_MediaSeverRunPath);
 	else
-	{//ÓÃ»§ÉèÖÃµÄÂ·¾¶,·ÀÖ¹ÓÃ»§Ã»ÓĞ´´½¨ºÃÂ·¾¶
+	{//ç”¨æˆ·è®¾ç½®çš„è·¯å¾„,é˜²æ­¢ç”¨æˆ·æ²¡æœ‰åˆ›å»ºå¥½è·¯å¾„
 		int nPos = 0;
 		char szTempPath[512] = { 0 };
 		string strPath = ABL_MediaServerPort.recordPath;
@@ -4144,11 +4144,11 @@ ABL_Restart:
 		}
 	}
 
-	//ÉèÖÃÍ¼Æ¬×¥ÅÄÂ·¾¶
+	//è®¾ç½®å›¾ç‰‡æŠ“æ‹è·¯å¾„
 	if (strlen(ABL_MediaServerPort.picturePath) == 0)
 		strcpy(ABL_MediaServerPort.picturePath, ABL_MediaSeverRunPath);
 	else
-	{//ÓÃ»§ÉèÖÃµÄÂ·¾¶,·ÀÖ¹ÓÃ»§Ã»ÓĞ´´½¨ºÃÂ·¾¶
+	{//ç”¨æˆ·è®¾ç½®çš„è·¯å¾„,é˜²æ­¢ç”¨æˆ·æ²¡æœ‰åˆ›å»ºå¥½è·¯å¾„
 		int nPos = 0;
 		char szTempPath[512] = { 0 };
 		string strPath = ABL_MediaServerPort.picturePath;
@@ -4168,11 +4168,11 @@ ABL_Restart:
 		}
 	}
 
-	//ÉèÖÃÇĞÆ¬Â·¾¶
+	//è®¾ç½®åˆ‡ç‰‡è·¯å¾„
 	if (strlen(ABL_MediaServerPort.wwwPath) == 0)
 		strcpy(ABL_MediaServerPort.wwwPath, ABL_MediaSeverRunPath);
 	else
-	{//ÓÃ»§ÉèÖÃµÄÂ·¾¶,·ÀÖ¹ÓÃ»§Ã»ÓĞ´´½¨ºÃÂ·¾¶
+	{//ç”¨æˆ·è®¾ç½®çš„è·¯å¾„,é˜²æ­¢ç”¨æˆ·æ²¡æœ‰åˆ›å»ºå¥½è·¯å¾„
 		int nPos = 0;
 		char szTempPath[512] = { 0 };
 		string strPath = ABL_MediaServerPort.wwwPath;
@@ -4192,13 +4192,13 @@ ABL_Restart:
 		}
 	}
 
-	//´´½¨×ÓÂ·¾¶ record 
+	//åˆ›å»ºå­è·¯å¾„ record 
 	if (ABL_MediaServerPort.recordPath[strlen(ABL_MediaServerPort.recordPath) - 1] != '\\')
 		strcat(ABL_MediaServerPort.recordPath, "\\");
 	strcat(ABL_MediaServerPort.recordPath, "record\\");
 	::CreateDirectory(ABL_MediaServerPort.recordPath, NULL);
 
-	//´´½¨×ÓÂ·¾¶ picture 
+	//åˆ›å»ºå­è·¯å¾„ picture 
 	if (ABL_MediaServerPort.picturePath[strlen(ABL_MediaServerPort.picturePath) - 1] != '\\')
 		strcat(ABL_MediaServerPort.picturePath, "\\");
 	strcat(ABL_MediaServerPort.picturePath, "picture\\");
@@ -4207,18 +4207,18 @@ ABL_Restart:
 	sprintf(ABL_MediaServerPort.debugPath, "%s%s\\", ABL_MediaSeverRunPath, "debugFile");
 	::CreateDirectory(ABL_MediaServerPort.debugPath, NULL);
 
-	WriteLog(Log_Debug, "´´½¨³É¹¦Â¼ÏñÂ·¾¶£º%s ,´´½¨Í¼Æ¬Â·¾¶: %s  ", ABL_MediaServerPort.recordPath, ABL_MediaServerPort.picturePath);
-	//°ÑÀúÊ·Â¼ÏñÎÄ¼ş×°Èë list  
+	WriteLog(Log_Debug, "åˆ›å»ºæˆåŠŸå½•åƒè·¯å¾„ï¼š%s ,åˆ›å»ºå›¾ç‰‡è·¯å¾„: %s  ", ABL_MediaServerPort.recordPath, ABL_MediaServerPort.picturePath);
+	//æŠŠå†å²å½•åƒæ–‡ä»¶è£…å…¥ list  
 	FindHistoryRecordFile(ABL_MediaServerPort.recordPath);
-	//°ÑÀúÊ·Í¼Æ¬×°Èëlist 
+	//æŠŠå†å²å›¾ç‰‡è£…å…¥list 
 	FindHistoryPictureFile(ABL_MediaServerPort.picturePath);
 
 	rtp_packet_setsize(65535);
 
 	if (ABL_MediaServerPort.H265ConvertH264_enable == 1 && ABL_MediaServerPort.H265DecodeCpuGpuType == 1 && ABL_bInitCudaSDKFlag == false)
-	{///Ó¢Î°´ï
-		if (true/*²»ÄÜ¸ù¾İÏÔ¿¨Ãû³ÆÀ´ÅĞ¶Ï£¬ÓĞĞ©µçÄÔÓĞË«ÏÔ¿¨ strstr(pD3DName.Description, "GeForce") != NULL || strstr(pD3DName.Description, "NVIDIA") != NULL*/)
-		{//Ó¢Î°´ïÏÔ¿¨Ó²±àÂë
+	{///è‹±ä¼Ÿè¾¾
+		if (true/*ä¸èƒ½æ ¹æ®æ˜¾å¡åç§°æ¥åˆ¤æ–­ï¼Œæœ‰äº›ç”µè„‘æœ‰åŒæ˜¾å¡ strstr(pD3DName.Description, "GeForce") != NULL || strstr(pD3DName.Description, "NVIDIA") != NULL*/)
+		{//è‹±ä¼Ÿè¾¾æ˜¾å¡ç¡¬ç¼–ç 
 			hCudaDecodeInstance = ::LoadLibrary("cudaCodecDLL.dll");
 			if (hCudaDecodeInstance != NULL)
 			{
@@ -4240,19 +4240,19 @@ ABL_Restart:
 				ABL_nCudaCount = cudaCodec_GetDeviceGetCount();
 
 			if (ABL_bCudaFlag == false || ABL_nCudaCount <= 0)
-				ABL_MediaServerPort.H265DecodeCpuGpuType = 0; //»Ö¸´cpuÈí½â
+				ABL_MediaServerPort.H265DecodeCpuGpuType = 0; //æ¢å¤cpuè½¯è§£
 			else
-			{//cuda ×ÊÔ´ÒÑ¾­Æô¶¯¹ı 
+			{//cuda èµ„æºå·²ç»å¯åŠ¨è¿‡ 
 				ABL_bInitCudaSDKFlag = true;
-				WriteLog(Log_Debug, "²âÊÔÓ¢Î°´ïÏÔ¿¨ ABL_bCudaFlag = %d, Ó¢Î°´ïÏÔ¿¨×ÜÊı : %d  ", ABL_bCudaFlag, ABL_nCudaCount);
+				WriteLog(Log_Debug, "æµ‹è¯•è‹±ä¼Ÿè¾¾æ˜¾å¡ ABL_bCudaFlag = %d, è‹±ä¼Ÿè¾¾æ˜¾å¡æ€»æ•° : %d  ", ABL_bCudaFlag, ABL_nCudaCount);
 			}
 		}
 		else
-			ABL_MediaServerPort.H265DecodeCpuGpuType = 0; //»Ö¸´cpuÈí½â
+			ABL_MediaServerPort.H265DecodeCpuGpuType = 0; //æ¢å¤cpuè½¯è§£
 	}
 	else if (ABL_MediaServerPort.H265ConvertH264_enable == 1 && ABL_MediaServerPort.H265DecodeCpuGpuType == 2)
 	{//amd 
-		ABL_MediaServerPort.H265DecodeCpuGpuType = 0; //»Ö¸´cpuÈí½â
+		ABL_MediaServerPort.H265DecodeCpuGpuType = 0; //æ¢å¤cpuè½¯è§£
 	}
 
 	if (ABL_MediaServerPort.H265ConvertH264_enable == 1)
@@ -4264,7 +4264,7 @@ ABL_Restart:
 
 	strcpy(ABL_MediaSeverRunPath, get_current_dir_name());
 	if (argc >= 3 && strcmp(argv[1], "-c") == 0)
-	{//´øÅäÖÃÎÄ¼şÆô¶¯
+	{//å¸¦é…ç½®æ–‡ä»¶å¯åŠ¨
 		strcpy(szConfigFileName, argv[2]);
 	}
 	else
@@ -4272,23 +4272,23 @@ ABL_Restart:
 	WriteLog(Log_Debug, "ABLMediaServer.ini : %s ", szConfigFileName);
 	if (access(szConfigFileName, F_OK) != 0)
 	{
-		WriteLog(Log_Debug, "µ±Ç°Â·¾¶ %s Ã»ÓĞÅäÖÃÎÄ¼ş ABLMediaServer.ini£¬Çë¼ì²é¡£", ABL_MediaSeverRunPath);
+		WriteLog(Log_Debug, "å½“å‰è·¯å¾„ %s æ²¡æœ‰é…ç½®æ–‡ä»¶ ABLMediaServer.iniï¼Œè¯·æ£€æŸ¥ã€‚", ABL_MediaSeverRunPath);
 		return -1;
 	}
 	if (ABL_ConfigFile.LoadFile(szConfigFileName) != SI_OK)
 	{
-		WriteLog(Log_Debug, "¶ÁÈ¡ÅäÖÃÎÄ¼ş %s Ê§°Ü £¡", szConfigFileName);
+		WriteLog(Log_Debug, "è¯»å–é…ç½®æ–‡ä»¶ %s å¤±è´¥ ï¼", szConfigFileName);
 		return -1;
 	}
 
 	ABL_SetPathAuthority(ABL_MediaSeverRunPath);
 
-	//»ñÈ¡ÓÃ»§ÅäÖÃµÄIPµØÖ· 
+	//è·å–ç”¨æˆ·é…ç½®çš„IPåœ°å€ 
 	strcpy(ABL_szLocalIP, ABL_ConfigFile.GetValue("ABLMediaServer", "localipAddress", ""));
-	WriteLog(Log_Debug, "¶ÁÈ¡µ½ÅäÖÃÎÄ¼şµÄIP : %s ", ABL_szLocalIP);
-	WriteLog(Log_Debug, "±¾»úcpuÎïÀíºËĞÄÊıÁ¿ nCurrentSystemCpuCount %d ", ABL_nCurrentSystemCpuCount);
+	WriteLog(Log_Debug, "è¯»å–åˆ°é…ç½®æ–‡ä»¶çš„IP : %s ", ABL_szLocalIP);
+	WriteLog(Log_Debug, "æœ¬æœºcpuç‰©ç†æ ¸å¿ƒæ•°é‡ nCurrentSystemCpuCount %d ", ABL_nCurrentSystemCpuCount);
 
-	//»ñÈ¡IPµØÖ· 
+	//è·å–IPåœ°å€ 
 	if (strlen(ABL_szLocalIP) == 0)
 	{
 		string strIPTemp;
@@ -4300,7 +4300,7 @@ ABL_Restart:
 			strcpy(ABL_szLocalIP, "127.0.0.1");
 	}
 	strcpy(ABL_MediaServerPort.ABL_szLocalIP, ABL_szLocalIP);
-	WriteLog(Log_Debug, "±¾»úIPµØÖ· ABL_szLocalIP : %s ", ABL_szLocalIP);
+	WriteLog(Log_Debug, "æœ¬æœºIPåœ°å€ ABL_szLocalIP : %s ", ABL_szLocalIP);
 	
 	strcpy(ABL_MediaServerPort.secret, ABL_ConfigFile.GetValue("ABLMediaServer", "secret",""));
 	ABL_MediaServerPort.nHttpServerPort = ABL_ConfigFile.GetLongValue("ABLMediaServer", "httpServerPort",0);
@@ -4368,7 +4368,7 @@ ABL_Restart:
 	ABL_MediaServerPort.nFilterFontAlpha = atof(ABL_ConfigFile.GetValue("ABLMediaServer", "FilterFontAlpha",""));
 	ABL_MediaServerPort.httqRequstClose = ABL_ConfigFile.GetLongValue("ABLMediaServer", "httqRequstClose",0);
  
-	//¶ÁÈ¡ÊÂ¼şÍ¨ÖªÅäÖÃ
+	//è¯»å–äº‹ä»¶é€šçŸ¥é…ç½®
 	ABL_MediaServerPort.hook_enable = ABL_ConfigFile.GetLongValue("ABLMediaServer", "hook_enable",0);
 	ABL_MediaServerPort.noneReaderDuration = ABL_ConfigFile.GetLongValue("ABLMediaServer", "noneReaderDuration",0);
 	strcpy(ABL_MediaServerPort.on_server_started, ABL_ConfigFile.GetValue("ABLMediaServer", "on_server_started",""));
@@ -4416,7 +4416,7 @@ ABL_Restart:
 	if (strlen(ABL_MediaServerPort.recordPath) == 0)
 		strcpy(ABL_MediaServerPort.recordPath, ABL_MediaSeverRunPath);
 	else
-	{//ÓÃ»§ÉèÖÃµÄÂ·¾¶,·ÀÖ¹ÓÃ»§Ã»ÓĞ´´½¨ºÃÂ·¾¶
+	{//ç”¨æˆ·è®¾ç½®çš„è·¯å¾„,é˜²æ­¢ç”¨æˆ·æ²¡æœ‰åˆ›å»ºå¥½è·¯å¾„
 		int nPos = 0;
 		char szTempPath[512] = { 0 };
 		string strPath = ABL_MediaServerPort.recordPath;
@@ -4430,7 +4430,7 @@ ABL_Restart:
 				mkdir(szTempPath, 777);
 				ABL_SetPathAuthority(szTempPath);
 
-				WriteLog(Log_Debug, "´´½¨×ÓÂ·¾¶£º%s ", szTempPath);
+				WriteLog(Log_Debug, "åˆ›å»ºå­è·¯å¾„ï¼š%s ", szTempPath);
 			}
 			else
 			{
@@ -4438,7 +4438,7 @@ ABL_Restart:
 				mkdir(ABL_MediaServerPort.recordPath, 777);
 				ABL_SetPathAuthority(ABL_MediaServerPort.recordPath);
 
-				WriteLog(Log_Debug, "´´½¨×ÓÂ·¾¶£º%s ", ABL_MediaServerPort.recordPath);
+				WriteLog(Log_Debug, "åˆ›å»ºå­è·¯å¾„ï¼š%s ", ABL_MediaServerPort.recordPath);
 				break;
 			}
 		}
@@ -4447,7 +4447,7 @@ ABL_Restart:
 	if (strlen(ABL_MediaServerPort.picturePath) == 0)
 		strcpy(ABL_MediaServerPort.picturePath, ABL_MediaSeverRunPath);
 	else
-	{//ÓÃ»§ÉèÖÃµÄÂ·¾¶,·ÀÖ¹ÓÃ»§Ã»ÓĞ´´½¨ºÃÂ·¾¶
+	{//ç”¨æˆ·è®¾ç½®çš„è·¯å¾„,é˜²æ­¢ç”¨æˆ·æ²¡æœ‰åˆ›å»ºå¥½è·¯å¾„
 		int nPos = 0;
 		char szTempPath[512] = { 0 };
 		string strPath = ABL_MediaServerPort.picturePath;
@@ -4461,7 +4461,7 @@ ABL_Restart:
 				mkdir(szTempPath, 777);
 				ABL_SetPathAuthority(szTempPath);
 
-				WriteLog(Log_Debug, "´´½¨×ÓÂ·¾¶£º%s ", szTempPath);
+				WriteLog(Log_Debug, "åˆ›å»ºå­è·¯å¾„ï¼š%s ", szTempPath);
 			}
 			else
 			{
@@ -4470,7 +4470,7 @@ ABL_Restart:
 				ABL_SetPathAuthority(ABL_MediaServerPort.picturePath);
 
 
-				WriteLog(Log_Debug, "´´½¨×ÓÂ·¾¶£º%s ", ABL_MediaServerPort.picturePath);
+				WriteLog(Log_Debug, "åˆ›å»ºå­è·¯å¾„ï¼š%s ", ABL_MediaServerPort.picturePath);
 				break;
 			}
 		}
@@ -4479,7 +4479,7 @@ ABL_Restart:
 	if (strlen(ABL_MediaServerPort.wwwPath) == 0)
 		strcpy(ABL_MediaServerPort.wwwPath, ABL_MediaSeverRunPath);
 	else
-	{//ÓÃ»§ÉèÖÃµÄÂ·¾¶,·ÀÖ¹ÓÃ»§Ã»ÓĞ´´½¨ºÃÂ·¾¶
+	{//ç”¨æˆ·è®¾ç½®çš„è·¯å¾„,é˜²æ­¢ç”¨æˆ·æ²¡æœ‰åˆ›å»ºå¥½è·¯å¾„
 		int nPos = 0;
 		char szTempPath[512] = { 0 };
 		string strPath = ABL_MediaServerPort.wwwPath;
@@ -4493,19 +4493,19 @@ ABL_Restart:
 				mkdir(szTempPath, 777);
 				ABL_SetPathAuthority(szTempPath);
 
-				WriteLog(Log_Debug, "´´½¨×ÓÂ·¾¶£º%s ", szTempPath);
+				WriteLog(Log_Debug, "åˆ›å»ºå­è·¯å¾„ï¼š%s ", szTempPath);
 			}
 			else
 			{
 				umask(0);
 				mkdir(ABL_MediaServerPort.wwwPath, 777);
 				ABL_SetPathAuthority(ABL_MediaServerPort.wwwPath);
-				WriteLog(Log_Debug, "´´½¨×ÓÂ·¾¶£º%s ", ABL_MediaServerPort.wwwPath);
+				WriteLog(Log_Debug, "åˆ›å»ºå­è·¯å¾„ï¼š%s ", ABL_MediaServerPort.wwwPath);
 				break;
 			}
 		}
 	}
-	//´´½¨×ÓÂ·¾¶ record 
+	//åˆ›å»ºå­è·¯å¾„ record 
 	if (ABL_MediaServerPort.recordPath[strlen(ABL_MediaServerPort.recordPath) - 1] != '/')
 		strcat(ABL_MediaServerPort.recordPath, "/");
 	strcat(ABL_MediaServerPort.recordPath, "record/");
@@ -4513,20 +4513,20 @@ ABL_Restart:
 	mkdir(ABL_MediaServerPort.recordPath, 777);
 	ABL_SetPathAuthority(ABL_MediaServerPort.recordPath);
 
-	//´´½¨µ÷ÊÔÎÄ¼şÂ·¾¶
+	//åˆ›å»ºè°ƒè¯•æ–‡ä»¶è·¯å¾„
 	sprintf(ABL_MediaServerPort.debugPath, "%s/debugFile/", ABL_MediaSeverRunPath);
 	umask(0);
 	mkdir(ABL_MediaServerPort.debugPath, 777);
 	ABL_SetPathAuthority(ABL_MediaServerPort.debugPath);
 
-	//´´½¨×ÓÂ·¾¶ picture 
+	//åˆ›å»ºå­è·¯å¾„ picture 
 	if (ABL_MediaServerPort.picturePath[strlen(ABL_MediaServerPort.picturePath) - 1] != '/')
 		strcat(ABL_MediaServerPort.picturePath, "/");
 	strcat(ABL_MediaServerPort.picturePath, "picture/");
 	umask(0);
 	mkdir(ABL_MediaServerPort.picturePath, 777);
 	ABL_SetPathAuthority(ABL_MediaServerPort.picturePath);
-	WriteLog(Log_Debug, "´´½¨³É¹¦Â¼ÏñÂ·¾¶£º%s ,´´½¨Í¼Æ¬Â·¾¶³É¹¦£º%s ", ABL_MediaServerPort.recordPath, ABL_MediaServerPort.picturePath);
+	WriteLog(Log_Debug, "åˆ›å»ºæˆåŠŸå½•åƒè·¯å¾„ï¼š%s ,åˆ›å»ºå›¾ç‰‡è·¯å¾„æˆåŠŸï¼š%s ", ABL_MediaServerPort.recordPath, ABL_MediaServerPort.picturePath);
 
 	struct rlimit rlim, rlim_new;
 	if (getrlimit(RLIMIT_CORE, &rlim) == 0) {
@@ -4535,7 +4535,7 @@ ABL_Restart:
 			rlim_new.rlim_cur = rlim_new.rlim_max = rlim.rlim_max;
 			setrlimit(RLIMIT_CORE, &rlim_new);
 		}
-		WriteLog(Log_Debug, "ÉèÖÃcoreÎÄ¼ş´óĞ¡Îª: %llu ", rlim_new.rlim_cur);
+		WriteLog(Log_Debug, "è®¾ç½®coreæ–‡ä»¶å¤§å°ä¸º: %llu ", rlim_new.rlim_cur);
 	}
 
 	if (getrlimit(RLIMIT_NOFILE, &rlim) == 0) {
@@ -4544,12 +4544,12 @@ ABL_Restart:
 			rlim_new.rlim_cur = rlim_new.rlim_max = rlim.rlim_max;
 			setrlimit(RLIMIT_NOFILE, &rlim_new);
 		}
-		WriteLog(Log_Debug, "ÉèÖÃ×î´óSocketÌ×½Ó×Ö×î´óÁ¬½ÓÊı: %llu ", rlim_new.rlim_cur);
+		WriteLog(Log_Debug, "è®¾ç½®æœ€å¤§Socketå¥—æ¥å­—æœ€å¤§è¿æ¥æ•°: %llu ", rlim_new.rlim_cur);
 	}
 
-	//°ÑÀúÊ·Â¼ÏñÎÄ¼ş×°Èë list  
+	//æŠŠå†å²å½•åƒæ–‡ä»¶è£…å…¥ list  
 	FindHistoryRecordFile(ABL_MediaServerPort.recordPath);
-	//°ÑÀúÊ·Í¼Æ¬×°Èëlist 
+	//æŠŠå†å²å›¾ç‰‡è£…å…¥list 
 	FindHistoryPictureFile(ABL_MediaServerPort.picturePath);
 
 	rtp_packet_setsize(65535);
@@ -4597,16 +4597,16 @@ ABL_Restart:
          bool bRet2 = cudaEncode_Init();
  	     WriteLog(Log_Debug, "cudaCodec_Init()= %d , cudaEncode_Init() = %d ", bRet1,bRet2);
 		 if(!(bRet1 && bRet2 ))
-			ABL_MediaServerPort.H265DecodeCpuGpuType = 0 ;//»Ö¸´ÎªÈí½âÂë 
+			ABL_MediaServerPort.H265DecodeCpuGpuType = 0 ;//æ¢å¤ä¸ºè½¯è§£ç  
 	   }else 
-		  ABL_MediaServerPort.H265DecodeCpuGpuType = 0 ;//»Ö¸´ÎªÈí½âÂë
+		  ABL_MediaServerPort.H265DecodeCpuGpuType = 0 ;//æ¢å¤ä¸ºè½¯è§£ç 
 
 	   WriteLog(Log_Debug, " H265DecodeCpuGpuType = %d ",ABL_MediaServerPort.H265DecodeCpuGpuType );
 	}
 #endif
-	WriteLog(Log_Debug, "....¸ßĞÔÄÜÁ÷Ã½Ìå·şÎñÆ÷ ABLMediaServer Start ....");
+	WriteLog(Log_Debug, "....é«˜æ€§èƒ½æµåª’ä½“æœåŠ¡å™¨ ABLMediaServer Start ....");
 	printfVersion();
-	WriteLog(Log_Debug, "´ÓÅäÖÃÎÄ¼şÖĞ¶ÁÈ¡µ½ \r\nÔËĞĞ²ÎÊı£ºhttp = %d, rtsp = %d , rtmp = %d ,http-flv = %d ,ws-flv = %d ,http-mp4 = %d, nHlsPort = %d , nHlsEnable = %d nHLSCutType = %d \r\n ÍøÂç½ÓÊÕÏß³ÌÊıÁ¿ RecvThreadCount = %d ÍøÂç·¢ËÍÏß³ÌÊıÁ¿ SendThreadCount = %d ",
+	WriteLog(Log_Debug, "ä»é…ç½®æ–‡ä»¶ä¸­è¯»å–åˆ° \r\nè¿è¡Œå‚æ•°ï¼šhttp = %d, rtsp = %d , rtmp = %d ,http-flv = %d ,ws-flv = %d ,http-mp4 = %d, nHlsPort = %d , nHlsEnable = %d nHLSCutType = %d \r\n ç½‘ç»œæ¥æ”¶çº¿ç¨‹æ•°é‡ RecvThreadCount = %d ç½‘ç»œå‘é€çº¿ç¨‹æ•°é‡ SendThreadCount = %d ",
 		                     ABL_MediaServerPort.nHttpServerPort,ABL_MediaServerPort.nRtspPort, ABL_MediaServerPort.nRtmpPort, ABL_MediaServerPort.nHttpFlvPort, ABL_MediaServerPort.nWSFlvPort, ABL_MediaServerPort.nHttpMp4Port, ABL_MediaServerPort.nHlsPort, ABL_MediaServerPort.nHlsEnable , ABL_MediaServerPort.nHLSCutType,
 		                     ABL_MediaServerPort.nRecvThreadCount, ABL_MediaServerPort.nSendThreadCount);
 
@@ -4615,7 +4615,7 @@ ABL_Restart:
 	else if (ABL_MediaServerPort.hlsCutTime > 120)
 		ABL_MediaServerPort.hlsCutTime = 120;
 	
-	//ÏŞÖÆÍøÂç³¬Ê±Ê±³¤
+	//é™åˆ¶ç½‘ç»œè¶…æ—¶æ—¶é•¿
 	if (ABL_MediaServerPort.MaxDiconnectTimeoutSecond < 5)
 		ABL_MediaServerPort.MaxDiconnectTimeoutSecond = 16;
 	else if (ABL_MediaServerPort.MaxDiconnectTimeoutSecond > 200)
@@ -4630,7 +4630,7 @@ ABL_Restart:
 	pNetBaseObjectFifo.InitFifo(1024 * 1024 * 2);
 	pDisconnectMediaSource.InitFifo(1024 * 1024 * 2);
 
-	//´´½¨www×ÓÂ·¾¶ 
+	//åˆ›å»ºwwwå­è·¯å¾„ 
 #ifdef OS_System_Windows
 	if (ABL_MediaServerPort.wwwPath[strlen(ABL_MediaServerPort.wwwPath) - 1] != '\\')
 		strcat(ABL_MediaServerPort.wwwPath, "\\");
@@ -4644,9 +4644,9 @@ ABL_Restart:
 	mkdir(ABL_wwwMediaPath, 777);
 	ABL_SetPathAuthority(ABL_wwwMediaPath);
 #endif
-	WriteLog(Log_Debug, "www Â·¾¶Îª %s ", ABL_wwwMediaPath);
+	WriteLog(Log_Debug, "www è·¯å¾„ä¸º %s ", ABL_wwwMediaPath);
 
-	//·ÀÖ¹ÓÃ»§ÂÒÌîĞ´
+	//é˜²æ­¢ç”¨æˆ·ä¹±å¡«å†™
 	if ((ABL_MediaServerPort.snapOutPictureWidth == 0 && ABL_MediaServerPort.snapOutPictureHeight != 0) || (ABL_MediaServerPort.snapOutPictureWidth != 0 && ABL_MediaServerPort.snapOutPictureHeight == 0))
 		ABL_MediaServerPort.snapOutPictureWidth = ABL_MediaServerPort.snapOutPictureHeight = 0;
 	if (ABL_MediaServerPort.snapOutPictureWidth > 1920)
@@ -4654,7 +4654,7 @@ ABL_Restart:
 	if (ABL_MediaServerPort.snapOutPictureHeight > 1080)
 		ABL_MediaServerPort.snapOutPictureHeight = 1080;
 
-	//È·¶¨ÍøÂç½ÓÊÕ¡¢´¦ÀíÏß³ÌÊıÁ¿
+	//ç¡®å®šç½‘ç»œæ¥æ”¶ã€å¤„ç†çº¿ç¨‹æ•°é‡
 	if (ABL_nCurrentSystemCpuCount > 0 && ABL_nCurrentSystemCpuCount <= 4)
 		ABL_MediaServerPort.nRecvThreadCount = ABL_nCurrentSystemCpuCount * 4;
 	else if (ABL_nCurrentSystemCpuCount > 4 && ABL_nCurrentSystemCpuCount <= 8)
@@ -4666,17 +4666,17 @@ ABL_Restart:
 
 	ABL_nGB28181Port = ABL_MediaServerPort.GB28181RtpMinPort;
 
-	//ÓÃÓÚÍøÂçÊı¾İ½ÓÊÕ
+	//ç”¨äºç½‘ç»œæ•°æ®æ¥æ”¶
 	NetBaseThreadPool = new CNetBaseThreadPool(ABL_MediaServerPort.nRecvThreadCount);
 
-	//Â¼Ïñ»Ø·ÅÏß³Ì³Ø
+	//å½•åƒå›æ”¾çº¿ç¨‹æ± 
 	RecordReplayThreadPool = new CNetBaseThreadPool(ABL_MediaServerPort.nRecordReplayThread);
 
-	//ÏûÏ¢·¢ËÍÏß³Ì³Ø
+	//æ¶ˆæ¯å‘é€çº¿ç¨‹æ± 
 	MessageSendThreadPool = new CNetBaseThreadPool(6);
 
 	int nRet = -1;
-	if (!ABL_bInitXHNetSDKFlag) //±£Ö¤Ö»³õÊ¼»¯1´Î
+	if (!ABL_bInitXHNetSDKFlag) //ä¿è¯åªåˆå§‹åŒ–1æ¬¡
 	{
 		nRet = XHNetSDK_Init(ABL_MediaServerPort.nRecvThreadCount, 1);
 
@@ -4694,15 +4694,15 @@ ABL_Restart:
 	nBindRecvAudio = XHNetSDK_Listen((int8_t*)("0.0.0.0"), ABL_MediaServerPort.WsRecvPcmPort, &srvhandle_9298, onaccept, onread, onclose, true, ABL_MediaServerPort.WsRecvPcmPort % 2 == 1 ? true : false);
 	nBingPS10000 = XHNetSDK_Listen((int8_t*)("0.0.0.0"), ABL_MediaServerPort.ps_tsRecvPort, &srvhandle_10000, onaccept, onread, onclose, true);
 
-	WriteLog(Log_Debug, (nBindHttp == 0) ? "°ó¶¨¶Ë¿Ú [ %s ] %d ³É¹¦(success) " : "°ó¶¨¶Ë¿Ú %d Ê§°Ü(fail) ", ABL_MediaServerPort.nHttpServerPort % 2 == 1 ? "https" : "http", ABL_MediaServerPort.nHttpServerPort);
-	WriteLog(Log_Debug, (nBindRtsp == 0) ? "°ó¶¨¶Ë¿Ú [ %s ] %d ³É¹¦(success)  " : "°ó¶¨¶Ë¿Ú %d Ê§°Ü(fail) ", ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_MediaServerPort.nRtspPort);
-	WriteLog(Log_Debug, (nBindRtmp == 0) ? "°ó¶¨¶Ë¿Ú [ %s ] %d ³É¹¦(success)  " : "°ó¶¨¶Ë¿Ú %d Ê§°Ü(fail) ", ABL_MediaServerPort.nRtmpPort % 2 == 1 ? "rtmps" : "rtmp", ABL_MediaServerPort.nRtmpPort);
-	WriteLog(Log_Debug, (nBindWsFlv == 0) ? "°ó¶¨¶Ë¿Ú [ %s ] %d ³É¹¦(success)  " : "°ó¶¨¶Ë¿Ú %d Ê§°Ü(fail) ", ABL_MediaServerPort.nWSFlvPort % 2 == 1 ? "wss-flv" : "ws-flv", ABL_MediaServerPort.nWSFlvPort);
-	WriteLog(Log_Debug, (nBindHttpFlv == 0) ? "°ó¶¨¶Ë¿Ú [ %s ] %d ³É¹¦(success)  " : "°ó¶¨¶Ë¿Ú %d Ê§°Ü(fail) ", ABL_MediaServerPort.nHttpFlvPort % 2 == 1 ? "https-flv" : "http-flv", ABL_MediaServerPort.nHttpFlvPort);
-	WriteLog(Log_Debug, (nBindHls == 0) ? "°ó¶¨¶Ë¿Ú [ %s ] %d ³É¹¦(success)  " : "°ó¶¨¶Ë¿Ú %d Ê§°Ü(fail) ", ABL_MediaServerPort.nHlsPort % 2 == 1 ? "https-hls" : "http-hls", ABL_MediaServerPort.nHlsPort);
-	WriteLog(Log_Debug, (nBindMp4 == 0) ? "°ó¶¨¶Ë¿Ú [ %s ] %d ³É¹¦(success)  " : "°ó¶¨¶Ë¿Ú %d Ê§°Ü(fail) ", ABL_MediaServerPort.nHttpMp4Port % 2 == 1 ? "https-mp4" : "http-mp4", ABL_MediaServerPort.nHttpMp4Port);
-	WriteLog(Log_Debug, (nBindRecvAudio == 0) ? "°ó¶¨¶Ë¿Ú [ %s ] %d ³É¹¦(success)  " : "°ó¶¨¶Ë¿Ú %d Ê§°Ü(fail) ", ABL_MediaServerPort.WsRecvPcmPort % 2 == 1 ? "wss-recvpcm" : "ws-recvpcm", ABL_MediaServerPort.WsRecvPcmPort);
-	WriteLog(Log_Debug, (nBingPS10000 == 0) ? "°ó¶¨¶Ë¿Ú [ tcp ] %d  ³É¹¦(success)  " : "°ó¶¨¶Ë¿Ú %d(tcp) Ê§°Ü(fail) ", ABL_MediaServerPort.ps_tsRecvPort);
+	WriteLog(Log_Debug, (nBindHttp == 0) ? "ç»‘å®šç«¯å£ [ %s ] %d æˆåŠŸ(success) " : "ç»‘å®šç«¯å£ %d å¤±è´¥(fail) ", ABL_MediaServerPort.nHttpServerPort % 2 == 1 ? "https" : "http", ABL_MediaServerPort.nHttpServerPort);
+	WriteLog(Log_Debug, (nBindRtsp == 0) ? "ç»‘å®šç«¯å£ [ %s ] %d æˆåŠŸ(success)  " : "ç»‘å®šç«¯å£ %d å¤±è´¥(fail) ", ABL_MediaServerPort.nRtspPort % 2 == 1 ? "rtsps" : "rtsp", ABL_MediaServerPort.nRtspPort);
+	WriteLog(Log_Debug, (nBindRtmp == 0) ? "ç»‘å®šç«¯å£ [ %s ] %d æˆåŠŸ(success)  " : "ç»‘å®šç«¯å£ %d å¤±è´¥(fail) ", ABL_MediaServerPort.nRtmpPort % 2 == 1 ? "rtmps" : "rtmp", ABL_MediaServerPort.nRtmpPort);
+	WriteLog(Log_Debug, (nBindWsFlv == 0) ? "ç»‘å®šç«¯å£ [ %s ] %d æˆåŠŸ(success)  " : "ç»‘å®šç«¯å£ %d å¤±è´¥(fail) ", ABL_MediaServerPort.nWSFlvPort % 2 == 1 ? "wss-flv" : "ws-flv", ABL_MediaServerPort.nWSFlvPort);
+	WriteLog(Log_Debug, (nBindHttpFlv == 0) ? "ç»‘å®šç«¯å£ [ %s ] %d æˆåŠŸ(success)  " : "ç»‘å®šç«¯å£ %d å¤±è´¥(fail) ", ABL_MediaServerPort.nHttpFlvPort % 2 == 1 ? "https-flv" : "http-flv", ABL_MediaServerPort.nHttpFlvPort);
+	WriteLog(Log_Debug, (nBindHls == 0) ? "ç»‘å®šç«¯å£ [ %s ] %d æˆåŠŸ(success)  " : "ç»‘å®šç«¯å£ %d å¤±è´¥(fail) ", ABL_MediaServerPort.nHlsPort % 2 == 1 ? "https-hls" : "http-hls", ABL_MediaServerPort.nHlsPort);
+	WriteLog(Log_Debug, (nBindMp4 == 0) ? "ç»‘å®šç«¯å£ [ %s ] %d æˆåŠŸ(success)  " : "ç»‘å®šç«¯å£ %d å¤±è´¥(fail) ", ABL_MediaServerPort.nHttpMp4Port % 2 == 1 ? "https-mp4" : "http-mp4", ABL_MediaServerPort.nHttpMp4Port);
+	WriteLog(Log_Debug, (nBindRecvAudio == 0) ? "ç»‘å®šç«¯å£ [ %s ] %d æˆåŠŸ(success)  " : "ç»‘å®šç«¯å£ %d å¤±è´¥(fail) ", ABL_MediaServerPort.WsRecvPcmPort % 2 == 1 ? "wss-recvpcm" : "ws-recvpcm", ABL_MediaServerPort.WsRecvPcmPort);
+	WriteLog(Log_Debug, (nBingPS10000 == 0) ? "ç»‘å®šç«¯å£ [ tcp ] %d  æˆåŠŸ(success)  " : "ç»‘å®šç«¯å£ %d(tcp) å¤±è´¥(fail) ", ABL_MediaServerPort.ps_tsRecvPort);
 
 	alaw_pcm16_tableinit();
 	ulaw_pcm16_tableinit();
@@ -4710,25 +4710,25 @@ ABL_Restart:
 	ABL_MediaServerPort.nServerStartTime = GetCurrentSecond();
 	ABL_MediaServerPort.nServerKeepaliveTime = GetTickCount64();
 
-#if  0 //²âÊÔ hls ¿Í»§¶Ë  http://190.168.24.112:8082/live/Camera_00001.m3u8  \   http://190.15.240.36:9088/Media/Camera_00001.m3u8 \ http://190.15.240.36:9088/Media/Camera_00001/hls.m3u8
+#if  0 //æµ‹è¯• hls å®¢æˆ·ç«¯  http://190.168.24.112:8082/live/Camera_00001.m3u8  \   http://190.15.240.36:9088/Media/Camera_00001.m3u8 \ http://190.15.240.36:9088/Media/Camera_00001/hls.m3u8
 	//CreateNetRevcBaseClient(0, 0, "http://190.168.24.112:8082/live/Camera_00001.m3u8", 0);
 	CreateNetRevcBaseClient(NetRevcBaseClient_addStreamProxy, 0, 0, "http://190.15.240.36:9088/Media/Camera_00001.m3u8", 0, "/Media/Camera_00002");
 #endif
-#if   0 //²âÊÔ rtmp ¿Í»§¶Ë  rtmp://10.0.0.239:1936/Media/Camera_00001  \   rtmp://10.0.0.239:1936/Media/Camera_00001
+#if   0 //æµ‹è¯• rtmp å®¢æˆ·ç«¯  rtmp://10.0.0.239:1936/Media/Camera_00001  \   rtmp://10.0.0.239:1936/Media/Camera_00001
 	CreateNetRevcBaseClient(NetRevcBaseClient_addStreamProxy, 0, 0, "rtmp://190.15.240.36:1935/Media/Camera_00001", 0, "/Media/Camera_00002");
 #endif
-#if   0 //²âÊÔ flv  http://190.15.240.36:8088/Media/Camera_00001.flv
+#if   0 //æµ‹è¯• flv  http://190.15.240.36:8088/Media/Camera_00001.flv
 	CreateNetRevcBaseClient(NetRevcBaseClient_addStreamProxy, 0, 0, "http://190.15.240.36:8088/Media/Camera_00001.flv", 0, "/Media/Camera_00002");
 #endif
-#if   0 //²âÊÔ rtmp ¿Í»§¶Ë  rtmp://10.0.0.239:1936/Media/Camera_00001  \   rtmp://10.0.0.239:1936/Media/Camera_00001
+#if   0 //æµ‹è¯• rtmp å®¢æˆ·ç«¯  rtmp://10.0.0.239:1936/Media/Camera_00001  \   rtmp://10.0.0.239:1936/Media/Camera_00001
 	CNetRevcBase_ptr rtmpClient = CreateNetRevcBaseClient(NetRevcBaseClient_addPushStreamProxy, 0, 0, "rtmp://190.15.240.36:1935/Media/Camera_00001", 0, "/Media/Camera_00001");
 	nTestRtmpPushID = rtmpClient->nClient;
 #endif
-#if  0 //²âÊÔ rtmp ¿Í»§¶Ë  rtmp://10.0.0.239:1936/Media/Camera_00001  \   rtmp://10.0.0.239:1936/Media/Camera_00001
+#if  0 //æµ‹è¯• rtmp å®¢æˆ·ç«¯  rtmp://10.0.0.239:1936/Media/Camera_00001  \   rtmp://10.0.0.239:1936/Media/Camera_00001
 	CNetRevcBase_ptr rtmpClient = CreateNetRevcBaseClient(NetRevcBaseClient_addStreamProxy, 0, 0, "rtsp://admin:abldyjh2020@192.168.1.120:554", 0, "/Media/Camera_00001");
 	nTestRtmpPushID = rtmpClient->nClient;
 #endif
-#if   0 //²âÊÔ rtsp ¿Í»§¶Ë  
+#if   0 //æµ‹è¯• rtsp å®¢æˆ·ç«¯  
 	CreateNetRevcBaseClient(NetRevcBaseClient_addPushStreamProxy, 0, 0, "rtsp://10.0.0.238:554/Media/Camera_00001", 0, "/Media/Camera_00002");
 #endif
 #if 0
@@ -4739,14 +4739,14 @@ ABL_Restart:
 	//	CreateNetRevcBaseClient(ReadRecordFileInput_ReadFMP4File, 0, 0, "D:\\video\\20220119161822.mp4", 0, "/Media/Camera_00001");
 		//CreateNetRevcBaseClient(ReadRecordFileInput_ReadFMP4File, 0, 0, "D:\\video\\20220119162324.mp4", 0, "/Media/Camera_00001");
 #endif
-#if   0//²âÊÔÏûÏ¢Í¨Öª  http://10.0.0.238:7088/index/hook/on_stream_none_reader
+#if   0//æµ‹è¯•æ¶ˆæ¯é€šçŸ¥  http://10.0.0.238:7088/index/hook/on_stream_none_reader
 	CreateNetRevcBaseClient(NetBaseNetType_HttpClient_None_reader, 0, 0, "http://10.0.0.238:7088/index/hook/on_stream_none_reader", 0, "");
 #endif
 
-	//´´½¨µ¥¶Ë¿Ú¹ú±ê½ÓÊÕ 
+	//åˆ›å»ºå•ç«¯å£å›½æ ‡æ¥æ”¶ 
 	CreateNetRevcBaseClient(NetBaseNetType_NetGB28181RecvRtpPS_TS, 0, 0, "", 0, "");
 
-	//Æô¶¯ÒµÎñ´¦ÀíÏß³Ì
+	//å¯åŠ¨ä¸šåŠ¡å¤„ç†çº¿ç¨‹
 #ifdef  OS_System_Windows
 	unsigned long dwThread, dwThread2;
 	::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ABLMedisServerProcessThread, (LPVOID)NULL, 0, &dwThread);
@@ -4763,11 +4763,11 @@ ABL_Restart:
 	WebRtcEndpoint::getInstance().init(szWebrtcConfig, [=](const char* callbackJson, void* pUserHandle) {
 		WebRtcCallBack(callbackJson, pUserHandle);
 		});
-	WriteLog(Log_Debug, "³õÊ¼»¯webrtcÍê±Ï £¬¶Ë¿ÚÎª %d", ABL_MediaServerPort.nWebRtcPort);
+	WriteLog(Log_Debug, "åˆå§‹åŒ–webrtcå®Œæ¯• ï¼Œç«¯å£ä¸º %d", ABL_MediaServerPort.nWebRtcPort);
 
 	while (ABL_bMediaServerRunFlag)
 	{
-		//·şÎñÆ÷ÉÏÏßÍ¨Öª 
+		//æœåŠ¡å™¨ä¸Šçº¿é€šçŸ¥ 
 		if (ABL_MediaServerPort.hook_enable == 1 && ABL_MediaServerPort.bNoticeStartEvent == false)
 		{
 			if ((GetCurrentSecond() - ABL_MediaServerPort.nServerStartTime) > 6 && (GetCurrentSecond() - ABL_MediaServerPort.nServerStartTime) <= 15)
@@ -4844,12 +4844,12 @@ ABL_Restart:
 		ABL_MediaServerPort.nServerKeepaliveTime = GetTickCount64();
 		ABL_MediaServerPort.bNoticeStartEvent = false;
 		ABL_bRestartServerFlag = false;
-		memset((char*)&ABL_MediaServerPort, 0x00, sizeof(ABL_MediaServerPort));//°ÑÅäÖÃÎÄ¼şÈ«²¿Çå³ı£¬ÖØĞÂ¶ÁÈ¡ 
+		memset((char*)&ABL_MediaServerPort, 0x00, sizeof(ABL_MediaServerPort));//æŠŠé…ç½®æ–‡ä»¶å…¨éƒ¨æ¸…é™¤ï¼Œé‡æ–°è¯»å– 
 		goto ABL_Restart;
 	}
 	XHNetSDK_Deinit();
 
-	//cuda Ó²¼ş½âÂë£¬±àÂë×ÊÔ´ÊÍ·Å 
+	//cuda ç¡¬ä»¶è§£ç ï¼Œç¼–ç èµ„æºé‡Šæ”¾ 
 #ifdef OS_System_Windows
 	if (ABL_bInitCudaSDKFlag)
 		cudaCodec_UnInit();

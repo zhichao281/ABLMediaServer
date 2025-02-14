@@ -2,7 +2,7 @@
   "configurations": [
     {
       "name": "Linux-GCC-Release",
-      "generator": "Ninja",
+      "generator": "Unix Makefiles",
       "configurationType": "RelWithDebInfo",
       "cmakeExecutable": "cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
@@ -11,7 +11,7 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "remoteMachineName": "768132158;192.168.2.15 (username=server, port=22, authentication=Password)",
-      "remoteCMakeListsRoot": "$HOME/${projectDirName}//src",
+      "remoteCMakeListsRoot": "$HOME/${projectDirName}/src",
       "remoteBuildRoot": "$HOME/${projectDirName}/out/build/${name}",
       "remoteInstallRoot": "$HOME/${projectDirName}/out/install/${name}",
       "remoteCopySources": true,

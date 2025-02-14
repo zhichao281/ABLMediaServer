@@ -123,7 +123,8 @@ CNetClientSendRtsp::~CNetClientSendRtsp()
 	for (int i = 0; i < 3; i++)
 	{
 		while (!bExitProcessFlagArray[i])
-			Sleep(5);
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			//Sleep(5);
 	}
 	WriteLog(Log_Debug, "CNetClientSendRtsp 任务退出完毕 nTime = %llu, nClient = %llu ", GetTickCount64(), nClient);
 
@@ -276,7 +277,8 @@ int32_t  CNetClientSendRtsp::XHNetSDKRead(NETHANDLE clihandle, uint8_t* buffer, 
 			bExitProcessFlagArray[0] = true;
 			return 0;
 		}
-		Sleep(10);
+		//Sleep(10);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 		nWaitCount++;
 		if (nWaitCount >= 100 * 3)

@@ -838,7 +838,8 @@ std::shared_ptr<CMediaStreamSource>   CNetRevcBase::CreateReplayClient(char* szR
  		while (true)
 		{//等待录像文件创建好媒体源
 		   nWaitCount++;
-		   Sleep(200);
+		   std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		 //  Sleep(200);
 		   pTempSource = GetMediaStreamSource(szReplayURL);
 		   if (pTempSource != NULL)
 			   break;
