@@ -77,7 +77,7 @@ add_subdirectory(XHNetSDK)
 if(USE_WEBRTC)
     add_subdirectory(webrtc-streamer)
 endif()
-
+add_subdirectory(simple-media-server)
 # Á´½Ó¾²Ì¬¿â
 link_libraries(
     rtmp
