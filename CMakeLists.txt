@@ -37,15 +37,6 @@ endif()
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SYSTEM_NAME_LOWER})
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SYSTEM_NAME_LOWER})  
 
-# 设置链接目录
-set(LIBRARY_DIR
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${SYSTEM_NAME_LOWER}
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/boost/${SYSTEM_NAME_LOWER}
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/faac-1.30/lib/${SYSTEM_NAME_LOWER}
-    ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SYSTEM_NAME_LOWER}
-    ${CMAKE_CURRENT_SOURCE_DIR}/media-server-master/${CMAKE_SYSTEM_PROCESSOR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/XHNetSDK/openssl/lib/${SYSTEM_NAME_LOWER}
-)
 
 if(USE_BOOST)
     add_definitions(-DUSE_BOOST)
@@ -55,7 +46,13 @@ if(USE_BOOST)
 endif()
 
 # 设置库文件链接路径
-link_directories(${LIBRARY_DIR})
+link_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${SYSTEM_NAME_LOWER}
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/faac-1.30/lib/${SYSTEM_NAME_LOWER}
+    ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SYSTEM_NAME_LOWER}
+    ${CMAKE_CURRENT_SOURCE_DIR}/media-server-master/${CMAKE_SYSTEM_PROCESSOR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/XHNetSDK/openssl/lib/${SYSTEM_NAME_LOWER}
+)
 
 # 设置头文件包含路径
 include_directories(
@@ -76,8 +73,9 @@ include_directories(
 add_subdirectory(XHNetSDK)
 if(USE_WEBRTC)
     add_subdirectory(webrtc-streamer)
+    add_subdirectory(simple-media-server)
 endif()
-add_subdirectory(simple-media-server)
+
 # 链接静态库
 link_libraries(
     rtmp
@@ -86,7 +84,6 @@ link_libraries(
     hls
     mov
     rtp
-
 )
 
 # 添加源文件
@@ -122,13 +119,13 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
     faac
-    avcodec
-    avutil
-    avformat
-    swscale
-    avfilter
-    postproc
-    swresample
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${SYSTEM_NAME_LOWER}/libavcodec.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${SYSTEM_NAME_LOWER}/libavutil.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${SYSTEM_NAME_LOWER}/libavformat.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${SYSTEM_NAME_LOWER}/libswscale.so   
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${SYSTEM_NAME_LOWER}/libavfilter.so   
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${SYSTEM_NAME_LOWER}/libpostproc.so   
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${SYSTEM_NAME_LOWER}/libswresample.so    
     pthread
     XHNetSDK  # 链接 XHNetSDK 库
     PsDemux
