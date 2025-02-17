@@ -70,6 +70,12 @@ target_include_directories(${PROJECT_NAME} PRIVATE asio/include)
 
 target_link_libraries(${PROJECT_NAME} libssl.a libcrypto.a pthread)
 
+# 设置INSTALL_RPATH，用于安装时
+set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN")
+
+# 设置RPATH，用于构建时（可选）
+set_target_properties(${PROJECT_NAME}  PROPERTIES   RPATH "$ORIGIN")
+
 # 安装目标文件到 Bin 文件夹中
 install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
