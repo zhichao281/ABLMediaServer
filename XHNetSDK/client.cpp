@@ -735,7 +735,7 @@ void client::handle_connect_timeout(const boost::system::error_code& ec)
 #include <malloc.h>
 #include <iostream>
 #include <cstdio>
-
+#include <thread>
 client::client(asio::io_context& ioc,
 	asio::ssl::context& context,
 	NETHANDLE srvid,
