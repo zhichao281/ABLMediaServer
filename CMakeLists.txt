@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 project(ABLMediaServer)
 # 判断是否启用了 USE_BOOST 选项
 option(USE_BOOST "Use Boost library" OFF)
-option(USE_WEBRTC "Use WEBRTC library" OFF)
+option(USE_WEBRTC "Use WEBRTC library" ON)
 # 设置编译选项
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # 检测是否满足标准，否则报错
@@ -11,6 +11,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON) # 检测是否满足标准，否则报错
 #set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O0 -Wall")
 
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
+
+set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-fPIC")
 # 允许相对路径
 set(CMAKE_SKIP_RPATH FALSE)
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
@@ -72,7 +75,7 @@ include_directories(
 # 添加子目录，这样子目录中的CMakeLists.txt才会被调用
 add_subdirectory(XHNetSDK)
 if(USE_WEBRTC)
-    add_subdirectory(webrtc-streamer)
+   # add_subdirectory(webrtc-streamer)
     add_subdirectory(simple-media-server)
 endif()
 
@@ -104,7 +107,7 @@ set_target_properties(${CMAKE_PROJECT_NAME}  PROPERTIES
                 )
 # 设置INSTALL_RPATH，用于安装时
 set_target_properties(${PROJECT_NAME} PROPERTIES
-    INSTALL_RPATH "$ORIGIN:/home/server/ABLMediaServer/src/bin/linux86"
+    INSTALL_RPATH "$ORIGIN"
     BUILD_WITH_INSTALL_RPATH TRUE  # 确保构建时 RPATH 生效
 )
 
@@ -133,7 +136,6 @@ target_link_libraries(${PROJECT_NAME}
     RtpDepacket
     RtpPacket
     webrtc-streamer
-
     dl
 )
 
