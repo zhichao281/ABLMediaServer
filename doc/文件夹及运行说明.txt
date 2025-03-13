@@ -1,19 +1,22 @@
-文件夹     功能说明
-Linux       Linux 平台运行文件
-            ABLMediaServer         是主程序
-			ABLMediaServer.ini     是配置文件
-			运行步骤
-			1、用超级用户 root 执行 ,因为要写日志文件，录像功能等等需要写文件 
-			2、转到 ABLMediaServer 所在的路径 ，执行如下命令
-			   chmod 777 ABLMediaServer
-			3、设置so依赖库的路径 ，其中 /xxx/xxx/xxx/xxx/Linux 就是 ABLMediaServer  主程序 所在路径的全路径，一定要准确无误 ，可以用 pwd 命令查询出来
-				 export LD_LIBRARY_PATH=/xxx/xxx/xxx/xxx/Linux
-			4、运行程序 (后台运行)
-               setsid ./ABLMediaServer &
+文件夹          功能说明
+ARM　　　　　　 gcc-7.3   及以上版本即可运行  比如国产新创ARM平台,麒麟990、鲲鹏920芯片、天宫CPU 
+ARM-webrtc      gcc-9.4   及以上版本即可运行
+Linux           gcc-4.8.5 及以上版本即可运行 （没有webrtc播放功能）
+Linux-webrtc    gcc-11.4   及以上版本即可运行
 
+				ABLMediaServer         是主程序
+				ABLMediaServer.ini     是配置文件
+				运行步骤
+				1 登录 linux 服务器，创建 cd home ; mkdir ABLMediaServer; cd ABLMediaServer 
+                2 把 ABLMediaServer-2025-03-11.zip 上传到 /home/ABLMediaServer ; unzip ABLMediaServer-2025-03-11.zip 
+				3 用超级用户 root 执行 ,因为要写日志文件，录像功能等等需要写文件 
+				4 cd /home/ABLMediaServer/Linux [ 转到 start.sh 也即是 ABLMediaServer文件 所在的路径 ]
+				5 chmod 777 start.sh
+  				6 ./start.sh
 			   
-WinX64     Windows 平台运行路径
-            ABLMediaServer.exe     是主程序
-			ABLMediaServer.ini     是配置文件
-           1、双击 ABLMediaServer.exe 即可把服务器运行起来
+WinX64          Windows 平台运行路径
+                ABLMediaServer.exe          是主程序
+			    ABLMediaServer.ini          是配置文件
+                1、双击 ABLMediaServer.exe  即可把服务器运行起来
+		   
 		   
