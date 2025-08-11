@@ -27,9 +27,9 @@ using namespace boost;
 #include <random>
 
 #endif
-#define     ReadMultRecordFile_MaxPacketCount     1024*1024*3 
-#define     OpenMp4FileToReadWaitMaxMilliSecond    800  //打开mp4文件，500毫秒后 才开始读取文件 
-//#define     WriteAACFileFlag                       1    //是否保存AAC文件
+#define     ReadMultRecordFile_MaxPacketCount          1024*1024*3 
+#define     OpenMp4FileToReadMultWaitMaxMilliSecond    8  //打开mp4文件，500毫秒后 才开始读取文件 
+//#define     WriteAACFileFlag                         1    //是否保存AAC文件
 
 class CNetServerReadMultRecordFile : public CNetRevcBase
 {
@@ -47,7 +47,8 @@ public:
    virtual int SendFirstRequst();//发送第一个请求
    virtual bool RequestM3u8File();//请求m3u8文件
 
-   int                GetFileOrderBySecond(int nSeekSecond, uint32_t& nSecondOfCurrentFile);
+   bool               StartReadMp4File();
+   int                GetFileOrderBySecond(int nSeekSecond, uint32_t& nSecondOfCurrentFile,bool& bSeekFlag);
    uint64_t           nStartPlayerSecond, nStopPlayerSecond;//开始播放、 结束播放的秒数量 
    uint64_t           nStartSeekTime;//开始seek时间点
    volatile bool      bSeekTimeState;//正处于Seek状态时间范围内

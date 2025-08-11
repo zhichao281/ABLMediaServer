@@ -64,8 +64,6 @@ static int record_ts_write(void* param, const void* packet, size_t bytes)
 		CStreamRecordTS* handle = (CStreamRecordTS*)param;
 		if (handle != NULL)
 		{
-			bool  bUpdateFlag = false;
-
 			if (handle->fTSFileWrite == NULL)
 			{
 				handle->nStartDateTime = GetCurrentSecond();
@@ -87,8 +85,8 @@ static int record_ts_write(void* param, const void* packet, size_t bytes)
 				auto pRecord = GetRecordFileSource(handle->m_szShareMediaURL);
 				if (pRecord)
 				{
-					bUpdateFlag = pRecord->UpdateExpireRecordFile(handle->szFileName);
-					if (bUpdateFlag)
+					handle->bUpdateFlag = pRecord->UpdateExpireRecordFile(handle->szFileName,&handle->nOldFileSize);
+					if (handle->bUpdateFlag)
 					{
 						handle->fTSFileWrite = fopen(handle->szFileName, "r+b");
 						if (handle->fTSFileWrite)
@@ -100,7 +98,7 @@ static int record_ts_write(void* param, const void* packet, size_t bytes)
 					if (handle->fTSFileWrite)
 					{
 						pRecord->AddRecordFile(handle->szFileNameOrder);
-						WriteLog(Log_Debug, "CStreamRecordFMP4 = %X %s 增加录像文件 nClient = %llu ,nMediaClient = %llu szFileNameOrder %s ", handle, handle->m_szShareMediaURL, handle->nClient, handle->nMediaClient, handle->szFileNameOrder);
+						WriteLog(Log_Debug, "CStreamRecordTS = %X %s 增加录像文件 nClient = %llu ,nMediaClient = %llu szFileNameOrder %s ", handle, handle->m_szShareMediaURL, handle->nClient, handle->nMediaClient, handle->szFileNameOrder);
 					}
 				}
 			}
@@ -109,7 +107,16 @@ static int record_ts_write(void* param, const void* packet, size_t bytes)
 			{
 				handle->fTSFileWriteByteCount += bytes;
 				handle->nWriteRecordByteSize += bytes;
-				return 1 == fwrite(packet, bytes, 1, (FILE*)handle->fTSFileWrite) ? 0 : ferror((FILE*)handle->fTSFileWrite);
+
+				if (MaxWriteRecordCacheFFLushLength - handle->nWriteRecordCacheFFLushLength < bytes && handle->nWriteRecordCacheFFLushLength > 0)
+				{//积累4兆再更新到硬盘
+					fwrite(handle->pWriteDiskRecordBuffer, 1, handle->nWriteRecordCacheFFLushLength, handle->fTSFileWrite);
+					handle->nWriteRecordCacheFFLushLength = 0;
+				}
+				memcpy(handle->pWriteDiskRecordBuffer + handle->nWriteRecordCacheFFLushLength, packet, bytes);
+				handle->nWriteRecordCacheFFLushLength += bytes;
+
+				return 0 ;// 1 == fwrite(packet, bytes, 1, (FILE*)handle->fTSFileWrite) ? 0 : ferror((FILE*)handle->fTSFileWrite);
 			}
 			else
 				return 0;
@@ -171,22 +178,36 @@ bool  CStreamRecordTS::H264H265FrameToTSFile(unsigned char* szVideo, int nLength
 
 	if (bCreateNewRecordFile == true )
 	{//1秒切片1次
-		fflush(fTSFileWrite);
+		if (nWriteRecordCacheFFLushLength > 0)
+			fwrite(pWriteDiskRecordBuffer, 1, nWriteRecordCacheFFLushLength, fTSFileWrite);
+		nWriteRecordCacheFFLushLength = 0;
 
-		fclose(fTSFileWrite);
+		if (bUpdateFlag && (nOldFileSize - nWriteRecordByteSize) > 0)
+		{//有剩余残留媒体数据 
+			WriteLog(Log_Debug, "CStreamRecordTS 有剩余残留媒体数据 %d 字节，现在执行清空， nClient = %llu , szFileName = %s ", (nOldFileSize - nWriteRecordByteSize), nClient, szFileName);
+			for (int i = 0; i < ((nOldFileSize - nWriteRecordByteSize) / sizeof(szZeroMediaData)); i++)
+			{
+			   fwrite(szZeroMediaData, 1, sizeof(szZeroMediaData), fTSFileWrite);
+			   nWriteRecordByteSize += sizeof(szZeroMediaData);
+			}
+		}
+		else if ((bUpdateFlag == false && nOldFileSize == 0) || (bUpdateFlag && nWriteRecordByteSize - nOldFileSize >= 0))
+		{//首次创建文件、或者是覆盖文件，但是覆盖的长度 大于等于 原来长度，需要扩展,这样在清理上一次录像残留数据时更方便、快捷
+			WriteLog(Log_Debug, "CStreamRecordTS 首次创建文件、或者是覆盖文件，但是覆盖的长度 大于等于 原来长度，需要扩展 1K 字节， nClient = %llu , szFileName = %s ", nClient, szFileName);
+ 			fwrite(szZeroMediaData, 1, sizeof(szZeroMediaData), fTSFileWrite);
+			nWriteRecordByteSize += sizeof(szZeroMediaData);
+		}
+
+  		fclose(fTSFileWrite);
 		fTSFileWrite = NULL;
 		bCreateNewRecordFile = false;
-#ifdef  OS_System_Windows
-		ftruncate(szFileName, nWriteRecordByteSize);
-#else
-		truncate(szFileName, nWriteRecordByteSize);
-#endif 
+
 		//完成一个fmp4切片文件通知 
 		if (ABL_MediaServerPort.hook_enable == 1 )
 		{
 			MessageNoticeStruct msgNotice;
 			msgNotice.nClient = NetBaseNetType_HttpClient_Record_mp4;
-			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_mp4\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\",\"fileSize\":%llu}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, getDatetimeBySecond(nStartDateTime + (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate)), nWriteRecordByteSize);
+			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_mp4\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\",\"fileSize\":%d}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, GetCurrentDateTime(), nWriteRecordByteSize);
 			pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 		}
  		nCurrentVideoFrames = 0;
@@ -197,6 +218,9 @@ bool  CStreamRecordTS::H264H265FrameToTSFile(unsigned char* szVideo, int nLength
 
 CStreamRecordTS::CStreamRecordTS(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort,char* szShareMediaURL)
 {
+	nWriteRecordCacheFFLushLength = 0;
+	pWriteDiskRecordBuffer = new unsigned char[MaxWriteRecordCacheFFLushLength]; ;//写入硬盘录像缓存 
+
 	bCreateNewRecordFile = false;
 	nRecordDateTime = GetTickCount64();
 	nVideoStampAdd = 1000 / 25 ;
@@ -207,7 +231,7 @@ CStreamRecordTS::CStreamRecordTS(NETHANDLE hServer, NETHANDLE hClient, char* szI
 
 	memset((char*)&avc, 0x00, sizeof(avc));
 	memset((char*)&hevc, 0x00, sizeof(hevc));
-
+ 
 	nCurrentVideoFrames = 0;//当前视频帧数
 	nTotalVideoFrames = 0;//录像视频总帧数
 
@@ -256,24 +280,38 @@ CStreamRecordTS::~CStreamRecordTS()
  
 	if (fTSFileWrite)
 	{
-		fflush(fTSFileWrite);
+ 		if (nWriteRecordCacheFFLushLength > 0)
+			fwrite(pWriteDiskRecordBuffer, 1, nWriteRecordCacheFFLushLength, fTSFileWrite);
+
+		if (bUpdateFlag && (nOldFileSize - nWriteRecordByteSize) > 0)
+		{//有剩余残留媒体数据 
+			WriteLog(Log_Debug, "CStreamRecordTS 有剩余残留媒体数据 %d 字节，现在执行清空， nClient = %llu ", (nOldFileSize - nWriteRecordByteSize), nClient);
+			for (int i = 0; i < ((nOldFileSize - nWriteRecordByteSize) / sizeof(szZeroMediaData)); i++)
+			{
+			  fwrite(szZeroMediaData, 1, sizeof(szZeroMediaData), fTSFileWrite);
+			  nWriteRecordByteSize += sizeof(szZeroMediaData);
+			}
+		}
+		else if ((bUpdateFlag == false && nOldFileSize == 0) || (bUpdateFlag && nWriteRecordByteSize - nOldFileSize >= 0))
+		{//首次创建文件、或者是覆盖文件，但是覆盖的长度 大于等于 原来长度，需要扩展，这样在清理上一次录像残留数据时更方便、快捷
+			WriteLog(Log_Debug, "CStreamRecordTS 首次创建文件、或者是覆盖文件，但是覆盖的长度 大于等于 原来长度，需要扩展 1K 字节， nClient = %llu , szFileName = %s ", nClient, szFileName);
+			fwrite(szZeroMediaData, 1, sizeof(szZeroMediaData), fTSFileWrite);
+			nWriteRecordByteSize += sizeof(szZeroMediaData);
+		}
+		
  		fclose(fTSFileWrite);
 		fTSFileWrite = NULL;
-#ifdef  OS_System_Windows
-		ftruncate(szFileName, nWriteRecordByteSize);
-#else
-		truncate(szFileName, nWriteRecordByteSize);
-#endif 
 
 		//完成一个fmp4切片文件通知 
 		if (ABL_MediaServerPort.hook_enable == 1 )
 		{
-			MessageNoticeStruct msgNotice;
+ 			MessageNoticeStruct msgNotice;
 			msgNotice.nClient = NetBaseNetType_HttpClient_Record_mp4;
-			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_mp4\",\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\",\"fileSize\":%llu}", key, app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, getDatetimeBySecond(nStartDateTime + (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate)), nWriteRecordByteSize);
+			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_mp4\",\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\",\"fileSize\":%d}", key, app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, GetCurrentDateTime(), nWriteRecordByteSize);
 			pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 		}
 	}
+	SAFE_ARRAY_DELETE(pWriteDiskRecordBuffer);
 
 	WriteLog(Log_Debug, "CStreamRecordTS 析构 = %X nClient = %llu ,nMediaClient = %llu\r\n", this, nClient, nMediaClient);
 	malloc_trim(0);
@@ -294,7 +332,7 @@ int CStreamRecordTS::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char* 
 	{
 		MessageNoticeStruct msgNotice;
 		msgNotice.nClient = NetBaseNetType_HttpClient_Record_Progress;
-		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_progress\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"TotalVideoDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\"}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType,key, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), (nTotalVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, getDatetimeBySecond(nStartDateTime + (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate)));
+		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_progress\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"TotalVideoDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\"}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType,key, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), (nTotalVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, GetCurrentDateTime());
 		pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 		nCreateDateTime = GetTickCount64();
 	}

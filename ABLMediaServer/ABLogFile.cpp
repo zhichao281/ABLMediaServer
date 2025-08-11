@@ -39,6 +39,8 @@ FILE*                            ABL_fLogFile=NULL ;
 char                             ABL_wzLog[48000] = {0};
 char                             ABL_LogBuffer[48000] = {0};
 char                             ABL_PrintBuffer[48000] = {0};
+char*                            ABL_WriteLogCacheBuffer = NULL ;//写日志缓存 
+int                              nWriteLogCacheBufferLength = 0;
 pthread_t                        pThread_deleteLogFile ;
 char                             szLogLevel[3][64]={"Log_Debug","Log_Title","Log_Error"};
 extern char                      ABL_MediaSeverRunPath[256] ; //当前路径
@@ -196,6 +198,7 @@ bool  InitLogFile()
 			ABL_fLogFile = fopen(szFileName,"w");
 		}
 		
+		ABL_WriteLogCacheBuffer = new char[1024*768] ;
 		bInitLogFlag = true ;
 		pthread_create(&pThread_deleteLogFile,NULL,DeleteLogFileThread,(void*)NULL) ;
 		
@@ -234,6 +237,7 @@ bool WriteLog(LogLevel nLogLevel,const char* ms, ... )
 		struct tm *local;
 		local = localtime(&now);
  
+        memset(ABL_LogBuffer,0x00,sizeof(ABL_LogBuffer));
 		sprintf(ABL_LogBuffer,"%04d-%02d-%02d %02d:%02d:%02d %s %s\n", local->tm_year+1900, local->tm_mon+1,
 					local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec,szLogLevel[nLogLevel],
 					ABL_wzLog);
@@ -243,10 +247,15 @@ bool WriteLog(LogLevel nLogLevel,const char* ms, ... )
 		if(strlen(ABL_PrintBuffer) < 1024 && strstr(ABL_PrintBuffer,"%") == NULL )
 		   printf(ABL_PrintBuffer);
 		
-	     if(ABL_fLogFile != NULL)				
+	     if(ABL_fLogFile != NULL && strlen(ABL_LogBuffer) > 0 )				
 		 {
-		   fwrite(ABL_LogBuffer,1,strlen(ABL_LogBuffer),ABL_fLogFile);
-		   fflush(ABL_fLogFile);
+		   if( ((1024*768) - nWriteLogCacheBufferLength) < strlen(ABL_LogBuffer) )
+		   {//积累快2兆时写入硬盘 
+		      fwrite(ABL_WriteLogCacheBuffer,1,nWriteLogCacheBufferLength,ABL_fLogFile);
+			  nWriteLogCacheBufferLength = 0;
+		   }
+		   memcpy(ABL_WriteLogCacheBuffer + nWriteLogCacheBufferLength ,ABL_LogBuffer ,strlen(ABL_LogBuffer));
+  		   nWriteLogCacheBufferLength += strlen(ABL_LogBuffer) ;
 		   
 		   ABL_nFileByteCount += strlen(ABL_LogBuffer) ;
 		 }
@@ -265,10 +274,14 @@ bool  ExitLogFile()
 		
 		if(ABL_fLogFile != NULL)
 		{
+			if(nWriteLogCacheBufferLength > 0)
+			  fwrite(ABL_WriteLogCacheBuffer,1,nWriteLogCacheBufferLength,ABL_fLogFile);
+		  
 			fclose(ABL_fLogFile) ;
 			ABL_fLogFile = NULL ;
 		}
-		
+		delete [] ABL_WriteLogCacheBuffer ;
+		ABL_WriteLogCacheBuffer = NULL ;
 	    pthread_mutex_unlock(&ABL_LogFileLock);
 		return true ;
 	}else

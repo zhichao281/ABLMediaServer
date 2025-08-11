@@ -10,10 +10,8 @@
 
 //定义当前操作系统为Windows 
 #if (defined _WIN32 || defined _WIN64)
-#define      OS_System_Windows        1
+ #define      OS_System_Windows        1
 #endif
-
-
 
 #ifdef OS_System_Windows
 
@@ -47,6 +45,7 @@
 #include <malloc.h>
 #include <thread>
 #include <fcntl.h>
+#include <dirent.h>
 
 #include<sys/types.h> 
 #include<sys/socket.h>
@@ -155,6 +154,8 @@ struct MediaServerPort
 	int  nWebRtcPort;  //webrtc 
 	int  ps_tsRecvPort; //国标单端口
 	int  WsRecvPcmPort;//私有协议接收pcm音频
+	int  n1078Port;//1078单端口接入码流
+	int  jtt1078Version;//1078单端口接入码流的版本号
 
 	int  nHlsPort;     //Hls 端口 
 	int  nHlsEnable;   //HLS 是否开启 
@@ -174,7 +175,7 @@ struct MediaServerPort
 	int  nThreadCountOfIOContent;//每个iocontent上创建的线程数量
 	int  nReConnectingCount;//重连次数
 
-	char recordPath[256];//录像保存路径
+	char recordPath[512];//录像保存路径
 	int  pushEnable_mp4;//推流上来是否开启录像
 	int  fileSecond;//fmp4切割时长
 	int  videoFileFormat;//录像文件格式 1 为 fmp4, 2 为 mp4 
@@ -338,7 +339,7 @@ struct MediaServerPort
 		memset(on_publish, 0x00, sizeof(on_publish));
 		memset(on_stream_iframe_arrive, 0x00, sizeof(on_stream_iframe_arrive));
 		memset(on_rtsp_replay, 0x00, sizeof(on_rtsp_replay));
-
+ 
 		nClientNoneReader = 0 ;
 		nClientNotFound = 0;
 		nClientRecordMp4 = 0;
@@ -388,18 +389,10 @@ struct MediaServerPort
 		GB28181RtpMinPort = 35000;
 		GB28181RtpMaxPort = 40000;
 		nSyncWritePacket = 0;
+		n1078Port = 1078;
+		jtt1078Version = 2016;
 
-		nUseWvp = 0;
-		memset(port_range, 0x00, sizeof(port_range));
-		memset(listeningip, 0x00, sizeof(listeningip));
-		memset(externalip, 0x00, sizeof(externalip));
-		listeningport = 3478;
-		minport = 50000;
-		maxport = 65535;
-		memset(realm, 0x00, sizeof(realm));
-		memset(user, 0x00, sizeof(user));
-
-	}
+ 	}
 };
 
 //真对单独某一路视频转码结构
@@ -425,7 +418,7 @@ struct H265ConvertH264Struct
 enum NetBaseNetType
 {
 	NetBaseNetType_Unknown                 = 20 ,//未定义的网络类型
-	NetBaseNetType_RtspProtectBaseState = 15,//rtsp所有协议初始状态 
+	NetBaseNetType_RtspProtectBaseState    = 15 ,//rtsp所有协议初始状态 
 	NetBaseNetType_RtspServerRecvPushVideo = 16 ,//接收rtsp推流udp方式的视频
 	NetBaseNetType_RtspServerRecvPushAudio = 17 ,//接收rtsp推流udp方式的音频
 	NetBaseNetType_GB28181TcpPSInputStream = 18,//通过10000端口TCP方式接收国标PS流接入
@@ -438,7 +431,7 @@ enum NetBaseNetType
 	NetBaseNetType_HttpHLSServerSendPush   = 26,//Http-HLS 服务器，转发 rtsp 、rtmp 、GB28181等等推流上来的码流
 	NetBaseNetType_WsFLVServerSendPush     = 27,//WS-FLV 服务器，转发 rtsp 、rtmp 、GB28181等等推流上来的码流
 	NetBaseNetType_HttpMP4ServerSendPush   = 28,//http-mp4 服务器，转发 rtsp 、rtmp 、GB28181等等推流上来的码流以mp4发送出去
-	NetBaseNetType_WebRtcServerSendPush    = 29,//WebRtc 服务器，转发 rtsp 、rtmp 、GB28181等等推流上来的码流
+	NetBaseNetType_WebRtcServerWhepPlayer  = 29,//WebRtc 服务器，转发 rtsp 、rtmp 、GB28181等等推流上来的码流
 
 	//主动拉流对象
 	NetBaseNetType_RtspClientRecv          = 30 ,//rtsp主动拉流对象 
@@ -493,7 +486,7 @@ enum NetBaseNetType
 	NetBaseNetType_HttpClient_on_record_ts          = 95,//TS切片完成
 	NetBaseNetType_HttpClient_on_stream_not_arrive  = 96,//码流没有到达
 	NetBaseNetType_HttpClient_Record_Progress       = 97,//录像下载进度
-	NetBaseNetType_HttpClient_on_rtsp_replay = 98,//rtsp录像回放事件通知
+	NetBaseNetType_HttpClient_on_rtsp_replay        = 98,//rtsp录像回放事件通知
 
 	NetBaseNetType_SnapPicture_JPEG               =100,//抓拍为JPG 
 	NetBaseNetType_SnapPicture_PNG                =101,//抓拍为PNG
@@ -511,7 +504,7 @@ enum NetBaseNetType
 	NetBaseNetType_NetServerReadMultRecordFile     = 140,//连续读取多个录像文件
 };
 
-#define   MediaServerVerson                 "ABLMediaServer-6.3.6(2024-12-13)"
+#define   MediaServerVerson                 "ABLMediaServer-6.3.6(2025-06-19)"
 #define   RtspServerPublic                  "DESCRIBE, SETUP, TEARDOWN, PLAY, PAUSE, OPTIONS, ANNOUNCE, RECORD，GET_PARAMETER"
 #define   RecordFileReplaySplitter          "__ReplayFMP4RecordFile__"  //实况、录像区分的标志字符串，用于区分实况，放置在url中。
 
@@ -521,6 +514,8 @@ enum NetBaseNetType
 #define  BaseRecvRtpSSRCNumber              0xFFFFFFFFFF  //用于接收TS接收时 加上 ssrc 的值作为关键字 Key
 #define  IDRFrameMaxBufferLength            1024*1024*3   //IDR帧最大缓存区域字节大小
 #define  MaxClientConnectTimerout           10*1000       //连接服务器最大超时时长 10 秒 
+#define  OpenMp4FileToReadWaitMaxMilliSecond    20        //打开mp4文件，50毫秒后 才开始读取文件 
+#define  MaxWriteRecordCacheFFLushLength    1024*1024*3   //每次积累4M字节递交一次硬盘 
 
 //rtsp url 地址分解
 //rtsp://admin:szga2019@190.15.240.189:554
@@ -581,6 +576,9 @@ struct addStreamProxyStruct
 	char   dst_url[string_length_256];//TCP主动时 目标IP 
 	char   dst_port[string_length_256];//TCP主动时 目标端口 
 	char   optionsHeartbeat[64];//是否开启options命令作为心跳包
+	char   fileKeepMaxTime[128];//录像最大保存时长 、精确到每一路媒体源，先从配置文件读取默认值，addStreamProxy 、openRtpServer 函数可以修改 
+	char   videoFileFormat[64];//录像文件格式  1  fmp4(ps), 2  mp4 , 3  ts  ，addStreamProxy 、openRtpServer 函数可以修改 
+	char   G711ConvertAAC[64];//g711a\g711u 是否转码为 aac ,默认从配置文件读取
 
 	addStreamProxyStruct()
 	{
@@ -601,6 +599,10 @@ struct addStreamProxyStruct
 		memset(dst_url, 0x00, sizeof(dst_url));
 		memset(dst_port, 0x00, sizeof(dst_port));
 		memset(optionsHeartbeat, 0x00, sizeof(optionsHeartbeat));
+		memset(fileKeepMaxTime, 0x00, sizeof(fileKeepMaxTime));
+		memset(videoFileFormat, 0x00, sizeof(videoFileFormat));
+		strcpy(videoFileFormat, "1");
+		strcpy(G711ConvertAAC, "1");
 	}
 };
 
@@ -648,6 +650,7 @@ struct openRtpServerStruct
 	char   app[string_length_256];//添加流的应用名
 	char   stream_id[string_length_512];//添加流的id 
 	char   port[64] ;//GB2818端口
+	char   port2[64];//接收ES码流第2端口 
 	char   enable_tcp[16]; //0 UDP，1 TCP 被动，2 TCP 主动 
 	char   payload[64]; //payload rtp 打包的payload 
 	char   dst_url[string_length_256];//TCP主动时 目标IP 
@@ -666,6 +669,10 @@ struct openRtpServerStruct
 	char   send_disableAudio[16];//过滤掉音频 1 过滤掉音频 ，0 不过滤音频 ，默认 0 
 	char   jtt1078_version[128]; //1078版本 2013、2016、2019
 	char   detectSendAppStream[64];//检测回复的码流是否存在
+	char   fileKeepMaxTime[128];//录像最大保存时长 、精确到每一路媒体源，先从配置文件读取默认值，addStreamProxy 、openRtpServer 函数可以修改 
+	char   videoFileFormat[64];//录像文件格式  1  fmp4(ps), 2  mp4 , 3  ts  ，addStreamProxy 、openRtpServer 函数可以修改 
+	char   jtt1078_KeepOpenPortType[64];//jtt1078常开端口类型 0 不是常开端口 【默认，只接入1次，设备关闭该端口关闭】 ，1  常开为实时视频  ， 2 常开为录像回放 ， 3  常开为语音对讲 ，4 为常开 子码流接入端口
+	char   G711ConvertAAC[64];//g711a\g711u 是否转码为 aac ,默认从配置文件读取
 
 	openRtpServerStruct()
 	{
@@ -692,6 +699,12 @@ struct openRtpServerStruct
 		memset(dst_port, 0x00, sizeof(dst_port));
 		memset(jtt1078_version, 0x00, sizeof(jtt1078_version));
 		memset(detectSendAppStream, 0x00, sizeof(detectSendAppStream));
+		memset(fileKeepMaxTime, 0x00, sizeof(fileKeepMaxTime));
+		memset(port2, 0x00, sizeof(port2));
+		memset(videoFileFormat, 0x00, sizeof(videoFileFormat));
+		memset(jtt1078_KeepOpenPortType, 0x00, sizeof(jtt1078_KeepOpenPortType));
+		strcpy(jtt1078_KeepOpenPortType, "0");
+		strcpy(G711ConvertAAC, "1");
 	}
 };
 
@@ -716,6 +729,9 @@ struct startSendRtpStruct
 	char   recv_disableVideo[16];//过滤掉视频 1 过滤掉视频 ，0 不过滤视频 ，默认 0 
 	char   recv_disableAudio[16];//过滤掉音频 1 过滤掉音频 ，0 不过滤音频 ，默认 0 
 	char   jtt1078_version[128]; //1078版本 2013、2016、2019
+	char   enable_hls[16];//接入的码流是否开启hls
+	char   enable_mp4[16];//接入的码流是否保存MP4 
+	char   fileKeepMaxTime[128];//录像最大保存时长 、精确到每一路媒体源，先从配置文件读取默认值，addStreamProxy 、openRtpServer 函数可以修改 
 
 	startSendRtpStruct()
 	{
@@ -736,6 +752,9 @@ struct startSendRtpStruct
 		memset(recv_disableVideo, 0x00, sizeof(recv_disableVideo));
 		memset(recv_disableAudio, 0x00, sizeof(recv_disableAudio));
 		memset(jtt1078_version, 0x00, sizeof(jtt1078_version));
+		memset(enable_hls, 0x00, sizeof(enable_hls));
+		memset(enable_mp4, 0x00, sizeof(enable_mp4));
+		memset(fileKeepMaxTime, 0x00, sizeof(fileKeepMaxTime));
 	}
 };
 
@@ -940,6 +959,27 @@ struct pauseResumeRtpServer
 	}
 };
 
+//获取服务器占用端口结构
+struct sendJtt1078Talk
+{
+	char   secret[string_length_256];//api操作密码 
+	char   vhost[string_length_256];//添加流的虚拟主机
+	char   app[string_length_256];//添加流的应用名
+	char   stream[string_length_512];//添加流的id 
+	char   send_app[string_length_256];//给1078设备发送的音频的 app
+	char   send_stream_id[string_length_512];//给1078设备发送的音频的 stream_id
+
+	sendJtt1078Talk()
+	{
+		memset(secret, 0x00, sizeof(secret));
+		memset(vhost, 0x00, sizeof(vhost));
+		memset(app, 0x00, sizeof(app));
+		memset(stream, 0x00, sizeof(stream));
+		memset(send_app, 0x00, sizeof(send_app));
+		memset(send_stream_id, 0x00, sizeof(send_stream_id));
+	}
+};
+
 enum NetRevcBaseClientType
 {
 	NetRevcBaseClient_ServerAccept               = 1, //服务器端口接入 ，比如 554,8080,8088,8089,1935 等等端口accept进来的
@@ -961,21 +1001,6 @@ struct RequestKeyValue
 	{
 		memset(key, 0x00, sizeof(key));
 		memset(value, 0x00, sizeof(value));
-	}
-};
-
-struct WebRtcCallStruct
-{
-	uint64_t eventID;
-	char     media[string_length_512];
-	char     playerID[string_length_512];
-	char     stream[string_length_512];
-	WebRtcCallStruct()
-	{
-		eventID = 0;
-		memset(media, 0x00, sizeof(media));
-		memset(playerID, 0x00, sizeof(playerID));
-		memset(stream, 0x00, sizeof(stream));
 	}
 };
 
@@ -1105,6 +1130,7 @@ enum RtspRtpPayloadType
 	RtspRtpPayloadType_Unknow = 0,  //未知
 	RtspRtpPayloadType_ES     = 1, //rtp负载ES 
 	RtspRtpPayloadType_PS     = 2, //rtp负载PS 
+    RtspRtpPayloadType_TS     = 3, //rtp负载TS 
 };
 
 //图片类型
@@ -1360,11 +1386,9 @@ struct muteAACBufferStruct
 #ifndef OS_System_Windows
 unsigned long GetTickCount();
 int64_t  GetTickCount64();
-#ifdef USE_BOOST
 void          Sleep(int mMicroSecond);
 #endif
 
-#endif
 #include "XHNetSDK.h"
 #include "ABLSipParse.h"
 
@@ -1438,7 +1462,6 @@ typedef list<int> LogFileVector;
 #include "NetServerHLS.h"
 #include "NetClientHttp.h"
 #include "NetClientSnap.h"
-#include "NetClientWebrtcPlayer.h"
 
 #include "ps_demux.h"
 #include "ps_mux.h"
@@ -1477,5 +1500,6 @@ typedef list<int> LogFileVector;
 #include "SimpleIni.h"
 #include "NetClientFFmpegRecv.h"
 #include "NetServerReadMultRecordFile.h"
+#include "NetServerSendWebRTC.h"
 
 #endif

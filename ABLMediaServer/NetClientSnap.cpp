@@ -184,8 +184,8 @@ int CNetClientSnap::SendVideo()
 						   }
  					   }
 
-					   if (ABL_MediaServerPort.snapObjectDestroy == 1)
-						   pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
+					   if(ABL_MediaServerPort.snapObjectDestroy == 1)
+						   pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 					   else
 					   {//从拷贝线程、发送线程移除
 						   bWaitIFrameFlag = true;//需要等等I帧

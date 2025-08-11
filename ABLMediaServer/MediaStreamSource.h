@@ -60,7 +60,6 @@ struct RtspSDPContentStruct
 	}
 };
 
-
 #define  OneFrame_MP4_Stream_BufferLength    1024*1024*2 
 
 class CMediaStreamSource
@@ -69,20 +68,17 @@ public:
    CMediaStreamSource(char* szURL,uint64_t nClientTemp, MediaSourceType nSourceType, uint32_t nDuration, H265ConvertH264Struct h265ConvertH264Struct);
    ~CMediaStreamSource();
 
-  
-#ifdef WriteInputVideoFileFlag
-   FILE* fWriteInputVideoFile;
-#endif
-  
-   int                nWebRtcPlayerCount;//webRtc播放次数统计 
-   uint64_t           nWebRtcPushStreamID;//给webRTC推流提供者 
+   bool            initiative;//是否主动断开  
+   static int32_t  mediaSourceCount;//码流接入数量
+   void            SetG711ConvertAAC(int nFlag);
+   int             nG711ConvertAAC;//是否转码，默认从配置文件读取，也可以外部更改设置 
+   int             videoFileFormat;//录像存储格式精准到每一个接入视频 
+   char            sourceURL[string_length_2048];//源流提供者的URL 
    void            addClientToDisconnectFifo();
-#ifdef USE_BOOST
-   boost::atomic_bool bCreateWebRtcPlaySourceFlag;//创建webrtc源标志 
-#else
-   std::atomic<bool> bCreateWebRtcPlaySourceFlag;//创建webrtc源标志 
+#ifdef WriteInputVideoFileFlag
+   FILE*   fWriteInputVideoFile;
 #endif
-   volatile bool   bEnableFlag;
+   volatile bool   bEnableFlag ;
    bool            CopyAudioFrameBufer();
    bool            CopyVideoGopFrameBufer();//拷贝一个gop视频帧 
 
@@ -166,6 +162,7 @@ public:
 
    MediaSourceType        nMediaSourceType;//媒体源类型，实况播放，录像点播
    uint32_t               nMediaDuration;//媒体源时长，单位秒，当录像点播时有效
+   uint64_t               fileKeepMaxTime;//录像最大保存时长 、精确到每一路媒体源，先从配置文件读取默认值，addStreamProxy 、openRtpServer 函数可以修改 
 
    char                   szRecordPath[string_length_2048];
    volatile   bool        enable_mp4;//是否录制mp4文件

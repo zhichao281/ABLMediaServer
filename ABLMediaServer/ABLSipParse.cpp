@@ -61,10 +61,19 @@ bool CABLSipParse::ParseSipString(char* szSipString)
 	sipKey = NULL;
 	int nLineCount = 0;
 	int nPos1 = 0 ,  nPos2 = 0,nPos3;
+	bool bFindFlag = false;
 	while (true)
 	{
+		bFindFlag = false;
 		nPos2 = strSipString.find("\r\n", nPos1);
-		if (nPos2 > 0 && nPos2 != string::npos && nPos2 - nPos1 > 0 )
+		if(nPos2 == std::string::npos)
+		{   
+			nPos2 = strSipString.find("\n", nPos1);
+			if (nPos2 == std::string::npos)
+ 				nPos2 = strSipString.find("\r", nPos1);
+ 			bFindFlag = true;
+		}
+ 		if (nPos2 > 0 && nPos2 != string::npos && nPos2 - nPos1 > 0 )
 		{
 			memset(szLineString, 0x00, sizeof(szLineString));
 			memcpy(szLineString, szSipString + nPos1, nPos2 - nPos1);
@@ -229,7 +238,11 @@ bool CABLSipParse::ParseSipString(char* szSipString)
  				}
 			}
 
-			nPos1 = nPos2+2;
+			if(bFindFlag == false)
+			  nPos1 = nPos2+2;
+			else 
+			  nPos1 = nPos2 + 1;
+
 			nLineCount ++;
 		}
 		else

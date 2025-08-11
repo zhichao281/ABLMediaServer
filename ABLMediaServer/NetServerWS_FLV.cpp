@@ -461,7 +461,6 @@ bool  CNetServerWS_FLV::Create_WS_FLV_Handle()
 #else
 		std::shared_ptr<CMediaStreamSource> pushClient = NULL;
 #endif
-
 		if (strstr(szFlvName, RecordFileReplaySplitter) == NULL)
 		{//实况点播
 			pushClient = GetMediaStreamSource(szFlvName, true);
@@ -592,6 +591,7 @@ bool  CNetServerWS_FLV::Create_WS_FLV_Handle()
 		pushClient->AddClientToMap(nClient);
 
 	}
+	return true;
 }
 
 //发送第一个请求

@@ -1,7 +1,7 @@
 #ifndef _NetClientSendRtsp_H
 #define _NetClientSendRtsp_H
 
-#include "DigestAuthentication.hh"
+#include "./rtspMD5/DigestAuthentication.hh"
 
 #include "MediaStreamSource.h"
 #include "rtp_packet.h"
@@ -124,8 +124,6 @@ public:
 	int                     au_size; // only AU-size
 	int                     au_numbers;
 	int                     SplitterSize[16];
-
-	
 
 	std::mutex              netDataLock;
 	unsigned char           netDataCache[MaxNetDataCacheBufferLength]; //ÍøÂçÊý¾Ý»º´æ

@@ -297,7 +297,7 @@ int CNetServerHLS::ProcessNetData()
  		bOn_playFlag = true;
 		MessageNoticeStruct msgNotice;
 		msgNotice.nClient = NetBaseNetType_HttpClient_on_play;
-		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_play\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"params\":\"%s\"}", m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient, szClientIP, nClientPort, szPlayParams);
+		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_play\",\"app\":\"%s\",\"stream\":\"%s\",\"readerCount\": %d,\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu,\"ip\":\"%s\" ,\"port\":%d,\"params\":\"%s\"}", m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream, readerCount, ABL_MediaServerPort.mediaServerID, netBaseNetType, nClient, szClientIP, nClientPort, szPlayParams);
 		pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 	}
 
@@ -358,7 +358,7 @@ int CNetServerHLS::SendLiveHLS()
 		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 		return -1;
 	}
-
+	readerCount = pushClient->mediaSendMap.size();
 	//更新HLS最后观看时间,因为HLS播放，采用这种方式来判断某路流是否在观看　
 	pushClient->nLastWatchTime = pushClient->nRecordLastWatchTime = pushClient->nLastWatchTimeDisconect = GetCurrentSecond();
 
@@ -406,6 +406,7 @@ int CNetServerHLS::SendLiveHLS()
 		WriteLog(Log_Debug, "CNetServerHLS=%X, 发送完毕m3u8文件 szRequestFileName = %s, nClient = %llu , 文件字节大小 %d ", this, szRequestFileName, nClient, strlen(szM3u8Content));
 		//WriteLog(Log_Debug, "CNetServerHLS=%X, nClient = %llu 发出http回复：\r\n%s", this, nClient, httpResponseData);
 		//WriteLog(Log_Debug, "CNetServerHLS=%X, nClient = %llu 发出http回复：\r\n%s", this, nClient, szM3u8Content);
+		return 0;
 	}
 	else if (strstr(szRequestFileName, ".ts") != NULL || strstr(szRequestFileName, ".mp4") != NULL)
 	{//请求TS文件 
@@ -517,6 +518,7 @@ int CNetServerHLS::SendLiveHLS()
 			}
 		}
 		WriteLog(Log_Debug, "CNetServerHLS=%X, 发送完毕TS、FMP4 文件 szRequestFileName = %s, nClient = %llu ,文件字节大小 %d", this, szRequestFileName, nClient, nPos);
+		return 0;
 	}
 	else
 	{
@@ -524,6 +526,7 @@ int CNetServerHLS::SendLiveHLS()
 		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 		return -1;
 	}
+	return 0;
 }
 
 int CNetServerHLS::SendRecordHLS()
@@ -662,13 +665,15 @@ int CNetServerHLS::SendRecordHLS()
 		   fReadMP4 = NULL ;
 		}
 		WriteLog(Log_Debug, "CNetServerHLS=%X, 发送完毕TS、FMP4 文件 szRequestFileName = %s, nClient = %llu ,文件字节大小 %d", this, szRequestFileName, nClient, fFileByteCount);
- 	}
+		return 0;
+	}
 	else
 	{
 		WriteLog(Log_Debug, "CNetServerHLS=%X, 请求 http 文件类型有误 szRequestFileName = %s, nClient = %llu ", this, szRequestFileName, nClient);
 		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 		return -1;
 	}
+	return 0;
 }
  
 //根据TS文件名字 ，获取文件序号 

@@ -38,7 +38,6 @@ extern MediaServerPort                       ABL_MediaServerPort;
 extern CNetBaseThreadPool* MessageSendThreadPool;//消息发送线程池
 extern CMediaFifo                            pMessageNoticeFifo; //消息通知FIFO
 #endif
-
 extern void LIBNET_CALLMETHOD	             onconnect(NETHANDLE clihandle,uint8_t result, uint16_t nLocalPort);
 extern void LIBNET_CALLMETHOD                onread(NETHANDLE srvhandle,NETHANDLE clihandle,uint8_t* data,uint32_t datasize,void* address);
 extern void LIBNET_CALLMETHOD	             onclose(NETHANDLE srvhandle,NETHANDLE clihandle);
@@ -53,10 +52,10 @@ CNetClientHttp::CNetClientHttp(NETHANDLE hServer, NETHANDLE hClient, char* szIP,
 	strcpy(szClientIP, szIP);
 	nClientPort = nPort;
 	nNetStart = nNetEnd = netDataCacheLength = 0;
-
-	if (ParseRtspRtmpHttpURL(szIP) == true)
-		uint32_t ret = XHNetSDK_Connect((int8_t*)m_rtspStruct.szIP, atoi(m_rtspStruct.szPort), (int8_t*)(NULL), 0, (uint64_t*)&nClient, onread, onclose, onconnect, 0, MaxClientConnectTimerout, 1, memcmp(m_rtspStruct.szSrcRtspPullUrl, "https://", 8) == 0 ? true : false);
-
+ 
+ 	if (ParseRtspRtmpHttpURL(szIP) == true)
+ 	  uint32_t ret = XHNetSDK_Connect((int8_t*)m_rtspStruct.szIP, atoi(m_rtspStruct.szPort), (int8_t*)(NULL), 0, (uint64_t*)&nClient, onread, onclose, onconnect, 0, MaxClientConnectTimerout, 1, memcmp(m_rtspStruct.szSrcRtspPullUrl, "https://", 8) == 0 ? true : false );
+ 
 	m_videoFifo.InitFifo(MaxNetClientHttpBuffer);
 	string strResponeURL = szClientIP;
 	int nPos = 0;

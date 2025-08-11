@@ -164,9 +164,9 @@ CNetClientRecvFLV::CNetClientRecvFLV(NETHANDLE hServer, NETHANDLE hClient, char*
 	nWriteRet = 0;
 	nWriteErrorCount = 0;
 
-	if (ParseRtspRtmpHttpURL(szIP) == true)
-		uint32_t  ret = XHNetSDK_Connect((int8_t*)m_rtspStruct.szIP, atoi(m_rtspStruct.szPort), (int8_t*)(NULL), 0, (uint64_t*)&nClient, onread, onclose, onconnect, 0, MaxClientConnectTimerout, 1, memcmp(m_rtspStruct.szSrcRtspPullUrl, "https://", 8) == 0 ? true : false);
-
+ 	if (ParseRtspRtmpHttpURL(szIP) == true)
+ 		uint32_t  ret = XHNetSDK_Connect((int8_t*)m_rtspStruct.szIP, atoi(m_rtspStruct.szPort), (int8_t*)(NULL), 0, (uint64_t*)&nClient, onread, onclose, onconnect, 0, MaxClientConnectTimerout, 1, memcmp(m_rtspStruct.szSrcRtspPullUrl, "https://", 8) == 0 ? true : false );
+ 
 	nVideoDTS = 0;
 	nAudioDTS = 0;
 	memset(szRtmpName, 0x00, sizeof(szRtmpName));
@@ -179,7 +179,7 @@ CNetClientRecvFLV::CNetClientRecvFLV(NETHANDLE hServer, NETHANDLE hClient, char*
 
 CNetClientRecvFLV::~CNetClientRecvFLV()
 {
-	bRunFlag.exchange(false);
+	bRunFlag.exchange(false) ;
 	std::lock_guard<std::mutex> lock(NetClientRecvFLVLock);
 
 	//服务器异常断开
@@ -195,8 +195,8 @@ CNetClientRecvFLV::~CNetClientRecvFLV()
 	if (flvDemuxer)
 		flv_demuxer_destroy(flvDemuxer);
 
-	//如果是接收推流，并且成功接收推流的，则需要删除媒体数据源 szURL ，比如 /Media/Camera_00001 
-	if (strlen(m_szShareMediaURL) > 0 && pMediaSource != NULL)
+	 //如果是接收推流，并且成功接收推流的，则需要删除媒体数据源 szURL ，比如 /Media/Camera_00001 
+	if(strlen(m_szShareMediaURL) >0 && pMediaSource != NULL )
 		pDisconnectMediaSource.push((unsigned char*)m_szShareMediaURL, strlen(m_szShareMediaURL));
 
 #ifdef  SaveNetDataToFlvFile
@@ -236,7 +236,7 @@ int CNetClientRecvFLV::SendAudio()
 int CNetClientRecvFLV::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClientHandle, uint8_t* pData, uint32_t nDataLength, void* address)
 {
 	std::lock_guard<std::mutex> lock(NetClientRecvFLVLock);
-	if(!bRunFlag)
+	if(!bRunFlag.load())
 		return -1 ;
 	
 #ifdef  SaveNetDataToFlvFile
@@ -334,7 +334,7 @@ static int http_flv_netRead(void* param, void* buf, int len)
 int CNetClientRecvFLV::ProcessNetData()
 {
 	std::lock_guard<std::mutex> lock(NetClientRecvFLVLock);
-	if (!bRunFlag.load())
+    if(!bRunFlag.load())
 		return -1;
  
 	if (netDataCacheLength > (1024 * 1024 * 1.256) )
@@ -381,28 +381,28 @@ int CNetClientRecvFLV::SendFirstRequst()
 			//创建媒体分发资源
 			if (strlen(m_szShareMediaURL) > 0)
 			{
-				pMediaSource = CreateMediaStreamSource(m_szShareMediaURL, hParent, MediaSourceType_LiveMedia, 0, m_h265ConvertH264Struct);
+				pMediaSource = CreateMediaStreamSource(m_szShareMediaURL, hParent, MediaSourceType_LiveMedia,0, m_h265ConvertH264Struct);
 				if (pMediaSource)
 				{
 					pMediaSource->netBaseNetType = netBaseNetType;
 					pMediaSource->enable_mp4 = (strcmp(m_addStreamProxyStruct.enable_mp4, "1") == 0) ? true : false;
 					pMediaSource->enable_hls = (strcmp(m_addStreamProxyStruct.enable_hls, "1") == 0) ? true : false;
+					pMediaSource->fileKeepMaxTime = atoi(m_addStreamProxyStruct.fileKeepMaxTime);
+					pMediaSource->videoFileFormat = atoi(m_addStreamProxyStruct.videoFileFormat);
 				}
 				else
 				{
-					pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
+					pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 					return -1;
 				}
-			}
+  			}
 
 			memcpy(szSubPath, m_rtspStruct.szSrcRtspPullUrl + nPos2, strlen(m_rtspStruct.szSrcRtspPullUrl) - nPos2);
 			sprintf(szRequestFLVFile, "GET %s HTTP/1.1\r\nUser-Agent: %s\r\nAccept: */*\r\nRange: bytes=0-\r\nConnection: keep-alive\r\nHost: 190.15.240.11:8088\r\nIcy-MetaData: 1\r\n\r\n", szSubPath, MediaServerVerson);
 			XHNetSDK_Write(nClient, (unsigned char*)szRequestFLVFile, strlen(szRequestFLVFile), ABL_MediaServerPort.nSyncWritePacket);
-		}
-		else
+		}else
 			pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
-	}
-	else
+	}else
 		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 
 #ifdef  SaveNetDataToFlvFile

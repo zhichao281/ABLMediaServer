@@ -1,6 +1,7 @@
 #ifndef _NetRecvBase_H
 #define _NetRecvBase_H
 #include <atomic>
+
 #include "MediaFifo.h"
 #include "MediaStreamSource.h"
 #include "AACEncode.h"
@@ -25,7 +26,21 @@ public:
 
    virtual int   SendFirstRequst() = 0;//发送第一个请求
    virtual bool  RequestM3u8File() = 0 ;
+   
+   int                   nWebRTC_Comm_State;
+   char*                 GetCurrentDateTime();
 
+   int                   readerCount;//某一个码流观看数量 
+   uint64_t              nStartProcessJtt1078Time;
+   bool                  UpdateSim(char* szSIM);
+
+   char                  szZeroMediaData[1024]={0x00};
+   char                  szExtendMediaData[1024 * 32]={0x00};
+   bool                  bUpdateFlag;
+   int                   nOldFileSize;
+   volatile bool          addThreadPoolFlag;
+   unsigned  char         sz1078AudioFrameHead[4] = {0x00,0x01,0xa0,0x00};
+   uint32_t               nWriteRecordCacheFFLushLength;
 #ifdef  OS_System_Windows
    bool                   ftruncate(char* szFileName, DWORD nFileSize);
 #endif
@@ -46,10 +61,11 @@ public:
 
    std::vector<std::string> mutliRecordPlayNameList;//多个录像连续播放文件
    MessageNoticeStruct    msgNotice;
-   uint64_t               nWriteRecordByteSize;//写入录像字节数量
+   int                    nWriteRecordByteSize;//写入录像字节数量
    void                   GetCurrentDatetime();//获取当前时间
    char                   szCurrentDateTime[128];//当前时间，年月日时分秒 
    char                   szStartDateTime[128];//当前时间，年月日时分秒 
+   char                   szEndDateTime[128];//结束时间，年月日时分秒 
    uint64_t               nStartDateTime;//文件创建秒数
 
    volatile bool          m_bSendCacheAudioFlag;
@@ -61,10 +77,6 @@ public:
    uint64_t               nAddMuteAACBufferOrder;//增加静音的包数量
    void                   AddMuteAACBuffer(); //增加aac静音
    bool                   bAddMuteFlag;//是否增加静音
-
-   int                    FindSPSPositionPos(char* szVideoName, unsigned char* pVideo, int nLength);
-
-   WebRtcCallStruct       webRtcCallStruct;
 
    void                   GetAACAudioInfo2(unsigned char* nAudioData, int nLength,int* nSampleRate,int* nChans);
 
@@ -191,6 +203,8 @@ public:
    delRequestStruct     m_delRequestStruct ;//删除代理拉流
    NETHANDLE            nMediaClient;//真正拉流的句柄
    NETHANDLE            nMediaClient2;//真正拉流的句柄
+   NETHANDLE            nMediaClient3;//rtp  
+   NETHANDLE            nMediaClient4;//rtcp  
 
    addPushProxyStruct   m_addPushProxyStruct ; //请求代理推流
  
@@ -208,6 +222,7 @@ public:
    getMediaListStruct     m_getMediaListStruct;//获取媒体源列表 
    getOutListStruct       m_getOutListStruct;  //获取往外发送的列表
    getServerConfigStruct  m_getServerConfigStruct;//获取系统配置
+   sendJtt1078Talk        m_sendJtt1078Talk;//发送1078语音对讲数据
 
    int                    m_gbPayload;            //国标payload 
    uint32_t               hRtpHandle;             //国标rtp打包、或者解包

@@ -29,6 +29,7 @@ public:
    CRecordFileSource(char* app,char* stream);
    ~CRecordFileSource();
 
+   uint64_t                fileKeepMaxTime;//录像最大保存时长 、精确到每一路媒体源，先从配置文件读取默认值，addStreamProxy 、openRtpServer 函数可以修改 
    m3u8FileList_ptrMap     m_m3u8FileMap;
    std::mutex              m3u8NameMutex; 
    bool                    AddM3u8FileToMap(char* szM3u8Name);
@@ -47,7 +48,7 @@ public:
    char          szJson[string_length_4096];
 
    bool   AddRecordFile(char* szFileName);
-   bool   UpdateExpireRecordFile(char* szNewFileName);
+   bool   UpdateExpireRecordFile(char* szNewFileName, int* nFileSize);
 
    list<uint64_t> fileList;
 };

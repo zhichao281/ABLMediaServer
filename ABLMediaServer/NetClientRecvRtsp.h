@@ -1,7 +1,7 @@
 #ifndef _NetClientRecvRtsp_H
 #define _NetClientRecvRtsp_H
 
-#include "DigestAuthentication.hh"
+#include "./rtspMD5/DigestAuthentication.hh"
 
 #include "MediaStreamSource.h"
 #include "rtp_packet.h"
@@ -56,6 +56,10 @@ public:
    virtual int SendFirstRequst();//发送第一个请求
    virtual bool RequestM3u8File();//请求m3u8文件
 
+   mpeg4_aac_t     aacInfo;
+   ts_demuxer_t    *ts=NULL;
+
+   bool           bUniviewFlag;//如果是宇视摄像头可能需要判断视频编码格式
    bool           destroy();
    char           m_szContentBaseURL[string_length_1024];//如果Describe 命令返回有 Content-Base 字段，则使用该URL
    int            nRecvRtpPacketCount;

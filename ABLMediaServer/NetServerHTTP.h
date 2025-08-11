@@ -21,7 +21,7 @@ using namespace boost;
 
 #define  MaxNetServerHttpBuffer      1024*1024*2 
 
-#define  MaxMediaSourceInfoLength    1024*1024*6   
+#define  MaxMediaSourceInfoLength    1024*1024*8   
 typedef  std::map<string, RequestKeyValue*, less<string> > RequestKeyValueMap;
 
 class CNetServerHTTP : public CNetRevcBase
@@ -40,6 +40,8 @@ public:
    virtual int SendFirstRequst();//发送第一个请求
    virtual bool RequestM3u8File();//请求m3u8文件
 
+   bool                    CheckPortIfUse(int nPort);
+   bool                    index_api_sendJtt1078Talk();
    bool                    index_api_controlRecordPlay();
    bool                    RequesePauseRtpServer(bool bFlag);
    bool                    index_api_pauseRtpServer();

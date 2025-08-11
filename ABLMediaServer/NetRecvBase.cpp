@@ -19,7 +19,7 @@ E-Mail  79941308@qq.com
 
 extern CMediaFifo                            pDisconnectBaseNetFifo;             //清理断裂的链接 
 extern MediaServerPort                       ABL_MediaServerPort;
-extern boost::shared_ptr<CNetRevcBase>       CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL);
+extern boost::shared_ptr<CNetRevcBase>       CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL, bool bLock = true);
 extern boost::shared_ptr<CMediaStreamSource> GetMediaStreamSource(char* szURL, bool bNoticeStreamNoFound = false);
 extern boost::shared_ptr<CNetRevcBase>       GetNetRevcBaseClient(NETHANDLE CltHandle);
 extern boost::shared_ptr<CNetRevcBase>       GetNetRevcBaseClientNoLock(NETHANDLE CltHandle);
@@ -28,7 +28,7 @@ extern boost::shared_ptr<CNetRevcBase>       GetNetRevcBaseClientNoLock(NETHANDL
 
 extern CMediaFifo                            pDisconnectBaseNetFifo;             //清理断裂的链接 
 extern MediaServerPort                       ABL_MediaServerPort;
-extern std::shared_ptr<CNetRevcBase>       CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL);
+extern std::shared_ptr<CNetRevcBase>       CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL, bool bLock = true);
 extern std::shared_ptr<CMediaStreamSource> GetMediaStreamSource(char* szURL, bool bNoticeStreamNoFound = false);
 extern std::shared_ptr<CNetRevcBase>       GetNetRevcBaseClient(NETHANDLE CltHandle);
 extern std::shared_ptr<CNetRevcBase>       GetNetRevcBaseClientNoLock(NETHANDLE CltHandle);
@@ -47,6 +47,14 @@ extern  uint8_t                              SLICE_START_CODE[4]  ;
 
 CNetRevcBase::CNetRevcBase()
 {
+	nWebRTC_Comm_State = -1 ;
+	readerCount = 0;
+	memset(szExtendMediaData, 0x00, sizeof(szExtendMediaData));
+	bUpdateFlag = false ;
+	nOldFileSize = 0 ;
+	memset(szZeroMediaData, 0x00, sizeof(szZeroMediaData));
+	addThreadPoolFlag = false;
+	nWriteRecordCacheFFLushLength = 0;
 	bCreateNewRecordFile = false;
 	nRecordDateTime = GetTickCount64();
 	nWriteRecordByteSize = 0;
@@ -142,7 +150,7 @@ CNetRevcBase::CNetRevcBase()
 	timeout_sec = 10;
 	memset(domainName,0x00,sizeof(domainName)); //域名
     ifConvertFlag = false;//是否需要转换
-	tUpdateIPTime = GetTickCount64();
+	tUpdateIPTime = nStartProcessJtt1078Time = GetTickCount64();
 }
 
 CNetRevcBase::~CNetRevcBase()
@@ -838,8 +846,7 @@ std::shared_ptr<CMediaStreamSource>   CNetRevcBase::CreateReplayClient(char* szR
  		while (true)
 		{//等待录像文件创建好媒体源
 		   nWaitCount++;
-		   std::this_thread::sleep_for(std::chrono::milliseconds(200));
-		 //  Sleep(200);
+		   Sleep(200);
 		   pTempSource = GetMediaStreamSource(szReplayURL);
 		   if (pTempSource != NULL)
 			   break;
@@ -1103,61 +1110,6 @@ char*   CNetRevcBase::getDatetimeBySecond(time_t tSecond)
 	return szDatetimeBySecond;
 }
 
-//检查SPS的位置 
-int  CNetRevcBase::FindSPSPositionPos(char* szVideoName, unsigned char* pVideo, int nLength)
-{
-	int nPos = 0;
-	bool bVideoIsSPSFlag = false;
-	unsigned char  nFrameType = 0x00;
-	int nNaluType = 1;
-	int nAddStep = 3;
-
-	for (int i = 0; i < nLength; i++)
-	{
-		nNaluType = -1;
-		if (memcmp(pVideo + i, (unsigned char*)NALU_START_CODE, sizeof(NALU_START_CODE)) == 0)
-		{//有出现 00 00 01 的nalu头标志
-			nNaluType = 1;
-			nAddStep = sizeof(NALU_START_CODE);
-		}
-		else if (memcmp(pVideo + i, (unsigned char*)SLICE_START_CODE, sizeof(SLICE_START_CODE)) == 0)
-		{//有出现 00 00 00 01 的nalu头标志
-			nNaluType = 2;
-			nAddStep = sizeof(SLICE_START_CODE);
-		}
-
-		if (nNaluType >= 1) 
-		{//找到帧片段
-			if (strcmp(szVideoName, "H264") == 0)
-			{
-				nFrameType = (pVideo[i + nAddStep] & 0x1F);
-				if (nFrameType == 7 )
-				{//SPS 
-					nPos = i ;
-					continue ;
-				}
-			}
-			else if (strcmp(szVideoName, "H265") == 0)
-			{
-				nFrameType = (pVideo[i + nAddStep] & 0x7E) >> 1;
-				if (nFrameType == 33 )
-				{//SPS   PPS   IDR 
-					nPos = i;
-					continue ;
-				}
-			}
-
-			//偏移位置 
-			i += nAddStep ;
-		}
-
-		//不需要全部检查完毕，就可以判断一帧类型
-		if (i >= 256 )
-			break ;
-	}
-
-	return nPos;
-}
 #ifdef  OS_System_Windows
 //设置文件大小 
 bool CNetRevcBase::ftruncate(char* szFileName, DWORD nFileSize)
@@ -1189,3 +1141,44 @@ bool CNetRevcBase::ftruncate(char* szFileName, DWORD nFileSize)
 }
 
 #endif
+
+//修正SIM卡的号码
+bool CNetRevcBase::UpdateSim(char* szSIM)
+{
+	if (szSIM == NULL || atoi(szSIM) == 0)
+		return false;
+
+	int nSize = strlen(szSIM);
+	int nPos = -1;
+	for (int i = 0; i < nSize; i++)
+	{
+		if (szSIM[i] != 0x30)
+		{
+			nPos = i;
+			break;
+		}
+	}
+	if (nPos != -1)
+	{
+		memmove(szSIM, szSIM + nPos, nSize - nPos);
+		szSIM[nSize - nPos] = 0x00;
+	}
+	return true;
+}
+
+char* CNetRevcBase::GetCurrentDateTime()
+{
+#ifdef OS_System_Windows
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+	sprintf(szEndDateTime, "%04d%02d%02d%02d%02d%02d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);;
+#else
+	time_t now;
+	time(&now);
+	struct tm *local;
+	local = localtime(&now);
+	sprintf(szEndDateTime, "%04d%02d%02d%02d%02d%02d", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);;
+#endif
+
+	return  szEndDateTime;
+}

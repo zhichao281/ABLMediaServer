@@ -220,7 +220,6 @@ bool   CNetRtspServerUDP::CreateVideoRtpDecode(std::shared_ptr<CMediaStreamSourc
 
 
 #endif
-
 {
 	if (strlen(VideoName) == 0 || nVidoePT <= 0 || mediaServer == NULL)
 		return false;

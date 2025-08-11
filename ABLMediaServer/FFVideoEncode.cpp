@@ -45,7 +45,8 @@ int           nFrameRate      ”∆µ÷°ÀŸ∂»
 bool CFFVideoEncode::StartEncode(char* szEncodeName, AVPixelFormat nAVPixel, int nWidth, int nHeight, int nFrameRate, int nEncodeByteRate)
 {
 	std::lock_guard<std::mutex> lock(enable_Lock);
-	 WriteLog(Log_Debug, "StartEncode nAVPixel = %d ", (int)nAVPixel);
+	WriteLog(Log_Debug, "StartEncode nAVPixel = %d ",(int)nAVPixel);
+
 	 strcpy(m_szEncodeName, szEncodeName);
 	 m_nAVPixel = nAVPixel;
 	 m_nWidth = nWidth ;
@@ -55,7 +56,7 @@ bool CFFVideoEncode::StartEncode(char* szEncodeName, AVPixelFormat nAVPixel, int
 	 AVDictionary* param = 0;
 
 	 //≤È’“±‡¬Î∆˜
-	 pCodec = avcodec_find_encoder_by_name(szEncodeName);
+	 pCodec = (AVCodec*)avcodec_find_encoder_by_name(szEncodeName);
 
 	 if (!pCodec) 
 	 {
@@ -77,9 +78,8 @@ bool CFFVideoEncode::StartEncode(char* szEncodeName, AVPixelFormat nAVPixel, int
 	 pCodecCtx->bit_rate = nEncodeByteRate * 1024 ;
 	 pCodecCtx->gop_size = 25;
 
-	 pCodecCtx->time_base = { 1, m_nFrameRate };
-	// pCodecCtx->time_base.num = 1;
-	 //pCodecCtx->time_base.den = m_nFrameRate;
+	 pCodecCtx->time_base.num = 1;
+	 pCodecCtx->time_base.den = m_nFrameRate;
 
 	 pCodecCtx->qmin = 10;
 	 pCodecCtx->qmax = 51;
@@ -326,7 +326,7 @@ bool CFFVideoFilter::StartFilter(AVPixelFormat nAVPixel, int nWidth, int nHeight
 	//Õº∆¨ÀÆ”°
 	//std::string filters_descr = "movie=./watermark/logo.png[watermark];[in][watermark]overlay=10:10[out]";
 
-	enum AVPixelFormat pix_fmts[] = { nAVPixel, AV_PIX_FMT_NONE };
+	enum AVPixelFormat pix_fmts[] = {nAVPixel, AV_PIX_FMT_NONE};
 	const AVFilter *buffersrc = avfilter_get_by_name("buffer");
 	const AVFilter *buffersink = avfilter_get_by_name("buffersink");
 
@@ -424,6 +424,7 @@ bool CFFVideoFilter::StopFilter()
 		bRunFlag = false ;
 		return true;
 	}
+	return false;
 }
 
 bool CFFVideoFilter::FilteringFrame(AVFrame * srcFrame)
@@ -486,6 +487,7 @@ bool CFFVideoFilter::CopyYUVData(unsigned char* pOutYUVData)
 		  nVPos += filterFrame->linesize[2];
 		  nYUVPos += m_nWidth / 2;
 	  }	
+	return true;
 }
 
 

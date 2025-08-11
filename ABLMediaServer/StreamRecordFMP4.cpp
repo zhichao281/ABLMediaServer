@@ -134,7 +134,7 @@ CStreamRecordFMP4::~CStreamRecordFMP4()
 		{
 			MessageNoticeStruct msgNotice;
 			msgNotice.nClient = NetBaseNetType_HttpClient_Record_mp4;
-			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_mp4\",\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\",\"fileSize\":%llu}", key, app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, getDatetimeBySecond(nStartDateTime + (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate)), nWriteRecordByteSize);
+			sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_mp4\",\"key\":%llu,\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\",\"fileSize\":%d}", key, app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, GetCurrentDateTime(), nWriteRecordByteSize);
 			pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 		}
 	}
@@ -157,7 +157,7 @@ int CStreamRecordFMP4::PushVideo(uint8_t* pVideoData, uint32_t nDataLength, char
 	{
  		MessageNoticeStruct msgNotice;
 		msgNotice.nClient = NetBaseNetType_HttpClient_Record_Progress;
-		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_progress\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"TotalVideoDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\"}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType,key, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), (nTotalVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, getDatetimeBySecond(nStartDateTime + (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate)));
+		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_progress\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"TotalVideoDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\"}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType,key, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), (nTotalVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, GetCurrentDateTime());
 		pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 		nCreateDateTime = GetTickCount64();
 	}
@@ -311,7 +311,6 @@ static int fmp4_hls_init_segment(hls_fmp4_t* hls, void* param)
 
 	pNetServerHttpMp4->fTSFileWriteByteCount = pNetServerHttpMp4->nFmp4SPSPPSLength = bytes;
 	pNetServerHttpMp4->s_packetLength = bytes;
-	bool  bUpdateFlag = false;
 
 	if (pNetServerHttpMp4->fWriteMP4 == NULL)
 	{
@@ -334,8 +333,8 @@ static int fmp4_hls_init_segment(hls_fmp4_t* hls, void* param)
 			if (pRecord)
 			{
 				pNetServerHttpMp4->nStartDateTime = GetCurrentSecond();
-				bUpdateFlag = pRecord->UpdateExpireRecordFile(pNetServerHttpMp4->szFileName);
-				if (bUpdateFlag)
+				pNetServerHttpMp4->bUpdateFlag = pRecord->UpdateExpireRecordFile(pNetServerHttpMp4->szFileName,&pNetServerHttpMp4->nOldFileSize);
+				if (pNetServerHttpMp4->bUpdateFlag)
 				{
 					pNetServerHttpMp4->fWriteMP4 = fopen(pNetServerHttpMp4->szFileName, "r+b");
 					if (pNetServerHttpMp4->fWriteMP4)
@@ -355,8 +354,7 @@ static int fmp4_hls_init_segment(hls_fmp4_t* hls, void* param)
 	if (pNetServerHttpMp4->fWriteMP4)
 	{
 		fwrite(pNetServerHttpMp4->s_packet, 1, bytes, pNetServerHttpMp4->fWriteMP4);
-		fflush(pNetServerHttpMp4->fWriteMP4);
-		pNetServerHttpMp4->nWriteRecordByteSize += bytes ;
+ 		pNetServerHttpMp4->nWriteRecordByteSize += bytes ;
 	}
 	//必须hls_init_segment 初始化完成才能写视频、音频段，在回调函数里面做标志
 	pNetServerHttpMp4->hls_init_segmentFlag = true;
@@ -473,7 +471,6 @@ bool CStreamRecordFMP4::writeTSBufferToMP4File(unsigned char* pTSData, int nLeng
 	if (fWriteMP4 && pTSData != NULL && nLength > 0)
 	{
 		fwrite(pTSData, 1, nLength, fWriteMP4);
-		fflush(fWriteMP4);
 		nWriteRecordByteSize += nLength;
 
 	if (ABL_MediaServerPort.recordFileCutType == 1)
@@ -504,7 +501,7 @@ bool CStreamRecordFMP4::writeTSBufferToMP4File(unsigned char* pTSData, int nLeng
 			{
 				MessageNoticeStruct msgNotice;
 				msgNotice.nClient = NetBaseNetType_HttpClient_Record_mp4;
-				sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_mp4\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\",\"fileSize\":%llu}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, getDatetimeBySecond(nStartDateTime + (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate)), nWriteRecordByteSize);
+				sprintf(msgNotice.szMsg, "{\"eventName\":\"on_record_mp4\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"fileName\":\"%s\",\"currentFileDuration\":%llu,\"startTime\":\"%s\",\"endTime\":\"%s\",\"fileSize\":%d}", app, stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, szFileNameOrder, (nCurrentVideoFrames / mediaCodecInfo.nVideoFrameRate), szStartDateTime, GetCurrentDateTime(), nWriteRecordByteSize);
 				pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 			}
 			nCurrentVideoFrames = 0;
@@ -530,7 +527,7 @@ bool CStreamRecordFMP4::writeTSBufferToMP4File(unsigned char* pTSData, int nLeng
 			if (pRecord)
 			{
 				nStartDateTime = GetCurrentSecond();
- 				bUpdateFlag = pRecord->UpdateExpireRecordFile(szFileName);
+ 				bUpdateFlag = pRecord->UpdateExpireRecordFile(szFileName,&nOldFileSize);
 				if (bUpdateFlag)
 				{
 					fWriteMP4 = fopen(szFileName, "r+b");
@@ -543,7 +540,6 @@ bool CStreamRecordFMP4::writeTSBufferToMP4File(unsigned char* pTSData, int nLeng
 				if (fWriteMP4 != NULL)
 				{
 					fwrite(s_packet, 1, s_packetLength, fWriteMP4);
-					fflush(fWriteMP4);
 					nWriteRecordByteSize += s_packetLength ;
 				}
 				pRecord->AddRecordFile(szFileNameOrder);

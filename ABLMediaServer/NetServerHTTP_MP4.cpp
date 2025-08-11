@@ -207,9 +207,10 @@ int CNetServerHTTP_MP4::SendVideo()
 		}
 
 		m_videoFifo.pop_front();
+	    videoDts += nVideoStampAdd;
 	}
 
-	videoDts += nVideoStampAdd;
+	return 0;
 }
 
 int CNetServerHTTP_MP4::SendAudio()

@@ -173,17 +173,17 @@ CNetClientReadLocalMediaFile::CNetClientReadLocalMediaFile(NETHANDLE hServer, NE
 	stream_isAudio = -1;
 	buffersrc = NULL;
 	bsf_ctx = NULL;
-	sample_index = 8;
+	sample_index = 8 ;
 	m_audioCacheFifo.InitFifo(1024 * 256);
 	nInputAudioDelay = 20;
 	nInputAudioTime = nCurrentDateTime = GetTickCount64();
 
 	nDownloadFrameCount = 0;
-
+  
 	m_rtspPlayerType = RtspPlayerType_RecordReplay;
-	pMediaSource = NULL;
-	nClient = hClient;
-
+	pMediaSource = NULL ;
+	nClient    = hClient;
+  
 	WriteLog(Log_Debug, "NetClientReadLocalMediaFile =  %X ,nClient = %llu 开始读取录像文件 %s ", this, nClient, szIP);
 
 #ifdef OS_System_Windows 
@@ -198,10 +198,10 @@ CNetClientReadLocalMediaFile::CNetClientReadLocalMediaFile(NETHANDLE hServer, NE
 		strcpy(szReadFileError, "open file error ! ");
 		WriteLog(Log_Debug, "NetClientReadLocalMediaFile =  %X ,nClient = %llu 读取文件失败 ", this, hClient);
 		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
-		return;
+		return  ;
 	}
 
-	//确定是否有媒体源
+    //确定是否有媒体源
 	if (avformat_find_stream_info(pFormatCtx2, NULL) < 0)
 	{
 		strcpy(szReadFileError, "file is Not Media File ! ");
@@ -215,7 +215,7 @@ CNetClientReadLocalMediaFile::CNetClientReadLocalMediaFile(NETHANDLE hServer, NE
 	if (open_codec_context(&stream_isVideo, &video_dec_ctx, pFormatCtx2, AVMEDIA_TYPE_VIDEO) >= 0)
 	{
 		video_stream = pFormatCtx2->streams[stream_isVideo];
-		if (video_stream->codecpar->codec_id == AV_CODEC_ID_H264)
+        if(video_stream->codecpar->codec_id == AV_CODEC_ID_H264)
 			strcpy(mediaCodecInfo.szVideoName, "H264");
 		else if (video_stream->codecpar->codec_id == AV_CODEC_ID_H265)
 			strcpy(mediaCodecInfo.szVideoName, "H265");
@@ -228,16 +228,16 @@ CNetClientReadLocalMediaFile::CNetClientReadLocalMediaFile(NETHANDLE hServer, NE
 			return;
 		}
 
-		mediaCodecInfo.nWidth = video_dec_ctx->width;
+ 		mediaCodecInfo.nWidth = video_dec_ctx->width;
 		mediaCodecInfo.nHeight = video_dec_ctx->height;
 		pix_fmt = video_dec_ctx->pix_fmt;
-	}
+ 	}
 	else
 	{
 		avformat_close_input(&pFormatCtx2);
 		WriteLog(Log_Debug, "CNetClientReadLocalMediaFile =  %X ,nClient = %llu 文件中不存在视频、音频流  ", this, hClient);
-		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient)); //清理断裂的链接 
-		return;
+	    pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient)); //清理断裂的链接 
+ 		return;
 	}
 
 	//查找出音频源
@@ -254,7 +254,7 @@ CNetClientReadLocalMediaFile::CNetClientReadLocalMediaFile(NETHANDLE hServer, NE
 			strcpy(mediaCodecInfo.szAudioName, "MP3");
 		else if (audio_stream->codecpar->codec_id == AV_CODEC_ID_OPUS)
 			strcpy(mediaCodecInfo.szAudioName, "OPUS");
-		else
+  		else
 			strcpy(mediaCodecInfo.szAudioName, "UNKNOW");
 
 		mediaCodecInfo.nSampleRate = audio_stream->codecpar->sample_rate; //采样频率
@@ -272,8 +272,8 @@ CNetClientReadLocalMediaFile::CNetClientReadLocalMediaFile(NETHANDLE hServer, NE
 			{
 				sample_index = i;
 				break;
+			}
 		}
-	}
 
 		if (audio_stream->codecpar->codec_id == AV_CODEC_ID_AAC)
 		{
@@ -298,7 +298,7 @@ CNetClientReadLocalMediaFile::CNetClientReadLocalMediaFile(NETHANDLE hServer, NE
 
 			mediaCodecInfo.nBaseAddAudioTimeStamp = nInputAudioDelay;
 		}
-}
+	}
 
 	packet2 = av_packet_alloc();
 #ifdef FFMPEG6
@@ -310,13 +310,13 @@ CNetClientReadLocalMediaFile::CNetClientReadLocalMediaFile(NETHANDLE hServer, NE
 	if (pFormatCtx2->streams[stream_isVideo]->codecpar->extradata_size > 0)
 	{
 		int ret;
-		codecpar = pFormatCtx2->streams[stream_isVideo]->codecpar;
+ 		codecpar = pFormatCtx2->streams[stream_isVideo]->codecpar;
 		if (codecpar != NULL)
 		{
-			if (strcmp(mediaCodecInfo.szVideoName, "H264") == 0)
-				buffersrc = (AVBitStreamFilter*)av_bsf_get_by_name("h264_mp4toannexb");
+			if (strcmp(mediaCodecInfo.szVideoName,"H264") == 0)
+				buffersrc = (AVBitStreamFilter *)av_bsf_get_by_name("h264_mp4toannexb");
 			else if (strcmp(mediaCodecInfo.szVideoName, "H265") == 0)
-				buffersrc = (AVBitStreamFilter*)av_bsf_get_by_name("hevc_mp4toannexb");
+				buffersrc = (AVBitStreamFilter *)av_bsf_get_by_name("hevc_mp4toannexb");
 			ret = av_bsf_alloc(buffersrc, &bsf_ctx);
 			avcodec_parameters_copy(bsf_ctx->par_in, codecpar);
 			ret = av_bsf_init(bsf_ctx);
@@ -332,7 +332,7 @@ CNetClientReadLocalMediaFile::CNetClientReadLocalMediaFile(NETHANDLE hServer, NE
 	//确定帧速度
 	mediaCodecInfo.nVideoFrameRate = 25;// video_stream->avg_frame_rate.num / video_stream->avg_frame_rate.den;
 
-	netBaseNetType = ReadRecordFileInput_ReadFMP4File;
+    netBaseNetType = ReadRecordFileInput_ReadFMP4File;
 	strcpy(m_addStreamProxyStruct.url, szIP);
 
 	nAVType = nOldAVType = AVType_Audio;
@@ -343,11 +343,11 @@ CNetClientReadLocalMediaFile::CNetClientReadLocalMediaFile(NETHANDLE hServer, NE
 	m_bPauseFlag = false;
 	m_nStartTimestamp = 0;
 	nReadVideoFrameCount = nReadAudioFrameCount = 0;
-	nVideoFirstPTS = 0;
+	nVideoFirstPTS = 0 ;
 	nAudioFirstPTS = 0;
-
-	bRestoreVideoFrameFlag = false;//是否需要恢复视频帧总数
-	bRestoreAudioFrameFlag = false;//是否需要恢复音频帧总数
+	 
+	bRestoreVideoFrameFlag = false ;//是否需要恢复视频帧总数
+	bRestoreAudioFrameFlag = false ;//是否需要恢复音频帧总数
 
 	netBaseNetType = NetBaseNetType_ReadLocalMediaFile;
 	mov_readerTime = GetTickCount64();
@@ -355,9 +355,9 @@ CNetClientReadLocalMediaFile::CNetClientReadLocalMediaFile(NETHANDLE hServer, NE
 #ifdef WriteAACFileFlag
 	char aacFile[256] = { 0 };
 	sprintf(aacFile, "%s%X.aac", ABL_MediaSeverRunPath, this);
-	fWriteAAC = fopen(aacFile, "wb");
+	fWriteAAC = fopen(aacFile,"wb");
 #endif 
-	RecordReplayThreadPool->InsertIntoTask(nClient);
+ 	RecordReplayThreadPool->InsertIntoTask(nClient);
 }
 
 CNetClientReadLocalMediaFile::~CNetClientReadLocalMediaFile() 
@@ -392,7 +392,6 @@ CNetClientReadLocalMediaFile::~CNetClientReadLocalMediaFile()
 	if (strlen(m_szShareMediaURL) > 0)
 		pDisconnectMediaSource.push((unsigned char*)m_szShareMediaURL, strlen(m_szShareMediaURL));
 
-
 	if(hParent > 0 )
 		pDisconnectBaseNetFifo.push((unsigned char*)&hParent,sizeof(hParent));
 
@@ -409,7 +408,7 @@ int CNetClientReadLocalMediaFile::InputNetData(NETHANDLE nServerHandle, NETHANDL
   return 0 ;	
 }
 
-int CNetClientReadLocalMediaFile::ProcessNetData()
+int CNetClientReadLocalMediaFile::ProcessNetData() 
 {
 	std::lock_guard<std::mutex> lock(readRecordFileInputLock);
 	nRecvDataTimerBySecond = 0;
@@ -436,7 +435,7 @@ int CNetClientReadLocalMediaFile::ProcessNetData()
 		strcpy(m_addStreamProxyStruct.stream, pMediaSource->stream);
 
 		SplitterAppStream(m_szShareMediaURL);
-	}
+ 	}
 
 	if (!bResponseHttpFlag && nReadVideoFrameCount >= 5)
 	{//回复代理拉流请求
@@ -446,7 +445,7 @@ int CNetClientReadLocalMediaFile::ProcessNetData()
 	}
 
 	nCurrentDateTime = GetTickCount64();
-	if (m_bPauseFlag == true)
+	if (m_bPauseFlag == true )
 	{
 		//Sleep(2);
 		std::this_thread::sleep_for(std::chrono::milliseconds(2));
@@ -465,26 +464,26 @@ int CNetClientReadLocalMediaFile::ProcessNetData()
 		}
 	}
 
-	if (nCurrentDateTime - mov_readerTime >= nWaitTime)
+    if(nCurrentDateTime - mov_readerTime >= nWaitTime)
 	{
-		mov_readerTime = nCurrentDateTime;
-		nReadRet = av_read_frame(pFormatCtx2, packet2);
+	   mov_readerTime = nCurrentDateTime ;
+	   nReadRet = av_read_frame(pFormatCtx2, packet2);
 
-		if (packet2->stream_index == stream_isVideo)
-		{
-			nAVType = AVType_Video;
-			if (bsf_ctx != NULL)
-			{//H264\H265 转换
-				ret1 = av_bsf_send_packet(bsf_ctx, packet2);
-				ret2 = av_bsf_receive_packet(bsf_ctx, packet2);
-			}
-		}
-		else if (packet2->stream_index == stream_isAudio)
-		{
-			nAVType = AVType_Audio;
+	   if (packet2->stream_index == stream_isVideo)
+	   {
+ 		   nAVType = AVType_Video;
+		   if (bsf_ctx != NULL)
+		   {//H264\H265 转换
+			   ret1 = av_bsf_send_packet(bsf_ctx, packet2);
+			   ret2 = av_bsf_receive_packet(bsf_ctx, packet2);
+		   }
+	   }
+	   else if (packet2->stream_index == stream_isAudio)
+	   {
+ 		   nAVType = AVType_Audio;
 
-		}
-	}
+	   }
+   	}
 
 	if (pMediaSource->bUpdateVideoSpeed == false)
 	{
@@ -493,37 +492,37 @@ int CNetClientReadLocalMediaFile::ProcessNetData()
 		pMediaSource->bUpdateVideoSpeed = true;
 	}
 
-	if (nAVType == AVType_Video && packet2->size > 0)
+	if (nAVType == AVType_Video && packet2->size > 0 )
 	{//读取视频
-		pMediaSource->PushVideo(packet2->data, packet2->size, mediaCodecInfo.szVideoName);
-		nReadVideoFrameCount++;
+   	    pMediaSource->PushVideo(packet2->data, packet2->size,mediaCodecInfo.szVideoName);
+		nReadVideoFrameCount ++;
 
-		if ((abs(m_dScaleValue - 8.0) <= 0.01 || abs(m_dScaleValue - 16.0) <= 0.01))
+ 		if ((abs(m_dScaleValue - 8.0) <= 0.01 || abs(m_dScaleValue - 16.0) <= 0.01))
 		{//8、16倍速不需要等待 
 			if (m_rtspPlayerType == RtspPlayerType_RecordReplay)
 			{//录像回放
 				if (nAVType == AVType_Video && nOldAVType == AVType_Video)
 				{
-					if (abs(m_dScaleValue - 8.0) <= 0.01)
-						nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 8;
-					else if (abs(m_dScaleValue - 16.0) <= 0.01)
-						nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 16;
-				}
-				else
+				  if (abs(m_dScaleValue - 8.0) <= 0.01)
+ 					nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 8;
+ 				  else if (abs(m_dScaleValue - 16.0) <= 0.01)
+ 					nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 16;
+				 }
+				 else 
 					nWaitTime = 1;
-				}
+ 			}
 			else//录像下载
 			{
-				if (abs(m_dScaleValue - 8.0) <= 0.01)
-					nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 8;
-				else if (abs(m_dScaleValue - 16.0) <= 0.01)
-					nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 16;
+			  if (abs(m_dScaleValue - 8.0) <= 0.01)
+				 nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 8 ;
+			  else if (abs(m_dScaleValue - 16.0) <= 0.01)
+				  nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 16 ;
 			}
-			}
-		else if (abs(m_dScaleValue - 255.0) <= 0.01)
-		{//rtsp录像下载
-			nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 16;
 		}
+ 		else if (abs(m_dScaleValue - 255.0) <= 0.01 )
+		{//rtsp录像下载
+            nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 16 ;
+ 		}
 		else if (abs(m_dScaleValue - 1.0) <= 0.01)
 		{//1倍速
 			if (((1000 / mediaCodecInfo.nVideoFrameRate)) > 0)
@@ -531,66 +530,64 @@ int CNetClientReadLocalMediaFile::ProcessNetData()
 #ifdef  OS_System_Windows
 				nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) - 8;
 #else 
-				nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) - 3;
+				nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) - 3 ;
 #endif   
 			}
 			else
 				nWaitTime = 1;
-			}
-		else if (abs(m_dScaleValue - 2.0) <= 0.01)
+ 		}else if (abs(m_dScaleValue - 2.0) <= 0.01)
 		{//2倍速
 			if (nAVType == AVType_Video && nOldAVType == AVType_Video)
 			{
 #ifdef  OS_System_Windows
-				nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 2 - 5;
-#else 
+				nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 2 - 5 ;
+ #else 
 				nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 2 - 3;
 #endif   
-			}
-			else
-				nWaitTime = 1;
-		}
-		else if (abs(m_dScaleValue - 4.0) <= 0.01)
+	        }
+		    else
+			  nWaitTime = 1;
+ 		}else if (abs(m_dScaleValue - 4.0) <= 0.01)
 		{//4倍速
 			if (nAVType == AVType_Video && nOldAVType == AVType_Video)
 			{
 #ifdef  OS_System_Windows
-				nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 4 - 3;
+			 nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 4 - 3;
 #else 
-				nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 4 - 3;
+			 nWaitTime = ((1000 / mediaCodecInfo.nVideoFrameRate)) / 4 - 3;
 #endif   
 			}
 			else
 				nWaitTime = 1;
-		}
-		else
+	    }
+		else 
 		{//读取视频的时间尚未到，需要Sleep(2) ,否则CPU会狂跑
-			if (!(abs(m_dScaleValue - 8.0) <= 0.01 || abs(m_dScaleValue - 16.0) <= 0.01))
-				nWaitTime = 5; //8倍速、16倍速，不需要Sleeep
-		}
-		}
-	else if (nAVType == AVType_Audio && packet2->size > 0)
+			  if ( !(abs(m_dScaleValue - 8.0) <= 0.01 || abs(m_dScaleValue - 16.0) <= 0.01) )
+			   nWaitTime = 5 ; //8倍速、16倍速，不需要Sleeep
+ 		}
+ 	}
+	else if (nAVType == AVType_Audio && packet2->size > 0 )  
 	{//音频直接读取
-		nWaitTime = 1;
-		if (nAudioFirstPTS == 0)
+		 nWaitTime = 1;
+ 		if (nAudioFirstPTS == 0)
 			nAudioFirstPTS = packet2->pts;
-
+ 
 		if (strcmp(mediaCodecInfo.szAudioName, "AAC") == 0)
 		{
-			if (packet2->size > 0 && packet2->data != NULL)
+ 			if (packet2->size > 0 && packet2->data != NULL)
 			{
 				if (packet2->data[0] == 0xff && packet2->data[1] == 0xf1)
 				{//已经有ff f1 
-					m_audioCacheFifo.push(packet2->data, packet2->size);
+ 					m_audioCacheFifo.push(packet2->data, packet2->size);
 				}
 				else
 				{
-					AddADTSHeadToAAC(packet2->data, packet2->size); //增加ADTS头
+ 					AddADTSHeadToAAC(packet2->data, packet2->size); //增加ADTS头
 #ifdef WriteAACFileFlag
 					fwrite(pAACBufferADTS, 1, packet2->size + 7, fWriteAAC);
 					fflush(fWriteAAC);
 #endif 
-					m_audioCacheFifo.push(pAACBufferADTS, +packet2->size + 7);
+ 					m_audioCacheFifo.push(pAACBufferADTS, + packet2->size + 7);
 				}
 				//获取AAC音频时间戳增量
 				if (mediaCodecInfo.nBaseAddAudioTimeStamp == 0)
@@ -601,20 +598,20 @@ int CNetClientReadLocalMediaFile::ProcessNetData()
 		{
 			nInputAudioDelay = (packet2->size / 80) * 10;
 
-			m_audioCacheFifo.push(packet2->data, packet2->size);
+  			m_audioCacheFifo.push(packet2->data, packet2->size);
 
 			//g711 时间戳增量
 			if (mediaCodecInfo.nBaseAddAudioTimeStamp == 0)
 				mediaCodecInfo.nBaseAddAudioTimeStamp = 320;
-		}
+		} 
 	}
 	av_packet_unref(packet2);
 
 	if (nReadRet < 0)
 	{//文件读取出错 
-		WriteLog(Log_Debug, "ProcessNetData 文件读取完毕 ,nClient = %llu ", nClient);
-		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
-		return -1;
+	    WriteLog(Log_Debug, "ProcessNetData 文件读取完毕 ,nClient = %llu ", nClient);
+	    pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
+	    return -1;
 	}
 	nOldAVType = nAVType;
 	//Sleep(1);
@@ -623,27 +620,27 @@ int CNetClientReadLocalMediaFile::ProcessNetData()
 	//加入音频
 	if (nCurrentDateTime - nInputAudioTime >= nInputAudioDelay - 5)
 	{
-		nInputAudioTime = nCurrentDateTime;
+		nInputAudioTime = nCurrentDateTime ;
 		unsigned char* pData = NULL;
 		int            nLength = 0;
-		int            nSize = 0;
-
+		int            nSize = 0 ;
+ 
 		nSize = m_audioCacheFifo.GetSize();
 		while (nSize >= 2)
 		{
-			pData = m_audioCacheFifo.pop(&nLength);
-			if (pData != NULL && nLength > 0)
-			{
-				pMediaSource->PushAudio(pData, nLength, mediaCodecInfo.szAudioName, mediaCodecInfo.nChannels, mediaCodecInfo.nSampleRate);
-				m_audioCacheFifo.pop_front();
-			}
-			nSize = m_audioCacheFifo.GetSize();
+		  pData = m_audioCacheFifo.pop(&nLength);
+		  if (pData != NULL && nLength > 0)
+		  {
+			pMediaSource->PushAudio(pData, nLength, mediaCodecInfo.szAudioName, mediaCodecInfo.nChannels, mediaCodecInfo.nSampleRate);
+		 	m_audioCacheFifo.pop_front();
+		  }
+		  nSize = m_audioCacheFifo.GetSize();
 		}
-	}
+	} 
 
 	RecordReplayThreadPool->InsertIntoTask(nClient);
-	return 0;
-	}
+    return 0 ;	
+}
 
 //更新录像回放速度
 bool CNetClientReadLocalMediaFile::UpdateReplaySpeed(double dScaleValue, ABLRtspPlayerType rtspPlayerType)
@@ -679,6 +676,7 @@ bool  CNetClientReadLocalMediaFile::ReaplyFileSeek(uint64_t nTimestamp)
 
 	bRestoreVideoFrameFlag = bRestoreAudioFrameFlag = true; //因为有拖到播放，需要重新计算已经播放视频，音频帧总数 
 	WriteLog(Log_Debug, "ReaplyFileSeek 拖动播放 ,nClient = %llu ,nTimestamp = %llu ,nRet = %d ", nClient, nTimestamp, nRet);
+	return true;
 }
 
 //追加adts信息头

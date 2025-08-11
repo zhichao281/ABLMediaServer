@@ -22,7 +22,6 @@ extern std::shared_ptr<CMediaStreamSource> GetMediaStreamSource(char* szURL, boo
 #endif
 
 
-
 extern bool                                  DeleteMediaStreamSource(char* szURL);
 extern bool                                  DeleteClientMediaStreamSource(uint64_t nClient);
 
@@ -35,7 +34,6 @@ extern bool                                 AddClientToMapAddMutePacketList(uint
 extern bool                                 DelClientToMapFromMutePacketList(uint64_t nClient);
 extern CMediaFifo                           pDisconnectMediaSource;      //清理断裂媒体源 
 
-
 static int rtmp_server_send(void* param, const void* header, size_t len, const void* data, size_t bytes)
 {
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
@@ -44,16 +42,16 @@ static int rtmp_server_send(void* param, const void* header, size_t len, const v
 	{
 		if (len > 0 && header != NULL && pClient->bRunFlag.load())
 		{
-			pClient->nWriteRet = XHNetSDK_Write(pClient->nClient, (uint8_t*)header, len, ABL_MediaServerPort.nSyncWritePacket);
+			pClient->nWriteRet = XHNetSDK_Write(pClient->nClient, (uint8_t*)header, len,ABL_MediaServerPort.nSyncWritePacket);
 			if (pClient->nWriteRet != 0)
 			{
-				pClient->nWriteErrorCount++;
+				pClient->nWriteErrorCount ++;
 				if (pClient->nWriteErrorCount >= 30)
 				{
-					pClient->bRunFlag.exchange(false);
-					WriteLog(Log_Debug, "rtmp_server_send 发送失败，次数 nWriteErrorCount = %d ", pClient->nWriteErrorCount);
-					pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
-				}
+				   pClient->bRunFlag.exchange(false);
+				   WriteLog(Log_Debug, "rtmp_server_send 发送失败，次数 nWriteErrorCount = %d ", pClient->nWriteErrorCount);
+				   pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
+  				}
 			}
 			else
 				pClient->nWriteErrorCount = 0;
@@ -63,8 +61,8 @@ static int rtmp_server_send(void* param, const void* header, size_t len, const v
 			pClient->nWriteRet = XHNetSDK_Write(pClient->nClient, (uint8_t*)data, bytes, ABL_MediaServerPort.nSyncWritePacket);
 			if (pClient->nWriteRet != 0)
 			{
-				pClient->nWriteErrorCount++;
-				WriteLog(Log_Debug, "rtmp_server_send 发送失败，次数 nWriteErrorCount = %d ", pClient->nWriteErrorCount);
+				pClient->nWriteErrorCount ++;
+				WriteLog(Log_Debug,"rtmp_server_send 发送失败，次数 nWriteErrorCount = %d ", pClient->nWriteErrorCount);
 				pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
 			}
 			else
@@ -74,16 +72,15 @@ static int rtmp_server_send(void* param, const void* header, size_t len, const v
 	return len + bytes;
 }
 
-
 static int rtmp_server_onpublish(void* param, const char* app, const char* stream, const char* type)
 {//打印 rtmp 主路径 、子路径 
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
 	if (pClient != NULL && pClient->bRunFlag.load())
 	{
-		WriteLog(Log_Debug, "CNetRtmpServerRecv=%X, nClient = %llu, rtmp_server_onpublish(%s, %s, %s)", pClient, pClient->nClient, app, stream, type);
+		WriteLog(Log_Debug,"CNetRtmpServerRecv=%X, nClient = %llu, rtmp_server_onpublish(%s, %s, %s)", pClient, pClient->nClient, app, stream, type);
 
 		//限制rtmp推流，需要两级路径 
-		if (!(strlen(app) > 0 && strlen(stream) > 0))
+		if ( !(strlen(app) > 0 && strlen(stream) > 0 ))
 		{//限制rtmp推流，需要两级路径 
 			WriteLog(Log_Debug, "rtmp推流地址不符合两级的标准，需要推送类似URL: rtmp://190.15.240.11:1935/live/Camera_00001 ");
 			pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
@@ -109,18 +106,12 @@ static int rtmp_server_onpublish(void* param, const char* app, const char* strea
 			szStream[nPos] = 0x00;
 		}
 
-		sprintf(pClient->szURL, "/%s/%s", app, szStream);
-#ifdef USE_BOOST
-		boost::shared_ptr<CMediaStreamSource> pTempSource = NULL;
-
-#else
-		std::shared_ptr<CMediaStreamSource> pTempSource = NULL;
-
-#endif
-		pTempSource = GetMediaStreamSource(pClient->szURL, true);
+ 		sprintf(pClient->szURL, "/%s/%s", app, szStream);
+	
+		auto pTempSource = GetMediaStreamSource(pClient->szURL,true);
 		if (pTempSource != NULL)
 		{//推流地址已经存在 
-			WriteLog(Log_Debug, "--- 推流地址已经存在--- %s ", pClient->szURL);
+			WriteLog(Log_Debug, "--- 推流地址已经存在--- %s ",pClient->szURL );
 			pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
 			return 0;
 		}
@@ -133,8 +124,8 @@ static int rtmp_server_onpublish(void* param, const char* app, const char* strea
 		pClient->flvDemuxer = flv_demuxer_create(NetRtmpServerRecvCallBackFLV, pClient);
 		pClient->netBaseNetType = NetBaseNetType_RtmpServerRecvPush;
 
-		pClient->bPushMediaSuccessFlag = true; //成功推流 
-		pClient->pMediaSource = CreateMediaStreamSource(pClient->szURL, pClient->nClient, MediaSourceType_LiveMedia, 0, pClient->m_h265ConvertH264Struct);
+ 		pClient->bPushMediaSuccessFlag = true; //成功推流 
+		pClient->pMediaSource =  CreateMediaStreamSource(pClient->szURL,pClient->nClient, MediaSourceType_LiveMedia, 0, pClient->m_h265ConvertH264Struct);
 		if (pClient->pMediaSource == NULL)
 		{//推流地址已经存在 
 			WriteLog(Log_Debug, "创建媒体源失败 %s ", pClient->szURL);
@@ -144,9 +135,9 @@ static int rtmp_server_onpublish(void* param, const char* app, const char* strea
 
 		pClient->pMediaSource->netBaseNetType = pClient->netBaseNetType;
 		//如果配置推流录像，则开启录像标志
-		if (pClient->pMediaSource && ABL_MediaServerPort.pushEnable_mp4 == 1)
-			pClient->pMediaSource->enable_mp4 = true;
-		pClient->netBaseNetType = NetBaseNetType_RtmpServerRecvPush;//RTMP 服务器，接收客户端的推流 
+		if(pClient->pMediaSource && ABL_MediaServerPort.pushEnable_mp4 == 1)
+ 		   pClient->pMediaSource->enable_mp4 = true;
+ 		pClient->netBaseNetType = NetBaseNetType_RtmpServerRecvPush;//RTMP 服务器，接收客户端的推流 
 	}
 	return 0;
 }
@@ -156,9 +147,9 @@ static int rtmp_server_onplay(void* param, const char* app, const char* stream, 
 {
 	WriteLog(Log_Debug, "rtmp_server_onplay(%s, %s, %f, %f, %d)", app, stream, start, duration, (int)reset);
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
-
-	if (!pClient->bRunFlag.load())
-		return -1;
+ 
+    if(!pClient->bRunFlag.load())
+		return -1 ;
 
 	//去掉？后面参数字符串
 	string strMP4Name = stream;
@@ -188,19 +179,19 @@ static int rtmp_server_onplay(void* param, const char* app, const char* stream, 
 	//判断源流媒体是否存在
 	if (strstr(szTemp, RecordFileReplaySplitter) == NULL)
 	{//观看实况
-		pushClient = GetMediaStreamSource(szTemp, true);
+		pushClient = GetMediaStreamSource(szTemp,true);
 
 		if (pushClient == NULL || !(strlen(pushClient->m_mediaCodecInfo.szVideoName) > 0 || strlen(pushClient->m_mediaCodecInfo.szAudioName) > 0))
 		{
 			WriteLog(Log_Debug, "CNetRtmpServerRecv=%X, 没有推流对象的地址 %s nClient = %llu ", pClient, szTemp, pClient->nClient);
-			if (pClient)
+ 			if (pClient)
 				pDisconnectBaseNetFifo.push((unsigned char*)&pClient->nClient, sizeof(pClient->nClient));
 			return -1;
-		}
+ 		}
 	}
 	else
 	{//录像点播
-		//查询点播的录像是否存在
+ 	    //查询点播的录像是否存在
 		if (pClient->QueryRecordFileIsExiting(szTemp) == false)
 		{
 			WriteLog(Log_Debug, "CNetRtmpServerRecv = %X, 没有点播的录像文件 %s nClient = %llu ", pClient, szTemp, pClient->nClient);
@@ -224,14 +215,14 @@ static int rtmp_server_onplay(void* param, const char* app, const char* stream, 
 	sprintf(pClient->szMediaSourceURL, "/%s/%s", app, szStream);
 	strcpy(pClient->m_addStreamProxyStruct.app, app);
 	strcpy(pClient->m_addStreamProxyStruct.stream, szStream);
-	sprintf(pClient->m_addStreamProxyStruct.url, "rtmp://%s:%d/%s/%s", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nRtmpPort, app, szStream);
-
+	sprintf(pClient->m_addStreamProxyStruct.url, "rtmp://%s:%d/%s/%s", ABL_MediaServerPort.ABL_szLocalIP,ABL_MediaServerPort.nRtmpPort, app, szStream);
+ 
 	//把客户端加入媒体拷贝线程 
 	if (pClient && pushClient)
 	{
 		strcpy(pClient->szRtmpName, szTemp);
 
-		pClient->flvMuxer = flv_muxer_create(NetRtmpServerRec_MuxerFlv, pClient);
+ 		pClient->flvMuxer = flv_muxer_create(NetRtmpServerRec_MuxerFlv, pClient);
 
 		//把客户端加入发送线程 
 		pClient->netBaseNetType = NetBaseNetType_RtmpServerSendPush;//RTMP 服务器，转发客户端的推上来的码流
@@ -240,7 +231,7 @@ static int rtmp_server_onplay(void* param, const char* app, const char* stream, 
 		pClient->m_audioFifo.InitFifo(MaxLiveingAudioFifoBufferLength);
 		pushClient->AddClientToMap(pClient->nClient);
 	}
-	return 0;
+ 	return 0;
 }
 static int rtmp_server_onpause(void* param, int pause, uint32_t ms)
 {
@@ -355,12 +346,13 @@ inline char flv_type(int type)
 	case FLV_VIDEO_HVCC: return 'h';
 	default: return '*';
 	}
+	return '*';
 }
 
 static int NetRtmpServerRecvCallBackFLV(void* param, int codec, const void* data, size_t bytes, uint32_t pts, uint32_t dts, int flags)
 {
 	CNetRtmpServerRecv* pClient = (CNetRtmpServerRecv*)param;
-	if (!pClient->bRunFlag.load())
+	if(!pClient->bRunFlag.load())
 		return -1;
 
 	static char s_pts[64], s_dts[64];
@@ -591,8 +583,8 @@ CNetRtmpServerRecv::~CNetRtmpServerRecv()
 		DelClientToMapFromMutePacketList(nClient);
 
 	//如果是接收推流，并且成功接收推流的，则需要删除媒体数据源 szURL ，比如 /Media/Camera_00001 
-	if (bPushMediaSuccessFlag && netBaseNetType == NetBaseNetType_RtmpServerRecvPush && pMediaSource != NULL)
-		pDisconnectMediaSource.push((unsigned char*)szURL, strlen(szURL));
+	if (bPushMediaSuccessFlag && netBaseNetType == NetBaseNetType_RtmpServerRecvPush && pMediaSource !=	NULL )
+ 	   pDisconnectMediaSource.push((unsigned char*)szURL, strlen(szURL));
 
 	WriteLog(Log_Debug, "CNetRtmpServerRecv 析构 = %X  nClient = %llu \r\n", this, nClient);
 	malloc_trim(0);
@@ -628,8 +620,7 @@ int CNetRtmpServerRecv::SendVideo()
 	
  	if (nWriteErrorCount >= 30)
 	{
-		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
-		DeleteNetRevcBaseClient(nClient);
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 		return -1;
 	}
 
@@ -665,7 +656,7 @@ int CNetRtmpServerRecv::SendVideo()
 	}
 
 	if (nWriteErrorCount >= 30)
-		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 
 	return 0;
 }
@@ -676,7 +667,7 @@ int CNetRtmpServerRecv::SendAudio()
  
 	if (nWriteErrorCount >= 30)
 	{
-		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 		return -1;
 	}
 
@@ -723,12 +714,12 @@ int CNetRtmpServerRecv::SendAudio()
 		}
  
 		m_audioFifo.pop_front();
+	    SyncVideoAudioTimestamp(); 
 	}
 
-	SyncVideoAudioTimestamp(); 
 
 	if (nWriteErrorCount >= 30)
-		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
+		pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 
 	return 0;
 }
@@ -755,7 +746,7 @@ int CNetRtmpServerRecv::ProcessNetData()
 			if ( !((pData[0] == 0x03 && pData[1] == 0x00 && pData[2] == 0x00 && pData[3] == 0x00 && pData[4] == 0x00) || (pData[0] == 0x03)))
 			{//简单检测包头是否合法，是否符合rtmp协议
 			    WriteLog(Log_Debug, "CNetRtmpServerRecv = %X 非法的 rtmp包头 ",this);
-				pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
+				pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
 				return -1;
 			}
 		}

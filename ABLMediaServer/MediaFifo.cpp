@@ -163,6 +163,7 @@ unsigned char*  CMediaFifo::pop(int* nLength)
 		*nLength = 0;
 		return fifoBuffer;
 	}
+	return NULL;
 }
 
 //真正删除,使用完毕再执行，否则内存得不到保护 

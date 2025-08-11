@@ -35,6 +35,24 @@ public:
    virtual int SendFirstRequst();//发送第一个请求
    virtual bool RequestM3u8File();//请求m3u8文件
 
+   //1078 数据发送 
+   int                     jtt1078_KeepOpenPortType;
+   char                    sim[string_length_512];
+   Jt1078VideoRtpPacket_T  jt1078VideoHead;
+   Jt1078AudioRtpPacket_T  jt1078AudioHead;
+   Jt1078OtherRtpPacket_T  jt1078OtherHead;
+   Jt1078VideoRtpPacket2019_T  jt1078VideoHead2019;
+   Jt1078AudioRtpPacket2019_T  jt1078AudioHead2019;
+   Jt1078OtherRtpPacket2019_T  jt1078OtherHead2019;
+   int                     nPacketOrder, pPacketCount;
+   int                     jt1078SendPacketLenth;//1078包数据长度
+   int                     nSrcVideoPos;
+   void                    SendJtt1078VideoPacket(unsigned char* pData, int nLength);
+   void                    SendJtt1078AduioPacket(unsigned char* pData, int nLength);
+   void                    SendJtt1078VideoPacket2019(unsigned char* pData, int nLength);
+   void                    SendJtt1078AduioPacket2019(unsigned char* pData, int nLength);
+   int                     nPFrameCount; //和前一个I帧之间的P帧总数 
+
 #ifdef WriteJt1078VideoFlag
    FILE*                        fWrite1078File;
 #endif
@@ -91,7 +109,6 @@ public:
    unsigned short          nVideoRtpLen;
    uint32_t                nSendRet;
 
-   volatile bool addThreadPoolFlag;
    uint64_t      nAddSend_app_streamDatetime;//回复码流时间戳
    void          CreateSendRtpByPS();
    char*         s_buffer;

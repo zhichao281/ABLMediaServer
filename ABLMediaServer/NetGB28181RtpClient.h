@@ -11,10 +11,9 @@ using namespace boost;
 
 #endif
 
-
 #include "mpeg-ps.h"
 #include "mpeg-ts.h"
-
+#include "mpeg-ts-proto.h"
 
 
 #define  MaxGB28181RtpSendVideoMediaBufferLength  1024*64 
@@ -41,7 +40,20 @@ public:
    virtual int SendFirstRequst();//发送第一个请求
    virtual bool RequestM3u8File();//请求m3u8文件
 
-   int                     nRecvSampleRate, nRecvChannels;
+   int                          Find1078HeadFromCacheBuffer(unsigned char* pData, int nLength);
+   void                         SplitterJt1078CacheBuffer();
+   void                         SplitterJt1078CacheBuffer2019();
+   unsigned char*               p1078VideoFrameBuffer;
+   int                          n1078VideoFrameBufferLength;
+   unsigned short               nPayloadSize;
+   int                          n1078Pos;
+   int                          n1078CacheBufferLength;
+   int                          nVideoPT, nAudioPT;
+   int                          n1078CurrentProcCountLength;//当前出来的总长度 
+   int                          nFind1078FlagPos;//查找到的1078标志头位置 
+   int                          n1078NewPosition;//查找到的1078标志头位置后重新计算位置
+
+   int                          nRecvSampleRate, nRecvChannels;
    //1078 数据发送 
    Jt1078VideoRtpPacket_T  jt1078VideoHead;
    Jt1078AudioRtpPacket_T  jt1078AudioHead;
@@ -109,6 +121,7 @@ public:
    struct ps_muxer_func_t handler;
    uint64_t videoPTS , audioPTS  ;
    int      nflags;
+   uint32_t       nVdeoFrameNumber;
 
    _rtp_packet_sessionopt  optionPS;
    _rtp_packet_input       inputPS;

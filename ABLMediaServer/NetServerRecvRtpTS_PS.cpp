@@ -18,10 +18,9 @@ extern bool                                  DeleteMediaStreamSource(char* szURL
 extern bool                                  DeleteClientMediaStreamSource(uint64_t nClient);
 extern MediaServerPort                       ABL_MediaServerPort;
 
-
 extern CMediaFifo                            pDisconnectBaseNetFifo; //清理断裂的链接 
 extern char                                  ABL_MediaSeverRunPath[256]; //当前路径
-extern boost::shared_ptr<CNetRevcBase>       CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL);
+extern boost::shared_ptr<CNetRevcBase>       CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL, bool bLock = true);
 extern boost::shared_ptr<CNetRevcBase>       GetNetRevcBaseClient(NETHANDLE CltHandle);
 extern void LIBNET_CALLMETHOD                onread(NETHANDLE srvhandle, NETHANDLE clihandle, uint8_t* data, uint32_t datasize, void* address);
 
@@ -33,10 +32,9 @@ extern bool                                  DeleteMediaStreamSource(char* szURL
 extern bool                                  DeleteClientMediaStreamSource(uint64_t nClient);
 extern MediaServerPort                       ABL_MediaServerPort;
 
-
 extern CMediaFifo                            pDisconnectBaseNetFifo; //清理断裂的链接 
 extern char                                  ABL_MediaSeverRunPath[256]; //当前路径
-extern std::shared_ptr<CNetRevcBase>       CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL);
+extern std::shared_ptr<CNetRevcBase>       CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL, bool bLock = true);
 extern std::shared_ptr<CNetRevcBase>       GetNetRevcBaseClient(NETHANDLE CltHandle);
 extern void LIBNET_CALLMETHOD                onread(NETHANDLE srvhandle, NETHANDLE clihandle, uint8_t* data, uint32_t datasize, void* address);
 
@@ -45,10 +43,10 @@ extern void LIBNET_CALLMETHOD                onread(NETHANDLE srvhandle, NETHAND
 CNetServerRecvRtpTS_PS::CNetServerRecvRtpTS_PS(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort, char* szShareMediaURL)
 {
 	netBaseNetType = NetBaseNetType_NetGB28181RecvRtpPS_TS;
-	int nRet = XHNetSDK_BuildUdp(NULL, ABL_MediaServerPort.ps_tsRecvPort, NULL, &nClient, onread, 1);
-	nClientPort = ABL_MediaServerPort.ps_tsRecvPort;
+ 	int nRet = XHNetSDK_BuildUdp(NULL,ABL_MediaServerPort.ps_tsRecvPort, NULL, &nClient, onread, 1);
+	nClientPort = ABL_MediaServerPort.ps_tsRecvPort ;
 	WriteLog(Log_Debug, (nRet == 0) ? "绑定端口 [ udp ] %d 成功(success) " : "绑定端口 %d(udp) 失败(fail) ", ABL_MediaServerPort.ps_tsRecvPort);
-	WriteLog(Log_Debug, "CNetServerRecvRtpTS_PS 构造 = %X  nClient = %llu ,nRet = %d ", this, nClient, nRet);
+	WriteLog(Log_Debug, "CNetServerRecvRtpTS_PS 构造 = %X  nClient = %llu ,nRet = %d ", this, nClient,nRet);
 }
 
 CNetServerRecvRtpTS_PS::~CNetServerRecvRtpTS_PS()
@@ -90,7 +88,7 @@ int CNetServerRecvRtpTS_PS::InputNetData(NETHANDLE nServerHandle, NETHANDLE nCli
 		return -1;//不是rtp包
 
  	auto  rtpClientPtr = GetNetRevcBaseClient(rtpClient);
-	if (rtpClientPtr == NULL && address != NULL)
+	if (rtpClientPtr == NULL && address != NULL )
 	{
 		char szTemp[256] = { 0 };
 		char szRtpSource[256] = { 0 };

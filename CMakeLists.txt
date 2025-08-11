@@ -4,6 +4,9 @@ project(ABLMediaServer)
 # 判断是否启用了 USE_BOOST 选项
 option(USE_BOOST "Use Boost library" OFF)
 option(USE_WEBRTC "Use WEBRTC library" ON)
+
+
+
 # 设置编译选项
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # 检测是否满足标准，否则报错
@@ -14,18 +17,14 @@ set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O0 -Wall")
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
 
 set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-fPIC")
-# 允许相对路径
-set(CMAKE_SKIP_RPATH FALSE)
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-set(CMAKE_INSTALL_RPATH "$ORIGIN")
 
+# 允许相对路径
+set(CMAKE_INSTALL_RPATH "$ORIGIN")
 set(CMAKE_BUILD_TYPE "Release")   # 自定义构建类型
 
 # 添加宏定义
 add_definitions(-DFFMPEG6)
+
 
 # 设置输出目录
 message("当前系统架构: ${CMAKE_SYSTEM_PROCESSOR}")
@@ -40,6 +39,11 @@ endif()
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SYSTEM_NAME_LOWER})
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SYSTEM_NAME_LOWER})  
 
+# 设置 media-server-master 的输出目录
+set(MEDIA_SERVER_LIB_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/media-server-master/${CMAKE_SYSTEM_PROCESSOR}")
+
+
+
 
 if(USE_BOOST)
     add_definitions(-DUSE_BOOST)
@@ -53,7 +57,7 @@ link_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${SYSTEM_NAME_LOWER}
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd/faac-1.30/lib/${SYSTEM_NAME_LOWER}
     ${CMAKE_CURRENT_SOURCE_DIR}/bin/${SYSTEM_NAME_LOWER}
-    ${CMAKE_CURRENT_SOURCE_DIR}/media-server-master/${CMAKE_SYSTEM_PROCESSOR}
+    ${MEDIA_SERVER_LIB_OUTPUT_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/XHNetSDK/openssl/lib/${SYSTEM_NAME_LOWER}
 )
 
@@ -79,15 +83,7 @@ if(USE_WEBRTC)
     add_subdirectory(simple-media-server)
 endif()
 
-# 链接静态库
-link_libraries(
-    rtmp
-    flv
-    mpeg
-    hls
-    mov
-    rtp
-)
+add_subdirectory(media-server-master)
 
 # 添加源文件
 file(GLOB ABL_SRCS
@@ -105,20 +101,21 @@ set_target_properties(${CMAKE_PROJECT_NAME}  PROPERTIES
 				LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin/${SYSTEM_NAME_LOWER}"       # 动态库输出路径
 				RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin/${SYSTEM_NAME_LOWER}"       # 可执行文件输出路径
                 )
-# 设置INSTALL_RPATH，用于安装时
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    INSTALL_RPATH "$ORIGIN"
-    BUILD_WITH_INSTALL_RPATH TRUE  # 确保构建时 RPATH 生效
-)
 
-# 设置RPATH，用于构建时
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    RPATH "$ORIGIN"
-    LINK_FLAGS "-Wl,-rpath,./"
+#设置RPATH路径
+set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN")
 
-)
 
 # 链接需要的库文件
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+    rtmp
+    flv
+    mpeg
+    hls
+    mov
+    rtp)
+
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
     faac

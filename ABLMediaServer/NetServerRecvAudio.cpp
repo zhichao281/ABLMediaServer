@@ -1,6 +1,6 @@
 /*
 功能：
-       实现websocket服务器音频数据接收 
+       实现websocket服务器音频数据接收 ，接收浏览器录音组件发送过来的PCM语音数据，然后再编码为g711a、g711u、aac 
 日期    2023-12-02
 作者    罗家兄弟
 QQ      79941308
@@ -334,6 +334,10 @@ void   CNetServerRecvAudio::ProcessPcmCacheBuffer()
 			SplitterMaxPcmLength = SplitterMaxPcmLength_AAC;
 			aacEnc.InitAACEncodec(64000, audioRegisterStruct.sampleRate, audioRegisterStruct.channels, &nAACEncodeLength);
 		}
+
+		//语音对讲的音频设置为不需要转码 
+		pMediaSouce->SetG711ConvertAAC(0);
+
 	}
 	else if (pcmHead.nType == 0x02)
 	{
@@ -556,6 +560,7 @@ bool  CNetServerRecvAudio::Create_WS_FLV_Handle()
  
 		return true;
 	}
+	return false;
 }
 
 //发送第一个请求

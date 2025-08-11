@@ -20,7 +20,7 @@ extern bool                                  DeleteClientMediaStreamSource(uint6
 
 extern CMediaFifo                            pDisconnectBaseNetFifo; //清理断裂的链接 
 extern char                                  ABL_MediaSeverRunPath[256]; //当前路径
-extern boost::shared_ptr<CNetRevcBase>       CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL);
+extern boost::shared_ptr<CNetRevcBase>  CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL, bool bLock = true);
 
 #else
 extern bool                                  DeleteNetRevcBaseClient(NETHANDLE CltHandle);
@@ -31,20 +31,19 @@ extern bool                                  DeleteClientMediaStreamSource(uint6
 
 extern CMediaFifo                            pDisconnectBaseNetFifo; //清理断裂的链接 
 extern char                                  ABL_MediaSeverRunPath[256]; //当前路径
-extern std::shared_ptr<CNetRevcBase>       CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL);
+extern std::shared_ptr<CNetRevcBase>  CreateNetRevcBaseClient(int netClientType, NETHANDLE serverHandle, NETHANDLE CltHandle, char* szIP, unsigned short nPort, char* szShareMediaURL, bool bLock = true);
 
 #endif
 
 CNetClientAddStreamProxy::CNetClientAddStreamProxy(NETHANDLE hServer, NETHANDLE hClient, char* szIP, unsigned short nPort, char* szShareMediaURL)
 {
-	strcpy(m_szShareMediaURL, szShareMediaURL);
-	netBaseNetType = NetBaseNetType_addStreamProxyControl;
+	strcpy(m_szShareMediaURL,szShareMediaURL);
+ 	netBaseNetType = NetBaseNetType_addStreamProxyControl;
 	nMediaClient = 0;
 	nServer = hServer;
 	nClient = hClient;
 	WriteLog(Log_Debug, "CNetClientAddStreamProxy 构造 = %X nClient = %llu ", this, hClient);
 }
-
 
 CNetClientAddStreamProxy::~CNetClientAddStreamProxy()
 {
@@ -92,21 +91,20 @@ int CNetClientAddStreamProxy::SendFirstRequst()
 
 	if (strlen(m_szShareMediaURL) > 0)
 	{
+
 #ifdef USE_BOOST
 		boost::shared_ptr<CNetRevcBase> pClient = NULL;
 #else
 		std::shared_ptr<CNetRevcBase> pClient = NULL;
 
 #endif
-	
+	  if(nServer == NetRevcBaseClient_addStreamProxyControl)//自研代理拉流 
+	    pClient = CreateNetRevcBaseClient(NetRevcBaseClient_addStreamProxy, 0, 0, m_addStreamProxyStruct.url, 0, m_szShareMediaURL);
+	  else if(nServer == NetRevcBaseClient_addFFmpegProxyControl)//调用ffmepg函数实现代理拉流
+	    pClient = CreateNetRevcBaseClient(NetRevcBaseClient_addFFmpegProxy, 0, 0, m_addStreamProxyStruct.url, 0, m_szShareMediaURL);
 
-		if (nServer == NetRevcBaseClient_addStreamProxyControl)//自研代理拉流 
-			pClient = CreateNetRevcBaseClient(NetRevcBaseClient_addStreamProxy, 0, 0, m_addStreamProxyStruct.url, 0, m_szShareMediaURL);
-		else if (nServer == NetRevcBaseClient_addFFmpegProxyControl)//调用ffmepg函数实现代理拉流
-			pClient = CreateNetRevcBaseClient(NetRevcBaseClient_addFFmpegProxy, 0, 0, m_addStreamProxyStruct.url, 0, m_szShareMediaURL);
-
-		if (pClient)
-		{
+	  if (pClient)
+	  {
 		 ParseRtspRtmpHttpURL(m_addStreamProxyStruct.url);
 		 strcpy(szClientIP, m_rtspStruct.szIP);
 		 nClientPort = atoi(m_rtspStruct.szPort);

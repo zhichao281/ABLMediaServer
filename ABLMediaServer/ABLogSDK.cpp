@@ -54,7 +54,7 @@ bool WriteLog(LogLevel nLogLevel, char* szSQL, ...)
 	SYSTEMTIME        st;
 	GetLocalTime(&st);
 
-	sprintf(ABL_writeBuffer, "%04d-%02d-%02d_%02d:%02d:%02d:%03d [%d] %s ", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds, ::GetCurrentThreadId(), ABL_LogStringArrray[nLogLevel]);
+	sprintf(ABL_writeBuffer, "%04d-%02d-%02d_%02d:%02d:%02d:%03d [%d] %s ", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds,::GetCurrentThreadId(),ABL_LogStringArrray[nLogLevel]);
 	va_list list;
 	va_start(list, szSQL);
 	vsprintf(ABL_szLogText, szSQL, list);
@@ -62,13 +62,13 @@ bool WriteLog(LogLevel nLogLevel, char* szSQL, ...)
 	strcat(ABL_szLogText, "\r\n");
 	strcat(ABL_writeBuffer, ABL_szLogText);
 
-	if (strlen(ABL_writeBuffer) < 512 && strstr(ABL_writeBuffer, "%") == NULL)
+	if (strlen(ABL_writeBuffer) < 4096 && strstr(ABL_writeBuffer,"%") == NULL )
 		printf(ABL_writeBuffer);
 
-	if (strlen(ABL_writeBuffer) < 4096)
-		myLogFile.WriteAVFile(ABL_writeBuffer, strlen(ABL_writeBuffer), true);
+	if (strlen(ABL_writeBuffer) < 1024*64 )
+	   myLogFile.WriteAVFile(ABL_writeBuffer, strlen(ABL_writeBuffer), true);
 
-	return true;
+	return true ;
 }
 
 bool  StopLogFile()

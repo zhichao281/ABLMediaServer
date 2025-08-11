@@ -57,91 +57,91 @@ CNetClientWebrtcPlayer::CNetClientWebrtcPlayer(NETHANDLE hServer, NETHANDLE hCli
 		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
 		return;
 	}
-	if(pMediaSource->bCreateWebRtcPlaySourceFlag.load() == false )
-	{
-		if (VideoCaptureManager::getInstance().GetInput(m_szShareMediaURL) != NULL)
-		{
-	      VideoCaptureManager::getInstance().GetInput(m_szShareMediaURL)->Init("H264", pMediaSource->m_mediaCodecInfo.nWidth, pMediaSource->m_mediaCodecInfo.nHeight, pMediaSource->m_mediaCodecInfo.nVideoFrameRate);
-	      pMediaSource->bCreateWebRtcPlaySourceFlag.exchange(true);
- 	    }
-		WriteLog(Log_Debug, "CNetClientWebrtcPlayer = %X  nClient = %llu audioname =%s ", this, nClient, pMediaSource->m_mediaCodecInfo.szAudioName);
+	//if(pMediaSource->bCreateWebRtcPlaySourceFlag.load() == false )
+	//{
+	//	if (VideoCaptureManager::getInstance().GetInput(m_szShareMediaURL) != NULL)
+	//	{
+	//      VideoCaptureManager::getInstance().GetInput(m_szShareMediaURL)->Init("H264", pMediaSource->m_mediaCodecInfo.nWidth, pMediaSource->m_mediaCodecInfo.nHeight, pMediaSource->m_mediaCodecInfo.nVideoFrameRate);
+	//      pMediaSource->bCreateWebRtcPlaySourceFlag.exchange(true);
+ //	    }
+	//	WriteLog(Log_Debug, "CNetClientWebrtcPlayer = %X  nClient = %llu audioname =%s ", this, nClient, pMediaSource->m_mediaCodecInfo.szAudioName);
 
-		ABL::to_upper(pMediaSource->m_mediaCodecInfo.szAudioName);
-		int format= AUDIOMIX_AVSampleFormat::AUDIOMIX_FMT_S16;
+	//	ABL::to_upper(pMediaSource->m_mediaCodecInfo.szAudioName);
+	//	int format= AUDIOMIX_AVSampleFormat::AUDIOMIX_FMT_S16;
 
-		std::map<std::string, std::string> streamInfo;
+	//	std::map<std::string, std::string> streamInfo;
 
-		if (strcmp(pMediaSource->m_mediaCodecInfo.szAudioName, "AAC") == 0) {
-			format = AUDIOMIX_AVSampleFormat::AUDIOMIX_FMT_FLTP;
-			streamInfo["codec_id"] = std::to_string(AV_CODEC_ID_AAC);
-		}
-		if (strcmp(pMediaSource->m_mediaCodecInfo.szAudioName, "G711_A") == 0) {
-			format = AUDIOMIX_AVSampleFormat::AUDIOMIX_FMT_S16;
-			streamInfo["codec_id"] = std::to_string(AV_CODEC_ID_PCM_ALAW);
-		}
-		if (strcmp(pMediaSource->m_mediaCodecInfo.szAudioName, "G711_U") == 0) {
-			format = AUDIOMIX_AVSampleFormat::AUDIOMIX_FMT_S16;
-			streamInfo["codec_id"] = std::to_string(AV_CODEC_ID_PCM_MULAW);
-		}
-		m_resampler = AudioResamplerAPI::CreateAudioResampler(
-			(AUDIOMIX_AVSampleFormat)format, pMediaSource->m_mediaCodecInfo.nSampleRate, pMediaSource->m_mediaCodecInfo.nChannels,
-			(AUDIOMIX_AVSampleFormat)AUDIOMIX_AVSampleFormat::AUDIOMIX_FMT_S16, m_sample_rate, m_nb_channels);
+	//	if (strcmp(pMediaSource->m_mediaCodecInfo.szAudioName, "AAC") == 0) {
+	//		format = AUDIOMIX_AVSampleFormat::AUDIOMIX_FMT_FLTP;
+	//		streamInfo["codec_id"] = std::to_string(AV_CODEC_ID_AAC);
+	//	}
+	//	if (strcmp(pMediaSource->m_mediaCodecInfo.szAudioName, "G711_A") == 0) {
+	//		format = AUDIOMIX_AVSampleFormat::AUDIOMIX_FMT_S16;
+	//		streamInfo["codec_id"] = std::to_string(AV_CODEC_ID_PCM_ALAW);
+	//	}
+	//	if (strcmp(pMediaSource->m_mediaCodecInfo.szAudioName, "G711_U") == 0) {
+	//		format = AUDIOMIX_AVSampleFormat::AUDIOMIX_FMT_S16;
+	//		streamInfo["codec_id"] = std::to_string(AV_CODEC_ID_PCM_MULAW);
+	//	}
+	//	m_resampler = AudioResamplerAPI::CreateAudioResampler(
+	//		(AUDIOMIX_AVSampleFormat)format, pMediaSource->m_mediaCodecInfo.nSampleRate, pMediaSource->m_mediaCodecInfo.nChannels,
+	//		(AUDIOMIX_AVSampleFormat)AUDIOMIX_AVSampleFormat::AUDIOMIX_FMT_S16, m_sample_rate, m_nb_channels);
 
-	
-		streamInfo["sample_rate"] = std::to_string(pMediaSource->m_mediaCodecInfo.nSampleRate);
-		streamInfo["nb_channels"] =std::to_string(pMediaSource->m_mediaCodecInfo.nChannels);
-		streamInfo["format"] = std::to_string(format);
-	
+	//
+	//	streamInfo["sample_rate"] = std::to_string(pMediaSource->m_mediaCodecInfo.nSampleRate);
+	//	streamInfo["nb_channels"] =std::to_string(pMediaSource->m_mediaCodecInfo.nChannels);
+	//	streamInfo["format"] = std::to_string(format);
+	//
 
-		m_AudioDecder = FFmpegAudioDecoderAPI::CreateDecoder(streamInfo);
-		// 处理音频数据的线程函数
-	/*	ABL::ThreadPool::getInstance().append([&]()
-			{
-				stopThread.store(false);
-				while (!stopThread.load())
-				{
-					int sample_size = 0;
-					uint8_t* output_data[AV_NUM_DATA_POINTERS] = { 0 };
-					int ret = m_resampler->GetOneFrame(output_data, &sample_size);
-					if (ret < 0)
-					{
-						if (stopThread.load())
-						{
-							return;
-						}
-						for (int i = 0; i < AV_NUM_DATA_POINTERS; ++i)
-						{
-							if (output_data[i] != nullptr) {
-								delete[] output_data[i];
-								output_data[i] = nullptr;
-							}
-						}
-						std::this_thread::sleep_for(std::chrono::milliseconds(2));
-						continue;
-					}
+	//	m_AudioDecder = FFmpegAudioDecoderAPI::CreateDecoder(streamInfo);
+	//	// 处理音频数据的线程函数
+	//	ABL::ThreadPool::getInstance().append([&]()
+	//		{
+	//			stopThread.store(false);
+	//			while (!stopThread.load())
+	//			{
+	//				int sample_size = 0;
+	//				uint8_t* output_data[AV_NUM_DATA_POINTERS] = { 0 };
+	//				int ret = m_resampler->GetOneFrame(output_data, &sample_size);
+	//				if (ret < 0)
+	//				{
+	//					if (stopThread.load())
+	//					{
+	//						return;
+	//					}
+	//					for (int i = 0; i < AV_NUM_DATA_POINTERS; ++i)
+	//					{
+	//						if (output_data[i] != nullptr) {
+	//							delete[] output_data[i];
+	//							output_data[i] = nullptr;
+	//						}
+	//					}
+	//					std::this_thread::sleep_for(std::chrono::milliseconds(2));
+	//					continue;
+	//				}
 
-					if (AudioCaptureManager::getInstance().GetInput(m_szShareMediaURL) && nSpsPositionPos >= 0)
-					{
-						AudioCaptureManager::getInstance().GetInput(m_szShareMediaURL)->onData("", output_data[0], sample_size, 1);
-					}
-				
-					for (int i = 0; i < AV_NUM_DATA_POINTERS; ++i) {
-						if (output_data[i] != nullptr) {
-							delete[] output_data[i];
-							output_data[i] = nullptr;
-						}
-					}
-					continue;
-				}
-			});*/
+	//				if (AudioCaptureManager::getInstance().GetInput(m_szShareMediaURL) && nSpsPositionPos >= 0)
+	//				{
+	//					AudioCaptureManager::getInstance().GetInput(m_szShareMediaURL)->onData("", output_data[0], sample_size, 1);
+	//				}
+	//			
+	//				for (int i = 0; i < AV_NUM_DATA_POINTERS; ++i) {
+	//					if (output_data[i] != nullptr) {
+	//						delete[] output_data[i];
+	//						output_data[i] = nullptr;
+	//					}
+	//				}
+	//				continue;
+	//			}
+	//		});
 
 
-	}
-	pMediaSource->AddClientToMap(nClient);
-	pMediaSource->nWebRtcPushStreamID = nClient;
-	SplitterAppStream(szShareMediaURL);
-	sprintf(m_addStreamProxyStruct.url, "http://%s:%d/webrtc-streamer.html?video=/%s/%s", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nWebRtcPort, m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream);
-	WriteLog(Log_Debug, "CNetClientWebrtcPlayer 构造 = %X  nClient = %llu ", this, nClient);
+	//}
+	//pMediaSource->AddClientToMap(nClient);
+	//pMediaSource->nWebRtcPushStreamID = nClient;
+	//SplitterAppStream(szShareMediaURL);
+	//sprintf(m_addStreamProxyStruct.url, "http://%s:%d/webrtc-streamer.html?video=/%s/%s", ABL_MediaServerPort.ABL_szLocalIP, ABL_MediaServerPort.nWebRtcPort, m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream);
+	//WriteLog(Log_Debug, "CNetClientWebrtcPlayer 构造 = %X  nClient = %llu ", this, nClient);
 }
 
 CNetClientWebrtcPlayer::~CNetClientWebrtcPlayer()
@@ -171,11 +171,11 @@ CNetClientWebrtcPlayer::~CNetClientWebrtcPlayer()
 		}
 	}
 
-	if (pMediaSource != NULL)
-	{
-		if (pMediaSource->bCreateWebRtcPlaySourceFlag.load() == true)
-			pMediaSource->bCreateWebRtcPlaySourceFlag.exchange(false);
- 	}
+	//if (pMediaSource != NULL)
+	//{
+	//	if (pMediaSource->bCreateWebRtcPlaySourceFlag.load() == true)
+	//		pMediaSource->bCreateWebRtcPlaySourceFlag.exchange(false);
+ //	}
 #ifdef WebRtcVideoFileFlag
 	if(fWriteVideoFile)
 	  fclose(fWriteVideoFile);
@@ -217,7 +217,7 @@ int CNetClientWebrtcPlayer::PushVideo(uint8_t* pVideoData, uint32_t nDataLength,
 		}
 	}
 #endif
-	nSpsPositionPos = FindSPSPositionPos("H264", pVideoData, nDataLength);
+	//nSpsPositionPos = FindSPSPositionPos("H264", pVideoData, nDataLength);
 
 	if (VideoCaptureManager::getInstance().GetInput(m_szShareMediaURL) && nSpsPositionPos >= 0 )
 	{

@@ -48,13 +48,12 @@ bool  CNetClientFFmpegRecv::GetMediaShareURLFromFileName(char* szRecordFileName,
 
 	string strRecordFileName = szRecordFileName;
 #ifdef OS_System_Windows
-
 #ifdef USE_BOOST
+
 	replace_all(strRecordFileName, "\\", "/");
 #else
 	ABL::replace_all(strRecordFileName, "\\", "/");
 #endif
-
 
 #endif
 	int   nPos;
@@ -161,7 +160,7 @@ CNetClientFFmpegRecv::CNetClientFFmpegRecv(NETHANDLE hServer, NETHANDLE hClient,
 	if (strstr(szIP, "rtsp://") != NULL)
 	{
 		AVDictionary* format_opts = NULL;
-		av_dict_set(&format_opts, "buffer_size", "4924000", 0);
+		av_dict_set(&format_opts, "buffer_size", "4924000", 0);  
 		av_dict_set(&format_opts, "fifo_size", "4924000", 0);
 		av_dict_set(&format_opts, "timeout", "5000000", 0);
 		av_dict_set(&format_opts, "rtsp_transport", "tcp", 0);
@@ -311,6 +310,7 @@ CNetClientFFmpegRecv::CNetClientFFmpegRecv(NETHANDLE hServer, NETHANDLE hClient,
 
 	//确定帧速度
 	mediaCodecInfo.nVideoFrameRate = 25;// video_stream->avg_frame_rate.num / video_stream->avg_frame_rate.den;
+
 	strcpy(m_addStreamProxyStruct.url, szIP);
 
 	nAVType = nOldAVType = AVType_Audio;
@@ -370,7 +370,7 @@ CNetClientFFmpegRecv::~CNetClientFFmpegRecv()
 	{
 		MessageNoticeStruct msgNotice;
 		msgNotice.nClient = NetBaseNetType_HttpClient_on_stream_not_arrive;
-		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_stream_not_arrive\",\"app\":\"%s\",\"stream\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu}", m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream, ABL_MediaServerPort.mediaServerID, netBaseNetType, hParent);
+		sprintf(msgNotice.szMsg, "{\"eventName\":\"on_stream_not_arrive\",\"app\":\"%s\",\"stream\":\"%s\",\"sourceURL\":\"%s\",\"mediaServerId\":\"%s\",\"networkType\":%d,\"key\":%llu}", m_addStreamProxyStruct.app, m_addStreamProxyStruct.stream, m_addStreamProxyStruct.url, ABL_MediaServerPort.mediaServerID, netBaseNetType, hParent);
 		pMessageNoticeFifo.push((unsigned char*)&msgNotice, sizeof(MessageNoticeStruct));
 	}
 
@@ -391,7 +391,7 @@ int CNetClientFFmpegRecv::InputNetData(NETHANDLE nServerHandle, NETHANDLE nClien
   return 0 ;	
 }
 
-int CNetClientFFmpegRecv::ProcessNetData()
+int CNetClientFFmpegRecv::ProcessNetData() 
 {
 	std::lock_guard<std::mutex> lock(readRecordFileInputLock);
 	nRecvDataTimerBySecond = 0;
@@ -411,6 +411,12 @@ int CNetClientFFmpegRecv::ProcessNetData()
 		pMediaSource->m_mediaCodecInfo.nSampleRate = mediaCodecInfo.nSampleRate; //采样频率
 		pMediaSource->m_mediaCodecInfo.nChannels = mediaCodecInfo.nChannels;
 		pMediaSource->m_mediaCodecInfo.nVideoFrameRate = mediaCodecInfo.nVideoFrameRate;
+		pMediaSource->enable_mp4 = strcmp(m_addStreamProxyStruct.enable_mp4, "1") == 0 ? true : false;//记录是否录像
+		pMediaSource->enable_hls = strcmp(m_addStreamProxyStruct.enable_hls, "1") == 0 ? true : false;//记录是否开启hls
+		pMediaSource->fileKeepMaxTime = atoi(m_addStreamProxyStruct.fileKeepMaxTime);
+		pMediaSource->videoFileFormat = atoi(m_addStreamProxyStruct.videoFileFormat);
+		pMediaSource->nG711ConvertAAC = atoi(m_addStreamProxyStruct.G711ConvertAAC);
+
 		if (strcmp(mediaCodecInfo.szAudioName, "AAC") == 0)
 			pMediaSource->m_mediaCodecInfo.nBaseAddAudioTimeStamp = nInputAudioDelay;
 
@@ -423,11 +429,11 @@ int CNetClientFFmpegRecv::ProcessNetData()
 		auto   pParentPtr = GetNetRevcBaseClient(hParent);
 		if (pParentPtr && pParentPtr->bProxySuccessFlag == false)
 		{
-			bProxySuccessFlag = pParentPtr->bProxySuccessFlag = true;
+ 			bProxySuccessFlag = pParentPtr->bProxySuccessFlag = true;
 			pParentPtr->SplitterAppStream(m_szShareMediaURL);
 		}
-}
-
+ 	}
+  
 	if (!bResponseHttpFlag && nReadVideoFrameCount >= 5)
 	{//回复代理拉流请求
 		bResponseHttpFlag = true;
@@ -436,11 +442,11 @@ int CNetClientFFmpegRecv::ProcessNetData()
 	}
 
 	nCurrentDateTime = GetTickCount64();
-	if (m_bPauseFlag == true)
+	if (m_bPauseFlag == true )
 	{
-	  //Sleep(2);
+		  //Sleep(2);
 		std::this_thread::sleep_for(std::chrono::milliseconds(2));
-		RecordReplayThreadPool->InsertIntoTask(nClient);
+ 		RecordReplayThreadPool->InsertIntoTask(nClient);
 		return -1;
 	}
 
@@ -448,32 +454,31 @@ int CNetClientFFmpegRecv::ProcessNetData()
 	{//打开mp4文件后需要等待一段事件，否则读取文件会失败
 		if (nCurrentDateTime - mov_readerTime < nWaitTime)
 		{
-			//Sleep(2);
-			std::this_thread::sleep_for(std::chrono::milliseconds(2));
+			Sleep(2);
 			RecordReplayThreadPool->InsertIntoTask(nClient);
 			return 0;
 		}
 	}
 
-	if (nCurrentDateTime - mov_readerTime >= nWaitTime)
+    if(nCurrentDateTime - mov_readerTime >= nWaitTime)
 	{
-		mov_readerTime = nCurrentDateTime;
-		nReadRet = av_read_frame(pFormatCtx2, packet2);
+	   mov_readerTime = nCurrentDateTime ;
+	   nReadRet = av_read_frame(pFormatCtx2, packet2);
 
-		if (packet2->stream_index == stream_isVideo)
-		{
-			nAVType = AVType_Video;
-			if (bsf_ctx != NULL)
-			{//H264\H265 转换
-				ret1 = av_bsf_send_packet(bsf_ctx, packet2);
-				ret2 = av_bsf_receive_packet(bsf_ctx, packet2);
-			}
-		}
-		else if (packet2->stream_index == stream_isAudio)
-		{
-			nAVType = AVType_Audio;
+	   if (packet2->stream_index == stream_isVideo)
+	   {
+ 		   nAVType = AVType_Video;
+		   if (bsf_ctx != NULL)
+		   {//H264\H265 转换
+			   ret1 = av_bsf_send_packet(bsf_ctx, packet2);
+			   ret2 = av_bsf_receive_packet(bsf_ctx, packet2);
+		   }
+	   }
+	   else if (packet2->stream_index == stream_isAudio)
+	   {
+ 		   nAVType = AVType_Audio;
 
-		}
+	   }
 	}
 
 	if (pMediaSource->bUpdateVideoSpeed == false)
@@ -483,10 +488,10 @@ int CNetClientFFmpegRecv::ProcessNetData()
 		pMediaSource->bUpdateVideoSpeed = true;
 	}
 
-	if (nAVType == AVType_Video && packet2->size > 0)
+	if (nAVType == AVType_Video && packet2->size > 0 )
 	{//读取视频
-		pMediaSource->PushVideo(packet2->data, packet2->size, mediaCodecInfo.szVideoName);
-		nReadVideoFrameCount++;
+   	    pMediaSource->PushVideo(packet2->data, packet2->size,mediaCodecInfo.szVideoName);
+		nReadVideoFrameCount ++;
 		if (((1000 / mediaCodecInfo.nVideoFrameRate)) > 0)
 		{
 #ifdef  OS_System_Windows
@@ -498,45 +503,45 @@ int CNetClientFFmpegRecv::ProcessNetData()
 		else
 			nWaitTime = 1;
 		nRecvDataTimerBySecond = 0;
-	}
-	else if (nAVType == AVType_Audio && packet2->size > 0)
+ 	}
+	else if (nAVType == AVType_Audio && packet2->size > 0 )  
 	{//音频直接读取
-		nWaitTime = 1;
-		if (nAudioFirstPTS == 0)
+		 nWaitTime = 1;
+ 		if (nAudioFirstPTS == 0)
 			nAudioFirstPTS = packet2->pts;
-
+ 
 		if (strcmp(mediaCodecInfo.szAudioName, "AAC") == 0)
 		{
-			if (packet2->size > 0 && packet2->data != NULL)
+ 			if (packet2->size > 0 && packet2->data != NULL)
 			{
 				if (packet2->data[0] == 0xff && packet2->data[1] == 0xf1)
 				{//已经有ff f1 
-					m_audioCacheFifo.push(packet2->data, packet2->size);
+ 					m_audioCacheFifo.push(packet2->data, packet2->size);
 				}
 				else
 				{
-					AddADTSHeadToAAC(packet2->data, packet2->size); //增加ADTS头
+ 					AddADTSHeadToAAC(packet2->data, packet2->size); //增加ADTS头
 #ifdef WriteAACFileFlag
 					fwrite(pAACBufferADTS, 1, packet2->size + 7, fWriteAAC);
 					fflush(fWriteAAC);
 #endif 
-					m_audioCacheFifo.push(pAACBufferADTS, +packet2->size + 7);
-			}
+ 					m_audioCacheFifo.push(pAACBufferADTS, + packet2->size + 7);
+				}
 				//获取AAC音频时间戳增量
 				if (mediaCodecInfo.nBaseAddAudioTimeStamp == 0)
 					mediaCodecInfo.nBaseAddAudioTimeStamp = pMediaSource->m_mediaCodecInfo.nBaseAddAudioTimeStamp;
+			}
 		}
-	}
 		else if (strcmp(mediaCodecInfo.szAudioName, "G711_A") == 0 || strcmp(mediaCodecInfo.szAudioName, "G711_U") == 0)
 		{
 			nInputAudioDelay = (packet2->size / 80) * 10;
 
-			m_audioCacheFifo.push(packet2->data, packet2->size);
+  			m_audioCacheFifo.push(packet2->data, packet2->size);
 
 			//g711 时间戳增量
 			if (mediaCodecInfo.nBaseAddAudioTimeStamp == 0)
 				mediaCodecInfo.nBaseAddAudioTimeStamp = 320;
-		}
+		} 
 	}
 	av_packet_unref(packet2);
 
@@ -544,32 +549,31 @@ int CNetClientFFmpegRecv::ProcessNetData()
 	{//文件读取出错 
 		av_strerror(nReadRet, szFFmpegErrorMsg, sizeof(szFFmpegErrorMsg));
 		WriteLog(Log_Debug, "ProcessNetData 读取完毕 ,nClient = %llu \r\n%s", nClient, szFFmpegErrorMsg);
-		pDisconnectBaseNetFifo.push((unsigned char*)&nClient, sizeof(nClient));
-		return -1;
+	    pDisconnectBaseNetFifo.push((unsigned char*)&nClient,sizeof(nClient));
+	    return -1;
 	}
 	nOldAVType = nAVType;
-	std::this_thread::sleep_for(std::chrono::milliseconds(1));
-	//Sleep(1);
+	Sleep(1);
 
 	//加入音频
-	if (m_audioCacheFifo.GetSize() > 0)
+	if (m_audioCacheFifo.GetSize() > 0 )
 	{
 		nRecvDataTimerBySecond = 0;
-		nInputAudioTime = nCurrentDateTime;
+		nInputAudioTime = nCurrentDateTime ;
 		unsigned char* pData = NULL;
 		int            nLength = 0;
-
-		while ((pData = m_audioCacheFifo.pop(&nLength)) != NULL)
+ 
+		while ((pData = m_audioCacheFifo.pop(&nLength)) != NULL )
 		{
-			if (pData != NULL && nLength > 0)
-				pMediaSource->PushAudio(pData, nLength, mediaCodecInfo.szAudioName, mediaCodecInfo.nChannels, mediaCodecInfo.nSampleRate);
+ 		  if (pData != NULL && nLength > 0)
+ 			pMediaSource->PushAudio(pData, nLength, mediaCodecInfo.szAudioName, mediaCodecInfo.nChannels, mediaCodecInfo.nSampleRate);
 
-			m_audioCacheFifo.pop_front();
+ 		  m_audioCacheFifo.pop_front();
 		}
-	}
+	} 
 
 	RecordReplayThreadPool->InsertIntoTask(nClient);
-	return 0;
+    return 0 ;	
 }
 
 //更新录像回放速度
@@ -606,6 +610,7 @@ bool  CNetClientFFmpegRecv::ReaplyFileSeek(uint64_t nTimestamp)
 
 	bRestoreVideoFrameFlag = bRestoreAudioFrameFlag = true; //因为有拖到播放，需要重新计算已经播放视频，音频帧总数 
 	WriteLog(Log_Debug, "ReaplyFileSeek 拖动播放 ,nClient = %llu ,nTimestamp = %llu ,nRet = %d ", nClient, nTimestamp, nRet);
+	return true;
 }
 
 //追加adts信息头

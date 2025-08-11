@@ -29,6 +29,7 @@ CRecordFileSource::CRecordFileSource(char* app, char* stream)
 	memset(m_stream, 0x00, sizeof(m_stream));
 	memset(m_szShareURL, 0x00, sizeof(m_szShareURL));
  
+	fileKeepMaxTime = ABL_MediaServerPort.fileKeepMaxTime ; 
 	strcpy(m_app, app);
 	strcpy(m_stream, stream);
 	sprintf(m_szShareURL, "/%s/%s", app, stream);
@@ -59,13 +60,14 @@ void CRecordFileSource::Sort()
 }
 
 //修改过期录像文件
-bool  CRecordFileSource::UpdateExpireRecordFile(char* szNewFileName)
+bool  CRecordFileSource::UpdateExpireRecordFile(char* szNewFileName,int* nFileSize)
 {
 	std::lock_guard<std::mutex> lock(RecordFileLock);
 	uint64_t nGetFile;
 	uint64_t nSecond = 0; 
 	char    szDateTime[128] = { 0 };
 	bool    bUpdateFlag = false;
+	*nFileSize = 0;
 
 	if (fileList.size() <= 0 )
 	{
@@ -78,13 +80,21 @@ bool  CRecordFileSource::UpdateExpireRecordFile(char* szNewFileName)
 		nGetFile = fileList.front();
 		sprintf(szDateTime, "%llu", nGetFile);
 		nSecond = GetCurrentSecond() - GetCurrentSecondByTime(szDateTime);
-		if (nSecond > (ABL_MediaServerPort.fileKeepMaxTime * 3600))
+		if (nSecond > (fileKeepMaxTime * 3600))
 		{
 			fileList.pop_front();
 #ifdef OS_System_Windows
 			sprintf(szDeleteFile, "%s%s\\%s\\%s.mp4", ABL_MediaServerPort.recordPath, m_app, m_stream, szDateTime);
+			struct _stat64 fileBuf;
+ 			int error = _stat64(szDeleteFile, &fileBuf);
+			if (error == 0)
+				*nFileSize = fileBuf.st_size;
 #else 
 			sprintf(szDeleteFile, "%s%s/%s/%s.mp4", ABL_MediaServerPort.recordPath, m_app, m_stream, szDateTime);
+			struct stat fileBuf;
+			int error = stat(szDeleteFile, &fileBuf);
+			if (error == 0)
+				*nFileSize = fileBuf.st_size;
 #endif
 			//如果修改失败，回收以后再次修改
 			if (rename(szDeleteFile,szNewFileName) != 0 )
