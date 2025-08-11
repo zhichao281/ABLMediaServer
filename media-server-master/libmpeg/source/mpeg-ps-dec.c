@@ -10,6 +10,7 @@
 #include "mpeg-util.h"
 #include <assert.h>
 #include <string.h>
+#include <stdbool.h>
 #include <errno.h>
 
 #define N_BUFFER_INIT   256
@@ -47,6 +48,7 @@ struct ps_demuxer_t
 
     struct ps_demuxer_notify_t notify;
     void* notify_param;
+    uint32_t ver; // psm notify version
 };
 
 static void ps_demuxer_notify(struct ps_demuxer_t* ps);
@@ -248,8 +250,9 @@ static int ps_demuxer_header(struct ps_demuxer_t* ps, struct mpeg_bits_t* reader
         case PES_SID_PSM:
             n = ps->psm.stream_count;
             r = psm_read(&ps->psm, reader);
-            if (n != ps->psm.stream_count)
+            if (n != ps->psm.stream_count || ps->ver != ps->psm.ver)
                 ps_demuxer_notify(ps); // TODO: check psm stream sid
+            ps->ver = ps->psm.ver;
             break;
 
         case PES_SID_PSD:
@@ -468,6 +471,8 @@ struct ps_demuxer_t* ps_demuxer_create(ps_demuxer_onpacket onpacket, void* param
 
     ps->buffer.ptr = (uint8_t*)(ps + 1);
     ps->buffer.cap = N_BUFFER_INIT;
+
+    ps->ver = 0xFFFFFFFF; // fix: guest stream add stream internal, alway notify on firstly
 	return ps;
 }
 

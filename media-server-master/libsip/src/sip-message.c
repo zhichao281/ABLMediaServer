@@ -1,3 +1,4 @@
+
 #include "sip-message.h"
 #include "sip-header.h"
 #include "sip-dialog.h"
@@ -235,7 +236,13 @@ int sip_message_init2(struct sip_message_t* msg, const char* method, const struc
 	// initialize remote target
 	memmove(&msg->u.c.method, &msg->cseq.method, sizeof(struct cstring_t));
 	//memmove(&msg->u.c.uri, &dialog->remote.target, sizeof(struct sip_uri_t));
+#if defined(SIP_KEEP_DIALOG_REQUET_URI)
+	// same as invite request uri
+	msg->ptr.ptr = sip_uri_clone(msg->ptr.ptr, msg->ptr.end, &msg->u.c.uri, &dialog->remote.uri.uri);
+#else
+	// replace URI with dialog peer contact
 	msg->ptr.ptr = sip_uri_clone(msg->ptr.ptr, msg->ptr.end, &msg->u.c.uri, &dialog->remote.target);
+#endif
 
 	// TODO: Via
 
@@ -567,14 +574,14 @@ static char* sip_message_routers(const struct sip_message_t* msg, char* p, const
 	for (i = strict_router; i < sip_uris_count((struct sip_uris_t*)&msg->routers) && p < end; i++)
 	{
 		if (p < end) p += snprintf(p, end - p, "\r\n%s: ", SIP_HEADER_ROUTE);
-		if (p < end) p += sip_uri_write(sip_uris_get((struct sip_uris_t*)&msg->routers, i), p, end);
+		if (p < end) p += sip_route_write(sip_uris_get((struct sip_uris_t*)&msg->routers, i), p, end);
 	}
 
 	// place the remote target URI into the Route header field as the last value
 	if (strict_router)
 	{
 		if (p < end) p += snprintf(p, end - p, "\r\n%s: ", SIP_HEADER_ROUTE);
-		if (p < end) p += sip_uri_write(&msg->u.c.uri, p, end);
+		if (p < end) p += sip_route_write(&msg->u.c.uri, p, end);
 	}
 
 	return p;
@@ -630,7 +637,7 @@ int sip_message_write(const struct sip_message_t* msg, uint8_t* data, int bytes)
 	for (i = 0; i < sip_uris_count((struct sip_uris_t*)&msg->record_routers); i++)
 	{
 		if (p < end) p += snprintf(p, end - p, "\r\n%s: ", SIP_HEADER_RECORD_ROUTE);
-		if (p < end) p += sip_uri_write(sip_uris_get((struct sip_uris_t*)&msg->record_routers, i), p, end);
+		if (p < end) p += sip_route_write(sip_uris_get((struct sip_uris_t*)&msg->record_routers, i), p, end);
 	}
 
 	// PRACK
@@ -713,7 +720,7 @@ static inline int sip_message_skip_header(const struct cstring_t* name)
 int sip_message_add_header(struct sip_message_t* msg, const char* name, const char* value)
 {
 	int r;
-	struct sip_uri_t uri;
+	//struct sip_uri_t uri;
 	struct sip_param_t header;
 
 	if (!name || !*name)
@@ -758,17 +765,11 @@ int sip_message_add_header(struct sip_message_t* msg, const char* name, const ch
 	}
 	else if (0 == strcasecmp(SIP_HEADER_ROUTE, name))
 	{
-		memset(&uri, 0, sizeof(uri));
-		r = sip_header_uri(header.value.p, header.value.p + header.value.n, &uri);
-		if (0 == r)
-			sip_uris_push(&msg->routers, &uri);
+		r = sip_header_routes(header.value.p, header.value.p + header.value.n, &msg->routers);
 	}
 	else if (0 == strcasecmp(SIP_HEADER_RECORD_ROUTE, name))
 	{
-		memset(&uri, 0, sizeof(uri));
-		r = sip_header_uri(header.value.p, header.value.p + header.value.n, &uri);
-		if (0 == r)
-			sip_uris_push(&msg->record_routers, &uri);
+		r = sip_header_routes(header.value.p, header.value.p + header.value.n, &msg->record_routers);
 	}
 	else if (0 == strcasecmp(SIP_HEADER_RECV_INFO, name))
 	{
