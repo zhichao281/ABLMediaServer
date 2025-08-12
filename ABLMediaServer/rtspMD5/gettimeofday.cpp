@@ -1,3 +1,4 @@
+#ifdef OS_System_Windows
 #include "../stdafx.h"
 #include <time.h>
 #include <windows.h>
@@ -21,3 +22,4 @@ int gettimeofday(struct timeval *tp, void *tzp)
   return (0);
 }
 
+#endif

@@ -2757,7 +2757,9 @@ int  CheckNetRevcBaseClientDisconnect()
 
 	return nDiconnectCount;
 }
-
+#include <arpa/inet.h>   // ntohs, htonl, inet_ntoa
+#include <netinet/in.h>  // sockaddr_in
+#include <sys/socket.h>  // socket functions
 void LIBNET_CALLMETHOD	onaccept(NETHANDLE srvhandle,
 	NETHANDLE clihandle,
 	void* address)
