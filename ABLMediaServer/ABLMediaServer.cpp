@@ -3033,8 +3033,8 @@ void*  ABLMedisServerProcessThread(void* lpVoid)
 		nReConnectStreamProxyTimer ++;
 		nCreateHttpClientTimer ++;
 		DeleteExpireM3u8FileTimer ++ ;
-
-		Sleep(100);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	//	Sleep(100);
 	}
  
   	FillNetRevcBaseClientFifo();//把所有对象装入链表，准备删除
@@ -3059,7 +3059,9 @@ void*  ABLMedisServerProcessThread(void* lpVoid)
 		}
 
 		pDisconnectBaseNetFifo.pop_front();
-		Sleep(5);
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		//Sleep(5);
 	}
 
 	//快速删除媒体源
@@ -3148,8 +3150,8 @@ void*  ABLMedisServerFastDeleteThread(void* lpVoid)
 
 			pDisconnectMediaSource.pop_front();
 		}
- 
-		Sleep(20);
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		//Sleep(20);
 	}
 	return 0;
 }
@@ -3626,7 +3628,8 @@ ABL_Restart:
 	if (ABL_ConfigFile.LoadFile(szConfigFileName) != SI_OK)
 	{
 		WriteLog(Log_Error, "没有找到配置文件 ：%s ", szConfigFileName);
-		Sleep(3000);
+		//Sleep(3000);
+		std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 		return -1;
 	}
 
