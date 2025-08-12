@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.0)
-
-project(flv LANGUAGES C CXX)
+project(rtp LANGUAGES C CXX)
 
 # 使用现代目标式 CMake 替代传统变量
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 
 # 默认隐藏符号（对应 -fvisibility=hidden）
 set(CMAKE_C_VISIBILITY_PRESET hidden)
@@ -42,15 +42,20 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-# 源文件收集（对应 SOURCE_FILES）
+# 更安全的源文件收集方式（推荐显式列出，这里提供改进版 GLOB）
 file(GLOB_RECURSE SOURCE_FILES 
-    "source/*.cpp"
     "source/*.c"
+    "source/*.cpp"
+    "payload/*.c"
+    "payload/*.cpp"
+    "rtpext/*.c"
+    "rtpext/*.cpp"
 )
 
 # 设置静态库（显式声明比变量更清晰）
 add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
 
+#
 
 # 现代头文件包含方式（PUBLIC 表示会传递给依赖此库的目标）
 target_include_directories(${PROJECT_NAME}

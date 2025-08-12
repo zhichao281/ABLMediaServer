@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(flv LANGUAGES C CXX)
+project(mov LANGUAGES C CXX)
 
 # 使用现代目标式 CMake 替代传统变量
 set(CMAKE_C_STANDARD 11)

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(mpeg)
+project(hls)
 
 # 设置库类型 (对应 OUTTYPE = 2)
 set(LIB_TYPE STATIC)  # STATIC 对应静态库(.a)

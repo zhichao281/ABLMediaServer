@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 project(ABLMediaServer)
 # 判断是否启用了 USE_BOOST 选项
 option(USE_BOOST "Use Boost library" OFF)
-option(USE_WEBRTC "Use WEBRTC library" ON)
+option(USE_WEBRTC "Use WEBRTC library" OFF)
 
 
 
