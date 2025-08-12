@@ -1,25 +1,64 @@
 cmake_minimum_required(VERSION 3.0)
-project(media-server-master)
+project(media-server-master
+    VERSION 1.0.0
+    LANGUAGES C CXX
+)
+
+# 设置默认构建类型（如果未指定）
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose build type: Debug or Release" FORCE)
+endif()
 
 
-# 设置所有子项目的静态库输出目录
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_PROCESSOR})
-# 如果是动态库，可以额外设置 LIBRARY_OUTPUT_DIRECTORY
-# set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_PROCESSOR})
+# 输出目录设置（支持多平台）
+set(LIBRARY_OUTPUT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_SYSTEM_PROCESSOR}" CACHE PATH "Library output directory")
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_ROOT})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_ROOT})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_ROOT})
+
+# 创建输出目录（如果不存在）
+file(MAKE_DIRECTORY ${LIBRARY_OUTPUT_ROOT})
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Output directory: ${LIBRARY_OUTPUT_ROOT}")
 
 
 
-message("CMAKE_ARCHIVE_OUTPUT_DIRECTORY: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+# 添加子项目（有选择性地添加）
+option(BUILD_LIBFLV "Build FLV library" ON)
+option(BUILD_LIBHLS "Build HLS library" ON)
+option(BUILD_LIBMOV "Build MOV library" ON)
+option(BUILD_LIBMPEG "Build MPEG library" ON)
+option(BUILD_LIBRTMP "Build RTMP library" ON)
+option(BUILD_LIBRTP "Build RTP library" ON)
 
-# 添加所有子目录
-#add_subdirectory(libdash)
-add_subdirectory(libflv)
-add_subdirectory(libhls)
-#add_subdirectory(libmkv)
-add_subdirectory(libmov)
-add_subdirectory(libmpeg)
-add_subdirectory(librtmp)
-add_subdirectory(librtp)
-#add_subdirectory(librtsp)
-#add_subdirectory(libsip)
 
+if(BUILD_LIBFLV)
+    add_subdirectory(libflv)
+endif()
+
+if(BUILD_LIBHLS)
+    add_subdirectory(libhls)
+endif()
+
+if(BUILD_LIBMOV)
+    add_subdirectory(libmov)
+endif()
+
+if(BUILD_LIBMPEG)
+    add_subdirectory(libmpeg)
+endif()
+
+if(BUILD_LIBRTMP)
+    add_subdirectory(librtmp)
+endif()
+
+if(BUILD_LIBRTP)
+    add_subdirectory(librtp)
+endif()
+
+# 安装规则（可选）
+install(DIRECTORY ${LIBRARY_OUTPUT_ROOT}/ 
+    DESTINATION lib
+    FILES_MATCHING PATTERN "*.a" PATTERN "*.so" PATTERN "*.dll"
+)
