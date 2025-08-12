@@ -153,7 +153,12 @@ uint8_t* AMFWriteDate(uint8_t* ptr, const uint8_t* end, double milliseconds, int
 
     AMFWriteDouble(ptr, end, milliseconds);
     *ptr = AMF_DATE; // rewrite to date
-    return AMFWriteInt16(ptr + 8, end, timezone);
+    return AMFWriteInt16(ptr + 9, end, timezone);
+}
+
+uint8_t* AMFWriteNamed(uint8_t* ptr, const uint8_t* end, const char* name, size_t length)
+{
+	return AMFWriteString16(ptr, end, name, length);
 }
 
 uint8_t* AMFWriteNamedBoolean(uint8_t* ptr, const uint8_t* end, const char* name, size_t length, uint8_t value)
@@ -273,6 +278,10 @@ const uint8_t* AMFReadString(const uint8_t* ptr, const uint8_t* end, int isLongS
 	{
 		memcpy(string, ptr, len);
 		string[len] = 0;
+	}
+	else if(string && length > 0)
+	{
+		string[0] = 0; // fix: string buffer access overflow
 	}
 	return ptr + len;
 }

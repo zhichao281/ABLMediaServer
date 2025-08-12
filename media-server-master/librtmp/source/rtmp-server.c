@@ -441,6 +441,9 @@ struct rtmp_server_t* rtmp_server_create(void* param, const struct rtmp_server_h
 	ctx->rtmp.out_packets[RTMP_CHANNEL_AUDIO].header.cid = RTMP_CHANNEL_AUDIO;
 	ctx->rtmp.out_packets[RTMP_CHANNEL_VIDEO].header.cid = RTMP_CHANNEL_VIDEO;
 	ctx->rtmp.out_packets[RTMP_CHANNEL_DATA].header.cid = RTMP_CHANNEL_DATA;
+
+	ctx->rtmp.chunk_write_header.ptr = ctx->rtmp.chunk_write_header.bufer;
+	ctx->rtmp.chunk_write_header.capacity = sizeof(ctx->rtmp.chunk_write_header.bufer);
 	return ctx;
 }
 
@@ -453,6 +456,12 @@ void rtmp_server_destroy(struct rtmp_server_t* ctx)
 		assert(NULL == ctx->rtmp.out_packets[i].payload);
 		if (ctx->rtmp.in_packets[i].payload)
 			free(ctx->rtmp.in_packets[i].payload);
+	}
+
+	if (ctx->rtmp.chunk_write_header.ptr && ctx->rtmp.chunk_write_header.ptr != ctx->rtmp.chunk_write_header.bufer)
+	{
+		free(ctx->rtmp.chunk_write_header.ptr);
+		ctx->rtmp.chunk_write_header.capacity = 0;
 	}
 
 	free(ctx);
@@ -528,7 +537,15 @@ int rtmp_server_input(struct rtmp_server_t* ctx, const uint8_t* data, size_t byt
 
 int rtmp_server_start(rtmp_server_t* rtmp, int r, const char* msg)
 {
-	if (RTMP_SERVER_ONPLAY == rtmp->start.play)
+	if (RTMP_SERVER_START_RECONNECT == r)
+	{
+		if((unsigned int)rtmp->info.capsEx & RTMP_CAPSEX_RECONNECT)
+			r = (int)(rtmp_netstream_onreconnect(rtmp->payload, sizeof(rtmp->payload), 0, msg, "") - rtmp->payload);
+		else
+			r = (int)(rtmp_netstream_onconnect_rejected(rtmp->payload, sizeof(rtmp->payload), 0, msg, "") - rtmp->payload);
+		r = rtmp_server_send_control(&rtmp->rtmp, rtmp->payload, r, rtmp->stream_id);
+	}
+	else if (RTMP_SERVER_ONPLAY == rtmp->start.play)
 	{
 		if (0 == r)
 		{

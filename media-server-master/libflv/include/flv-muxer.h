@@ -23,6 +23,9 @@ void flv_muxer_destroy(flv_muxer_t* muxer);
 /// re-create AAC/AVC sequence header
 int flv_muxer_reset(flv_muxer_t* muxer);
 
+/// @param[in] enable muxer h264 with enhance rtmp
+void flv_muxer_set_enhanced_rtmp(flv_muxer_t* muxer, int enable);
+
 /// @param[in] data AAC ADTS stream, 0xFFF15C40011FFC...
 int flv_muxer_aac(flv_muxer_t* muxer, const void* data, size_t bytes, uint32_t pts, uint32_t dts);
 
@@ -35,6 +38,9 @@ int flv_muxer_g711u(flv_muxer_t* muxer, const void* data, size_t bytes, uint32_t
 
 /// @param[in] data opus stream, first opus head, then opus samples
 int flv_muxer_opus(flv_muxer_t* muxer, const void* data, size_t bytes, uint32_t pts, uint32_t dts);
+
+int flv_muxer_ac3(flv_muxer_t* muxer, const void* data, size_t bytes, uint32_t pts, uint32_t dts);
+int flv_muxer_eac3(flv_muxer_t* muxer, const void* data, size_t bytes, uint32_t pts, uint32_t dts);
 
 /// @param[in] data h.264 annexb bitstream: H.264 start code + H.264 NALU, 0x0000000168...
 int flv_muxer_avc(flv_muxer_t* muxer, const void* data, size_t bytes, uint32_t pts, uint32_t dts);

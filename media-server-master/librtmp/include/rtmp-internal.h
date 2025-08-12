@@ -90,6 +90,13 @@ struct rtmp_parser_t
 	struct rtmp_packet_t* pkt;
 };
 
+struct rtmp_chunk_write_header_t
+{
+	uint8_t bufer[MAX_CHUNK_HEADER + 5 * 20]; // 1-full chunk header + 20-type3 chunk header(with timestamp)
+	uint8_t* ptr;
+	uint32_t capacity;
+};
+
 struct rtmp_t
 {
 	uint32_t in_chunk_size; // read from network
@@ -107,6 +114,8 @@ struct rtmp_t
 	struct rtmp_packet_t in_packets[N_CHUNK_STREAM]; // receive from network
 	struct rtmp_packet_t out_packets[N_CHUNK_STREAM]; // send to network
 	struct rtmp_parser_t parser;
+
+	struct rtmp_chunk_write_header_t chunk_write_header; // rtmp_chunk_write only
 
 	void* param;
 
@@ -143,6 +152,13 @@ struct rtmp_t
         int (*oneof)(void* param, uint32_t stream_id); // EOF event
 		int (*onping)(void* param, uint32_t stream_id); // send pong
 		int (*onbandwidth)(void* param); // send window acknowledgement size
+
+		// enhanced rtmp v2
+		// 1. rtmp://foo.mydomain.com:1935/realtimeapp
+		// 2. rtmp://127.0.0.1/realtimeapp
+		// 3. //192.0.2.0/realtimeapp
+		// 4. / realtimeapp
+		int (*onreconnect)(void* param, const char* tcurl, const char* descritpion);
 	} client;
 };
 
