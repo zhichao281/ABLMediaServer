@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(media-server-master
     VERSION 1.0.0
     LANGUAGES C CXX
+     DESCRIPTION "media-server-master"
 )
 
 # 设置默认构建类型（如果未指定）

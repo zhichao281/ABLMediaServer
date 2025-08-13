@@ -1,0 +1,5 @@
+2020-09-09
+1  把rtp_session 类 的两个文件，修改为类名 rtp_session_packet ，所涉及到的地方都做相应修改，否则会
+   和 rtpdepacket 库有冲突，两个库一起调用时会报错。
+   
+   

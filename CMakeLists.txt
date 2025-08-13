@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(ABLMediaServer
     VERSION 1.0.0
+     DESCRIPTION "ABLMediaServer"
     LANGUAGES C CXX
 )
 
@@ -11,10 +12,6 @@ project(ABLMediaServer
 option(USE_BOOST "Use Boost library" OFF)
 option(USE_WEBRTC "Use WEBRTC library" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
-
-
-
-
 
 #=============================
 # 构建类型（默认 Release）
@@ -45,7 +42,7 @@ message(STATUS "CMAKE_SYSTEM_PROCESSOR:${CMAKE_SYSTEM_PROCESSOR}  Target archite
 #=============================
 # 输出与依赖目录
 #=============================
-set(OUTPUT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/bin/${ARCH_DIR}")
+set(OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin/${ARCH_DIR}")
 set(MEDIA_SERVER_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/media-server-master/${CMAKE_SYSTEM_PROCESSOR}")
 
 #=============================
@@ -103,7 +100,7 @@ include_directories(${PROJECT_INCLUDE_DIRS})
 link_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${ARCH_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd/faac-1.30/lib/${ARCH_DIR}
-    ${OUTPUT_ROOT}
+    ${OUTPUT_DIR}
     ${MEDIA_SERVER_LIB_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/XHNetSDK/openssl/lib/${ARCH_DIR}
 )
@@ -114,7 +111,34 @@ link_directories(
 if(USE_WEBRTC)
     add_subdirectory(simple-media-server)
 endif()
+
 add_subdirectory(XHNetSDK)
+set_target_properties(XHNetSDK  PROPERTIES
+    # 让运行时查找当前目录
+    BUILD_RPATH "\$ORIGIN"
+    INSTALL_RPATH "\$ORIGIN"
+    BUILD_WITH_INSTALL_RPATH TRUE  # 让 INSTALL_RPATH 在构建时也生效
+    SKIP_BUILD_RPATH FALSE         # 不跳过构建时的 RPATH
+    LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+    ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+    RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+)
+
+add_subdirectory(packet)
+set_target_properties(packet  PROPERTIES
+    # 让运行时查找当前目录
+    BUILD_RPATH "\$ORIGIN"
+    INSTALL_RPATH "\$ORIGIN"
+    BUILD_WITH_INSTALL_RPATH TRUE  # 让 INSTALL_RPATH 在构建时也生效
+    SKIP_BUILD_RPATH FALSE         # 不跳过构建时的 RPATH
+    LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+    ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+    RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+)
+
+
+
+
 add_subdirectory(media-server-master)
 
 #=============================
@@ -135,14 +159,16 @@ list(FILTER ABL_SRCS EXCLUDE REGEX ".*/test\\.cpp$")
 #=============================
 add_executable(${PROJECT_NAME} ${ABL_SRCS})
 
-
-
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_ROOT}
-    LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_ROOT}
-    RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_ROOT}
+set_target_properties(${PROJECT_NAME}  PROPERTIES
+    # 让运行时查找当前目录
+    BUILD_RPATH "\$ORIGIN"
+    INSTALL_RPATH "\$ORIGIN"
+    BUILD_WITH_INSTALL_RPATH TRUE  # 让 INSTALL_RPATH 在构建时也生效
+    SKIP_BUILD_RPATH FALSE         # 不跳过构建时的 RPATH
+    LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+    ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+    RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}
 )
-
 
 #设置RPATH路径
 set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN")
@@ -162,23 +188,28 @@ target_link_libraries(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
     faac
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${ARCH_DIR}/libavcodec.so
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${ARCH_DIR}/libavutil.so
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${ARCH_DIR}/libavformat.so
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${ARCH_DIR}/libswscale.so   
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${ARCH_DIR}/libavfilter.so   
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${ARCH_DIR}/libpostproc.so   
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${ARCH_DIR}/libswresample.so    
+    avcodec
+    avutil
+    avformat
+    swscale
+    avfilter
+    postproc
+    swresample   
     pthread
     XHNetSDK  # 链接 XHNetSDK 库
     PsDemux
     PsMux
     RtpDepacket
     RtpPacket
-    webrtc-streamer
     dl
 )
 
+if(USE_WEBRTC)
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+    webrtc-streamer   
+)
+endif()
 
 # 如果启用了 USE_BOOST 选项，则链接 Boost 库文件
 if(USE_BOOST)
@@ -193,10 +224,6 @@ if(USE_BOOST)
         boost_chrono
         boost_atomic
     )
-endif()
-
-if(USE_WEBRTC)
-    target_link_libraries(${PROJECT_NAME} PRIVATE webrtc-streamer)
 endif()
 
 #=============================

@@ -36,9 +36,7 @@ udp_session::~udp_session(void)
 		delete[] m_readbuff;
 		m_readbuff = NULL;
 	}
-#ifndef _WIN32
 	malloc_trim(0);
-#endif
 }
 
 int32_t udp_session::init(const int8_t* localip,
@@ -223,11 +221,7 @@ int32_t udp_session::send_to(uint8_t* data,
 	if (m_hasconnected)
 	{
 		m_socket.send(boost::asio::buffer(data, datasize), 0, ec);
-#ifndef WIN32
-		std::this_thread::sleep_for(std::chrono::microseconds(10));
-#endif // !WIN32
-
-		
+		usleep(10);
 	}
 	else
 	{
@@ -236,9 +230,7 @@ int32_t udp_session::send_to(uint8_t* data,
 		m_writeep.address(boost::asio::ip::address::from_string(inet_ntoa(addr->sin_addr)));
 		m_writeep.port(ntohs(addr->sin_port));
 		m_socket.send_to(boost::asio::buffer(data, datasize), m_writeep, 0, ec);
-#ifndef WIN32
-		std::this_thread::sleep_for(std::chrono::microseconds(10));
-#endif // !WIN32
+		usleep(10);
 	}
 
 	if (ec)
@@ -260,6 +252,7 @@ int32_t	udp_session::close()
 	{
 		boost::system::error_code ec;
 		m_socket.close(ec);
+		m_socket.release(ec);
 	}
 
 	return e_libnet_err_noerror;
@@ -380,7 +373,7 @@ void udp_session::handle_read(const boost::system::error_code& ec,
 		return;
 	}
 
-	if (!ec || ec == boost::asio::error::message_size)
+	if (!ec || ec.value() == 10061 || ec.value() == 10054 || ec == boost::asio::error::message_size)
 	{
 		if (m_start)
 		{
@@ -433,9 +426,9 @@ void udp_session::handle_read(const boost::system::error_code& ec,
 		}
 	}
 	else
-	{// 有时候会触发 10061 这个错误，造成udp关闭，不需要在这里调用关闭
-		//close();
-		//udp_session_manager_singleton::get_mutable_instance().pop_udp_session(get_id());
+	{
+		close();
+		udp_session_manager_singleton::get_mutable_instance().pop_udp_session(get_id());
 	}
 }
 
@@ -928,7 +921,7 @@ void udp_session::handle_read(const asio::error_code& ec,
 		return;
 	}
 
-	if (!ec || ec == asio::error::message_size)
+	if (!ec || ec.value() == 10061 || ec.value() == 10054 || ec == asio::error::message_size)
 	{
 		if (m_start)
 		{
@@ -982,8 +975,8 @@ void udp_session::handle_read(const asio::error_code& ec,
 	}
 	else
 	{// 有时候会触发 10061 这个错误，造成udp关闭，不需要在这里调用关闭
-		//close();
-		//udp_session_manager_singleton::get_mutable_instance().pop_udp_session(get_id());
+		close();
+		udp_session_manager::getInstance().pop_udp_session(get_id());
 	}
 }
 
