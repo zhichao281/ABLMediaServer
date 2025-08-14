@@ -1,25 +1,30 @@
 #include <unordered_set>
-#include <mutex>
+
 #include <memory>
-#include <cstring>
+#include <mutex>
+
+
 #include "common.h"
 #include "rtp_packet.h"
 
 std::unordered_set<uint32_t> g_identifier_set_rtppacket;
 
 
-std::mutex g_identifier_mutex;
+std::mutex g_identifier_mutex_rtppacket;
 
 
 uint32_t generate_identifier_rtppacket()
 {
-	std::lock_guard<std::mutex> lg(g_identifier_mutex);
+
+	std::lock_guard<std::mutex> lg(g_identifier_mutex_rtppacket);
+
 
 	static uint32_t s_id = 1;
+	std::unordered_set<uint32_t>::iterator it;
 
 	for (;;)
 	{
-		auto it = g_identifier_set_rtppacket.find(s_id);
+		it = g_identifier_set_rtppacket.find(s_id);
 		if ((g_identifier_set_rtppacket.end() == it) && (0 != s_id))
 		{
 			auto ret = g_identifier_set_rtppacket.insert(s_id);
@@ -40,8 +45,7 @@ uint32_t generate_identifier_rtppacket()
 void recycle_identifier_rtppacket(uint32_t id)
 {
 
-	std::lock_guard<std::mutex> lg(g_identifier_mutex);
-
+	std::lock_guard<std::mutex> lg(g_identifier_mutex_rtppacket);
 	auto it = g_identifier_set_rtppacket.find(id);
 	if (g_identifier_set_rtppacket.end() != it)
 	{
@@ -49,7 +53,7 @@ void recycle_identifier_rtppacket(uint32_t id)
 	}
 }
 
-int32_t get_mediatype(int32_t st)
+int32_t get_mediatype_rtppacket(int32_t st)
 {
 	int32_t mt = e_rtppkt_mt_unknown;
 

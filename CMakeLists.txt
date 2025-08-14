@@ -26,6 +26,7 @@ set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-fPIC")
 
 
 
+
 #=============================
 # 架构判断  # 根据不同架构设置输出目录和链接目录
 #=============================
@@ -48,13 +49,10 @@ set(MEDIA_SERVER_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/media-server-master/${CMAK
 #=============================
 # RPATH 设置
 #=============================
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
-if(UNIX AND NOT APPLE)
-    set(CMAKE_INSTALL_RPATH "\$ORIGIN:\$ORIGIN/../lib")
-elseif(APPLE)
-    set(CMAKE_INSTALL_RPATH "@loader_path;@loader_path/../lib")
-endif()
+set(CMAKE_INSTALL_RPATH "\$ORIGIN")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)  # 构建时也使用 INSTALL_RPATH
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)  # 添加链接路径到 RPATH
 
 #=============================
 # 宏定义
@@ -125,19 +123,6 @@ set_target_properties(XHNetSDK  PROPERTIES
 )
 
 add_subdirectory(packet)
-set_target_properties(packet  PROPERTIES
-    # 让运行时查找当前目录
-    BUILD_RPATH "\$ORIGIN"
-    INSTALL_RPATH "\$ORIGIN"
-    BUILD_WITH_INSTALL_RPATH TRUE  # 让 INSTALL_RPATH 在构建时也生效
-    SKIP_BUILD_RPATH FALSE         # 不跳过构建时的 RPATH
-    LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}
-    ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}
-    RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}
-)
-
-
-
 
 add_subdirectory(media-server-master)
 
@@ -193,7 +178,7 @@ target_link_libraries(${PROJECT_NAME}
     avformat
     swscale
     avfilter
-    postproc
+ #   postproc
     swresample   
     pthread
     XHNetSDK  # 链接 XHNetSDK 库
