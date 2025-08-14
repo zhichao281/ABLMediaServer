@@ -9,7 +9,7 @@
 #include "common.h"
 
 rtp_session::rtp_session(rtp_depacket_callback cb, void* userdata) 
-	: m_id(generate_identifier())
+	: m_id(generate_identifier_rtpdepacket())
 	, m_cb(cb)
 	, m_userdata(userdata) 
 {
@@ -18,7 +18,7 @@ rtp_session::rtp_session(rtp_depacket_callback cb, void* userdata)
 
 rtp_session::~rtp_session()
 {
-	recycle_identifier(m_id);
+	recycle_identifier_rtpdepacket(m_id);
 #ifndef _WIN32
 	malloc_trim(0);
 #endif // _WIN32
