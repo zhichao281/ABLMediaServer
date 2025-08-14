@@ -20,12 +20,8 @@ set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose build type: Debug or Release" 
 #set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O0 -Wall")
 
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC")
-
-set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-fPIC")
-
-
-
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 
 #=============================
 # 架构判断  # 根据不同架构设置输出目录和链接目录
@@ -59,7 +55,6 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)  # 添加链接路径到 RPATH
 #=============================
 add_compile_definitions(FFMPEG6)
 
-
 #=============================
 # Boost
 #=============================
@@ -71,8 +66,6 @@ if(USE_BOOST)
     include_directories(${BOOST_INCLUDEDIR})
     link_directories(${BOOST_LIBRARYDIR})
 endif()
-
-
 
 #=============================
 # 包含目录
@@ -163,7 +156,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN")
 # 链接需要的库文件
 #=============================
 target_link_libraries(${PROJECT_NAME}
-    PUBLIC
+    PRIVATE
     rtmp
     flv
     mpeg
@@ -171,7 +164,7 @@ target_link_libraries(${PROJECT_NAME}
     mov
     rtp)
 target_link_libraries(${PROJECT_NAME}
-    PUBLIC
+    PRIVATE  
     faac
     avcodec
     avutil
@@ -179,19 +172,19 @@ target_link_libraries(${PROJECT_NAME}
     swscale
     avfilter
    # postproc
-    swresample   
-    pthread
+    swresample  
     XHNetSDK  # 链接 XHNetSDK 库
     PsDemux
     PsMux
     RtpDepacket
     RtpPacket
+    pthread
     dl
 )
 
 if(USE_WEBRTC)
 target_link_libraries(${PROJECT_NAME}
-    PUBLIC
+    PRIVATE
     webrtc-streamer   
 )
 endif()
@@ -199,7 +192,7 @@ endif()
 # 如果启用了 USE_BOOST 选项，则链接 Boost 库文件
 if(USE_BOOST)
     target_link_libraries(${PROJECT_NAME}
-        PUBLIC
+        PRIVATE
         boost_system
         boost_thread
         boost_log

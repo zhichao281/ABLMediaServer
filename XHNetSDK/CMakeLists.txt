@@ -29,10 +29,7 @@ option(BUILD_XHNetSDK_STATIC "Build using static libraries" OFF)
 
 option(BUILD_OPENSSL "Build SSL" ON)
 option(USE_OPENSSL "use SSL" ON)
-option(USE_XHNetSDK_BOOST "Use  XHNetSDK Boost library" ON)
-
-
-
+option(USE_XHNetSDK_BOOST "Use  XHNetSDK Boost " OFF)
 
 add_definitions(-DASIO_STANDALONE)
 
@@ -42,29 +39,27 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/asio/include/asio
         ${CMAKE_CURRENT_SOURCE_DIR}/thread_pool
   )
-
-
-
+  
 # 设置项目的目标
-#FILE(GLOB XHNetSDK_SRC_LIST
- # ${CMAKE_CURRENT_SOURCE_DIR}/*.*
-  #${CMAKE_CURRENT_SOURCE_DIR}/thread_pool/*.* 
-#)
-# 源文件列表
-set(XHNetSDK_SRC_LIST
-    client.cpp
-    client_manager.cpp
-    identifier_generator.cpp
-    io_context_pool.cpp
-    libnet.cpp
-    server.cpp
-    server_manager.cpp
-    udp_session.cpp
-    udp_session_manager.cpp
-    circular_buffer.cpp
-    MediaFifo.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/thread_pool/thread_pool.cpp
+FILE(GLOB XHNetSDK_SRC_LIST
+  ${CMAKE_CURRENT_SOURCE_DIR}/*.*
+  ${CMAKE_CURRENT_SOURCE_DIR}/thread_pool/*.* 
 )
+# 源文件列表
+#set(XHNetSDK_SRC_LIST
+ #   client.cpp
+ #   client_manager.cpp
+ #   identifier_generator.cpp
+ #   io_context_pool.cpp
+ #   libnet.cpp
+ #   server.cpp
+ #   server_manager.cpp
+ #   udp_session.cpp
+ #   udp_session_manager.cpp
+ #   circular_buffer.cpp
+ #   MediaFifo.cpp
+ #   ${CMAKE_CURRENT_SOURCE_DIR}/thread_pool/thread_pool.cpp
+#)
 
 
 # 设置安装路径
