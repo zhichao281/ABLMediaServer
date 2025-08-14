@@ -1,5 +1,4 @@
-#ifndef _PS_MUX_DEMUX_PS_DEF_H_
-#define _PS_MUX_DEMUX_PS_DEF_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -490,4 +489,3 @@ typedef struct _ps_pes
 
 #pragma pack(pop)
 
-#endif

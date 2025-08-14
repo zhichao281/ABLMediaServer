@@ -1,10 +1,11 @@
-#ifndef _PS_MUX_DEMUX_MUX_H_
-#define _PS_MUX_DEMUX_MUX_H_
+#pragma once
 
 #include <vector>
 #include <stdint.h>
 #include <memory>
 #include <unordered_map>
+#include <string.h> // »ò #include <cstring>
+
 #include "ps_mux.h"
 #include "ps_def.h"
 
@@ -68,4 +69,3 @@ private:
 };
 typedef std::shared_ptr<ps_mux> ps_mux_ptr;
 
-#endif

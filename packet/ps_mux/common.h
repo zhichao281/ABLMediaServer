@@ -1,8 +1,6 @@
-#ifndef _PS_MUX_DEMUX_MUX_COMMON_H_
-#define _PS_MUX_DEMUX_MUX_COMMON_H_
-
+#pragma once
 #include <stdint.h>
-
+#include <cstring>
 /***************H264***************/
 enum e_h264_nalu_type
 {
@@ -214,4 +212,3 @@ int32_t h265frametype(uint8_t* data, uint32_t datasize);
 int32_t svacframetype(uint8_t* data, uint32_t datasize);
 */
 
-#endif 

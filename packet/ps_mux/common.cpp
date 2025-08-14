@@ -1,20 +1,18 @@
 #include <unordered_set>
 #include <memory>
 #include <mutex>
-#include <cstring>
 #include "common.h"
 #include "ps_mux.h"
 
 std::unordered_set<uint32_t> g_identifier_set;
 
+
 std::mutex g_identifier_mutex;
+
 
 uint32_t generate_identifier()
 {
-
 	std::lock_guard<std::mutex> lg(g_identifier_mutex);
-
-
 
 	static uint32_t s_id = 1;
 	std::unordered_set<uint32_t>::iterator it;
@@ -42,6 +40,7 @@ uint32_t generate_identifier()
 void recycle_identifier(uint32_t id)
 {
 	std::lock_guard<std::mutex> lg(g_identifier_mutex);
+
 	auto it = g_identifier_set.find(id);
 	if (g_identifier_set.end() != it)
 	{
@@ -52,6 +51,7 @@ void recycle_identifier(uint32_t id)
 int32_t get_mediatype(int32_t st)
 {
 	int32_t mt = e_psmux_mt_unknown;
+
 	switch (st)
 	{
 
