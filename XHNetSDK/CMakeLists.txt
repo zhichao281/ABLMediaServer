@@ -133,7 +133,6 @@ if(USE_OPENSSL)
 endif()
 
 if(USE_XHNetSDK_BOOST)
-  link_directories("/home/server/ABLMediaServer/src/bin/linux86")
     target_link_libraries(${PROJECT_NAME}
         PRIVATE
         boost_system
