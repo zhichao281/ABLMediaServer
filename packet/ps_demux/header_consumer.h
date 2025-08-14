@@ -1,5 +1,4 @@
-#ifndef _PS_MUX_DEMUX_HEADER_CONSUMER_H_
-#define _PS_MUX_DEMUX_HEADER_CONSUMER_H_
+#pragma once
 
 #include "consumer_base.h"
 
@@ -17,4 +16,3 @@ public:
 	virtual void clean();
 };
 
-#endif

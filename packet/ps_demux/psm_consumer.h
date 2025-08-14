@@ -1,7 +1,7 @@
-#ifndef _PS_MUX_DEMUX_PSM_CONSUMER_H_
-#define _PS_MUX_DEMUX_PSM_CONSUMER_H_
+#pragma once
 
 #include <vector>
+#include <memory>
 #include "consumer_base.h"
 #include "ps_def.h"
 
@@ -24,4 +24,3 @@ private:
 };
 typedef std::shared_ptr<psm_consumer> psm_consumer_ptr;
 
-#endif

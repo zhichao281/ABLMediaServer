@@ -11,7 +11,7 @@
 #include <malloc.h>
 
 ps_demux::ps_demux(ps_demux_callback cb, void* userdata, int32_t duxmode)
-	: m_id(generate_identifier())
+	: m_id(generate_identifier_psdemux())
 	, m_cb(cb)
 	, m_userdata(userdata)
 	, m_duxmode(duxmode)
@@ -21,10 +21,11 @@ ps_demux::ps_demux(ps_demux_callback cb, void* userdata, int32_t duxmode)
 
 ps_demux::~ps_demux()
 {
-	recycle_identifier(m_id);
+	recycle_identifier_psdemux(m_id);
 #ifndef _WIN32
 	malloc_trim(0);
 #endif // _WIN32
+
 }
 
 int32_t ps_demux::handle(uint8_t* data, uint32_t datasize)

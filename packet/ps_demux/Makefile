@@ -1,3 +1,6 @@
+INCLUDES = -I../boost/include
+LIBS = -L../boost/lib -lboost_system -lboost_thread -lboost_log -lboost_regex -lboost_filesystem -lboost_date_time -lboost_chrono -lboost_atomic 
+
 libPsDemux.so:common.o demux.o demux_manager.o header_consumer.o pes_consumer.o pes_nonmedia_consumer.o ps_demux.o psm_consumer.o sysheader_consumer.o
 	g++ -shared -fvisibility=hidden -fPIC -o libPsDemux.so common.o demux.o demux_manager.o header_consumer.o pes_consumer.o pes_nonmedia_consumer.o ps_demux.o psm_consumer.o sysheader_consumer.o $(LIBS) 
 common.o:common.cpp
