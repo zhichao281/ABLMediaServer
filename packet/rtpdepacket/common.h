@@ -1,8 +1,8 @@
 #pragma once
 
 #include <stdint.h>
+#include <cstring>
+uint32_t generate_identifier_rtpdepacket();
 
-uint32_t generate_identifier();
-
-void recycle_identifier(uint32_t id);
+void recycle_identifier_rtpdepacket(uint32_t id);
 

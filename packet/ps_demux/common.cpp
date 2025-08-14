@@ -10,7 +10,7 @@ std::mutex g_identifier_mutex_psDemux;
 
 
 
-uint32_t generate_identifier()
+uint32_t generate_identifier_psdemux()
 {
 	std::lock_guard<std::mutex> lg(g_identifier_mutex_psDemux);
 	static uint32_t s_id = 1;
@@ -34,7 +34,7 @@ uint32_t generate_identifier()
 	return s_id++;
 }
 
-void recycle_identifier(uint32_t id)
+void recycle_identifier_psdemux(uint32_t id)
 {
 	std::lock_guard<std::mutex> lg(g_identifier_mutex_psDemux);
 	auto it = g_identifier_set_psDemux.find(id);
