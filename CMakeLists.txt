@@ -5,7 +5,6 @@ project(ABLMediaServer
     LANGUAGES C CXX
 )
 
-
 #=============================
 # 构建选项
 #=============================
@@ -190,19 +189,7 @@ target_link_libraries(${PROJECT_NAME}
 endif()
 
 # 如果启用了 USE_BOOST 选项，则链接 Boost 库文件
-if(USE_BOOST)
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
-        boost_system
-        boost_thread
-        boost_log
-        boost_regex
-        boost_filesystem
-        boost_date_time
-        boost_chrono
-        boost_atomic
-    )
-endif()
+
 
 #=============================
 # 安装

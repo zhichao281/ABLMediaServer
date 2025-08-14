@@ -12,8 +12,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 # 默认隐藏符号（对应 -fvisibility=hidden）
-set(CMAKE_C_VISIBILITY_PRESET hidden)
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+#set(CMAKE_C_VISIBILITY_PRESET hidden)
+#set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 # 设置默认构建类型（与 Makefile 中的 RELEASE 变量对应）
 if(NOT CMAKE_BUILD_TYPE)

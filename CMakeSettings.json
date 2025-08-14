@@ -6,7 +6,7 @@
       "configurationType": "RelWithDebInfo",
       "cmakeExecutable": "cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
-      "cmakeCommandArgs": "-DUSE_WEBRTC=OFF",
+      "cmakeCommandArgs": "-DUSE_WEBRTC=OFF -DUSE_BOOST=OFF  -DUSE_XHNetSDK_BOOST=OFF",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "remoteMachineName": "768132158;192.168.2.15 (username=server, port=22, authentication=Password)",
