@@ -1,6 +1,5 @@
 
 #ifdef USE_BOOST
-
 #include "udp_session_manager.h"
 
 

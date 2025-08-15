@@ -171,7 +171,6 @@ boost::asio::io_context& io_context_pool::get_io_context()
 #include "libnet_error.h"
 #include "data_define.h"
 
-
 io_context_pool::io_context_pool()
 	: m_nextioc(0)
 	, m_isinit(false)
@@ -252,7 +251,12 @@ int32_t io_context_pool::run()
 {
 	int32_t ret = e_libnet_err_nonioc;
 	thread_ptr t;
-
+	int threadsize  = netlib::ThreadPool::getInstance().getThreadNum();
+	if (threadsize < m_periocthread * m_iocontexts.size())
+	{
+		printf("io_context_pool::run error threadsize : [%d] m_periocthread * m_iocontexts.size()=[%d]    \r\n ", threadsize , m_periocthread * m_iocontexts.size());
+		return -1;
+	}
 	
 	for (std::vector<io_context_ptr>::size_type i = 0; i < m_iocontexts.size(); ++i)
 	{
@@ -288,7 +292,6 @@ int32_t io_context_pool::run()
 
 	return ret;
 }
-
 
 
 
@@ -335,7 +338,6 @@ asio::io_context& io_context_pool::get_io_context()
 
 	return ioc;
 }
-
 
 
 

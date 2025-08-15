@@ -162,6 +162,8 @@ template<typename T> bool object_pool<T>::empty()
 
 #include <stdexcept>
 #include <unordered_set>
+#include <mutex>
+#include <memory>
 #include "identifier_generator.h"
 
 template<typename T>

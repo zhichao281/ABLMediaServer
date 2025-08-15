@@ -1,7 +1,6 @@
 #pragma  once 
 #ifdef USE_BOOST
 
-
 #include <vector>
 #include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
@@ -53,6 +52,7 @@ inline bool io_context_pool::is_init()
 
 #else
 
+
 #include <vector>
 #include <asio.hpp>
 #include <memory>
@@ -62,7 +62,6 @@ inline bool io_context_pool::is_init()
 
 class io_context_pool : public asio::detail::noncopyable
 {
-
 public:
 	io_context_pool();
 
@@ -102,6 +101,9 @@ inline bool io_context_pool::is_init()
 {
 	return m_isinit;
 }
+
+
+
 
 
 #endif
