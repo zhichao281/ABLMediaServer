@@ -1,6 +1,7 @@
 #pragma once 
 #ifdef USE_BOOST
-
+#ifndef _CIRCULAR_BUFFER_H_
+#define _CIRCULAR_BUFFER_H_ 
 
 #include <stdint.h>
 #include <boost/shared_array.hpp>
@@ -69,8 +70,9 @@ inline uint32_t circular_buffer::get_commit_count()
 	return m_commitcount;
 }
 
+#endif
 #else
-
+#pragma once
 #include <stdint.h>
 #include "auto_lock.h"
 #include <map>

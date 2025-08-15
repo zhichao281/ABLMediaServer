@@ -63,12 +63,21 @@
 			 1、以rtsp协议推本地aac文件接入流媒体 
 				 ffmpeg -re -stream_loop -1 -i F:\music\xxx.aac -c:a aac -rtsp_transport tcp -f rtsp rtsp://190.15.240.11:554/music/aac1
 				 
+				 //以rtsp SSL 加密方式推流，ffmpeg 需要 6.0 以上版本 
+				 ffmpeg -re -stream_loop -1 -i F:\music\xxx.aac -c:a aac -rtsp_transport tcp -f rtsp rtsps://190.15.240.11:554/music/aac1
+ 				 
 			 2、以rtmp协议推本地aac文件接入流媒体 
 				 ffmpeg -re -stream_loop -1 -i F:\music\xxx.aac -c:a aac -f flv rtmp://190.15.240.11:1935/music/aac2
 				 
+				 //以rtmp SSL 加密方式推流，ffmpeg 需要 6.0 以上版本 
+				 ffmpeg -re -stream_loop -1 -i F:\music\xxx.aac -c:a aac -f flv rtmps://190.15.240.11:1935/music/aac2
+				 
 			 3、以rtsp协议推本地mp3文件接入流媒体 
 				 ffmpeg -re -stream_loop -1 -i F:\music\xxx.mp3 -c:a mp3 -rtsp_transport tcp -f rtsp rtsp://190.15.240.11:554/music/aac3
-				 
+ 				 
+				//以rtsp SSL 加密方式推流，ffmpeg 需要 6.0 以上版本 
+				 ffmpeg -re -stream_loop -1 -i F:\music\xxx.mp3 -c:a mp3 -rtsp_transport tcp -f rtsp rtsps://190.15.240.11:554/music/aac3
+			 
 			 4、以rtmp协议推本地mp3文件接入流媒体 
 				 ffmpeg -re -stream_loop -1 -i F:\music\xxx.mp3 -c:a mp3 -f flv rtmp://190.15.240.11:1935/music/aac4
 		
@@ -116,6 +125,16 @@
 				"http-hls": "http://10.0.0.239:9088/Media/Camera_00001.m3u8"
 			}		    
 		  
+		    如果是 SSL 方式 则变成以下的 URL  
+				"url": {
+				"rtsp": "rtsps://10.0.0.239:555/Media/Camera_00001",
+				"rtmp": "rtmps://10.0.0.239:1935/Media/Camera_00001",
+				"http-flv": "https://10.0.0.239:8089/Media/Camera_00001.flv",
+				"ws-flv": "wss://10.0.0.239:6089/Media/Camera_00001.flv",
+				"http-mp4": "https://10.0.0.239:5089/Media/Camera_00001.mp4",
+				"http-hls": "https://10.0.0.239:9089/Media/Camera_00001.m3u8"
+			}
+			
 		    其中的 10.0.0.239 就是可以从 localipAddress 配置项 精确获取 。
 		  
 		 2、录像路径配置 recordPath，如果不需要录像，可以忽略录像路径配置
@@ -187,6 +206,9 @@
 		
 		ffmpeg -rtsp_transport tcp -i rtsp://admin:abldyjh2020@192.168.1.120:554 -acodec copy -vcodec copy -f flv rtmp://190.15.240.11:1935/Media/Camera_00001
 		
+		//rtmp 以 SSL 方式推流 （需要ffmpeg 6.0）
+		ffmpeg -rtsp_transport tcp -i rtsp://admin:abldyjh2020@192.168.1.120:554 -acodec copy -vcodec copy -f flv rtmps://190.15.240.11:1935/Media/Camera_00001
+		
 	      rtsp: 【rtsp输出格式说明：视频支持 H264、H265 ,音频支持AAC、G711A、G711U 】
 		    rtsp://190.15.240.11:554/Media/Camera_00001
 			
@@ -206,6 +228,9 @@
 	    【推送rtsp方式说明：视频支持 H264、H265 ,音频支持AAC、G711A、G711U 】
 		
 		ffmpeg -re -stream_loop -1 -i F:\video\MP4有声音\H264_AAC_2021-02-10_1080P.mp4 -vcodec copy -acodec copy -rtsp_transport tcp -f rtsp rtsp://190.15.240.11:554/Media/Camera_00001
+		
+		//rtsp 以 SSL 方式推流 （需要ffmpeg 6.0）
+		ffmpeg -re -stream_loop -1 -i F:\video\MP4有声音\H264_AAC_2021-02-10_1080P.mp4 -vcodec copy -acodec copy -rtsp_transport tcp -f rtsp rtsps://190.15.240.11:554/Media/Camera_00001
 		
 	    媒体输出：
 	      rtsp: 【rtsp输出格式说明：视频支持 H264、H265 ,音频支持AAC、G711A、G711U 】
@@ -247,10 +272,13 @@
  																	http://190.15.240.36:8088/Media/Camera_00001.flv   或者
 																	d:\\video\\xxxx.mp4   (windows平台)
 																	/home/video/xxxx.mp4  (Linux平台)
- 					isRtspRecordURL                             代理拉流的url是否是rtsp录像回放的url 默认0 ，1 是【可选参数】，如果是rtsp录像回放的url，可以进行控制代理拉流，比如 暂停、继续、控制倍速播放，拖动播放等等 ，参考
+					isRtspRecordURL                             代理拉流的url是否是rtsp录像回放的url 默认0 ，1 是【可选参数】，如果是rtsp录像回放的url，可以进行控制代理拉流，比如 暂停、继续、控制倍速播放，拖动播放等等 ，参考
 					                                            函数 /index/api/controlStreamProxy 
 				    optionsHeartbeat          options心跳       options 命令作为心跳包      【可选参数】 代理rtsp拉流成后，是否开启发送 0 不开启， 1 开启 ，默认不开启，如果从 ZLMediaKit 拉取rtsp流，建议设置为 1 
+					G711ConvertAAC            g711a、g711u 是否转码                         【可选参数】 如果不指定该参数，就会从配置中读取该参数的值，如果指定该路接入码流的音频是否转码 ，[ 0 不转换 ]，[ 1 转换为 AAC ]
 					enable_mp4                是否录像          1 录像，0 不录像            【可选参数】
+					videoFileFormat           录像文件格式                                  【可选参数】 1 为 fmp4格式 ，2 为 mp4 格式 , 3 ts 格式
+                    fileKeepMaxTime           录像最大保存时长                              【可选参数】 录像最大保存时长 、精确到每一路媒体源，如果不指定先从配置文件读取设置为默认值 6 小时 ，如果指定该参数值那么该路视频录像保存时长就使用指定执值
 					enable_hls                是否hls切片       1 进行hls 切片 ，0 不切片   【可选参数】
 				    convertOutWidth           转码宽            转码输出宽 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264 
 				    convertOutHeight          转码高            转码输出高 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264  
@@ -360,7 +388,10 @@
                                                    					http://190.15.240.36:8088/Media/Camera_00001.mp4    或者
  																	http://190.15.240.36:9088/Media/Camera_00001.m3u8
  																	
+ 					G711ConvertAAC            g711a、g711u 是否转码                         【可选参数】 如果不指定该参数，就会从配置中读取该参数的值，如果指定该路接入码流的音频是否转码 ，[ 0 不转换 ]，[ 1 转换为 AAC ]
  					enable_mp4                是否录像          1 录像，0 不录像            【可选参数】
+ 					videoFileFormat           录像文件格式                                  【可选参数】 1 为 fmp4格式 ，2 为 mp4 格式 , 3 ts 格式
+                    fileKeepMaxTime           录像最大保存时长                              【可选参数】 录像最大保存时长 、精确到每一路媒体源，如果不指定先从配置文件读取设置为默认值 6 小时 ，如果指定该参数值那么该路视频录像保存时长就使用指定执值
 					enable_hls                是否hls切片       1 进行hls 切片 ，0 不切片   【可选参数】
 				    convertOutWidth           转码宽            转码输出宽 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264 
 				    convertOutHeight          转码高            转码输出高 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264  
@@ -478,20 +509,29 @@
 					stream_id                 媒体流名          比如 44030012343220234234 （最好是国标编号）( 接入 )
 					payload                   PS负载值          国标SDP里面PS负载值　，比如 96,98 ,108 ,一定要从国标SDP里面获取 
 					port                      端口号            0 ，由服务器自动分配，别的值 比如 26324 为指定端口
+					port2                     端口号2           当 RtpPayloadDataType 为 2 时，接入ES码流并且用户指定第2个端口，由该参数指定第2个端口。如果 RtpPayloadDataType = 2 并且 port = 0（服务器自动分配端口） 时，忽略 port2 该参数
 					enable_tcp                是否为tcp         0 为 udp , 1 为tcp被动方式 ，2 为tcp主动连接方式 
 					dst_url                   目标IP            目标IP地址  【可选参数 ，当 enable_tcp 为 2 时必须填写 】
 					dst_port                  目标端口          目标端口    【可选参数 ，当 enable_tcp 为 2 时必须填写】
 					
  					enable_mp4                是否录像          1 录像，0 不录像            【可选参数】
+					G711ConvertAAC            g711a、g711u 是否转码                         【可选参数】 如果不指定该参数，就会从配置中读取该参数的值，如果指定该路接入码流的音频是否转码 ，[ 0 不转换 ]，[ 1 转换为 AAC ]
+					videoFileFormat           录像文件格式                                  【可选参数】 1 为 fmp4格式 ，2 为 mp4 格式 , 3 ts 格式
+                    fileKeepMaxTime           录像最大保存时长                              【可选参数】 录像最大保存时长 、精确到每一路媒体源，如果不指定先从配置文件读取设置为默认值 6 小时 ，如果指定该参数值那么该路视频录像保存时长就使用指定执值
 					enable_hls                是否hls切片       1 进行hls 切片 ，0 不切片   【可选参数】
 				    convertOutWidth           转码宽            转码输出宽 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264 
 				    convertOutHeight          转码高            转码输出高 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264  
 				    H264DecodeEncode_enable   H264是否解码      H264分辨率高再编码降分辨率，【可选参数】有时候需要H264视频进行先解码再重新编码降低分辨率，可以设置 H264DecodeEncode_enable 为 1 ，降下来的分辨率为 convertOutWidth 、 convertOutHeight
-					RtpPayloadDataType        rtp打包数据格式   rtp打包数据格式             【可选参数 ，默认 1 】 [1 PS 国标gb28181 ]、[ 2 ES 视频支持 H246\H265，音频只支持G711A、G711U ]、[3 XHB (一家公司的打包格式) 只支持视频，音频不能加入打包 ] [ 4 、Jt1078（2016版本）码流接入 ]
+					RtpPayloadDataType        rtp打包数据格式   rtp打包数据格式             【可选参数 ，默认 1 】 [1 PS 国标gb28181 ]、[ 2 ES 视频支持 H246\H265，音频只支持G711A、G711U 、AAC ]、[3 XHB (一家公司的打包格式) 只支持视频，音频不能加入打包 ] [ 4 、Jt1078（2016版本）码流接入 ]
 					disableVideo              是否过滤掉视频    0 不过滤 ，1 过滤视频       【可选参数】 默认 0 不过滤视频，国家电网协议中需要摄像头和摄像头直接需要对接，摄像头推上来的媒体流中过滤掉视频（disableVideo=1）再发给对方才能完成对讲 
 					disableAudio              是否过滤掉音频    0 不过滤 ，1 过滤音频       【可选参数】 默认 0 不过滤音频，有时候不需要音频、或者由于敏感原因禁止收听音频，可以过滤掉音频流接入流媒体服务器，只需要设置 disableAudio = 1即可过滤音频  
 					jtt1078_version           指定1078版本号    2013、2016、2019            【可选参数】 2013 指定为 2013版本 、2016 指定为 2016版本、 2019 指定为 2019 版本  
-					
+			        jtt1078_KeepOpenPortType  指定是否为常开端口                            【可选参数】 默认 0 只接入1次设备关闭该端口关闭 ，1  常开为实时视频  ， 2  常开为录像回放 ， 3  常开为语音对讲 , 4 常开为子码流接入。 常开端口就是打开一次后该端口不再关闭，可以多个设备连接该端口接入1078码流，类似rtsp协议的554端口
+                                                                                                         jtt1078常开端口状态下，媒体流的命名规则 实时视频 /1078/sim_chan  , 录像回放  /1078/sim_chan_playback , 语音对讲 /1078/sim_chan_talk , 子码流 /1078/sim_chan_sub 																										 
+                                                                                                        【注意：设置了常开端口就不需要调用closeRtpServer函数来关闭了，服务器退出时会自动关闭。车载设备分别连接到对应的四个端口后发送实况、录像、对讲、子码流 等等媒体码流，就可以接入几百、上千个车载设备的实况、录像、对讲、子码流
+																										  媒体流，如果要关闭某一个接入流调用 close_streams 函数或者让信令服务器给对应车载设备发送停止发流命令。1078设备常开端口模式下不需要调用closeRtpServer函数来关闭常开端口，常开端口意思是只要端口打开成功
+																										  端口就一直开放着等待车载设备的连接。 】 
+																										  
 					send_app                  应用名            比如 gb28181 、rtp 等等     【可选参数】 用于把本服务器的码流（send_app/send_stream_id）回复给发送端
 					send_stream_id            媒体流名          比如 44030012343220234234   【可选参数】 用于把本服务器的码流（send_app/send_stream_id）回复给发送端
 					send_disableVideo         是否过滤掉视频    0 不过滤 ，1 过滤视频       【可选参数】 默认 0 不过滤视频，国家电网协议中需要摄像头和摄像头直接需要对接，摄像头推上来的媒体流中过滤掉视频（disableVideo=1）再发给对方才能完成对讲 
@@ -591,7 +631,7 @@
 						"memo": "success",   # success 为成功 ,如果失败是其他值 
 					}	
 					
-	 10）、创建GB28181\Jtt1078 发送端口、删除GB28181\Jtt1078发送端口 
+	 10）、创建GB28181\Jtt1078 发送端口、删除GB28181\Jtt1078发送端口 、给 1078 设备发送语音对接声音
 	
          1 	创建GB28181\Jtt1078发送端口
 				 
@@ -605,7 +645,7 @@
 					app                 应用名                比如 gb28181 、rtp 等等  (发送出去)
 					stream              媒体流名              比如 44030012343220234234 （发送出去）
 					payload             PS负载值              国标SDP里面PS负载值　，比如 96,98 ,108 ,rtp打包时需要
-					ssrc                同步源                ssrc
+					ssrc                同步源                rtp 打包需要的值。如果设置为 0 ，由服务器自动分配。别的值 比如 27879 为调用者指定的值
 					src_port            发送端绑定的端口号    指定服务器在发送国标流时绑定的端口号，如果为 0 ，由服务器自动分配，别的值 比如 26324 为指定端口
 					dst_url             目标IP                目标IP地址 
 					dst_port            目标端口              目标端口 
@@ -619,6 +659,9 @@
 					recv_stream         媒体流名             比如 44030012343220234234    【可选参数】 接入进来 通过在发送的连接中接收进来的码流  
 					recv_disableVideo   是否过滤掉视频       0 不过滤 ，1 过滤视频        【可选参数】 默认 0 不过滤视频，国家电网协议中需要摄像头和摄像头直接需要对接，摄像头推上来的媒体流中过滤掉视频（disableVideo=1）再发给对方才能完成对讲 
 					recv_disableAudio   是否过滤掉音频       0 不过滤 ，1 过滤音频        【可选参数】 默认 0 不过滤音频，有时候不需要音频、或者由于敏感原因禁止收听音频，可以过滤掉音频流接入流媒体服务器，只需要设置 disableAudio = 1即可过滤音频  
+					enable_hls          是否开启hls播放      0 不开启 ，1 开启            【可选参数】 接入进来 的码流是否开启hls切片异步播放 
+					enable_mp4          是否开启mp4录制      0 不开启 ，1 开启            【可选参数】 接入进来 的码流是否开启MP4进行录制  
+                    fileKeepMaxTime     录像最大保存时长                                  【可选参数】 录像最大保存时长 、精确到每一路媒体源，如果不指定先从配置文件读取设置为默认值 6 小时 ，如果指定该参数值那么该路视频录像保存时长就使用指定执值
 					
 	             http  GET 方式 			   
 			        http://190.15.240.11:7088/index/api/startSendRtp?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&vhost=_defaultVhost_&app=gb28181&stream=44030012343220234234&payload=96&ssrc=5224&src_port=26324&dst_url=190.15.240.11&dst_port=9824&is_udp=1
@@ -663,6 +706,36 @@
 						"memo": "success",   # success 为成功 ,如果失败是其他值 
 					}				
 					
+         3 	发送1078设备语音对讲音频 
+ 
+			     URL: /index/api/sendJtt1078Talk 
+				 功能：
+				      给通过 openRtpServer 打开常开语音对接端口( jtt1078_KeepOpenPortType = 3 )接入进来的设备发送对讲语音数据
+			   
+			     参数：                 参数说明              参数参考值
+					secret              服务器密码            比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc
+					vhost                                     比如 _defaultVhost_
+					app                 应用名                比如 1078 
+					stream              媒体流名              比如 13832434234_1_talk 
+					send_app            应用名                比如 给1078设备发送的音频的 app 
+					send_stream_id      媒体流名              比如 给1078设备发送的音频的 stream_id    
+					
+			    http GET 方式 
+			       http://190.15.240.11:7088/index/api/sendJtt1078Talk?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&app=1078&stream=13832434234_1_talk&send_app=talk&send_stream_id=audio_1
+				   
+				http  POST 方式 
+				   http URL 
+				     http://190.15.240.11:7088/index/api/sendJtt1078Talk
+					 
+				   http Body 参数 json 格式
+				     {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","app":"1078","stream":"13832434234_1_talk","send_app":"talk","send_stream_id":"audio_1"}
+				   
+				返回Body：
+					{
+						"code": 0,           # 0为操作成功，其他值为操作失败
+						"memo": "success",   # success 为成功 ,如果失败是其他值 
+					}	
+	
 	11）、获取流媒体服务器所有可用的媒体源
 			 URL: /index/api/getMediaList
 			 
@@ -715,17 +788,18 @@
 							"key": 34,    
 							"app": "Media",  
 							"stream": "Camera_00001",
+							"sourceType": 0,            【0 为实况接入 ， 1 查询录像产生的录像流 】
+							"duration": 657,            【 接入时长 ，单位秒 】
 							"sim": "123456789123",      【1078码流接入这个字段的值不会为空，代表设备的sim卡编码 】
 							"status": false ,           【 false 尚未录像，true 正在录像    】
 			 			    "enable_hls": false,        【 false 尚未启用，true 启用hls回放 】
                             "transcodingStatus": false, 【 false 尚未转码，true 正在转码    】
 							"sourceURL": "rtsp://10.0.0.239:554/Media/Camera_00001",
-							"sourceType": 23,
+							"networkType": 23,
 							"readerCount": 0,
 							"videoCodec": "H264",
 							"width": 1920,
 							"height": 1080,
-							"networkType": 24,
 							"audioCodec": "AAC",
 							"audioChannels": 1,
 							"audioSampleRate": 16000,
@@ -1075,7 +1149,8 @@
 				]
 			}
 				
-		18）、查询录像列表
+		18）、查询录像播放已经录像回放控制 
+		   18.1 ）查询录像  
 			 URL: /index/api/queryRecordList
 			 
 			 功能：
@@ -1089,7 +1164,9 @@
 			    starttime        开始时间     比如 20220116154810 年月日时分秒                 【必填参数】
 			    endtime          结束时间     比如 20220116155115 年月日时分秒                 【必填参数】
 				
-			【注意：1、开始时间必须小于 当前时间减去切片时长的时间 2、从 开始时间 至 结束时间 不能超过3天】
+			【注意：1、开始时间必须小于 当前时间减去切片时长的时间 2、从 开始时间 至 结束时间 不能超过3天
+			  如果查询成功，立即会产生录像回放流 ，超时2分钟如果没有观看，则会自动删除录像码流回放 
+			 】
  				  
 	         http  GET 方式 
                http://10.0.0.239:7088/index/api/queryRecordList?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&app=Media&stream=Camera_00001&starttime=20220116154810&endtime=20220116155115
@@ -1103,38 +1180,103 @@
 				 
 			 返回Body：
 				{
-					"code": 0,
+					"code": 0,                     # 查询录像成功，如果查询失败非0 
+					"key": 30,                     # 产生录像回放对象的ID，如果不想观看录像码流，可以调用 delMediaStream函数，并传入该key的值，即可删除查询录像产生的媒体流 
 					"app": "Media",
-					"stream": "Camera_00001",
-					"starttime": "20220116154810",
-					"endtime": "20220116155115",
+					"stream": "Camera_00001_6fb4774e-5af1-40bd-88cc-066fb959ac7a_20240420105925-20240420110323", # 查询录像产生的流ID 命名规则：stream_uuid_开始时间-结束时间 【uuid 为随机数】
+					"starttime": "20240420105925",  #开始时间
+					"endtime": "20240420110323",    #结束时间 
+					"url": 
+					 { # 该组url 可以连续播放 20240420105925 ~ 20240420110323 
+						"rtsp": "rtsp://192.168.1.238:554/Media/Camera_00001_6fb4774e-5af1-40bd-88cc-066fb959ac7a_20240420105925-20240420110323",          [该url 可以用于下载 ，调用 controlRecordPlay 函数设置4倍速]
+						"rtmp": "rtmp://192.168.1.238:1935/Media/Camera_00001_6fb4774e-5af1-40bd-88cc-066fb959ac7a_20240420105925-20240420110323",
+						"http-flv": "http://192.168.1.238:8088/Media/Camera_00001_6fb4774e-5af1-40bd-88cc-066fb959ac7a_20240420105925-20240420110323.flv",
+						"ws-flv": "ws://192.168.1.238:6088/Media/Camera_00001_6fb4774e-5af1-40bd-88cc-066fb959ac7a_20240420105925-20240420110323.flv",
+						"http-mp4": "http://192.168.1.238:5088/Media/Camera_00001_6fb4774e-5af1-40bd-88cc-066fb959ac7a_20240420105925-20240420110323.mp4", [该url 可以用于下载 ，调用 controlRecordPlay 函数设置4倍速 ]
+						"download": "http://192.168.1.238:5088/Media/Camera_00001_6fb4774e-5af1-40bd-88cc-066fb959ac7a_20240420105925-20240420110323.mp4?download_speed=6", [该url 可以粘贴到浏览器后回车，直接下载mp4文件 ]
+                        "webrtc": "http://192.168.1.238:8892/webrtc-streamer.html?video=/Media/Camera_00001_6fb4774e-5af1-40bd-88cc-066fb959ac7a_20240420105925-20240420110323",						
+						"http-hls": "http://192.168.1.238:5088/Media/Camera_00001_6fb4774e-5af1-40bd-88cc-066fb959ac7a_20240420105925-20240420110323.m3u8"
+					 },
+					
+					#文件列表
 					"recordFileList": [
 						{
-							"file": "20220116154810.mp4",
-							"duration": 300,   当前录像时间长度，单位 秒
-							"url": {
-								"rtsp": "rtsp://10.0.0.239:554/Media/Camera_00001__ReplayFMP4RecordFile__20220116154810",
-								"rtmp": "rtmp://10.0.0.239:1935/Media/Camera_00001__ReplayFMP4RecordFile__20220116154810",
-								"http-flv": "http://10.0.0.239:8088/Media/Camera_00001__ReplayFMP4RecordFile__20220116154810.flv",
-								"ws-flv": "ws://10.0.0.239:6088/Media/Camera_00001__ReplayFMP4RecordFile__20220116154810.flv",
-								"http-mp4": "http://10.0.0.239:5088/Media/Camera_00001__ReplayFMP4RecordFile__20220116154810.mp4?download_speed=1",
-								"download": "http://10.0.0.239:5088/Media/Camera_00001__ReplayFMP4RecordFile__20220116154810.mp4?download_speed=6"
+							"file": "20240420105925.mp4", #录像文件1
+							"duration": 120, #录像文件时长 单位秒
+							"url": { #只是单独播放某个文件 下载某个文件 
+								"rtsp": "rtsp://192.168.1.238:554/Media/Camera_00001__ReplayFMP4RecordFile__20240420105925",
+								"rtmp": "rtmp://192.168.1.238:1935/Media/Camera_00001__ReplayFMP4RecordFile__20240420105925",
+								"http-flv": "http://192.168.1.238:8088/Media/Camera_00001__ReplayFMP4RecordFile__20240420105925.flv",
+								"ws-flv": "ws://192.168.1.238:6088/Media/Camera_00001__ReplayFMP4RecordFile__20240420105925.flv",
+								"http-mp4": "http://192.168.1.238:5088/Media/Camera_00001__ReplayFMP4RecordFile__20240420105925.mp4",
+								"download": "http://192.168.1.238:5088/Media/Camera_00001__ReplayFMP4RecordFile__20240420105925.mp4?download_speed=6" [该url 可以粘贴到浏览器后回车，直接下载mp4文件 ]
 							}
 						},
 						{
-							"file": "20220116155110.mp4",
-							"duration": 256,    当前录像时间长度，单位 秒
+							"file": "20240420110124.mp4", #录像文件2
+							"duration": 120,#录像文件时长 单位秒
 							"url": {
-								"rtsp": "rtsp://10.0.0.239:554/Media/Camera_00001__ReplayFMP4RecordFile__20220116155110",
-								"rtmp": "rtmp://10.0.0.239:1935/Media/Camera_00001__ReplayFMP4RecordFile__20220116155110",
-								"http-flv": "http://10.0.0.239:8088/Media/Camera_00001__ReplayFMP4RecordFile__20220116155110.flv",
-								"ws-flv": "ws://10.0.0.239:6088/Media/Camera_00001__ReplayFMP4RecordFile__20220116155110.flv",
-								"http-mp4": "http://10.0.0.239:5088/Media/Camera_00001__ReplayFMP4RecordFile__20220116155110.mp4?download_speed=1",
-								"download": "http://10.0.0.239:5088/Media/Camera_00001__ReplayFMP4RecordFile__20220116155110.mp4?download_speed=6"
+								"rtsp": "rtsp://192.168.1.238:554/Media/Camera_00001__ReplayFMP4RecordFile__20240420110124",
+								"rtmp": "rtmp://192.168.1.238:1935/Media/Camera_00001__ReplayFMP4RecordFile__20240420110124",
+								"http-flv": "http://192.168.1.238:8088/Media/Camera_00001__ReplayFMP4RecordFile__20240420110124.flv",
+								"ws-flv": "ws://192.168.1.238:6088/Media/Camera_00001__ReplayFMP4RecordFile__20240420110124.flv",
+								"http-mp4": "http://192.168.1.238:5088/Media/Camera_00001__ReplayFMP4RecordFile__20240420110124.mp4",
+								"download": "http://192.168.1.238:5088/Media/Camera_00001__ReplayFMP4RecordFile__20240420110124.mp4?download_speed=6"  [该url 可以粘贴到浏览器后回车，直接下载mp4文件 ]
+							}
+						},
+						{
+							"file": "20240420110323.mp4", #录像文件3
+							"duration": 120,#录像文件时长 单位秒
+							"url": {
+								"rtsp": "rtsp://192.168.1.238:554/Media/Camera_00001__ReplayFMP4RecordFile__20240420110323",
+								"rtmp": "rtmp://192.168.1.238:1935/Media/Camera_00001__ReplayFMP4RecordFile__20240420110323",
+								"http-flv": "http://192.168.1.238:8088/Media/Camera_00001__ReplayFMP4RecordFile__20240420110323.flv",
+								"ws-flv": "ws://192.168.1.238:6088/Media/Camera_00001__ReplayFMP4RecordFile__20240420110323.flv",
+								"http-mp4": "http://192.168.1.238:5088/Media/Camera_00001__ReplayFMP4RecordFile__20240420110323.mp4",
+								"download": "http://192.168.1.238:5088/Media/Camera_00001__ReplayFMP4RecordFile__20240420110323.mp4?download_speed=6" [该url 可以粘贴到浏览器后回车，直接下载mp4文件 ]
 							}
 						}
 					]
-				}
+				  }
+				  
+			   18.2 ) 录像回放控制 ，往往用于作为国标下级时，把录像往上级平台推送的暂停、继续、倍速、拖动控制 
+				   URL: /index/api/controlRecordPlay
+				   
+					 参数：
+						secret  服务器密码 ，比如  035c73f7-bb6b-4889-a715-d9eb2d1925cc
+						key                  比如  93 ，调用 queryRecordList 返回的 key 的值 
+						command              比如  seek、scale 对于对应意思：拖拽播放、倍速播放 
+						value  (字符串)      比如  0.125、0.25、0.5、1、2、4、8、16 (scale倍速播放) ，10、50、360 、600  （seek 拖拽播放） 
+						                           value 为可选参数，当 command 为 pause,resume 时，value 不用填写 ，当 command 为seek,sacale
+											       需要填写value的值 
+												   
+						命令、值样例列表
+						command                value                                              注释
+					      pause                不需要                                            暂停回放   
+					      resume               不需要                                            继续回放   
+						  scale                2                                                 2倍速回放 ，还有其他倍数 0.125、0.25、0.5、1、2、4、8、16
+						  seek                 360 单位秒                                        拖拽从开始点计算起到360秒处再回放  【ntp方式拖拽 ，代表 华为 VCN\3800 】
+ 						
+					http GET 方式 
+			            http://190.15.240.11:7088/index/api/controlRecordPlay?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=93&command=pause              暂停
+			            http://190.15.240.11:7088/index/api/controlRecordPlay?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=93&command=resume             继续
+						http://190.15.240.11:7088/index/api/controlRecordPlay?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=93&command=scale&value=2      2倍速回放
+						http://190.15.240.11:7088/index/api/controlRecordPlay?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=93&command=seek&value=360     拖拽到360秒处继续回放
+ 					   
+					http  POST 方式 
+						http URL :
+						  http://190.15.240.11:7088/index/api/controlRecordPlay
+						  
+						body 参数 Json格式 
+ 						   {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","key":93,"command":"sacale","value":"2"} 
+						   {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","key":93,"command":"seek","value":"360"} 
+ 					   
+					返回Body：
+						{
+							"code": 0,           # 0为操作成功，其他值为操作失败
+							"memo": "success",   # success 为成功 ,如果失败是其他值 
+						}		
+  				
 	  19）、消息通知使用 
             功能说明：消息通知是流媒体服务器的一些消息比如无人观看、fmp4录像切片完成、播放时流地址不存在等等信息能及时的通知到另外一个http服务器上，需要此功能
 			          消息通知功能用在什么地方，比如说无人观看消息通知，当收到无人观看消息时，国标服务器可以关闭国标发流，断开代理拉流，断开推流等等操作 
@@ -1163,6 +1305,7 @@
 				   "app":"Media",                            # app 
 				   "stream":"Camera_00001",                  # stream  
 				   "mediaServerId":"ABLMediaServer_00001",   # 流媒体服务器编号 ，在配置文件可以配置，如果集群流媒体服务器时，可以给每台流媒体服务器起个编号 
+				   "mediaSourceCount":10，                   # 当前服务器已经接入了多少个码流 
 				   "networkType":23,                         # 媒体流来源网络编号，可参考附表  
 				   "key":130,                                # 媒体流来源编号，可以根据这个key进行关闭流媒体 可以调用delMediaStream或close_streams 函数进行关闭
 				   "status":true,
@@ -1227,6 +1370,8 @@
 					  "mediaServerId":"ABLMediaServer_00001", # 流媒体服务器编号 ，在配置文件可以配置，如果集群流媒体服务器时，可以给每台流媒体服务器起个编号 
 					  "networkType":70,                       # 媒体流来源网络编号，可参考附表     
 					  "fileName":"20220312212546.mp4"         # 录像切片完成的文件名字    
+                      "startTime":"20240529112821",           # 该文件开始时间
+					  "endTime":"20240529112854"			  # 当前时间		    
 					} 
 
 				4、当某一路码流断开时会发送通知：
@@ -1245,7 +1390,8 @@
 				   "stream":"Camera_00001",                  # stream  
 				   "mediaServerId":"ABLMediaServer_00001",   # 流媒体服务器编号 ，在配置文件可以配置，如果集群流媒体服务器时，可以给每台流媒体服务器起个编号 
 				   "networkType":23,                         # 媒体流来源网络编号，可参考附表  
-				   "key":130                                 # 媒体流来源编号，可以根据这个key进行关闭流媒体 可以调用delMediaStream或close_streams 函数进行关闭
+				   "key":130  ,                              # 媒体流来源编号，可以根据这个key进行关闭流媒体 可以调用delMediaStream或close_streams 函数进行关闭
+				   "mediaSourceCount":1                      # 服务器还剩下几个接入流 
 				  }
 
 				 5、 当播放一个url，如果不存在时，会发出一个消息通知 
@@ -1288,7 +1434,7 @@
 					Tools: ABLMediaServer-6.3.5(2023-04-30)
 					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
 
-					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","networkType":50,"key":470,"ip":"44.35.33.248" ,"port":554,"params":""}
+					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","mediaSourceCount":1,"networkType":50,"key":470,"ip":"44.35.33.248" ,"port":554,"params":""}
 				
                   8、当播放流媒体服务器里面某一个码流时，会触发 播放事件 ，可以通知 parmas 参数值进行播放鉴权 				
 					POST /index/hook/on_play HTTP/1.1
@@ -1301,7 +1447,7 @@
 					Tools: ABLMediaServer-6.3.5(2023-04-30)
 					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
 
-					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","networkType":30,"key":472,"ip":"" ,"port":0,"params":"user=admin&password=safsa234234&token=@#$@#$@#ASDFasfdsa@#$23"}
+					{"app":"Media","stream":"Camera_00001","readerCount": 2,"mediaServerId":"ABLMediaServer_00001","networkType":30,"key":472,"ip":"" ,"port":0,"params":"user=admin&password=safsa234234&token=@#$@#$@#ASDFasfdsa@#$23"}
 			
 			     9、如果某一个码流进行MP4录像（enable_mp4=1），会触发录像进度通知事件 
 					POST /index/hook/on_record_progress HTTP/1.1
@@ -1314,7 +1460,7 @@
 					Tools: ABLMediaServer-6.3.5(2023-04-30)
 					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
 
-					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","networkType":472,"key":470,"fileName":"20230418100440.mp4","currentFileDuration":49,"TotalVideoDuration":49}
+					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","networkType":472,"key":470,"fileName":"20230418100440.mp4","currentFileDuration":49,"TotalVideoDuration":49,"startTime":"20240529112821","endTime":"20240529112854"}
 						
 				 10、如果某一个码流开启hls（enable_hls=1）并且设置为切片到硬盘（hlsCutType=1 在配置文件中） ，每当切片完成一个ts文件会触发该事件 
 					POST /index/hook/on_record_ts HTTP/1.1
@@ -1381,6 +1527,20 @@
 
 					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","networkType":23,"key":18,"ip":"44.35.33.249" ,"port":65183,"NotificationNumber":1}
 				
+
+				 15、rtsp录像回放控制事件通知 当客户端以rtsp录像回放控制播放某一个码流时，服务器会回调rtsp录像回放控制命令消息，比如 pause 暂停、play 继续 、 1、2、4、8、16 倍速 、seek 拖拽命令、stop 停止播放命令 
+					POST /index/hook/on_rtsp_replay HTTP/1.1
+					Accept: */*
+					Accept-Language: zh-CN,zh;q=0.8
+					Connection: keep-alive
+					Content-Length: 161
+					Content-Type: application/json
+					Host: 127.0.0.1
+					Tools: ABLMediaServer-6.3.6(2024-04-02)
+					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
+
+					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","networkType":23,"key":18,"ip":"44.35.33.249" ,"port":65183,"command":"play","value":"2"}
+
 				
 	  20) 图片抓拍 
 			 URL: /index/api/getSnap

@@ -127,7 +127,6 @@ void circular_buffer::read_commit(uint32_t commit)
 }
 
 
-
 #else
 
 #include <string.h>
