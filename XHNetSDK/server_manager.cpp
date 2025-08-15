@@ -1,8 +1,7 @@
 
 #ifdef USE_BOOST
-
-
 #include "server_manager.h"
+
 server_manager::server_manager(void)
 {
 }
@@ -91,7 +90,6 @@ server_ptr server_manager::get_server(NETHANDLE id)
 
 
 #else
-
 #include "server_manager.h"
 
 server_manager::server_manager(void)
@@ -106,7 +104,7 @@ server_manager::~server_manager(void)
 bool server_manager::push_server(server_ptr& s)
 {
 
-	std::lock_guard<std::mutex> lock(m_climtx);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 
 	if (s)
@@ -121,7 +119,7 @@ bool server_manager::push_server(server_ptr& s)
 bool server_manager::pop_server(NETHANDLE id)
 {
 
-	std::lock_guard<std::mutex> lock(m_climtx);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 
 	auto iter = m_servers.find(id);
@@ -141,17 +139,16 @@ bool server_manager::pop_server(NETHANDLE id)
 
 void server_manager::close_all_servers()
 {
+	std::lock_guard<std::mutex> lock(m_mutex);
 
-	std::lock_guard<std::mutex> lock(m_climtx);
-
-
-	for (auto iter : m_servers)
+	for (auto iter = m_servers.begin(); m_servers.end() != iter; ++iter)
 	{
-		if (iter.second)
+		if (iter->second)
 		{
-			iter.second->close();
+			iter->second->close();
 		}
 	}
+
 
 	m_servers.clear();
 }
@@ -159,21 +156,14 @@ void server_manager::close_all_servers()
 server_ptr server_manager::get_server(NETHANDLE id)
 {
 
-	std::lock_guard<std::mutex> lock(m_climtx);
-
-
-	server_ptr s = nullptr;
-	auto iter = m_servers.find(id);
-	if (m_servers.end() != iter)
-	{
-		s = iter->second;
-	}
-	return s;
+	std::lock_guard<std::mutex> lock(m_mutex);
+	auto it = m_servers.find(id);
+	return (it != m_servers.end()) ? it->second : nullptr;
 }
 
 server_manager& server_manager::getInstance()
 {
-		static server_manager instance;
+	static server_manager instance;
 	return instance;
 }
 

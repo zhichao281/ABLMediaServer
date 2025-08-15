@@ -1,5 +1,7 @@
 #pragma once
 #ifdef USE_BOOST
+#ifndef _SERVER_MANAGER_H_
+#define _SERVER_MANAGER_H_
 
 #include <boost/unordered_map.hpp>
 #include <boost/serialization/singleton.hpp>
@@ -31,9 +33,11 @@ private:
 };
 typedef boost::serialization::singleton<server_manager> server_manager_singleton;
 
+#endif
+
 
 #else
-#include <map>
+#include <unordered_map>
 #include <mutex>
 
 #include "server.h"
@@ -61,11 +65,10 @@ private:
 
 	
 private:
-	std::map<NETHANDLE, server_ptr> m_servers;
+	std::unordered_map<NETHANDLE, server_ptr> m_servers;
 
-	std::mutex          m_climtx;
+	std::mutex          m_mutex;
 
 };
-
 
 #endif

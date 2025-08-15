@@ -163,27 +163,14 @@ client_ptr client_manager::get_client(NETHANDLE id)
 #include "client_manager.h"
 #include <iostream>
 #include <asio/ssl.hpp>
-struct client_deletor
-{
-	void operator()(client* cli)
-	{
-		if (cli)
-		{
-			client_manager::getInstance().free_client(cli);
-		}
-	}
-};
 
 client_manager::client_manager(void)
-	: m_pool(CLIENT_POOL_OBJECT_COUNT, CLIENT_POOL_OBJECT_COUNT)
 {
 }
 
 client_manager::~client_manager(void)
 {
-	std::cout << "delete client_manager start " << std::endl;
 	pop_all_clients();
-	std::cout << "delete client_manager start " << std::endl;
 }
 
 client_ptr client_manager::malloc_client(asio::io_context& ioc,
@@ -197,20 +184,34 @@ client_ptr client_manager::malloc_client(asio::io_context& ioc,
 	accept_callback  fnaccept)
 {
 
+
+	//client_ptr cli;
+	//cli.reset(m_pool.construct(ioc, context, srvid, fnread, fnclose, autoread, bSSLFlag, nCLientType, fnaccept), client_deletor());
+
 	std::unique_lock<std::mutex> _lock(m_poolmtx);
-	client_ptr cli=std::make_shared<client>(ioc, context,srvid, fnread, fnclose, autoread, bSSLFlag,  nCLientType, fnaccept);
-	//cli.reset(m_pool.construct(ioc, srvid, fnread, fnclose, autoread), client_deletor());
+	// 使用 std::make_shared 创建 shared_ptr，并传入自定义删除器
+	client_ptr cli = std::shared_ptr<client>(
+		new client(ioc, context, srvid, fnread, fnclose, autoread, bSSLFlag, nCLientType, fnaccept),
+		[](client* cli) {
+			if (cli) {
+				client_manager::getInstance().free_client(cli);
+			}
+		}
+	);
+
 	return cli;
 }
-
 
 
 void client_manager::free_client(client* cli)
 {
 	std::lock_guard<std::mutex> lock(m_poolmtx);
 	
-	delete cli;
-	cli = nullptr;
+  if (cli)
+    {
+        delete cli;  // 直接删除对象，不再使用 m_pool.destroy()
+		cli = nullptr;
+    }
 	 
 	//m_pool.destroy(cli);
 }
@@ -266,11 +267,11 @@ void client_manager::pop_server_clients(NETHANDLE srvid)
 void client_manager::pop_all_clients()
 {
 	std::lock_guard<std::mutex> lock(m_climtx);
-	for (auto iter : m_clients)
+	for (auto iter = m_clients.begin(); iter != m_clients.end(); ++iter)
 	{
-		if (iter.second)
+		if (iter->second)
 		{
-			iter.second->close();
+			iter->second->close();
 		}
 	}
 

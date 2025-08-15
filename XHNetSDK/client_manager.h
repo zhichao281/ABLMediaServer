@@ -62,7 +62,7 @@ typedef boost::serialization::singleton<client_manager> client_manager_singleton
 #endif
 #else
 #include <memory>
-#include <map>
+#include <unordered_map>
 #include "client.h"
 #include "unordered_object_pool.h"
 
@@ -92,8 +92,6 @@ public:
 		bool bSSLFlag,
 		ClientType nCLientType,
 		accept_callback fnaccept);
-
-
 	void free_client(client* cli);
 	bool push_client(client_ptr& cli);
 	bool pop_client(NETHANDLE id);
@@ -108,10 +106,10 @@ private:
 	client_manager(const client_manager&) = delete;
 	client_manager& operator=(const client_manager&) = delete;
 private:
-	client_pool m_pool;
+	//client_pool m_pool;
 	std::mutex          m_poolmtx;
 	std::mutex          m_climtx;
-	std::map<NETHANDLE, client_ptr> m_clients;
+	std::unordered_map<NETHANDLE, client_ptr> m_clients;
 
 
 };
