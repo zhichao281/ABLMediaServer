@@ -275,7 +275,9 @@
 					isRtspRecordURL                             代理拉流的url是否是rtsp录像回放的url 默认0 ，1 是【可选参数】，如果是rtsp录像回放的url，可以进行控制代理拉流，比如 暂停、继续、控制倍速播放，拖动播放等等 ，参考
 					                                            函数 /index/api/controlStreamProxy 
 				    optionsHeartbeat          options心跳       options 命令作为心跳包      【可选参数】 代理rtsp拉流成后，是否开启发送 0 不开启， 1 开启 ，默认不开启，如果从 ZLMediaKit 拉取rtsp流，建议设置为 1 
+					G711ConvertAAC            g711a、g711u 是否转码                         【可选参数】 如果不指定该参数，就会从配置中读取该参数的值，如果指定该路接入码流的音频是否转码 ，[ 0 不转换 ]，[ 1 转换为 AAC ]
 					enable_mp4                是否录像          1 录像，0 不录像            【可选参数】
+					videoFileFormat           录像文件格式                                  【可选参数】 1 为 fmp4格式 ，2 为 mp4 格式 , 3 ts 格式
                     fileKeepMaxTime           录像最大保存时长                              【可选参数】 录像最大保存时长 、精确到每一路媒体源，如果不指定先从配置文件读取设置为默认值 6 小时 ，如果指定该参数值那么该路视频录像保存时长就使用指定执值
 					enable_hls                是否hls切片       1 进行hls 切片 ，0 不切片   【可选参数】
 				    convertOutWidth           转码宽            转码输出宽 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264 
@@ -386,7 +388,9 @@
                                                    					http://190.15.240.36:8088/Media/Camera_00001.mp4    或者
  																	http://190.15.240.36:9088/Media/Camera_00001.m3u8
  																	
+ 					G711ConvertAAC            g711a、g711u 是否转码                         【可选参数】 如果不指定该参数，就会从配置中读取该参数的值，如果指定该路接入码流的音频是否转码 ，[ 0 不转换 ]，[ 1 转换为 AAC ]
  					enable_mp4                是否录像          1 录像，0 不录像            【可选参数】
+ 					videoFileFormat           录像文件格式                                  【可选参数】 1 为 fmp4格式 ，2 为 mp4 格式 , 3 ts 格式
                     fileKeepMaxTime           录像最大保存时长                              【可选参数】 录像最大保存时长 、精确到每一路媒体源，如果不指定先从配置文件读取设置为默认值 6 小时 ，如果指定该参数值那么该路视频录像保存时长就使用指定执值
 					enable_hls                是否hls切片       1 进行hls 切片 ，0 不切片   【可选参数】
 				    convertOutWidth           转码宽            转码输出宽 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264 
@@ -511,6 +515,8 @@
 					dst_port                  目标端口          目标端口    【可选参数 ，当 enable_tcp 为 2 时必须填写】
 					
  					enable_mp4                是否录像          1 录像，0 不录像            【可选参数】
+					G711ConvertAAC            g711a、g711u 是否转码                         【可选参数】 如果不指定该参数，就会从配置中读取该参数的值，如果指定该路接入码流的音频是否转码 ，[ 0 不转换 ]，[ 1 转换为 AAC ]
+					videoFileFormat           录像文件格式                                  【可选参数】 1 为 fmp4格式 ，2 为 mp4 格式 , 3 ts 格式
                     fileKeepMaxTime           录像最大保存时长                              【可选参数】 录像最大保存时长 、精确到每一路媒体源，如果不指定先从配置文件读取设置为默认值 6 小时 ，如果指定该参数值那么该路视频录像保存时长就使用指定执值
 					enable_hls                是否hls切片       1 进行hls 切片 ，0 不切片   【可选参数】
 				    convertOutWidth           转码宽            转码输出宽 如果指定宽、高   【可选参数】[1920 x 1080, 1280 x 720 ,960 x 640 ,800 x 480 ,720 x 576 , 720 x 480 ,640 x 480 ,352 x 288 ] 就说明 H265 进行转码为 H264 
@@ -520,7 +526,12 @@
 					disableVideo              是否过滤掉视频    0 不过滤 ，1 过滤视频       【可选参数】 默认 0 不过滤视频，国家电网协议中需要摄像头和摄像头直接需要对接，摄像头推上来的媒体流中过滤掉视频（disableVideo=1）再发给对方才能完成对讲 
 					disableAudio              是否过滤掉音频    0 不过滤 ，1 过滤音频       【可选参数】 默认 0 不过滤音频，有时候不需要音频、或者由于敏感原因禁止收听音频，可以过滤掉音频流接入流媒体服务器，只需要设置 disableAudio = 1即可过滤音频  
 					jtt1078_version           指定1078版本号    2013、2016、2019            【可选参数】 2013 指定为 2013版本 、2016 指定为 2016版本、 2019 指定为 2019 版本  
-					
+			        jtt1078_KeepOpenPortType  指定是否为常开端口                            【可选参数】 默认 0 只接入1次设备关闭该端口关闭 ，1  常开为实时视频  ， 2  常开为录像回放 ， 3  常开为语音对讲 , 4 常开为子码流接入。 常开端口就是打开一次后该端口不再关闭，可以多个设备连接该端口接入1078码流，类似rtsp协议的554端口
+                                                                                                         jtt1078常开端口状态下，媒体流的命名规则 实时视频 /1078/sim_chan  , 录像回放  /1078/sim_chan_playback , 语音对讲 /1078/sim_chan_talk , 子码流 /1078/sim_chan_sub 																										 
+                                                                                                        【注意：设置了常开端口就不需要调用closeRtpServer函数来关闭了，服务器退出时会自动关闭。车载设备分别连接到对应的四个端口后发送实况、录像、对讲、子码流 等等媒体码流，就可以接入几百、上千个车载设备的实况、录像、对讲、子码流
+																										  媒体流，如果要关闭某一个接入流调用 close_streams 函数或者让信令服务器给对应车载设备发送停止发流命令。1078设备常开端口模式下不需要调用closeRtpServer函数来关闭常开端口，常开端口意思是只要端口打开成功
+																										  端口就一直开放着等待车载设备的连接。 】 
+																										  
 					send_app                  应用名            比如 gb28181 、rtp 等等     【可选参数】 用于把本服务器的码流（send_app/send_stream_id）回复给发送端
 					send_stream_id            媒体流名          比如 44030012343220234234   【可选参数】 用于把本服务器的码流（send_app/send_stream_id）回复给发送端
 					send_disableVideo         是否过滤掉视频    0 不过滤 ，1 过滤视频       【可选参数】 默认 0 不过滤视频，国家电网协议中需要摄像头和摄像头直接需要对接，摄像头推上来的媒体流中过滤掉视频（disableVideo=1）再发给对方才能完成对讲 
@@ -620,7 +631,7 @@
 						"memo": "success",   # success 为成功 ,如果失败是其他值 
 					}	
 					
-	 10）、创建GB28181\Jtt1078 发送端口、删除GB28181\Jtt1078发送端口 
+	 10）、创建GB28181\Jtt1078 发送端口、删除GB28181\Jtt1078发送端口 、给 1078 设备发送语音对接声音
 	
          1 	创建GB28181\Jtt1078发送端口
 				 
@@ -634,7 +645,7 @@
 					app                 应用名                比如 gb28181 、rtp 等等  (发送出去)
 					stream              媒体流名              比如 44030012343220234234 （发送出去）
 					payload             PS负载值              国标SDP里面PS负载值　，比如 96,98 ,108 ,rtp打包时需要
-					ssrc                同步源                ssrc
+					ssrc                同步源                rtp 打包需要的值。如果设置为 0 ，由服务器自动分配。别的值 比如 27879 为调用者指定的值
 					src_port            发送端绑定的端口号    指定服务器在发送国标流时绑定的端口号，如果为 0 ，由服务器自动分配，别的值 比如 26324 为指定端口
 					dst_url             目标IP                目标IP地址 
 					dst_port            目标端口              目标端口 
@@ -695,6 +706,36 @@
 						"memo": "success",   # success 为成功 ,如果失败是其他值 
 					}				
 					
+         3 	发送1078设备语音对讲音频 
+ 
+			     URL: /index/api/sendJtt1078Talk 
+				 功能：
+				      给通过 openRtpServer 打开常开语音对接端口( jtt1078_KeepOpenPortType = 3 )接入进来的设备发送对讲语音数据
+			   
+			     参数：                 参数说明              参数参考值
+					secret              服务器密码            比如 035c73f7-bb6b-4889-a715-d9eb2d1925cc
+					vhost                                     比如 _defaultVhost_
+					app                 应用名                比如 1078 
+					stream              媒体流名              比如 13832434234_1_talk 
+					send_app            应用名                比如 给1078设备发送的音频的 app 
+					send_stream_id      媒体流名              比如 给1078设备发送的音频的 stream_id    
+					
+			    http GET 方式 
+			       http://190.15.240.11:7088/index/api/sendJtt1078Talk?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&app=1078&stream=13832434234_1_talk&send_app=talk&send_stream_id=audio_1
+				   
+				http  POST 方式 
+				   http URL 
+				     http://190.15.240.11:7088/index/api/sendJtt1078Talk
+					 
+				   http Body 参数 json 格式
+				     {"secret":"035c73f7-bb6b-4889-a715-d9eb2d1925cc","app":"1078","stream":"13832434234_1_talk","send_app":"talk","send_stream_id":"audio_1"}
+				   
+				返回Body：
+					{
+						"code": 0,           # 0为操作成功，其他值为操作失败
+						"memo": "success",   # success 为成功 ,如果失败是其他值 
+					}	
+	
 	11）、获取流媒体服务器所有可用的媒体源
 			 URL: /index/api/getMediaList
 			 
@@ -1215,7 +1256,6 @@
 					      resume               不需要                                            继续回放   
 						  scale                2                                                 2倍速回放 ，还有其他倍数 0.125、0.25、0.5、1、2、4、8、16
 						  seek                 360 单位秒                                        拖拽从开始点计算起到360秒处再回放  【ntp方式拖拽 ，代表 华为 VCN\3800 】
-						                                                                         拖拽的秒数量不能大于 查询录像的开始时间 - 结束时间 的总秒数   
  						
 					http GET 方式 
 			            http://190.15.240.11:7088/index/api/controlRecordPlay?secret=035c73f7-bb6b-4889-a715-d9eb2d1925cc&key=93&command=pause              暂停
@@ -1265,6 +1305,7 @@
 				   "app":"Media",                            # app 
 				   "stream":"Camera_00001",                  # stream  
 				   "mediaServerId":"ABLMediaServer_00001",   # 流媒体服务器编号 ，在配置文件可以配置，如果集群流媒体服务器时，可以给每台流媒体服务器起个编号 
+				   "mediaSourceCount":10，                   # 当前服务器已经接入了多少个码流 
 				   "networkType":23,                         # 媒体流来源网络编号，可参考附表  
 				   "key":130,                                # 媒体流来源编号，可以根据这个key进行关闭流媒体 可以调用delMediaStream或close_streams 函数进行关闭
 				   "status":true,
@@ -1349,7 +1390,8 @@
 				   "stream":"Camera_00001",                  # stream  
 				   "mediaServerId":"ABLMediaServer_00001",   # 流媒体服务器编号 ，在配置文件可以配置，如果集群流媒体服务器时，可以给每台流媒体服务器起个编号 
 				   "networkType":23,                         # 媒体流来源网络编号，可参考附表  
-				   "key":130                                 # 媒体流来源编号，可以根据这个key进行关闭流媒体 可以调用delMediaStream或close_streams 函数进行关闭
+				   "key":130  ,                              # 媒体流来源编号，可以根据这个key进行关闭流媒体 可以调用delMediaStream或close_streams 函数进行关闭
+				   "mediaSourceCount":1                      # 服务器还剩下几个接入流 
 				  }
 
 				 5、 当播放一个url，如果不存在时，会发出一个消息通知 
@@ -1392,7 +1434,7 @@
 					Tools: ABLMediaServer-6.3.5(2023-04-30)
 					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
 
-					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","networkType":50,"key":470,"ip":"44.35.33.248" ,"port":554,"params":""}
+					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","mediaSourceCount":1,"networkType":50,"key":470,"ip":"44.35.33.248" ,"port":554,"params":""}
 				
                   8、当播放流媒体服务器里面某一个码流时，会触发 播放事件 ，可以通知 parmas 参数值进行播放鉴权 				
 					POST /index/hook/on_play HTTP/1.1
@@ -1405,7 +1447,7 @@
 					Tools: ABLMediaServer-6.3.5(2023-04-30)
 					User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36
 
-					{"app":"Media","stream":"Camera_00001","mediaServerId":"ABLMediaServer_00001","networkType":30,"key":472,"ip":"" ,"port":0,"params":"user=admin&password=safsa234234&token=@#$@#$@#ASDFasfdsa@#$23"}
+					{"app":"Media","stream":"Camera_00001","readerCount": 2,"mediaServerId":"ABLMediaServer_00001","networkType":30,"key":472,"ip":"" ,"port":0,"params":"user=admin&password=safsa234234&token=@#$@#$@#ASDFasfdsa@#$23"}
 			
 			     9、如果某一个码流进行MP4录像（enable_mp4=1），会触发录像进度通知事件 
 					POST /index/hook/on_record_progress HTTP/1.1
