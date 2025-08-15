@@ -1,7 +1,5 @@
 #pragma once
 #ifdef USE_BOOST
-
-
 #ifndef _CLIENT_MANAGER_H_
 #define _CLIENT_MANAGER_H_ 
 
@@ -62,7 +60,6 @@ private:
 typedef boost::serialization::singleton<client_manager> client_manager_singleton;
 
 #endif
-
 #else
 #include <memory>
 #include <map>

@@ -155,7 +155,6 @@ inline NETHANDLE client::get_server_id() const
 
 #else
 
-
 #ifdef _WIN32
 #define _WIN32_WINNT 0x0A00 
 #endif
@@ -177,7 +176,6 @@ enum ClientType
 	clientType_Connect = 1,  //主动向外连接服务器产生的client 
 	clientType_Accept = 2   //外部连接本地端口产生的client 
 };
-
 
 class client : public std::enable_shared_from_this<client>
 {
@@ -272,12 +270,10 @@ inline asio::ip::tcp::socket& client::socket()
 	return m_socket;
 }
 
-
 inline asio::ssl::stream<asio::ip::tcp::socket>::lowest_layer_type& client::socket_()
 {
 	return m_socket_.lowest_layer();
 }
-
 
 inline NETHANDLE client::get_id()
 {

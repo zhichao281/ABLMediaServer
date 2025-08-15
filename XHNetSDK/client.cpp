@@ -771,7 +771,6 @@ client::client(asio::io_context& ioc,
 	m_readbuff = new uint8_t[CLIENT_MAX_RECV_BUFF_SIZE];
 }
 
-
 client::~client(void)
 {
 	m_connectflag.exchange(false);
@@ -782,13 +781,14 @@ client::~client(void)
 		delete[] m_readbuff;
 		m_readbuff = NULL;
 	}
+
 	//等到异步发送完毕
 	int nWaitCount = 0;
 	while (m_onwriting.load())
 	{//等待10秒 
-		nWaitCount++;	
-		std::this_thread::sleep_for(std::chrono::milliseconds(1*1000));
-		if (nWaitCount >= 10 )
+		nWaitCount++;
+		std::this_thread::sleep_for(std::chrono::milliseconds(1 * 100));
+		if (nWaitCount >= 10 * 10)
 			break;
 	}
 	m_circularbuff.FreeFifo();
@@ -869,6 +869,7 @@ int32_t client::run()
 #ifndef _WIN32
 		int ul = 1;
 		int nRet3 = ioctl(m_socket.native_handle(), FIONBIO, &ul); //设置为非阻塞模式 
+	
 #else
 		u_long ul = 1; // 1 表示非阻塞模式
 		int nRet3 = ioctlsocket(m_socket.native_handle(), FIONBIO, &ul); // 设置为非阻塞模式
@@ -977,8 +978,10 @@ int32_t client::connect(int8_t* remoteip,
 		printf("connect() , setsockopt nRet1 = %d , nRet2 = %d \r\n", nRet1, nRet2);
 
 #ifndef _WIN32
+
 		int ul = 1;
 		int nRet3 = ioctl(m_socket.native_handle(), FIONBIO, &ul); //设置为非阻塞模式 
+
 #else
 		u_long ul = 1; // 1 表示非阻塞模式
 		int nRet3 = ioctlsocket(m_socket.native_handle(), FIONBIO, &ul); // 设置为非阻塞模式
@@ -1230,11 +1233,8 @@ int32_t client::read(uint8_t* buffer,
 			if (err || (0 == readsize))
 			{
 				*buffsize = 0;
-				if (client_manager::getInstance().pop_client(get_id()))
-				{
-					if (m_fnclose)
-						m_fnclose(get_server_id(), get_id());
-				}
+				//client_manager_singleton::get_mutable_instance().pop_client(get_id());
+				client_manager::getInstance().pop_client(get_id());
 				return e_libnet_err_clireaddata;
 			}
 			else
@@ -1248,7 +1248,12 @@ int32_t client::read(uint8_t* buffer,
 			if (err || (0 == readsize))
 			{
 				*buffsize = 0;
-				client_manager::getInstance().pop_client(get_id());
+				//if (client_manager_singleton::get_mutable_instance().pop_client(get_id()))
+				if (client_manager::getInstance().pop_client(get_id()))
+				{
+					if (m_fnclose)
+						m_fnclose(get_server_id(), get_id());
+				}
 				return e_libnet_err_clireaddata;
 			}
 			else

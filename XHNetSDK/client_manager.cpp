@@ -158,7 +158,6 @@ client_ptr client_manager::get_client(NETHANDLE id)
 
 	return cli;
 }
-
 #else
 #include <memory>
 #include "client_manager.h"
