@@ -232,10 +232,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AACEncode.h" />
+    <ClInclude Include="ABLogFile.h" />
     <ClInclude Include="ABLogSDK.h" />
     <ClInclude Include="ABLSipParse.h" />
     <ClInclude Include="ABLString.h" />
     <ClInclude Include="AVFrameSWS.h" />
+    <ClInclude Include="Base64.hh" />
+    <ClInclude Include="ConvertUTF.h" />
+    <ClInclude Include="cudaCodecDLL.h" />
+    <ClInclude Include="cudaCodecDLL_Linux.h" />
+    <ClInclude Include="cudaEncodeDLL.h" />
+    <ClInclude Include="DigestAuthentication.hh" />
     <ClInclude Include="faac.h" />
     <ClInclude Include="faaccfg.h" />
     <ClInclude Include="ffmpeg\AudioDecoder.h" />
@@ -251,43 +258,48 @@
     <ClInclude Include="FFVideoEncode.h" />
     <ClInclude Include="g711.h" />
     <ClInclude Include="g711_table.h" />
+    <ClInclude Include="gettimeofday.h" />
     <ClInclude Include="GlobalManager.h" />
     <ClInclude Include="H265_SPS_Nal.h" />
     <ClInclude Include="LCbase64.h" />
     <ClInclude Include="MediaFifo.h" />
     <ClInclude Include="MediaStreamSource.h" />
     <ClInclude Include="MyWriteLogFile.h" />
+    <ClInclude Include="netBase64.h" />
+    <ClInclude Include="NetBaseThreadPool.h" />
+    <ClInclude Include="NetClientAddPushProxy.h" />
+    <ClInclude Include="NetClientAddStreamProxy.h" />
     <ClInclude Include="NetClientFFmpegRecv.h" />
     <ClInclude Include="NetClientHttp.h" />
     <ClInclude Include="NetClientReadLocalMediaFile.h" />
-    <ClInclude Include="NetClientRecvJTT1078.h" />
-    <ClInclude Include="NetClientSnap.h" />
-    <ClInclude Include="NetClientWebrtcPlayer.h" />
-    <ClInclude Include="NetGB28181Listen.h" />
-    <ClInclude Include="NetClientAddPushProxy.h" />
-    <ClInclude Include="NetClientAddStreamProxy.h" />
     <ClInclude Include="NetClientRecvFLV.h" />
     <ClInclude Include="NetClientRecvHttpHLS.h" />
     <ClInclude Include="NetClientRecvRtmp.h" />
     <ClInclude Include="NetClientRecvRtsp.h" />
     <ClInclude Include="NetClientSendRtmp.h" />
     <ClInclude Include="NetClientSendRtsp.h" />
+    <ClInclude Include="NetClientSnap.h" />
+    <ClInclude Include="NetClientWebrtcPlayer.h" />
+    <ClInclude Include="NetGB28181Listen.h" />
     <ClInclude Include="NetGB28181RtpClient.h" />
     <ClInclude Include="NetGB28181RtpServer.h" />
     <ClInclude Include="NetRecvBase.h" />
+    <ClInclude Include="NetRtmpServerRecv.h" />
+    <ClInclude Include="NetRtspServer.h" />
     <ClInclude Include="NetRtspServerUDP.h" />
     <ClInclude Include="NetServerHLS.h" />
     <ClInclude Include="NetServerHTTP.h" />
     <ClInclude Include="NetServerHTTP_FLV.h" />
-    <ClInclude Include="NetRtmpServerRecv.h" />
-    <ClInclude Include="NetRtspServer.h" />
-    <ClInclude Include="NetBaseThreadPool.h" />
     <ClInclude Include="NetServerHTTP_MP4.h" />
     <ClInclude Include="NetServerReadMultRecordFile.h" />
     <ClInclude Include="NetServerRecvAudio.h" />
     <ClInclude Include="NetServerRecvRtpTS_PS.h" />
+    <ClInclude Include="NetServerSendWebRTC.h" />
     <ClInclude Include="NetServerWS_FLV.h" />
+    <ClInclude Include="ourMD5.hh" />
     <ClInclude Include="PictureFileSource.h" />
+    <ClInclude Include="ps_demux.h" />
+    <ClInclude Include="ps_mux.h" />
     <ClInclude Include="ReadRecordFileInput.h" />
     <ClInclude Include="RecordFileSource.h" />
     <ClInclude Include="resource.h" />
@@ -295,15 +307,12 @@
     <ClInclude Include="RtcpPacket.h" />
     <ClInclude Include="RtpPSStreamInput.h" />
     <ClInclude Include="RtpTSStreamInput.h" />
-    <ClInclude Include="rtspMD5\Base64.hh" />
-    <ClInclude Include="rtspMD5\DigestAuthentication.hh" />
-    <ClInclude Include="rtspMD5\gettimeofday.h" />
-    <ClInclude Include="rtspMD5\netBase64.h" />
-    <ClInclude Include="rtspMD5\ourMD5.hh" />
-    <ClInclude Include="rtspMD5\strDup.hh" />
+    <ClInclude Include="rtp_depacket.h" />
+    <ClInclude Include="rtp_packet.h" />
     <ClInclude Include="SHA1.h" />
     <ClInclude Include="SimpleIni.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="strDup.hh" />
     <ClInclude Include="StreamRecordFMP4.h" />
     <ClInclude Include="StreamRecordMP4.h" />
     <ClInclude Include="StreamRecordTS.h" />
@@ -313,298 +322,77 @@
     <ClInclude Include="XHNetSDK.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AACEncode.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ABLMediaServer.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ABLogSDK.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ABLSipParse.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ABLString.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="AVFrameSWS.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="AACEncode.cpp" />
+    <ClCompile Include="ABLMediaServer.cpp" />
+    <ClCompile Include="ABLogFile.cpp" />
+    <ClCompile Include="ABLogSDK.cpp" />
+    <ClCompile Include="ABLSipParse.cpp" />
+    <ClCompile Include="ABLString.cpp" />
+    <ClCompile Include="AVFrameSWS.cpp" />
+    <ClCompile Include="Base64.cpp" />
+    <ClCompile Include="CNetRtmpServerRecv.cpp" />
+    <ClCompile Include="DigestAuthentication.cpp" />
     <ClCompile Include="ffmpeg\AudioDecoder.cpp" />
     <ClCompile Include="ffmpeg\audio_resampler.cpp" />
     <ClCompile Include="ffmpeg\FFmpegAVFrameSWS.cpp" />
     <ClCompile Include="ffmpeg\FFmpegDecoderAPI.cpp" />
     <ClCompile Include="ffmpeg\thread_pool.cpp" />
-    <ClCompile Include="FFVideoDecode.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="FFVideoEncode.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="g711.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="g711_table.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="FFVideoDecode.cpp" />
+    <ClCompile Include="FFVideoEncode.cpp" />
+    <ClCompile Include="g711.cpp" />
+    <ClCompile Include="g711_table.cpp" />
+    <ClCompile Include="gettimeofday.cpp" />
     <ClCompile Include="GlobalManager.cpp" />
-    <ClCompile Include="LCbase64.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="MediaFifo.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="MediaStreamSource.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="MyWriteLogFile.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="LCbase64.cpp" />
+    <ClCompile Include="MediaFifo.cpp" />
+    <ClCompile Include="MediaStreamSource.cpp" />
+    <ClCompile Include="MyWriteLogFile.cpp" />
+    <ClCompile Include="netBase64.cpp" />
+    <ClCompile Include="NetBaseThreadPool.cpp" />
+    <ClCompile Include="NetClientAddPushProxy.cpp" />
+    <ClCompile Include="NetClientAddStreamProxy.cpp" />
     <ClCompile Include="NetClientFFmpegRecv.cpp" />
-    <ClCompile Include="NetClientHttp.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="NetClientHttp.cpp" />
     <ClCompile Include="NetClientReadLocalMediaFile.cpp" />
-    <ClCompile Include="NetClientRecvJTT1078.cpp" />
-    <ClCompile Include="NetClientSnap.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="NetClientRecvFLV.cpp" />
+    <ClCompile Include="NetClientRecvHttpHLS.cpp" />
+    <ClCompile Include="NetClientRecvRtmp.cpp" />
+    <ClCompile Include="NetClientRecvRtsp.cpp" />
+    <ClCompile Include="NetClientSendRtmp.cpp" />
+    <ClCompile Include="NetClientSendRtsp.cpp" />
+    <ClCompile Include="NetClientSnap.cpp" />
     <ClCompile Include="NetClientWebrtcPlayer.cpp" />
-    <ClCompile Include="NetGB28181Listen.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetClientAddPushProxy.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetClientAddStreamProxy.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetClientRecvFLV.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetClientRecvHttpHLS.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetClientRecvRtmp.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetClientRecvRtsp.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetClientSendRtmp.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetClientSendRtsp.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetGB28181RtpClient.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetGB28181RtpServer.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetRecvBase.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="NetGB28181Listen.cpp" />
+    <ClCompile Include="NetGB28181RtpClient.cpp" />
+    <ClCompile Include="NetGB28181RtpServer.cpp" />
+    <ClCompile Include="NetRecvBase.cpp" />
+    <ClCompile Include="NetRtspServer.cpp" />
     <ClCompile Include="NetRtspServerUDP.cpp" />
-    <ClCompile Include="NetServerHLS.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetServerHTTP.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetServerHTTP_FLV.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="CNetRtmpServerRecv.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetRtspServer.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetBaseThreadPool.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetServerHTTP_MP4.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="NetServerHLS.cpp" />
+    <ClCompile Include="NetServerHTTP.cpp" />
+    <ClCompile Include="NetServerHTTP_FLV.cpp" />
+    <ClCompile Include="NetServerHTTP_MP4.cpp" />
     <ClCompile Include="NetServerReadMultRecordFile.cpp" />
     <ClCompile Include="NetServerRecvAudio.cpp" />
-    <ClCompile Include="NetServerRecvRtpTS_PS.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="NetServerWS_FLV.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="PictureFileSource.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ReadRecordFileInput.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="RecordFileSource.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="RtcpPacket.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="RtpPSStreamInput.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="RtpTSStreamInput.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="rtspMD5\Base64.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="rtspMD5\DigestAuthentication.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="rtspMD5\gettimeofday.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="rtspMD5\netBase64.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="rtspMD5\ourMD5.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="rtspMD5\strDup.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="SHA1.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="StreamRecordFMP4.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="StreamRecordMP4.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="NetServerRecvRtpTS_PS.cpp" />
+    <ClCompile Include="NetServerSendWebRTC.cpp" />
+    <ClCompile Include="NetServerWS_FLV.cpp" />
+    <ClCompile Include="ourMD5.cpp" />
+    <ClCompile Include="PictureFileSource.cpp" />
+    <ClCompile Include="ReadRecordFileInput.cpp" />
+    <ClCompile Include="RecordFileSource.cpp" />
+    <ClCompile Include="RtcpPacket.cpp" />
+    <ClCompile Include="RtpPSStreamInput.cpp" />
+    <ClCompile Include="RtpTSStreamInput.cpp" />
+    <ClCompile Include="SHA1.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="strDup.cpp" />
+    <ClCompile Include="StreamRecordFMP4.cpp" />
+    <ClCompile Include="StreamRecordMP4.cpp" />
     <ClCompile Include="StreamRecordTS.cpp" />
-    <ClCompile Include="VideoDecode.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="VideoDecode.cpp" />
     <ClCompile Include="win\Crash_Dumper.cpp" />
-    <ClCompile Include="WriteAVFile.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='boost_release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="WriteAVFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ABLMediaServer.rc" />

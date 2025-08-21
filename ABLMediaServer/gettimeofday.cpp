@@ -1,5 +1,5 @@
 #ifdef OS_System_Windows
-#include "../stdafx.h"
+#include "stdafx.h"
 #include <time.h>
 #include <windows.h>
 

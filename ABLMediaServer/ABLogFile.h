@@ -1,3 +1,5 @@
+
+#ifndef OS_System_Windows
 #ifndef _ABLogFile_H
 #define _ABLogFile_H
 
@@ -14,6 +16,9 @@ void* DeleteLogFileThread(void* lpVoid);
 bool  InitLogFile() ;
 bool  WriteLog(LogLevel nLogLevel,const char* ms, ... );
 bool  ExitLogFile() ;
+
+#endif
+
 
 #endif
 

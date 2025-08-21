@@ -1,3 +1,6 @@
+#ifndef OS_System_Windows
+
+
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
@@ -288,3 +291,5 @@ bool  ExitLogFile()
 		return false ;
 }
  
+
+#endif
