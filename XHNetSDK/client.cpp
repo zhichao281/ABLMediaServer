@@ -61,7 +61,9 @@ client::~client(void)
 			break;
 	}
 	m_circularbuff.FreeFifo();
+#ifndef _WIN32
 	malloc_trim(0);
+#endif
 }
 
 void client::handle_handshake(const boost::system::error_code& error)

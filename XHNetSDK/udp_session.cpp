@@ -36,7 +36,9 @@ udp_session::~udp_session(void)
 		delete[] m_readbuff;
 		m_readbuff = NULL;
 	}
+#ifndef _WIN32
 	malloc_trim(0);
+#endif
 }
 
 int32_t udp_session::init(const int8_t* localip,
