@@ -32,7 +32,7 @@ elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
 else()
     message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}")
 endif()
-message(STATUS "CMAKE_SYSTEM_PROCESSOR:${CMAKE_SYSTEM_PROCESSOR}  Target architecture: ${ARCH_DIR}")
+message(STATUS "CMAKE_SYSTEM_PROCESSOR:${CMAKE_SYSTEM_PROCESSOR}  Taibrtp.rget architecture: ${ARCH_DIR}")
 
 
 #=============================
@@ -117,6 +117,13 @@ set_target_properties(XHNetSDK  PROPERTIES
 add_subdirectory(packet)
 
 add_subdirectory(media-server-master)
+set_target_properties(
+    flv rtmp mpeg hls mov rtp  # 列出所有 media-server 的库目标
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+    LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+    RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+)
 
 #=============================
 # 源文件
@@ -162,6 +169,7 @@ target_link_libraries(${PROJECT_NAME}
     hls
     mov
     rtp)
+
 target_link_libraries(${PROJECT_NAME}
     PRIVATE  
     faac

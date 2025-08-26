@@ -9,7 +9,7 @@
       "cmakeCommandArgs": "-DUSE_WEBRTC=OFF -DUSE_BOOST=OFF  -DUSE_XHNetSDK_BOOST=OFF",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
-      "remoteMachineName": "768132158;192.168.2.15 (username=server, port=22, authentication=Password)",
+      "remoteMachineName": "-1611059687;192.168.2.180 (username=admin-nx, port=22, authentication=Password)",
       "remoteCMakeListsRoot": "$HOME/${projectDirName}/src",
       "remoteBuildRoot": "$HOME/${projectDirName}/out/build/${name}",
       "remoteInstallRoot": "$HOME/${projectDirName}/out/install/${name}",
