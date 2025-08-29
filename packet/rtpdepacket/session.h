@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <memory>
+#include <string>
 #include "depacket.h"
 #include "rtp_depacket.h"
 
