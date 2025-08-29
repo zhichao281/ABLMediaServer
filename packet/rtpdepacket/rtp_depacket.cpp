@@ -83,7 +83,7 @@ RTP_DEPACKET_API int32_t rtp_depacket_setmediaoption(uint32_t h, int8_t* opt, in
 		return e_rtpdepkt_err_notfindsession;
 	}
 
-	s->set_mediaoption(reinterpret_cast<char*>(opt), reinterpret_cast<char*>(parm));
+	s->set_mediaoption(std::string(reinterpret_cast<char*>(opt)), td::string(reinterpret_cast<char*>(parm)));
 
 	return e_rtpdepkt_err_noerror;
 }

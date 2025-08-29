@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.12)
 
 project(XHNetSDK
     VERSION 0.2.5.4
@@ -102,7 +102,9 @@ if(USE_OPENSSL)
         ${CMAKE_CURRENT_SOURCE_DIR}/openssl/include/openssl
         ${CMAKE_CURRENT_SOURCE_DIR}/openssl/include/
             )
-    link_directories(${CMAKE_CURRENT_SOURCE_DIR}/openssl/lib/${SYSTEM_NAME_LOWER})
+    link_directories(
+    "/usr/lib/aarch64-linux-gnu/"
+    )
 endif()
 
 
@@ -128,8 +130,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE  pthread)
 
 if(USE_OPENSSL)
     target_link_libraries(${PROJECT_NAME} PRIVATE
-        libssl.a 
-        libcrypto.a)
+        ssl
+        crypt)
 endif()
 
 if(USE_XHNetSDK_BOOST)

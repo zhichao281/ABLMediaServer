@@ -3,10 +3,11 @@
     {
       "name": "Linux-GCC-Release",
       "generator": "Unix Makefiles",
-      "configurationType": "RelWithDebInfo",
+      "configurationType": "Release",
       "cmakeExecutable": "cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
-      "cmakeCommandArgs": "-DUSE_WEBRTC=OFF -DUSE_BOOST=OFF  -DUSE_XHNetSDK_BOOST=OFF",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "remoteMachineName": "-1611059687;192.168.2.180 (username=admin-nx, port=22, authentication=Password)",
@@ -14,10 +15,9 @@
       "remoteBuildRoot": "$HOME/${projectDirName}/out/build/${name}",
       "remoteInstallRoot": "$HOME/${projectDirName}/out/install/${name}",
       "remoteCopySources": true,
-      "rsyncCommandArgs": "-t --delete --delete-excluded",
+      "rsyncCommandArgs": "-t --delete",
       "remoteCopyBuildOutput": true,
-      "remoteCopySourcesMethod": "rsync",
-      "remoteCopyAdditionalIncludeDirectories": []
+      "remoteCopySourcesMethod": "rsync"
     }
   ]
 }

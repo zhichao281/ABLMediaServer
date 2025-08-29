@@ -115,6 +115,15 @@ set_target_properties(XHNetSDK  PROPERTIES
 )
 
 add_subdirectory(packet)
+set_target_properties(
+    PsDemux PsMux RtpDepacket RtpPacket    # 列出所有 media-server 的库目标
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+    LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+    RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}
+)
+
+
 
 add_subdirectory(media-server-master)
 set_target_properties(

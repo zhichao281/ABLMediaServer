@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15) # 建议更新到更高版本
+cmake_minimum_required(VERSION 3.12) 
 project(PsDemux
     VERSION 0.6.0.4
     DESCRIPTION "PsDemux"
