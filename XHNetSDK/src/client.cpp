@@ -9,7 +9,11 @@
 */
 
 #include "stdafx.h"
+#ifdef USE_BOOST
 #include <boost/bind.hpp>
+#else
+#include <functional>
+#endif
 #include "client_manager.h"
 #include "libnet_error.h"
 #include "identifier_generator.h"
@@ -38,6 +42,7 @@ client::client(NETHANDLE srvid,
 	, m_inreading(false)
 	, m_usrreadbuffer(NULL)
 	, m_onwriting(false)
+
 	, m_currwriteaddr(NULL)
 	, m_currwritesize(0)
 	, m_nClientType(nCLientType)
@@ -63,7 +68,6 @@ client::~client(void)
 
 int32_t client::run()
 {
- 
 	return e_libnet_err_noerror;
 }
 

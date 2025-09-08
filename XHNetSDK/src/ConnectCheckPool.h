@@ -1,10 +1,16 @@
 #ifndef _ConnectCheckPool_H
 #define _ConnectCheckPool_H
 
+#ifdef USE_BOOST
 #include <boost/unordered/unordered_map.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <boost/unordered/unordered_map.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/atomic.hpp>
+#else
+#include <unordered_map>
+#include <memory>
+#include <atomic>
+#endif
 
 #include   "client.h"
 
@@ -28,10 +34,14 @@ public:
    EPOLLHANDLE           epfd;
    struct  epoll_event   events[MaxConnectCheckEventCount];
 
-   boost::unordered_map<NETHANDLE, NETHANDLE > clientMap;  //用于判断客户端是否连接成功
-
-   //插入任务ID 
+#ifdef USE_BOOST
+   boost::unordered_map<NETHANDLE, NETHANDLE > clientMap;
    boost::atomic_bool    bRunFlag;
+#else
+   std::unordered_map<NETHANDLE, NETHANDLE > clientMap;
+   std::atomic_bool      bRunFlag;
+#endif
+
    bool                  InsertIntoTask(uint64_t nClientID);
    bool                  DeleteFromTask(uint64_t nClientID);
    void                  CheckTimeoutClient();
@@ -45,7 +55,11 @@ private:
 	std::mutex              threadLock;
     uint64_t                nTrueNetThreadPoolCount; 
 	uint64_t                nGetCurClientID[CheckPool_MaxNetHandleQueueCount];
+#ifdef USE_BOOST
 	boost::atomic_bool      bExitProcessThreadFlag[CheckPool_MaxNetHandleQueueCount];
+#else
+	std::atomic_bool        bExitProcessThreadFlag[CheckPool_MaxNetHandleQueueCount];
+#endif
     volatile bool           bCreateThreadFlag;
 #ifdef  OS_System_Windows
     HANDLE                hProcessHandle[CheckPool_MaxNetHandleQueueCount];

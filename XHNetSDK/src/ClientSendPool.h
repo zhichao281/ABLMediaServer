@@ -1,11 +1,16 @@
 #ifndef _ClientSendPool_H
 #define _ClientSendPool_H
 
+#ifdef USE_BOOST
 #include <boost/unordered/unordered_map.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <boost/unordered/unordered_map.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/atomic/atomic.hpp>
+#else
+#include <unordered_map>
+#include <memory>
+#include <atomic>
+#endif
 
 #include   "client.h"
 #define     MaxNetHandleQueueCount     256 
@@ -22,7 +27,19 @@ public:
    ~CClientSendPool();
    
    void                                         destroySendPool();
-   boost::unordered_map<NETHANDLE, client_ptr > clientMap[MaxNetHandleQueueCount];  //把客户存储起来 
+#ifdef USE_BOOST
+   boost::unordered_map<NETHANDLE, client_ptr > clientMap[MaxNetHandleQueueCount];
+   boost::atomic_bool bRunFlag;
+   boost::atomic<uint64_t> nThreadProcessCount;
+   boost::atomic_bool      bExitProcessThreadFlag[MaxNetHandleQueueCount];
+   boost::atomic_bool      bCreateThreadFlag;
+#else
+   std::unordered_map<NETHANDLE, client_ptr > clientMap[MaxNetHandleQueueCount];
+   std::atomic_bool bRunFlag;
+   std::atomic<uint64_t> nThreadProcessCount;
+   std::atomic_bool      bExitProcessThreadFlag[MaxNetHandleQueueCount];
+   std::atomic_bool      bCreateThreadFlag;
+#endif
    std::condition_variable                      cv[MaxNetHandleQueueCount];
    std::mutex                                   mtx[MaxNetHandleQueueCount];
    bool                                         notify_one(int nThreadOrder);
@@ -34,7 +51,6 @@ public:
 
    bool               InsertIntoTask(uint64_t nClientID);
    bool               DeleteFromTask(int nThreadOrder,uint64_t nClientID);
-   boost::atomic_bool bRunFlag;
 
 private:
 	int                   GetThreadOrder();
@@ -43,11 +59,8 @@ private:
 	void         ProcessFunc();
 	static void* OnProcessThread(void* lpVoid);
 
-	boost::atomic<uint64_t> nThreadProcessCount;
     uint64_t                nTrueNetThreadPoolCount; 
 	uint64_t                nGetCurClientID[MaxNetHandleQueueCount];
-	boost::atomic_bool      bExitProcessThreadFlag[MaxNetHandleQueueCount];
-	boost::atomic_bool      bCreateThreadFlag;
 #ifdef  OS_System_Windows
     HANDLE                hProcessHandle[MaxNetHandleQueueCount];
 #else

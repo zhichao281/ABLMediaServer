@@ -1,5 +1,13 @@
-#include <boost/make_shared.hpp>
+
 #include "client_manager.h"
+
+#ifdef USE_BOOST
+#include <boost/make_shared.hpp>
+
+#else
+
+#endif
+
 
 struct client_deletor
 {
@@ -7,7 +15,16 @@ struct client_deletor
 	{
 		if (cli)
 		{
-			client_manager_singleton::get_mutable_instance().free_client(cli);
+#ifdef USE_BOOST
+			typedef boost::serialization::singleton<client_manager> client_manager_singleton;
+
+
+#else
+			client_manager::get_instance().free_client(cli);
+
+#endif
+
+		
 		}
 	}
 };

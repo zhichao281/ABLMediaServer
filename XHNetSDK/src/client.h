@@ -1,16 +1,20 @@
 #ifndef _CLIENT_H_
 #define _CLIENT_H_ 
 
+#ifdef USE_BOOST
 #include <boost/atomic.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
+#else
+#include <atomic>
+#include <memory>
+#endif
 
 #include "data_define.h"
 #include "XHNetSDK.h"
 #include "MediaFifo.h"
-
 #include "auto_lock.h"
 
 #ifndef SOCKET
@@ -24,7 +28,11 @@ enum ClientType
 	clientType_Accept  = 2   //外部连接本地端口产生的client 
 };
 
+#ifdef USE_BOOST
 class client : public boost::enable_shared_from_this<client>
+#else
+class client : public std::enable_shared_from_this<client>
+#endif
 {
 public:
 	client(NETHANDLE srvhandle,
@@ -45,8 +53,13 @@ public:
 	int                nSendPos;
 	int                nSendLength;
 
-	boost::atomic_uint64_t   nRecvThreadOrder;//记录在哪个线程进行读取
-	boost::atomic_uint64_t   nSendThreadOrder;//记录在哪个线程进行发送
+#ifdef USE_BOOST
+	boost::atomic_uint64_t   nRecvThreadOrder;
+	boost::atomic_uint64_t   nSendThreadOrder;
+#else
+	std::atomic<uint64_t>    nRecvThreadOrder;
+	std::atomic<uint64_t>    nSendThreadOrder;
+#endif
  
 	std::mutex         m_mutex;
  
@@ -83,12 +96,19 @@ public:
 	read_callback m_fnread = NULL ;
 	close_callback m_fnclose = NULL;
 	connect_callback m_fnconnect = NULL;
+#ifdef USE_BOOST
 	boost::atomic_bool m_connectflag;
+#else
+	std::atomic_bool m_connectflag;
+#endif
 
 private:
 	NETHANDLE m_srvid;
-	
+#ifdef USE_BOOST
 	boost::atomic_bool m_closeflag;
+#else
+	std::atomic_bool m_closeflag;
+#endif
 
 	//read
 #ifdef LIBNET_MULTI_THREAD_RECV
@@ -117,11 +137,20 @@ private:
 #else
 	auto_lock::al_spin m_autowrmtx;
 #endif
+#ifdef USE_BOOST
 	boost::atomic_bool m_onwriting;
+#else
+	std::atomic_bool m_onwriting;
+#endif
 	uint8_t*  m_currwriteaddr;
 	int       m_currwritesize;
 };
+
+#ifdef USE_BOOST
 typedef boost::shared_ptr<client>  client_ptr;
+#else
+typedef std::shared_ptr<client>  client_ptr;
+#endif
 
 inline NETHANDLE client::get_id()
 {
