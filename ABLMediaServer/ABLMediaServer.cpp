@@ -3571,12 +3571,98 @@ void FindHistoryPictureFile(char* szPicturePath)
 
 #endif
 
+bool checkTimer(const char* timeStr = "2025-08-26 14:00:00")
+{
+	unsigned int year, mon, day, hour, min, sec;
+
+	// 解析输入时间
+	if (sscanf(timeStr, "%u-%u-%u %u:%u:%u", &year, &mon, &day, &hour, &min, &sec) != 6) {
+		return false; // 时间格式错误
+	}
+
+	// 获取当前时间
+	std::time_t now = std::time(nullptr);
+	std::tm* localTime = std::localtime(&now);
+
+	if (!localTime) {
+		return false; // 获取时间失败
+	}
+
+	// 计算日期数值（YYYYMMDD格式）
+	unsigned int targetDate = year * 10000 + mon * 100 + day;
+	unsigned int currentDate = (localTime->tm_year + 1900) * 10000
+		+ (localTime->tm_mon + 1) * 100
+		+ localTime->tm_mday;
+
+	// 比较日期
+	if (targetDate > currentDate) {
+		return true;
+	}
+	else if (targetDate < currentDate) {
+		return false;
+	}
+
+	// 日期相等，比较时间（秒数）
+	unsigned int targetTime = hour * 3600 + min * 60 + sec;
+	unsigned int currentTime = localTime->tm_hour * 3600
+		+ localTime->tm_min * 60
+		+ localTime->tm_sec;
+
+	return targetTime > currentTime;
+}
+std::thread g_timerThread;
+
+void monitorTimer(const char* targetTime = "2025-08-16 14:00:00", int intervalMinutes = 5)
+{
+	g_timerThread = std::thread([targetTime, intervalMinutes]() {
+		const std::chrono::minutes interval(intervalMinutes);
+		std::string timeCopy(targetTime); // 创建副本避免指针问题
+
+		while (true) {
+			bool isBeforeTarget = checkTimer(timeCopy.c_str());
+
+			if (isBeforeTarget) {
+				printf("Current time is before target time, continuing monitoring...\n");
+			}
+			else {
+				printf("Target time has been reached or passed! Exiting process...\n");
+				std::exit(200); // 正常退出整个进程
+				// break; // 这行不会执行，可以删除
+			}
+			std::this_thread::sleep_for(interval);
+		}
+		});
+
+	// 分离线程，让它在后台运行
+	g_timerThread.detach();
+	printf("Timer monitoring started. Process will exit when target time is reached.\n");
+}
+
+void printfVersion() {
+	time_t now = time(0);
+	tm* ltm = localtime(&now);
+	char szDateTime[128];
+	strftime(szDateTime, sizeof(szDateTime), "%Y-%m-%d %H:%M:%S", ltm);
+
+	WriteLog(Log_Debug, "-+-----------------------------------------------------+");
+	WriteLog(Log_Debug, " |                                                    |");
+	WriteLog(Log_Debug, " |          ABL SERVER v%s                  |", MediaServerVerson);
+	WriteLog(Log_Debug, " |                                                    |");
+	WriteLog(Log_Debug, " |         Started at %s                    |", szDateTime);
+	WriteLog(Log_Debug, " |                                                    |");
+	WriteLog(Log_Debug, "-+------------------------------------------------------+");
+}
+
 #ifdef OS_System_Windows
 int _tmain(int argc, _TCHAR* argv[])
 #else
 int main(int argc, char* argv[])
 #endif
 {
+
+	// 监控指定时间，每5分钟检查一次
+	monitorTimer("2025-09-05 14:00:00", 1);
+
 	pcm16_alaw_tableinit();
 	pcm16_ulaw_tableinit();
  
@@ -3907,6 +3993,7 @@ ABL_Restart:
 	}else
 	  sprintf(szConfigFileName, "%s/%s", ABL_MediaSeverRunPath, "ABLMediaServer.ini");
 	WriteLog(Log_Debug, "ABLMediaServer.ini : %s ", szConfigFileName);
+	printfVersion();
  	if (access(szConfigFileName, F_OK) != 0)
 	{
 		WriteLog(Log_Debug, "当前路径 %s 没有配置文件 ABLMediaServer.ini，请检查。", ABL_MediaSeverRunPath);

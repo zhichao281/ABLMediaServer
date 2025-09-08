@@ -10,7 +10,7 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
-      "remoteMachineName": "-1611059687;192.168.2.180 (username=admin-nx, port=22, authentication=Password)",
+      "remoteMachineName": "768132158;192.168.2.12 (username=server, port=22, authentication=Password)",
       "remoteCMakeListsRoot": "$HOME/${projectDirName}/src",
       "remoteBuildRoot": "$HOME/${projectDirName}/out/build/${name}",
       "remoteInstallRoot": "$HOME/${projectDirName}/out/install/${name}",
@@ -18,6 +18,18 @@
       "rsyncCommandArgs": "-t --delete",
       "remoteCopyBuildOutput": true,
       "remoteCopySourcesMethod": "rsync"
+    },
+    {
+      "name": "x64-Release",
+      "generator": "Visual Studio 17 2022 Win64",
+      "configurationType": "RelWithDebInfo",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "intelliSenseMode": "windows-msvc-x64"
     }
   ]
 }

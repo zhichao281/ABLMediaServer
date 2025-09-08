@@ -1,162 +1,121 @@
 cmake_minimum_required(VERSION 3.12)
 
 project(XHNetSDK
-    VERSION 0.2.5.4
-    DESCRIPTION "XHNetSDK"
-    LANGUAGES C CXX)
-
-#=============================
-# 构建类型（默认 Release）
-#============================
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# 允许相对路径
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-
-set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose build type: Debug or Release" FORCE)
-#set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
-set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O0 -Wall")
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-
-
-
-# 添加选项，用于选择生成动态库、静态库或可执行文件
-option(BUILD_XHNetSDK_SHARED "Build using shared libraries" ON)
-option(BUILD_XHNetSDK_STATIC "Build using static libraries" OFF)
-
-option(BUILD_OPENSSL "Build SSL" ON)
-option(USE_OPENSSL "use SSL" ON)
-option(USE_XHNetSDK_BOOST "Use  XHNetSDK Boost " OFF)
-
-add_definitions(-DASIO_STANDALONE)
-
-include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}           # 含 当前 文件夹下的头文件目录
-        ${CMAKE_CURRENT_SOURCE_DIR}/asio/include   # 包含 asio 文件夹下的头文件目录
-        ${CMAKE_CURRENT_SOURCE_DIR}/asio/include/asio
-        ${CMAKE_CURRENT_SOURCE_DIR}/thread_pool
-  )
-  
-# 设置项目的目标
-FILE(GLOB XHNetSDK_SRC_LIST
-  ${CMAKE_CURRENT_SOURCE_DIR}/*.*
-  ${CMAKE_CURRENT_SOURCE_DIR}/thread_pool/*.* 
+    VERSION 1.0.0
+     DESCRIPTION "XHNetSDK"
+    LANGUAGES C CXX
 )
-# 源文件列表
-#set(XHNetSDK_SRC_LIST
- #   client.cpp
- #   client_manager.cpp
- #   identifier_generator.cpp
- #   io_context_pool.cpp
- #   libnet.cpp
- #   server.cpp
- #   server_manager.cpp
- #   udp_session.cpp
- #   udp_session_manager.cpp
- #   circular_buffer.cpp
- #   MediaFifo.cpp
- #   ${CMAKE_CURRENT_SOURCE_DIR}/thread_pool/thread_pool.cpp
-#)
 
 
-# 设置安装路径
-if (UNIX AND NOT APPLE)
-    if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
-        set(INSTALL_BIN_DIR "${CMAKE_CURRENT_LIST_DIR}/bin/arm64" CACHE PATH "exe和dll的安装路径")
-        set(INSTALL_LIB_DIR "${CMAKE_CURRENT_LIST_DIR}/../bin/arm64" CACHE PATH "lib的安装路径")
-        set(SYSTEM_NAME_LOWER "arm64")   # 自定义系统名称
-    else()
-        set(INSTALL_BIN_DIR "${CMAKE_CURRENT_LIST_DIR}/bin/linux86" CACHE PATH "exe和dll的安装路径")
-        set(INSTALL_LIB_DIR "${CMAKE_CURRENT_LIST_DIR}/bin/linux86" CACHE PATH "lib的安装路径")
-        set(SYSTEM_NAME_LOWER "linux86")   # 自定义系统名称
-    endif()
+# 设置C++标准
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+
+option(USE_BOOST "Use Boost library" OFF)
+
+
+# 检测操作系统
+if(WIN32)
+    message(STATUS "Building for Windows platform")
+    # Windows特定设置
+    add_definitions(-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0601)
+    
+    # 添加wepoll源文件
+    set(WEPOLL_SRC wepoll.c)
+    
+    # Windows编译选项
+    add_compile_options(/fp:precise /W3 /GL /MP)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+    
+else()
+    message(STATUS "Building for Unix-like platform")
+    # Linux/Unix编译选项
+    add_compile_options(-fPIC -fvisibility=hidden)
 endif()
 
-
-# 设置输出目录
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${INSTALL_BIN_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${INSTALL_LIB_DIR})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${INSTALL_LIB_DIR})
-
+# 包含目录
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 #=============================
 # Boost
 #=============================
-if(USE_XHNetSDK_BOOST)
-    set(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../3rd/boost")
+if(USE_BOOST)
+    set(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/3rd/boost")
     set(BOOST_INCLUDEDIR "${BOOST_ROOT}/include")
-    set(BOOST_LIBRARYDIR "${CMAKE_CURRENT_SOURCE_DIR}/../bin/${SYSTEM_NAME_LOWER}")
+    set(BOOST_LIBRARYDIR "${BOOST_ROOT}/${ARCH_DIR}")
     add_compile_definitions(USE_BOOST)
     include_directories(${BOOST_INCLUDEDIR})
     link_directories(${BOOST_LIBRARYDIR})
-    message(STATUS "BOOST_ROOT    :${BOOST_ROOT}    BOOST_LIBRARYDIR    :${BOOST_LIBRARYDIR}    ")
-
-
-endif()
-
-if(USE_OPENSSL)
-    include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}/openssl/include/openssl
-        ${CMAKE_CURRENT_SOURCE_DIR}/openssl/include/
-            )
-    link_directories(
-    "/usr/lib/aarch64-linux-gnu/"
-    )
 endif()
 
 
+# 源文件列表
 
-# 根据选项生成对应的目标
-if (BUILD_XHNetSDK_SHARED)
-   add_library(${PROJECT_NAME} SHARED ${XHNetSDK_SRC_LIST})
-     message("build BUILD_XHNetSDK_SHARED")
-  
-elseif (BUILD_XHNetSDK_STATIC)
-    add_library(${PROJECT_NAME}  STATIC ${XHNetSDK_SRC_LIST} )
-     message("build BUILD_XHNetSDK_STATIC")
-else()
-    add_executable(${PROJECT_NAME}  ${XHNetSDK_SRC_LIST})
-     message("build out file")
-endif()
-
-
-# 链接当前文件夹下的 asio 头文件目录
-target_include_directories(${PROJECT_NAME} PRIVATE asio/include)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE  pthread)
-
-if(USE_OPENSSL)
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        ssl
-        crypt)
-endif()
-
-if(USE_XHNetSDK_BOOST)
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
-        boost_system
-        boost_thread
-        boost_log
-        boost_regex
-        boost_filesystem
-        boost_date_time
-        boost_chrono
-        boost_atomic
-    )
-endif()
-
-# 设置INSTALL_RPATH，用于安装时
-set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN")
-
-# 安装目标文件到 Bin 文件夹中
-install(TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION ${INSTALL_BIN_DIR}
-    LIBRARY DESTINATION ${INSTALL_LIB_DIR}
-    ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
+# 源文件列表（加上src/前缀）
+set(SOURCES
+    src/client.cpp
+    src/client_manager.cpp
+    src/identifier_generator.cpp
+    src/XHNetSDK.cpp
+    src/ClientReadPool.cpp
+    src/ClientSendPool.cpp
+    src/ConnectCheckPool.cpp
+    src/ListenPool.cpp
+    src/MediaFifo.cpp
+    src/UdpPool.cpp
 )
-install(DIRECTORY html DESTINATION ${INSTALL_BIN_DIR})
-install(FILES config.json DESTINATION ${INSTALL_BIN_DIR})
-install(FILES Procfile DESTINATION ${INSTALL_BIN_DIR})
+
+# 如果是Windows，添加wepoll.c
+if(WIN32)
+    list(APPEND SOURCES src/${WEPOLL_SRC})
+endif()
+
+# 添加共享库
+add_library(XHNetSDK SHARED ${SOURCES})
+
+# 设置库属性
+set_target_properties(XHNetSDK  PROPERTIES
+    OUTPUT_NAME "XHNetSDK"
+    VERSION 1.0.0
+    SOVERSION 1
+    # 让运行时查找当前目录
+    BUILD_RPATH "\$ORIGIN"
+    INSTALL_RPATH "\$ORIGIN"
+    BUILD_WITH_INSTALL_RPATH TRUE  # 让 INSTALL_RPATH 在构建时也生效
+    SKIP_BUILD_RPATH FALSE         # 不跳过构建时的 RPATH
+)
+
+
+# 平台特定的链接库
+if(WIN32)
+    target_link_libraries(XHNetSDK
+        ${Boost_LIBRARIES}
+        ws2_32
+        advapi32
+    )
+    # Windows下的库命名约定
+    set_target_properties(XHNetSDK PROPERTIES SUFFIX ".dll")
+else()
+    target_link_libraries(XHNetSDK
+        ${Boost_LIBRARIES}
+        pthread
+    )
+    # Linux下的库命名约定
+    set_target_properties(XHNetSDK PROPERTIES SUFFIX ".so")
+endif()
+
+# 安装目标
+install(TARGETS XHNetSDK
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+
+# 可选：复制依赖的DLL（Windows）
+if(WIN32)
+    # 如果需要在安装时复制Boost DLL
+    install(FILES ${Boost_LIBRARIES} DESTINATION bin)
+endif()

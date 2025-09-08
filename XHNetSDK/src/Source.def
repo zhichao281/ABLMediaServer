@@ -1,0 +1,17 @@
+LIBRARY
+
+EXPORTS
+	XHNetSDK_Init
+	XHNetSDK_Deinit
+	XHNetSDK_Listen
+	XHNetSDK_Unlisten
+	XHNetSDK_Connect
+	XHNetSDK_Disconnect
+	XHNetSDK_Write
+	XHNetSDK_Read
+	XHNetSDK_BuildUdp
+	XHNetSDK_DestoryUdp
+	XHNetSDK_Sendto
+	XHNetSDK_Recvfrom
+	XHNetSDK_Multicast
+	XHNetSDK_GenerateIdentifier

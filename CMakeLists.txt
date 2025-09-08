@@ -30,7 +30,7 @@ if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
     set(ARCH_DIR "arm64")
 else()
-    message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}")
+    set(ARCH_DIR "x64")
 endif()
 message(STATUS "CMAKE_SYSTEM_PROCESSOR:${CMAKE_SYSTEM_PROCESSOR}  Taibrtp.rget architecture: ${ARCH_DIR}")
 

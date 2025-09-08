@@ -1,58 +1,59 @@
-我们的官网 [https://www.yunshihome.com/](http://)
+---
+# ABLMediaServer
 
-我们的QQ群：873666268
+ABLMediaServer 是一款跨平台高性能流媒体服务器，支持多种协议输入输出、硬件加速转码、智能录像与图片抓拍等功能，适用于安防、直播、点播等多场景。
 
-### 一、功能说明
+官网：[https://www.yunshihome.com/](http://)
+QQ群：873666268
 
-         
+## 主要特性
 
-- ABLMediaServer是一款高性能流媒体服务器，其在Windows平台采用高性能的完成端口网络模型，在Linux平台则采用epoll，同时配备线程池用于媒体数据的接收、转换和发送。
+- **多协议支持**：RTSP、RTMP、GB28181、HTTP-FLV、WS-FLV、HLS、HTTP-MP4 等输入输出。
+- **高性能架构**：Windows 使用完成端口，Linux 使用 epoll，配合线程池高效处理媒体数据。
+- **硬件加速转码**：支持英伟达显卡硬件加速，H265 转 H264，分辨率/码率可配置。
+- **智能录像与点播**：支持录像、查询、极速下载、倍速/拖动/暂停播放。
+- **图片抓拍**：秒级抓拍，支持图片查询与下载。
+- **水印功能**：支持自定义水印内容、颜色、大小、位置。
+- **API丰富**：支持 HTTP/RESTful 接口，便于集成与自动化。
 
-- 该服务器具有强劲的性能和稳定的运行，经过压力测试表明，在转发性能、CPU占用率和运行稳定性方面具有明显优势。ABLMediaServer能够接收通过ffmpeg命令或其他标准的rtsp、rtmp推流函数推送的rtsp流、rtmp流，并能够代理拉流，接收国标GB28181流。
+## 快速开始
 
-- 服务器经过转换后，能够输出标准的rtsp码流、rtmp码流、http-flv、ws-flv码流（支持H265视频输出）、http-mp4（视频支持H264、H265，音频支持AAC）、hls码流（视频支持H264、H265，音频支持AAC）、GB28181码流（国标PS流）。
+1. **编译与运行**
+	 - Windows 推荐使用 Visual Studio 打开 `ABLMediaServer.sln` 编译。
+	 - Linux 推荐使用 CMake：
+		 ```bash
+		 mkdir build && cd build
+		 cmake ..
+		 make
+		 ```
+	 - 运行主程序，确保 `ABLMediaServer.ini` 配置正确。
 
-- 此外，流媒体服务器支持录像功能，包括智能录像删除、录像查询、录像文件点播和录像文件极速下载。对于http-flv、ws-flv、http-mp4协议点播时，支持暂停继续和拖动播放；对于rtsp点播录像文件时，支持慢放（1/16、1/8、1/4、1/2）、快放（2、4、8、16）、正常速度以及拖动播放。
+2. **配置说明**
+	 - `localipAddress`：本机 IP，建议手动配置，影响媒体 URL 拼接。
+	 - `recordPath`：录像保存路径，建议配置为大容量硬盘。
 
-- 该服务器还支持秒级（基本上在1秒以内）图片抓拍，并能够对抓拍的图片进行查找和以http协议下载。同时，服务器支持H265转码为H264，转码输出视频支持指定分辨率、宽高、码率大小等参数。在Windows平台上，支持英伟达显卡硬件加速转码。
+3. **推流/拉流示例**
+	 - 使用 ffmpeg 推送 RTSP：
+		 ```bash
+		 ffmpeg -rtsp_transport tcp -i <源地址> -vcodec copy -acodec copy -f rtsp -rtsp_transport tcp rtsp://<服务器IP>:554/Media/Camera_00001
+		 ```
+	 - 拉流/点播可用 VLC、EasyPlayer.js、flv.js 等播放器。
 
-- 经过测试，Linux平台最大并发转码能力为40路H265（在至强E5 2650 V3的硬件环境下），而Windows平台为35路H265（在i9 + 英伟达RTX 2080的硬件环境下）。
+## API接口
 
-- 最后，服务器支持对转码后的视频打入自定义水印，水印的字符内容、字体大小、字体颜色和字体位置均可在配置文件中配置。
+详细接口请参考 `doc/API.md`，支持流管理、代理、推流、抓拍、录像、配置等丰富功能。
 
+## 常见问题 FAQ
 
-                                                                           【欢迎加入高性能流媒体服务QQ群 873666268 】
-  
-二、ABLMediaServer主要功能
-	 
-    网络协议媒体输入 
-	   rtsp、rtmp外部主动推流输入 
-         1、rtsp外部主动推流    (支持 视频：H264、H265 ，音频：AAC、G711A、G711U)	
-         2、rtmp外部主动推流    (支持 视频：H264、H265 ，音频：AAC)	
-		 3、国标GB28181输入     (支持 视频：H264、H265 ，音频：AAC、G711A、G711U) 
-		 
-	   rtsp、rtmp、http-flv 拉流输入：
-         1、rtsp     拉流       (支持 视频：H264、H265 ，音频：AAC、G711A、G711U)	
-         2、rtmp     拉流       (支持 视频：H264、H265 ，音频：AAC)	
-		 3、http-flv 拉流       (支持 视频：H264、H265 ，音频：AAC)
-		 
-    网络协议媒体 输出：
-	   被动拉流输出 
-         1、rtsp                (支持 视频：H264、H265 ，音频：AAC、G711A、G711U)	
-         2、rtmp                (支持 视频：H264、H265 ，音频：AAC)
-		 3、GB28181码流         (支持 视频：H264、H265 ，音频：AAC、G711A、G711U)
-         4、http-flv            (支持 视频：H264、H265 ，音频：AAC)
-         5、http-hls            (支持 视频：H264、H265 ，音频：AAC) 
-		 6、http-mp4            (支持 视频：H264、H265 ，音频：AAC)  
- 		 7、websocket-flv       (支持 视频：H264、H265 ，音频：AAC)
-	  
-	   rtsp、rtmp、gb28181 主动推流输出：
-         1、rtsp推流            (支持 视频：H264、H265 ，音频：AAC、G711A、G711U)	
-         2、rtmp推流            (支持 视频：H264、H265 ，音频：AAC)		  
-         3、GB28181推流         (支持 视频：H264、H265 ，音频：AAC、G711A、G711U)	
-	  
-	
-三、简明使用例子
+- **Q: 如何编译项目？**
+	A: Windows 用 VS，Linux 用 CMake。
+- **Q: 如何配置多网卡环境？**
+	A: 建议手动设置 `localipAddress`，否则自动获取可能不准确。
+- **Q: 如何获取支持？**
+	A: 加入QQ群或访问官网。
+
+---
+...existing code...
      1） 首先要配置 ABLMediaServer.ini 里面的 本机的IP地址 localipAddress 、recordPath 项。 
 	    
  		 1  本机的IP地址，最好需要配置准确（如果不配置程序会自动获取一个地址代替，如果本机有多个地址可能会不准确，如果配置则使用配置的IP地址，这样就准确），
