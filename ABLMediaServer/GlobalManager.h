@@ -34,11 +34,12 @@ public:
 	std::shared_ptr<CMediaStreamSource>   GetMediaStreamSource(char* szURL, bool bNoticeStreamNoFound = false);
 
 
-	//无锁查找，在外层已经有锁
-	CNetRevcBase_ptr GetNetRevcBaseClientNoLock(NETHANDLE CltHandle);
+
 
 
 #endif
+	//无锁查找，在外层已经有锁
+	CNetRevcBase_ptr GetNetRevcBaseClientNoLock(NETHANDLE CltHandle);
 	bool                                  DeleteNetRevcBaseClient(NETHANDLE CltHandle);
 	bool                                  DeleteMediaStreamSource(char* szURL);
 	bool                                  DeleteClientMediaStreamSource(uint64_t nClient);

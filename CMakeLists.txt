@@ -60,7 +60,7 @@ add_compile_definitions(FFMPEG6)
 if(USE_BOOST)
     set(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/3rd/boost")
     set(BOOST_INCLUDEDIR "${BOOST_ROOT}/include")
-    set(BOOST_LIBRARYDIR "${BOOST_ROOT}/${ARCH_DIR}")
+    set(BOOST_LIBRARYDIR "${BOOST_ROOT}/lib")
     add_compile_definitions(USE_BOOST)
     include_directories(${BOOST_INCLUDEDIR})
     link_directories(${BOOST_LIBRARYDIR})
@@ -163,6 +163,7 @@ set_target_properties(${PROJECT_NAME}  PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}
 )
 
+
 #…Ë÷√RPATH¬∑æ∂
 set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN")
 
@@ -212,7 +213,7 @@ if(USE_BOOST)
         boost_system
         boost_thread
         boost_log
-        boost_regex
+
         boost_filesystem
         boost_date_time
         boost_chrono

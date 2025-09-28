@@ -17,7 +17,14 @@
       "remoteCopySources": true,
       "rsyncCommandArgs": "-t --delete",
       "remoteCopyBuildOutput": true,
-      "remoteCopySourcesMethod": "rsync"
+      "remoteCopySourcesMethod": "rsync",
+      "variables": [
+        {
+          "name": "USE_BOOST",
+          "value": "True",
+          "type": "BOOL"
+        }
+      ]
     },
     {
       "name": "x64-Release",

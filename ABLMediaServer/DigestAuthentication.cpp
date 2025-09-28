@@ -26,10 +26,17 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if (defined _WIN32 || defined _WIN64)
+#include "gettimeofday.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#else
 #include <unistd.h>
 #include <sys/time.h>
 #include <unistd.h>
 
+#endif
 #if 0 //DESCRIBE  szResponse = 0x00cff964 "c9dd7b543f920f9d0913d4de859c8360"  
 	author.setRealmAndNonce("IP Camera(54112)", "9d2bff7a199e2e62d0bd70855641b168");
 	author.setUsernameAndPassword("admin", "szga2019");
