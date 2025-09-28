@@ -1,7 +1,7 @@
 #ifndef _NetClientSendRtsp_H
 #define _NetClientSendRtsp_H
 
-#include "./rtspMD5/DigestAuthentication.hh"
+#include "DigestAuthentication.hh"
 
 #include "MediaStreamSource.h"
 #include "rtp_packet.h"
