@@ -6,13 +6,7 @@
 #ifdef _WIN32
 
 #include <Windows.h>
-
-#if (__cplusplus < 201103L)
-#include <boost/thread/mutex.hpp>
-#else
 #include <mutex>
-#endif
-
 
 namespace auto_lock
 {
@@ -51,13 +45,7 @@ namespace auto_lock
 	private:
 		CRITICAL_SECTION m_spin;
 	};
-
-#if (__cplusplus < 201103L)
-	typedef boost::mutex al_mutex;
-#else
 	typedef std::mutex al_mutex;
-#endif
-
 
 }
 

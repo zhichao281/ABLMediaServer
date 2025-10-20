@@ -181,7 +181,17 @@ int32_t client::write(uint8_t* data,
 			}
 			else
 			{
- 				client_manager_singleton::get_mutable_instance().pop_client(get_id());
+
+#ifdef USE_BOOST
+
+				client_manager_singleton::get_mutable_instance().pop_client(get_id());
+
+#else
+
+				client_manager::get_instance().pop_client(get_id());
+#endif
+
+
  				return e_libnet_err_cliwritedata;
 			}
 

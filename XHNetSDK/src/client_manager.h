@@ -1,25 +1,30 @@
 #ifndef _CLIENT_MANAGER_H_
 #define _CLIENT_MANAGER_H_ 
 
+#include "client.h"
+#include "unordered_object_pool.h"
+
+
+
 #ifdef USE_BOOST
 #include <boost/unordered_map.hpp>
+#include <boost/serialization/singleton.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
+#include "unordered_object_pool.h"
 #else
 #include <unordered_map>
 #include <memory>
+#include "./common/thread_pool.h"
 #endif
 
-#include "client.h"
-#include "unordered_object_pool.h"
+
 
 #define CLIENT_POOL_OBJECT_COUNT 1000
 #define CLIENT_POOL_MAX_KEEP_COUNT 100 
 
-typedef simple_pool::unordered_object_pool<client> client_pool;
 #ifdef USE_BOOST
+typedef simple_pool::unordered_object_pool<client> client_pool;
 typedef boost::shared_ptr<client_pool> client_pool_ptr;
-#else
-typedef std::shared_ptr<client_pool> client_pool_ptr;
 #endif
 
 class client_manager
@@ -28,7 +33,9 @@ public:
     client_manager(void);
     ~client_manager(void);
 
+#ifndef USE_BOOST
     static client_manager& get_instance();
+#endif
 
     client_ptr malloc_client(
         NETHANDLE srvid,
@@ -45,22 +52,25 @@ public:
     void pop_all_clients();
     client_ptr get_client(NETHANDLE id);
 
+
+private:
+
+	client_manager(const client_manager&) = delete;
+	client_manager& operator=(const client_manager&) = delete;
+
 private:
 #ifdef USE_BOOST
     typedef boost::unordered_map<NETHANDLE, client_ptr>::iterator climapiter;
     typedef boost::unordered_map<NETHANDLE, client_ptr>::const_iterator const_climapiter;
+    client_pool m_pool;
+    boost::unordered_map<NETHANDLE, client_ptr> m_clients;
 #else
     typedef std::unordered_map<NETHANDLE, client_ptr>::iterator climapiter;
     typedef std::unordered_map<NETHANDLE, client_ptr>::const_iterator const_climapiter;
-#endif
-
-private:
-    client_pool m_pool;
-#ifdef USE_BOOST
-    boost::unordered_map<NETHANDLE, client_ptr> m_clients;
-#else
+    //netlib::ThreadPool m_pool; // 用线程池替代对象池
     std::unordered_map<NETHANDLE, client_ptr> m_clients;
 #endif
+
 #ifdef LIBNET_USE_CORE_SYNC_MUTEX
     auto_lock::al_mutex m_poolmtx;
     auto_lock::al_mutex m_climtx;
@@ -69,17 +79,14 @@ private:
     std::mutex          m_climtx;
 #endif
 
-    // 禁止拷贝和赋值
-    client_manager(const client_manager&) = delete;
-    client_manager& operator=(const client_manager&) = delete;
+
+
+
 };
 
 #ifdef USE_BOOST
+
 typedef boost::serialization::singleton<client_manager> client_manager_singleton;
-
-
-#else
-
 
 #endif
 

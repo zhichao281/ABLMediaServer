@@ -10,6 +10,16 @@
 #else
 #include <atomic>
 #include <memory>
+
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#endif
+
+
 #endif
 
 #include "data_define.h"
@@ -53,14 +63,7 @@ public:
 	int                nSendPos;
 	int                nSendLength;
 
-#ifdef USE_BOOST
-	boost::atomic_uint64_t   nRecvThreadOrder;
-	boost::atomic_uint64_t   nSendThreadOrder;
-#else
-	std::atomic<uint64_t>    nRecvThreadOrder;
-	std::atomic<uint64_t>    nSendThreadOrder;
-#endif
- 
+
 	std::mutex         m_mutex;
  
 	uint64_t           nCreateTime;
@@ -96,19 +99,11 @@ public:
 	read_callback m_fnread = NULL ;
 	close_callback m_fnclose = NULL;
 	connect_callback m_fnconnect = NULL;
-#ifdef USE_BOOST
-	boost::atomic_bool m_connectflag;
-#else
-	std::atomic_bool m_connectflag;
-#endif
+
 
 private:
 	NETHANDLE m_srvid;
-#ifdef USE_BOOST
-	boost::atomic_bool m_closeflag;
-#else
-	std::atomic_bool m_closeflag;
-#endif
+
 
 	//read
 #ifdef LIBNET_MULTI_THREAD_RECV
@@ -137,13 +132,28 @@ private:
 #else
 	auto_lock::al_spin m_autowrmtx;
 #endif
-#ifdef USE_BOOST
-	boost::atomic_bool m_onwriting;
-#else
-	std::atomic_bool m_onwriting;
-#endif
+
 	uint8_t*  m_currwriteaddr;
 	int       m_currwritesize;
+
+
+
+public:
+#ifdef USE_BOOST
+	boost::atomic<bool> m_connectflag;
+	boost::atomic<bool> m_closeflag;
+	boost::atomic<bool> m_onwriting;
+	boost::atomic_uint64_t   nRecvThreadOrder;
+	boost::atomic_uint64_t   nSendThreadOrder;
+#else
+	std::atomic_bool m_connectflag;
+	std::atomic_bool m_closeflag;
+	std::atomic_bool m_onwriting;
+	std::atomic<uint64_t>    nRecvThreadOrder;
+	std::atomic<uint64_t>    nSendThreadOrder;
+#endif
+
+
 };
 
 #ifdef USE_BOOST

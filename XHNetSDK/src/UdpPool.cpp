@@ -170,7 +170,7 @@ int32_t CUdpPool::BuildUdp(
 {
 	*srvhandle = 0 ;
 
-	boost::shared_ptr<UdpStruct> udpStruct = boost::make_shared<UdpStruct>();
+	std::shared_ptr<UdpStruct> udpStruct = std::make_shared<UdpStruct>();
 	if (udpStruct == NULL)
 		return e_libnet_err_make_shared;
 
@@ -230,9 +230,9 @@ int32_t CUdpPool::BuildUdp(
 	}
 
 	std::lock_guard<std::mutex> lock(threadLock);
- 	std::pair<boost::unordered_map<NETHANDLE, UdpStructPtr>::iterator, bool> ret = m_UdpStructPtrMap.insert(std::make_pair(udpStruct->srvhandle, udpStruct));
+ 	auto ret = m_UdpStructPtrMap.insert(std::make_pair(udpStruct->srvhandle, udpStruct));
 
-	nProcThreadOrder.add(1);
+	nProcThreadOrder.fetch_add(1);
 
 	*srvhandle = udpStruct->srvhandle ;
 

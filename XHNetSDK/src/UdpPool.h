@@ -1,11 +1,21 @@
 #ifndef _UdpPool_H
 #define _UdpPool_H
 
+
+#ifdef USE_BOOST
 #include <boost/unordered/unordered_map.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <boost/unordered/unordered_map.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/atomic.hpp>
+
+#else
+#include <unordered_map>
+#include <memory>
+#include <atomic>
+#endif
+
+
+
 
 #include <vector>
 
@@ -31,8 +41,17 @@ struct UdpStruct
 	int             nProcThreadOrder;//处理线程序号
 };
 
+
+#ifdef USE_BOOST
 typedef boost::shared_ptr<UdpStruct> UdpStructPtr;
 typedef boost::unordered_map<NETHANDLE, UdpStructPtr> UdpStructPtrMap;  //存储listen结构的智能指针
+
+#else
+typedef std::shared_ptr<UdpStruct> UdpStructPtr;
+typedef std::unordered_map<NETHANDLE, UdpStructPtr> UdpStructPtrMap;  //存储listen结构的智能指针
+
+#endif
+
 
 class CUdpPool
 {
@@ -41,7 +60,7 @@ public:
    ~CUdpPool();
   	void destoryUdpPool();
 
-	boost::atomic<uint64_t> nProcThreadOrder;
+
    int32_t BuildUdp(
 		int8_t* localip,
 		uint16_t localport,
@@ -61,7 +80,7 @@ public:
    struct  epoll_event                          events[MaxUdpThreadCount][MaxUdpEventCount];
    UdpStructPtrMap                              m_UdpStructPtrMap;
 
-   boost::atomic_bool     bRunFlag;
+
 
 private:
 	int                   GetThreadOrder();
@@ -74,8 +93,23 @@ private:
 	std::mutex              threadLock;
     uint64_t                nTrueNetThreadPoolCount; 
 	uint64_t                nGetCurClientID[MaxNetHandleQueueCount];
+
+
+
+
+#ifdef USE_BOOST
+	boost::atomic<uint64_t> nProcThreadOrder;
+	boost::atomic_bool     bRunFlag;
 	boost::atomic_bool      bExitProcessThreadFlag[MaxNetHandleQueueCount];
 	boost::atomic_bool      bCreateThreadFlag;
+#else
+	std::atomic<bool>        bExitProcessThreadFlag[MaxNetHandleQueueCount];
+	std::atomic<bool>        bCreateThreadFlag;
+	std::atomic<uint64_t>    nProcThreadOrder;
+	std::atomic<bool>        bRunFlag;
+#endif
+
+
 #ifdef  OS_System_Windows
     HANDLE                hProcessHandle[MaxNetHandleQueueCount];
 #else

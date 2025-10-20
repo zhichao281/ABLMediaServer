@@ -30,7 +30,11 @@ CListenPool::CListenPool(int nThreadCount)
  
 	nGetCurrentThreadOrder = 0;
 	unsigned long dwThread;
-	bRunFlag = true;
+#ifdef USE_BOOST
+	bRunFlag.store(true);
+#else
+	bRunFlag.store(true);
+#endif
 	for (int i = 0; i < nTrueNetThreadPoolCount; i++)
 	{
 #ifdef OS_System_Windows
@@ -113,7 +117,11 @@ void CListenPool::ProcessFunc()
 				sLinger.l_linger = 1;
 				int ret = setsockopt(cfd, SOL_SOCKET, SO_LINGER, (char *)&sLinger, sizeof(linger));
 
+#ifdef USE_BOOST
 				client_ptr cli = client_manager_singleton::get_mutable_instance().malloc_client(ptr->srvhandle, ptr->fnread, ptr->fnclose, (0 != ptr->autoread) ? true : false, ptr->bSSLFlag, clientType_Accept, ptr->fnaccept);
+#else
+				client_ptr cli = client_manager::get_instance().malloc_client(ptr->srvhandle, ptr->fnread, ptr->fnclose, (0 != ptr->autoread) ? true : false, ptr->bSSLFlag, clientType_Accept, ptr->fnaccept);
+#endif
 				if (cli)
 				{
   					cli->m_Socket  = cfd;
@@ -121,7 +129,11 @@ void CListenPool::ProcessFunc()
 					cli->SetConnect(true);
   
 					//加入客户链表
+#ifdef USE_BOOST
  					client_manager_singleton::get_mutable_instance().push_client(cli);
+#else
+ 					client_manager::get_instance().push_client(cli);
+#endif
 
 					//加入发送线程池
 					clientSendPool->InsertIntoTask(cli->get_id());
@@ -193,7 +205,11 @@ void CListenPool::destroyListenPool()
 	for (it = m_listenStructPtrMap.begin(); it != m_listenStructPtrMap.end();)
 	{
   	    //执行关闭accept接入进来所有的连接SOCKET 
+#ifdef USE_BOOST
 		client_manager_singleton::get_mutable_instance().pop_server_clients((*it).second->srvhandle);
+#else
+		client_manager::get_instance().pop_server_clients((*it).second->srvhandle);
+#endif
  
 		//关闭accept的Socket套接字 
 #ifdef OS_System_Windows
@@ -218,7 +234,7 @@ int32_t CListenPool::Listen(
 {
 	*srvhandle = 0 ;
 
-	boost::shared_ptr<ListenStruct> listenStruct = boost::make_shared<ListenStruct>();
+	std::shared_ptr<ListenStruct> listenStruct = std::make_shared<ListenStruct>();
 	if (listenStruct == NULL)
 		return e_libnet_err_make_shared;
 
@@ -295,10 +311,10 @@ int32_t CListenPool::Listen(
 
 	std::lock_guard<std::mutex> lock(threadLock);
 
-	std::pair<boost::unordered_map<NETHANDLE, ListenStructPtr>::iterator, bool> ret =
+	auto ret =
 		m_listenStructPtrMap.insert(std::make_pair(listenStruct->srvhandle, listenStruct));
 
-	nProcThreadOrder.add(1);
+	nProcThreadOrder.fetch_add(1);
 
 	*srvhandle = listenStruct->srvhandle ;
 
@@ -320,7 +336,11 @@ int32_t CListenPool::Unlisten(NETHANDLE srvhandle)
 	if (it != m_listenStructPtrMap.end())
 	{
 		//执行关闭accept接入进来所有的连接SOCKET 
+#ifdef USE_BOOST
 		client_manager_singleton::get_mutable_instance().pop_server_clients((*it).second->srvhandle);
+#else
+		client_manager::get_instance().pop_server_clients((*it).second->srvhandle);
+#endif
 
 		//把 accept 的socket 从 epoll 里面移除 
 		struct epoll_event  event;

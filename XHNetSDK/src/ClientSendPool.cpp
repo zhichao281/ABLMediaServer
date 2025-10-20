@@ -146,7 +146,11 @@ void CClientSendPool::ProcessFunc()
 				else
 				{
 					clientReadPool->DeleteFromTask(cli->get_id());
+#ifdef USE_BOOST
 					client_manager_singleton::get_mutable_instance().pop_client(cli->get_id());
+#else
+					client_manager::get_instance().pop_client(cli->get_id());
+#endif
 
 					if (cli->m_fnclose)
 						cli->m_fnclose(cli->get_server_id(), cli->get_id());
@@ -198,7 +202,11 @@ bool CClientSendPool::InsertIntoTask(uint64_t nClientID)
 {
 	if (bRunFlag.load() == false)
 		return false;
+#ifdef USE_BOOST
 	client_ptr cli =  client_manager_singleton::get_mutable_instance().get_client(nClientID);
+#else
+	client_ptr cli =  client_manager::get_instance().get_client(nClientID);
+#endif
 	if (cli == NULL)
 		return false ;
 

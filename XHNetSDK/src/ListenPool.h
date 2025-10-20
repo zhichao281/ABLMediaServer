@@ -1,11 +1,20 @@
 #ifndef _ListenPool_H
 #define _ListenPool_H
 
+
+#ifdef USE_BOOST
 #include <boost/unordered/unordered_map.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <boost/unordered/unordered_map.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/atomic.hpp>
+
+#else
+#include <unordered_map>
+#include <memory>
+#include <atomic>
+#endif
+
+
 
 #include <vector>
 
@@ -33,8 +42,16 @@ struct ListenStruct
 	int             nProcThreadOrder;//处理线程序号
 };
 
+
+#ifdef USE_BOOST
 typedef boost::shared_ptr<ListenStruct> ListenStructPtr;
 typedef boost::unordered_map<NETHANDLE, ListenStructPtr> ListenStructPtrMap;  //存储listen结构的智能指针
+
+#else
+typedef std::shared_ptr<ListenStruct> ListenStructPtr;
+typedef std::unordered_map<NETHANDLE, ListenStructPtr> ListenStructPtrMap;  //存储listen结构的智能指针
+
+#endif
 
 class CListenPool
 {
@@ -43,7 +60,7 @@ public:
    ~CListenPool();
   	void destroyListenPool();
 
-	boost::atomic<uint64_t> nProcThreadOrder;
+
    int32_t Listen(
 		int8_t* localip,
 		uint16_t localport,
@@ -61,7 +78,6 @@ public:
    struct  epoll_event                          events[MaxListenThreadCount][MaxListenEventCount];
    ListenStructPtrMap                           m_listenStructPtrMap;
 
-   boost::atomic_bool     bRunFlag;
 
 private:
 	int                   GetThreadOrder();
@@ -74,8 +90,19 @@ private:
 	std::mutex              threadLock;
     uint64_t                nTrueNetThreadPoolCount; 
 	uint64_t                nGetCurClientID[MaxNetHandleQueueCount];
-	boost::atomic_bool      bExitProcessThreadFlag[MaxNetHandleQueueCount];
-	boost::atomic_bool      bCreateThreadFlag;
+
+#ifdef USE_BOOST
+	boost::atomic<bool>      bExitProcessThreadFlag[MaxNetHandleQueueCount];
+	boost::atomic<bool>      bCreateThreadFlag;
+	boost::atomic<uint64_t>  nProcThreadOrder;
+	boost::atomic<bool>      bRunFlag;
+#else
+	std::atomic<bool>        bExitProcessThreadFlag[MaxNetHandleQueueCount];
+	std::atomic<bool>        bCreateThreadFlag;
+	std::atomic<uint64_t>    nProcThreadOrder;
+	std::atomic<bool>        bRunFlag;
+#endif
+
 #ifdef  OS_System_Windows
     HANDLE                hProcessHandle[MaxNetHandleQueueCount];
 #else

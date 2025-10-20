@@ -71,7 +71,12 @@ LIBNET_API int32_t XHNetSDK_Deinit()
 	int32_t ret = e_libnet_err_noerror;
 	printf(" ---------------- NetSDK_Deinit ---------------\r\n");
 
+#ifdef USE_BOOST
 	client_manager_singleton::get_mutable_instance().pop_all_clients();
+#else
+	client_manager::get_instance().pop_all_clients();
+#endif
+
 #ifdef OS_System_Windows
 	ret = ::WSACleanup();
 #endif
@@ -145,13 +150,18 @@ LIBNET_API int32_t XHNetSDK_Connect(int8_t* remoteip,
 	else
 	{
  		*clihandle = INVALID_NETHANDLE;
+#ifdef USE_BOOST
 		client_ptr cli = client_manager_singleton::get_mutable_instance().malloc_client(INVALID_NETHANDLE, fnread, fnclose, (0 != autoread) ? true : false, bSSLFlag, clientType_Connect, NULL);
+#else
+		client_ptr cli = client_manager::get_instance().malloc_client(INVALID_NETHANDLE, fnread, fnclose, (0 != autoread) ? true : false, bSSLFlag, clientType_Connect, NULL);
+#endif
 		if (cli)
 		{
 				ret = cli->connect(remoteip, remoteport, localip, locaport, (0 != blocked), fnconnect, timeout);
 				if (e_libnet_err_noerror == ret)
 				{
 					*clihandle = cli->get_id();
+#ifdef USE_BOOST
 					if (client_manager_singleton::get_mutable_instance().push_client(cli))
 					{
  						connectCheckPool->InsertIntoTask(cli->get_id());
@@ -166,6 +176,22 @@ LIBNET_API int32_t XHNetSDK_Connect(int8_t* remoteip,
 				{
 					client_manager_singleton::get_mutable_instance().pop_client(cli->get_id());
 				}
+#else
+					if (client_manager::get_instance().push_client(cli))
+					{
+ 						connectCheckPool->InsertIntoTask(cli->get_id());
+  					}
+					else
+					{
+						cli->close();
+						ret = e_libnet_err_climanage;
+					}
+ 				}
+				else
+				{
+					client_manager::get_instance().pop_client(cli->get_id());
+				}
+#endif
  		}
 		else
 		{
@@ -189,7 +215,11 @@ LIBNET_API int32_t XHNetSDK_Disconnect(NETHANDLE clihandle)
 		//先执行从线程池里面移除
 		if (true)
 		{
+#ifdef USE_BOOST
 			client_ptr cli = client_manager_singleton::get_mutable_instance().get_client(clihandle);
+#else
+			client_ptr cli = client_manager::get_instance().get_client(clihandle);
+#endif
 			if (cli != NULL)
 			{
 				cli->close();
@@ -198,7 +228,11 @@ LIBNET_API int32_t XHNetSDK_Disconnect(NETHANDLE clihandle)
  			}
 		}
  
+#ifdef USE_BOOST
 		if (!client_manager_singleton::get_mutable_instance().pop_client(clihandle))
+#else
+		if (!client_manager::get_instance().pop_client(clihandle))
+#endif
 		{
 			ret = e_libnet_err_invalidhandle;
 		}
@@ -220,7 +254,11 @@ LIBNET_API int32_t XHNetSDK_Write(NETHANDLE clihandle,
 	}
 	else
 	{
+#ifdef USE_BOOST
 		client_ptr cli = client_manager_singleton::get_mutable_instance().get_client(clihandle);
+#else
+		client_ptr cli = client_manager::get_instance().get_client(clihandle);
+#endif
 		if (cli)
 		{
 			if (cli->GetConnect() == true)

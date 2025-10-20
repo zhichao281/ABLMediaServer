@@ -98,7 +98,11 @@ void CConnectCheckPool::ProcessFunc()
 			for (int i = 0; i < ret_num; i++)
 			{
 			   bDeleteFlag = false;
+#ifdef USE_BOOST
 			   client_ptr cli = client_manager_singleton::get_mutable_instance().get_client(events[i].data.u64);
+#else
+			   client_ptr cli = client_manager::get_instance().get_client(events[i].data.u64);
+#endif
 			   if (cli)
 			   {
 				   if (events[i].events == EPOLLOUT)
@@ -122,7 +126,11 @@ void CConnectCheckPool::ProcessFunc()
 					   if (cli->m_nClientType == clientType_Connect && (GetTickCount64() - cli->nCreateTime >= 1000 * 8))
 					   {//在linux、arm平台汇报别的错误消息，但是尚未达到连接超时的时间，不能删除epoll检测
 						   bDeleteFlag = true;
+#ifdef USE_BOOST
 						   client_manager_singleton::get_mutable_instance().pop_client(cli->get_id());
+#else
+						   client_manager::get_instance().pop_client(cli->get_id());
+#endif
 					      if(cli->m_fnconnect)
 					        cli->m_fnconnect(cli->get_id(), 0, ntohs(cli->tAddr4.sin_port));
  					   }
@@ -176,7 +184,11 @@ bool CConnectCheckPool::InsertIntoTask(uint64_t nClientID)
 		return false;
 
 	std::lock_guard<std::mutex> lock(threadLock);
+#ifdef USE_BOOST
 	client_ptr cli = client_manager_singleton::get_mutable_instance().get_client(nClientID);
+#else
+	client_ptr cli = client_manager::get_instance().get_client(nClientID);
+#endif
 	if (cli)
 	{
 		//记录检测连接是否成功、连接超时的ID 
@@ -273,7 +285,7 @@ void  CConnectCheckPool::CheckTimeoutClient()
 	std::unordered_map<NETHANDLE, NETHANDLE >::iterator it; 
 	for (it = clientMap.begin(); it != clientMap.end();)
 	{
-		client_ptr cli = client_manager_singleton::get_mutable_instance().get_client((*it).second);
+		client_ptr cli = client_manager::get_instance().get_client((*it).second);
 		if (cli != NULL)
 		{
 			if (cli->GetConnect() == false && cli->m_nClientType == clientType_Connect && (GetTickCount64() - cli->nCreateTime >= 1000 * 8) )
@@ -285,7 +297,7 @@ void  CConnectCheckPool::CheckTimeoutClient()
 				int nRet = epoll_ctl(epfd, EPOLL_CTL_DEL, cli->m_Socket, &event);
  
  				//先删除客户端
-				client_manager_singleton::get_mutable_instance().pop_client((*it).second);
+				client_manager::get_instance().pop_client((*it).second);
 
 				//通知连接失败
 				if(cli->m_fnconnect)

@@ -23,28 +23,19 @@ struct ConectResultNote
 	unsigned short nPort;        //本地端口号
 	bool           bConnectFlag; //是否连接成功 
 };
-
 class CConnectCheckPool
 {
 public:
 	CConnectCheckPool(int nThreadCount);
-   ~CConnectCheckPool();
+	~CConnectCheckPool();
 
-   void                  destoryPool();
-   EPOLLHANDLE           epfd;
-   struct  epoll_event   events[MaxConnectCheckEventCount];
+	void                  destoryPool();
+	EPOLLHANDLE           epfd;
+	struct  epoll_event   events[MaxConnectCheckEventCount];
 
-#ifdef USE_BOOST
-   boost::unordered_map<NETHANDLE, NETHANDLE > clientMap;
-   boost::atomic_bool    bRunFlag;
-#else
-   std::unordered_map<NETHANDLE, NETHANDLE > clientMap;
-   std::atomic_bool      bRunFlag;
-#endif
-
-   bool                  InsertIntoTask(uint64_t nClientID);
-   bool                  DeleteFromTask(uint64_t nClientID);
-   void                  CheckTimeoutClient();
+	bool                  InsertIntoTask(uint64_t nClientID);
+	bool                  DeleteFromTask(uint64_t nClientID);
+	void                  CheckTimeoutClient();
 private:
 	int         nGetCurrentThreadOrder;
 	int         GetThreadOrder();
@@ -53,19 +44,26 @@ private:
 
 	volatile   uint64_t     nThreadProcessCount;
 	std::mutex              threadLock;
-    uint64_t                nTrueNetThreadPoolCount; 
+	uint64_t                nTrueNetThreadPoolCount;
 	uint64_t                nGetCurClientID[CheckPool_MaxNetHandleQueueCount];
 #ifdef USE_BOOST
-	boost::atomic_bool      bExitProcessThreadFlag[CheckPool_MaxNetHandleQueueCount];
+	boost::unordered_map<NETHANDLE, NETHANDLE > clientMap;
+	boost::atomic<bool>    bRunFlag;
+	boost::atomic<bool>      bExitProcessThreadFlag[CheckPool_MaxNetHandleQueueCount];
 #else
-	std::atomic_bool        bExitProcessThreadFlag[CheckPool_MaxNetHandleQueueCount];
+	std::unordered_map<NETHANDLE, NETHANDLE > clientMap;
+	std::atomic<bool>      bRunFlag;
+	std::atomic<bool>        bExitProcessThreadFlag[CheckPool_MaxNetHandleQueueCount];
 #endif
-    volatile bool           bCreateThreadFlag;
+	volatile bool           bCreateThreadFlag;
 #ifdef  OS_System_Windows
-    HANDLE                hProcessHandle[CheckPool_MaxNetHandleQueueCount];
+	HANDLE                hProcessHandle[CheckPool_MaxNetHandleQueueCount];
 #else
 	pthread_t             hProcessHandle[CheckPool_MaxNetHandleQueueCount];
 #endif
+
+
+
 
 };
 

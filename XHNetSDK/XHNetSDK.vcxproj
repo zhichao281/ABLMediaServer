@@ -50,7 +50,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -83,8 +83,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\boost_1_73_0\boost_1_73_0;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\boost_1_73_0_lib\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>../3rd/boost/include;$(IncludePath)</IncludePath>
+    <LibraryPath>../3rd/boost/lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)bin\$(Platform)</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -136,95 +137,62 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;XHNETSDK_EXPORTS;_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>Source.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
       <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>$(SolutionDir)\lib\x64\release\$(TargetName).lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="auto_lock.h" />
-    <ClInclude Include="client.h" />
-    <ClInclude Include="ClientReadPool.h" />
-    <ClInclude Include="ClientSendPool.h" />
-    <ClInclude Include="client_manager.h" />
-    <ClInclude Include="ConnectCheckPool.h" />
-    <ClInclude Include="data_define.h" />
-    <ClInclude Include="identifier_generator.h" />
-    <ClInclude Include="libnet_error.h" />
-    <ClInclude Include="ListenPool.h" />
-    <ClInclude Include="MediaFifo.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="UdpPool.h" />
-    <ClInclude Include="unordered_object_pool.h" />
-    <ClInclude Include="wepoll.h" />
-    <ClInclude Include="XHNetSDK.h" />
+    <ClCompile Include="src\client.cpp" />
+    <ClCompile Include="src\ClientReadPool.cpp" />
+    <ClCompile Include="src\ClientSendPool.cpp" />
+    <ClCompile Include="src\client_manager.cpp" />
+    <ClCompile Include="src\common\thread_pool.cpp" />
+    <ClCompile Include="src\ConnectCheckPool.cpp" />
+    <ClCompile Include="src\dllmain.cpp" />
+    <ClCompile Include="src\identifier_generator.cpp" />
+    <ClCompile Include="src\ListenPool.cpp" />
+    <ClCompile Include="src\MediaFifo.cpp" />
+    <ClCompile Include="src\UdpPool.cpp" />
+    <ClCompile Include="src\wepoll.c" />
+    <ClCompile Include="src\XHNetSDK.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="client.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ClientReadPool.cpp" />
-    <ClCompile Include="ClientSendPool.cpp" />
-    <ClCompile Include="client_manager.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ConnectCheckPool.cpp" />
-    <ClCompile Include="dllmain.cpp">
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </PrecompiledHeader>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </PrecompiledHeader>
-      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</CompileAsManaged>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="identifier_generator.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="ListenPool.cpp" />
-    <ClCompile Include="MediaFifo.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="UdpPool.cpp" />
-    <ClCompile Include="wepoll.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="XHNetSDK.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Source.def" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="XHNetSDK.rc" />
+    <ClInclude Include="src\auto_lock.h" />
+    <ClInclude Include="src\client.h" />
+    <ClInclude Include="src\ClientReadPool.h" />
+    <ClInclude Include="src\ClientSendPool.h" />
+    <ClInclude Include="src\client_manager.h" />
+    <ClInclude Include="src\common\thread_pool.h" />
+    <ClInclude Include="src\ConnectCheckPool.h" />
+    <ClInclude Include="src\data_define.h" />
+    <ClInclude Include="src\identifier_generator.h" />
+    <ClInclude Include="src\libnet_error.h" />
+    <ClInclude Include="src\ListenPool.h" />
+    <ClInclude Include="src\MediaFifo.h" />
+    <ClInclude Include="src\stdafx.h" />
+    <ClInclude Include="src\UdpPool.h" />
+    <ClInclude Include="src\unordered_object_pool.h" />
+    <ClInclude Include="src\wepoll.h" />
+    <ClInclude Include="src\XHNetSDK.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
