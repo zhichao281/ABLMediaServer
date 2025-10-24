@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32901.82
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ABLMediaServer", "ABLMediaServer\ABLMediaServer.vcxproj", "{078F7418-8D74-4F0F-A997-E49607E874B7}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XHNetSDK", "XHNetSDK\XHNetSDK.vcxproj", "{051B2BB1-162E-4FA0-8877-4C8E98D79088}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "webrtc-streamer", "webrtc-streamer\webrtc-streamer.vcxproj", "{9436486C-5146-4B7C-A0DA-B7483D917F58}"
 EndProject
@@ -16,6 +14,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtpdepacket", "packet\rtpdepacket\rtpdepacket.vcxproj", "{3DA99D20-077A-401D-9D6D-937B2130C817}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtppacket", "packet\rtppacket\rtppacket.vcxproj", "{D134CC89-2776-49A2-A3B8-59716ABB757B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XHNetSDK", "XHNetSDK\XHNetSDK.vcxproj", "{9A255667-85C8-4507-8692-DDB37F26B8A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,24 +51,6 @@ Global
 		{078F7418-8D74-4F0F-A997-E49607E874B7}.Release|x64.Build.0 = Release|x64
 		{078F7418-8D74-4F0F-A997-E49607E874B7}.Release|x86.ActiveCfg = Release|Win32
 		{078F7418-8D74-4F0F-A997-E49607E874B7}.Release|x86.Build.0 = Release|Win32
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.boost_release|ARM.ActiveCfg = boost_release|Win32
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.boost_release|ARM64.ActiveCfg = boost_release|Win32
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.boost_release|x64.ActiveCfg = boost_release|x64
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.boost_release|x64.Build.0 = boost_release|x64
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.boost_release|x86.ActiveCfg = boost_release|Win32
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.boost_release|x86.Build.0 = boost_release|Win32
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.Debug|ARM.ActiveCfg = Debug|Win32
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.Debug|ARM64.ActiveCfg = Debug|Win32
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.Debug|x64.ActiveCfg = Debug|x64
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.Debug|x64.Build.0 = Debug|x64
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.Debug|x86.ActiveCfg = Debug|Win32
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.Debug|x86.Build.0 = Debug|Win32
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.Release|ARM.ActiveCfg = Release|Win32
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.Release|ARM64.ActiveCfg = Release|Win32
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.Release|x64.ActiveCfg = Release|x64
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.Release|x64.Build.0 = Release|x64
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.Release|x86.ActiveCfg = Release|Win32
-		{051B2BB1-162E-4FA0-8877-4C8E98D79088}.Release|x86.Build.0 = Release|Win32
 		{9436486C-5146-4B7C-A0DA-B7483D917F58}.boost_release|ARM.ActiveCfg = Debug|Win32
 		{9436486C-5146-4B7C-A0DA-B7483D917F58}.boost_release|ARM.Build.0 = Debug|Win32
 		{9436486C-5146-4B7C-A0DA-B7483D917F58}.boost_release|ARM64.ActiveCfg = Debug|Win32
@@ -169,6 +151,30 @@ Global
 		{D134CC89-2776-49A2-A3B8-59716ABB757B}.Release|x64.Build.0 = Release|x64
 		{D134CC89-2776-49A2-A3B8-59716ABB757B}.Release|x86.ActiveCfg = Release|Win32
 		{D134CC89-2776-49A2-A3B8-59716ABB757B}.Release|x86.Build.0 = Release|Win32
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.boost_release|ARM.ActiveCfg = Release|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.boost_release|ARM.Build.0 = Release|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.boost_release|ARM64.ActiveCfg = Release|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.boost_release|ARM64.Build.0 = Release|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.boost_release|x64.ActiveCfg = Release|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.boost_release|x64.Build.0 = Release|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.boost_release|x86.ActiveCfg = Release|Win32
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.boost_release|x86.Build.0 = Release|Win32
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Debug|ARM.ActiveCfg = Debug|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Debug|ARM.Build.0 = Debug|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Debug|ARM64.ActiveCfg = Debug|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Debug|ARM64.Build.0 = Debug|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Debug|x64.ActiveCfg = Debug|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Debug|x64.Build.0 = Debug|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Debug|x86.ActiveCfg = Debug|Win32
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Debug|x86.Build.0 = Debug|Win32
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Release|ARM.ActiveCfg = Release|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Release|ARM.Build.0 = Release|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Release|ARM64.ActiveCfg = Release|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Release|ARM64.Build.0 = Release|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Release|x64.ActiveCfg = Release|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Release|x64.Build.0 = Release|x64
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Release|x86.ActiveCfg = Release|Win32
+		{9A255667-85C8-4507-8692-DDB37F26B8A6}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

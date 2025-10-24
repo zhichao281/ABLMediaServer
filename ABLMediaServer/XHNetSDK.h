@@ -1,15 +1,12 @@
 #pragma once
-
 #include <stdint.h>
-//NETHANDLE固定为uint64_t，否则在arm环境编译出问题，认为是 uint32_t 
-#define NETHANDLE uint64_t
 
 #if (defined _WIN32 || defined _WIN64)
 #define LIBNET_CALLMETHOD _stdcall
 #ifdef LIBNET_STATIC
 #define LIBNET_API
 #else
-#ifdef LIBNET_EXPORTS
+#ifdef XHNETSDK_EXPORTS
 #define LIBNET_API  __declspec(dllexport)
 #else
 #define LIBNET_API  __declspec(dllimport)
@@ -21,7 +18,7 @@
 #endif 
 
 #ifndef NETHANDLE
-#if (defined(__x86_64__) || defined(_M_X64) || defined(_amd64))
+#if (defined(__x86_64__) || defined(_M_X64) || defined(__amd64))
 #define NETHANDLE uint64_t
 #else
 #define NETHANDLE uint32_t
@@ -63,8 +60,7 @@ extern "C"
 
 	LIBNET_API int32_t XHNetSDK_Deinit();
 
-	LIBNET_API int32_t XHNetSDK_Listen(
-		int8_t* localip,
+	LIBNET_API int32_t XHNetSDK_Listen(int8_t* localip,
 		uint16_t localport,
 		NETHANDLE* srvhandle,
 		accept_callback fnaccept,
@@ -75,7 +71,6 @@ extern "C"
 	);
 
 	LIBNET_API int32_t XHNetSDK_Unlisten(NETHANDLE srvhandle);
-
 
 	LIBNET_API int32_t XHNetSDK_Connect(int8_t* remoteip,
 		uint16_t remoteport,
@@ -88,8 +83,7 @@ extern "C"
 		uint8_t blocked,
 		uint32_t timeout,
 		uint8_t autoread,
-		bool bSSLFlag = false
-	);
+		bool bSSLFlag = false);
 
 	LIBNET_API int32_t XHNetSDK_Disconnect(NETHANDLE clihandle);
 
@@ -134,3 +128,4 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
+

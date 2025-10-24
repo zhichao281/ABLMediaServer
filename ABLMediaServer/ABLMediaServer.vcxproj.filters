@@ -515,7 +515,7 @@
     <Library Include="..\lib\x64\release\rtpdepacket.lib" />
     <Library Include="..\lib\x64\release\rtppacket.lib" />
     <Library Include="..\lib\x64\release\webrtc-streamer.lib" />
-    <Library Include="..\lib\x64\release\XHNetSDK.lib" />
     <Library Include="..\lib\x64\release\libfaac.lib" />
+    <Library Include="..\lib\x64\release\XHNetSDK.lib" />
   </ItemGroup>
 </Project>

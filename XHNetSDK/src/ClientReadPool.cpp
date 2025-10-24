@@ -80,110 +80,94 @@ void CClientReadPool::ProcessFunc()
 {
 	int nCurrentThreadID = GetThreadOrder();
 	bExitProcessThreadFlag[nCurrentThreadID].store(false);
-	uint64_t nClientID = 0;
-	int      ret_num;
-	int      i;
-	int      ret_recv;
-	unsigned char* szRecvData;
+	int ret_num, i, ret_recv;
+	unsigned char* szRecvData = new unsigned char[1024 * 1024 * 2];
 
-	//创建epoll句柄epfd
+	// 创建epoll句柄
 	epfd[nCurrentThreadID] = epoll_create(1);
-	szRecvData = new unsigned char[1024 * 1024 * 2];
 
 	while (bRunFlag.load())
 	{
 		ret_num = epoll_wait(epfd[nCurrentThreadID], events[nCurrentThreadID], MaxEventCount, 1000);
-		if (ret_num > 0)
+		if (ret_num <= 0) {
+			Sleep(2);
+			continue;
+		}
+
+		for (i = 0; i < ret_num; ++i)
 		{
-			for (i = 0; i < ret_num; i++)//遍历是哪种事件到来
+#ifdef USE_BOOST
+			client_ptr cli = client_manager_singleton::get_mutable_instance().get_client(events[nCurrentThreadID][i].data.u64);
+#else
+			client_ptr cli = client_manager::get_instance().get_client(events[nCurrentThreadID][i].data.u64);
+#endif
+			if (!cli)
+				continue;
+
+			ret_recv = ::recv(cli->m_Socket, (char*)szRecvData, 1024 * 1024 * 2, 0);
+			if (ret_recv > 0)
 			{
+				if (ret_recv < 1024 * 1024 * 2)
+					szRecvData[ret_recv] = 0x00;
 
-#ifdef USE_BOOST
-				client_ptr cli = client_manager_singleton::get_mutable_instance().get_client(events[nCurrentThreadID][i].data.u64);
-				if (cli == NULL)
-					continue;
-
-#else
-				client_ptr cli = client_manager::get_instance().get_client(events[nCurrentThreadID][i].data.u64);
-				if (cli == NULL)
-					continue;
-#endif
-
-				ret_recv = ::recv(cli->m_Socket, (char*)szRecvData, 1024 * 1024 * 2, 0);//接收数据
-				if (ret_recv > 0)
+				// 只在可能为HTTP请求时构造字符串
+				if (ret_recv >= 4 &&
+					(memcmp(szRecvData, "GET ", 4) == 0 || memcmp(szRecvData, "POST", 4) == 0))
 				{
-					if (ret_recv < 1024 * 1024 * 2)
-						szRecvData[ret_recv] = 0x00;
+					std::string reqStr((char*)szRecvData, ret_recv);
 
-					// 只在可能为HTTP请求时构造字符串
-					if (ret_recv >= 4 &&
-						(memcmp(szRecvData, "GET ", 4) == 0 || memcmp(szRecvData, "POST", 4) == 0))
-					{
-						std::string reqStr((char*)szRecvData, ret_recv);
+					size_t line_end = reqStr.find("\r\n");
+					std::string first_line = (line_end != std::string::npos) ? reqStr.substr(0, line_end) : reqStr;
+					std::istringstream iss(first_line);
+					std::string method, url, version;
+					iss >> method >> url >> version;
 
-						size_t line_end = reqStr.find("\r\n");
-						std::string first_line = (line_end != std::string::npos) ? reqStr.substr(0, line_end) : reqStr;
-						std::istringstream iss(first_line);
-						std::string method, url, version;
-						iss >> method >> url >> version;
-
-						// 静态资源判断
-						static const std::vector<std::string> mime_suffix = {
-							".html", ".htm", ".css", ".js", ".json", ".png", ".jpg", ".jpeg", ".gif", ".txt", ".ico"
-						};
-						bool is_static = (url == "/");
-						for (const auto& suffix : mime_suffix) {
-							if (url.size() >= suffix.size() &&
-								url.compare(url.size() - suffix.size(), suffix.size(), suffix) == 0) {
-								is_static = true;
-								break;
-							}
-						}
-						if (is_static) {
-							printf("handle_http_request: %s \r\n ", reqStr.c_str());
-							handle_http_request(cli, reqStr);
-							continue;
+					// 静态资源判断
+					static const std::vector<std::string> mime_suffix = {
+						".html", ".htm", ".css", ".js", ".json", ".png", ".jpg", ".jpeg", ".gif", ".txt", ".ico"
+					};
+					bool is_static = (url == "/");
+					for (const auto& suffix : mime_suffix) {
+						if (url.size() >= suffix.size() &&
+							url.compare(url.size() - suffix.size(), suffix.size(), suffix) == 0) {
+							is_static = true;
+							break;
 						}
 					}
-					// 非HTTP或非静态资源，走原有逻辑
-					if (cli->m_fnread)
-						cli->m_fnread(0, events[nCurrentThreadID][i].data.u64, szRecvData, static_cast<uint32_t>(ret_recv), (void*)&cli->tAddr4);
+					if (is_static) {
+						printf("handle_http_request: %s \r\n ", reqStr.c_str());
+						handle_http_request(cli, reqStr);
+						continue;
+					}
 				}
-				else
-				{//客户端断开连接
+				// 非HTTP或非静态资源，走原有逻辑
+				if (cli->m_fnread)
+					cli->m_fnread(0, events[nCurrentThreadID][i].data.u64, szRecvData, static_cast<uint32_t>(ret_recv), (void*)&cli->tAddr4);
+			}
+			else
+			{
 #ifdef OS_System_Windows
-					if (ret_recv == 0 || (ret_recv == SOCKET_ERROR && (WSAGetLastError() != EWOULDBLOCK && WSAGetLastError() != EAGAIN)))
+				if (ret_recv == 0 || (ret_recv == SOCKET_ERROR && (WSAGetLastError() != EWOULDBLOCK && WSAGetLastError() != EAGAIN)))
 #else 
-					if (ret_recv == 0 || (ret_recv == -1 && (errno != EWOULDBLOCK && errno != EAGAIN)))
+				if (ret_recv == 0 || (ret_recv == -1 && (errno != EWOULDBLOCK && errno != EAGAIN)))
 #endif
-					{//连接断开 
-						clientSendPool->DeleteFromTask(cli->nSendThreadOrder.load(), cli->get_id());
-						DeleteFromTask(events[nCurrentThreadID][i].data.u64);//从读取线程中移除
-
+				{
+					clientSendPool->DeleteFromTask(cli->nSendThreadOrder.load(), cli->get_id());
+					DeleteFromTask(events[nCurrentThreadID][i].data.u64);
 #ifdef USE_BOOST
-						client_manager_singleton::get_mutable_instance().pop_client(cli->get_id());
-
+					client_manager_singleton::get_mutable_instance().pop_client(cli->get_id());
 #else
-						client_manager::get_instance().pop_client(cli->get_id());
+					client_manager::get_instance().pop_client(cli->get_id());
 #endif
-
-
-						
-
-						if (cli->m_fnclose)
-							cli->m_fnclose(cli->get_server_id(), cli->get_id());
-					}
-
-					continue;//继续执行下一层
+					if (cli->m_fnclose)
+						cli->m_fnclose(cli->get_server_id(), cli->get_id());
 				}
+				// 继续下一个事件
 			}
 		}
-		else
-			Sleep(2);
 	}
 	delete[] szRecvData;
-	szRecvData = NULL;
-
+	szRecvData = nullptr;
 	bExitProcessThreadFlag[nCurrentThreadID].store(true);
 }
 

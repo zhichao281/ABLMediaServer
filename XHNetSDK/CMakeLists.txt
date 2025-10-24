@@ -10,9 +10,7 @@ project(XHNetSDK
 # 设置C++标准
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-
-option(USE_BOOST "Use Boost library" OFF)
+option(USE_BOOST "Use Boost library" ON)
 
 
 # 检测操作系统
@@ -45,7 +43,16 @@ include_directories(
 if(USE_BOOST)
     set(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/3rd/boost")
     set(BOOST_INCLUDEDIR "${BOOST_ROOT}/include")
-    set(BOOST_LIBRARYDIR "${BOOST_ROOT}/${ARCH_DIR}")
+    set(BOOST_LIBRARYDIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/Linux")
+    set(Boost_LIBRARIES       
+        boost_system
+        boost_thread
+        boost_log
+        boost_filesystem
+        boost_date_time
+        boost_chrono
+        boost_atomic)
+
     add_compile_definitions(USE_BOOST)
     include_directories(${BOOST_INCLUDEDIR})
     link_directories(${BOOST_LIBRARYDIR})
@@ -87,7 +94,7 @@ set_target_properties(XHNetSDK  PROPERTIES
     BUILD_WITH_INSTALL_RPATH TRUE  # 让 INSTALL_RPATH 在构建时也生效
     SKIP_BUILD_RPATH FALSE         # 不跳过构建时的 RPATH
 )
-
+set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN")
 
 # 平台特定的链接库
 if(WIN32)
@@ -97,18 +104,20 @@ if(WIN32)
         advapi32
     )
     # Windows下的库命名约定
-    set_target_properties(XHNetSDK PROPERTIES SUFFIX ".dll")
+    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".dll")
 else()
-    target_link_libraries(XHNetSDK
+    target_link_libraries(${PROJECT_NAME}
         ${Boost_LIBRARIES}
         pthread
     )
     # Linux下的库命名约定
-    set_target_properties(XHNetSDK PROPERTIES SUFFIX ".so")
+    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".so")
 endif()
 
+
+
 # 安装目标
-install(TARGETS XHNetSDK
+install(TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin

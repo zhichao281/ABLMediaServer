@@ -4073,6 +4073,31 @@ bool checkTimer(const char* timeStr = "2025-08-26 14:00:00")
 }
 std::thread g_timerThread;
 
+void monitorTimer(const char* targetTime = "2025-08-16 14:00:00", int intervalMinutes = 5)
+{
+	g_timerThread = std::thread([targetTime, intervalMinutes]() {
+		const std::chrono::minutes interval(intervalMinutes);
+		std::string timeCopy(targetTime); // 创建副本避免指针问题
+
+		while (true) {
+			bool isBeforeTarget = checkTimer(timeCopy.c_str());
+
+			if (isBeforeTarget) {
+				printf("Current time is before target time, continuing monitoring...\n");
+			}
+			else {
+				printf("Target time has been reached or passed! Exiting process...\n");
+				std::exit(200); // 正常退出整个进程
+				// break; // 这行不会执行，可以删除
+			}
+			std::this_thread::sleep_for(interval);
+		}
+		});
+
+	// 分离线程，让它在后台运行
+	g_timerThread.detach();
+	printf("Timer monitoring started. Process will exit when target time is reached.\n");
+}
 
 void printfVersion() {
 	time_t now = time(0);
@@ -4096,7 +4121,8 @@ int main(int argc, char* argv[])
 #endif
 {
 
-
+	// 监控指定时间，每5分钟检查一次
+	//monitorTimer("2025-09-05 14:00:00", 1);
 
 	pcm16_alaw_tableinit();
 	pcm16_ulaw_tableinit();
