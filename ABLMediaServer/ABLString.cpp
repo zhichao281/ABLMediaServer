@@ -658,4 +658,100 @@ namespace ABL {
 		return std::string();
 	}
 
+
+
+	std::string GetIniMemo(const CSimpleIniA& ini, const char* section, const char* key)
+	{
+		CSimpleIniA::TNamesDepend keys;
+		ini.GetAllKeys(section, keys);
+		for (const auto& entry : keys) {
+			if (strcmp(entry.pItem, key) == 0) {
+				return entry.pComment ? entry.pComment : "";
+			}
+		}
+		return "";
+	}
+	std::string GbkToUtf8(const char* src)
+	{
+		int len = MultiByteToWideChar(CP_ACP, 0, src, -1, NULL, 0);
+		wchar_t* wstr = new wchar_t[len];
+		MultiByteToWideChar(CP_ACP, 0, src, -1, wstr, len);
+		len = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
+		char* str = new char[len];
+		WideCharToMultiByte(CP_UTF8, 0, wstr, -1, str, len, NULL, NULL);
+		std::string result(str);
+		delete[] wstr;
+		delete[] str;
+		return result;
+	}
+	std::string IniFileToJsonArray(const std::string& iniFilePath)
+	{
+		CSimpleIniA ini;
+		ini.SetUnicode();
+		SI_Error rc = ini.LoadFile(iniFilePath.c_str());
+		if (rc < 0) {
+			return "[]";
+		}
+
+		rapidjson::Document doc;
+		doc.SetArray();
+		rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+
+		CSimpleIniA::TNamesDepend sections;
+		ini.GetAllSections(sections);
+
+		for (const auto& section : sections) {
+			CSimpleIniA::TNamesDepend keys;
+			ini.GetAllKeys(section.pItem, keys);
+			for (const auto& key : keys) {
+				const char* value = ini.GetValue(section.pItem, key.pItem, "");
+				std::string memo = GetIniMemo(ini, section.pItem, key.pItem);
+				// 如果不是UTF-8，需转码
+			//	std::string value_utf8 = GbkToUtf8(value);
+			//	std::string memo_utf8 = GbkToUtf8(memo.c_str());
+				rapidjson::Value item(rapidjson::kObjectType);
+				item.AddMember("section", rapidjson::Value(section.pItem, allocator), allocator);
+				item.AddMember("key", rapidjson::Value(key.pItem, allocator), allocator);
+				item.AddMember("value", rapidjson::Value(value, allocator), allocator);
+				item.AddMember("memo", rapidjson::Value(memo.c_str(), allocator), allocator);
+
+				doc.PushBack(item, allocator);
+			}
+		}
+
+		rapidjson::StringBuffer buffer;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+		doc.Accept(writer);
+
+		return buffer.GetString();
+	}
+
+	bool JsonArrayToIniFile(const std::string& jsonStr, const std::string& iniFilePath)
+	{
+		rapidjson::Document doc;
+		if (doc.Parse(jsonStr.c_str()).HasParseError() || !doc.IsArray()) {
+			return false;
+		}
+
+		CSimpleIniA ini;
+		ini.SetUnicode();
+
+		for (auto& item : doc.GetArray()) {
+			if (!item.IsObject()) continue;
+			const char* section = item.HasMember("section") && item["section"].IsString() ? item["section"].GetString() : "";
+			const char* key = item.HasMember("key") && item["key"].IsString() ? item["key"].GetString() : "";
+			const char* value = item.HasMember("value") && item["value"].IsString() ? item["value"].GetString() : "";
+			const char* memo = item.HasMember("memo") && item["memo"].IsString() ? item["memo"].GetString() : "";
+
+			if (section[0] && key[0])
+			{
+				ini.SetValue(section, key, value, memo);
+			}
+		}
+
+		SI_Error rc = ini.SaveFile(iniFilePath.c_str());
+		return rc >= 0;
+	}
+
 }
+
