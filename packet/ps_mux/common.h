@@ -188,9 +188,9 @@ const uint8_t MPEG2_START_CODE[] = { 0x00, 0x00, 0x01 };
 
 
 
-uint32_t generate_identifier();
+//uint32_t generate_identifier();
 
-void recycle_identifier(uint32_t id);
+//void recycle_identifier(uint32_t id);
 
 int32_t get_mediatype(int32_t st);
 

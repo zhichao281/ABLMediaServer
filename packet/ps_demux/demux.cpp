@@ -1,7 +1,7 @@
 #include <stdexcept>
 #include <memory>
 #include "demux.h"
-#include "common.h"
+#include "psdemux_identifier_manager.h"
 #include "ps_def.h"
 #include "header_consumer.h"
 #include "sysheader_consumer.h"
@@ -11,7 +11,7 @@
 #include <malloc.h>
 
 ps_demux::ps_demux(ps_demux_callback cb, void* userdata, int32_t duxmode)
-	: m_id(generate_identifier_psdemux())
+	: m_id(PsDemuxIdentifierManager::getInstance().Generate())
 	, m_cb(cb)
 	, m_userdata(userdata)
 	, m_duxmode(duxmode)
@@ -21,7 +21,8 @@ ps_demux::ps_demux(ps_demux_callback cb, void* userdata, int32_t duxmode)
 
 ps_demux::~ps_demux()
 {
-	recycle_identifier_psdemux(m_id);
+	PsDemuxIdentifierManager::getInstance().Recycle(m_id);
+
 #ifndef _WIN32
 	malloc_trim(0);
 #endif // _WIN32

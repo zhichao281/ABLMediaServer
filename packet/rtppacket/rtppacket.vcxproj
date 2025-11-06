@@ -19,19 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common.h" />
     <ClInclude Include="packet.h" />
     <ClInclude Include="rtp_def.h" />
     <ClInclude Include="rtp_packet.h" />
-    <ClInclude Include="session.h" />
-    <ClInclude Include="session_manager.h" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="common.cpp" />
+    <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="packet.cpp" />
-    <ClCompile Include="rtp_packet.cpp" />
-    <ClCompile Include="session.cpp" />
-    <ClCompile Include="session_manager.cpp" />
+    <ClCompile Include="rtppacket.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

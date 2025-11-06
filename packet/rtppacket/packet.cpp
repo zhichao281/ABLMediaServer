@@ -1,642 +1,139 @@
-#if (defined _WIN32 || defined _WIN64)
-#include <WinSock2.h>
-#pragma  comment(lib, "WS2_32.lib")
-#else
-#include <arpa/inet.h>
-#endif
+/*
+功能：
+       rtp打包功能实现文件，能实现对H264、H265、G711A、G711U、AAC 进行打包 
 
+日期    2025-09-03
+作者    罗家兄弟
+QQ      79941308
+E-Mail  79941308@qq.com
+*/
+
+#include "stdafx.h"
 #include "packet.h"
-#include <memory.h>
-#include <malloc.h>
  
-const uint8_t NALU_START_CODE_RTPPACKET[] = { 0x00, 0x00, 0x01 };
-const uint8_t SLICE_START_CODE_RTPPACKET[] = { 0X00, 0X00, 0X00, 0X01 };
+unsigned char pVideoStartCode_1[] = { 0x00,0x00,0x00,0x01 };
+unsigned char pVideoStartCode_2[] = { 0x00,0x00,0x01 };
 
-rtp_packet::rtp_packet(rtp_packet_callback cb, void* userdata, const _rtp_packet_sessionopt& opt)
-	: m_cb(cb)
-	, m_userdata(userdata)
-	, m_attr(opt)
-	, RTP_PAYLOAD_MAX_SIZE(1320)
-	, m_outbufsize(0)
-	, m_ttbase(0)
-	, m_seqbase(0)
+packet::packet()
 {
-	m_out.handle = opt.handle;
-	m_out.ssrc = m_attr.ssrc;
+	m_outbufsize = 0;
+	m_seqbase = 0;
+	m_ttbase = 0;
+	m_out.data = m_outbuff;
+}
+
+packet::~packet()
+{
+
+}
+ 
+bool packet::set_option(_rtp_packet_sessionopt* op)
+{
+	if (op)
+	  memcpy((char*)&rtp_sessionOpt, (char*)op, sizeof(_rtp_packet_sessionopt));
+
+	m_rtphead.ssrc = ::htonl(op->ssrc);
+	m_rtphead.payload = op->payload;
+
+	m_out.handle = nID;
+	m_out.ssrc = op->ssrc;
 	m_out.userdata = userdata;
 
-	m_rtphead.payload = m_attr.payload;
-	m_rtphead.ssrc = ::htonl(m_attr.ssrc);
+	return true;
 }
-
-rtp_packet::~rtp_packet()
-{
-#ifndef _WIN32
-	malloc_trim(0);
-#endif // _WIN32
-}
-
-int32_t rtp_packet::handle(uint8_t* data, uint32_t datasize, uint32_t inTimestamp)
+ 
+uint32_t packet::handle(uint8_t* data, uint32_t datasize, uint32_t inTimestamp)
 {
 	if (!data || (0 == datasize))
 	{
 		return e_rtppkt_err_invaliddata;
 	}
+	int32_t ret = e_rtppkt_err_noerror;
 	m_inTimestamp = inTimestamp;
-	int32_t ret = e_rtppkt_err_noerror;
 
-	switch (m_attr.streamtype)
+	switch (rtp_sessionOpt.streamtype)
 	{
-	case e_rtppkt_st_h264:
-	case e_rtppkt_st_h265:
-	case e_rtppkt_st_svacv:
-	{
-		ret = handle_nalu_stream(m_attr.streamtype, data, datasize);
-
-	}break;
-
-	case e_rtppkt_st_aac:
-		ret = aac_adts(data, datasize);
-		break;
-
-	default:
-	{
-		ret = handle_common(data, datasize);
-
-	};
-
-	}
-
-	
-	return ret;
-}
-
-int32_t rtp_packet::handle_nalu_stream(int32_t st, uint8_t* data, uint32_t datasize)
-{
-	if ((datasize < sizeof(SLICE_START_CODE_RTPPACKET + 2)) ||
-		((0 != memcmp(SLICE_START_CODE_RTPPACKET, data, sizeof(SLICE_START_CODE_RTPPACKET))) &&
-		(0 != memcmp(NALU_START_CODE_RTPPACKET, data, sizeof(NALU_START_CODE_RTPPACKET)))))
-	{
-		return e_rtppkt_err_malformedframe;
-	}
-
-	int32_t ret = e_rtppkt_err_noerror;
-	uint32_t payloadlen = 0;
-	uint32_t sclen = 0, firstsclen = 0;
-	bool findfirst = false;
-	uint32_t pos = 0;
-
-	for (uint32_t offset = 0; offset < (datasize - sizeof(SLICE_START_CODE_RTPPACKET));)
-	{
-		if (0 == memcmp(SLICE_START_CODE_RTPPACKET, data + offset, sizeof(SLICE_START_CODE_RTPPACKET)))
-		{
-			sclen = sizeof(SLICE_START_CODE_RTPPACKET);
-		}
-		else if (0 == memcmp(NALU_START_CODE_RTPPACKET, data + offset, sizeof(NALU_START_CODE_RTPPACKET)))
-		{
-			sclen = sizeof(NALU_START_CODE_RTPPACKET);
-		}
-		else
-		{
-			++offset;
-			continue;
-		}
-
-		if (!findfirst)
-		{
-			findfirst = true;
-			pos = offset;
-			firstsclen = sclen;
-
-			offset += (sclen + 1);
-
-			continue;
-		}
-
-		payloadlen = offset - pos - firstsclen;
-
-		if (payloadlen <= RTP_PAYLOAD_MAX_SIZE)
-		{
-			ret = singlenalu(data + pos + firstsclen, payloadlen, false);
-		}
-		else
-		{
-			switch (st)
+	    case e_rtppkt_st_h264:
+			ret = SplitterH264VideoData(data, datasize);
+		  break;
+		case e_rtppkt_st_h265:
+			ret = SplitterH265VideoData(data, datasize);
+			break;
+		case e_rtppkt_st_aac:
+			aac_adts(data, datasize);
+			break;
+		default:
 			{
-			case e_rtppkt_st_h264:
-			{
-				ret = h264_fua(data + pos + firstsclen, payloadlen, false);
-
-			}break;
-
-			case e_rtppkt_st_h265:
-			{
-				ret = h265_fus(data + pos + firstsclen, payloadlen, false);
-
-			}break;
-
-			case e_rtppkt_st_svacv:
-			{
-				ret = svacv_fua(data + pos + firstsclen, payloadlen, false);
-
-			}break;
-
-			default:
-			{
-				return e_rtppkt_err_unsupportednalustream;
-
-			}break;
-
+			ret = handle_common(data, datasize);
 			}
-
-		}
-
-		if (e_rtppkt_err_noerror != ret)
-		{
-			if (m_inTimestamp == 0)
-				m_ttbase += m_attr.ttincre;
-			else
-				m_ttbase = m_inTimestamp;
-
-			return ret;
-		}
-
-		pos = offset;
-		firstsclen = sclen;
-		offset += (sclen + 1);
-	}
-
-	if (findfirst)
-	{
-		payloadlen = datasize - pos - firstsclen;
-
-		if (payloadlen <= RTP_PAYLOAD_MAX_SIZE)
-		{
-			ret = singlenalu(data + pos + firstsclen, payloadlen, true);
-		}
-		else
-		{
-			switch (st)
-			{
-			case e_rtppkt_st_h264:
-			{
-				ret = h264_fua(data + pos + firstsclen, payloadlen, true);
-
-			}break;
-
-			case e_rtppkt_st_h265:
-			{
-				ret = h265_fus(data + pos + firstsclen, payloadlen, true);
-
-			}break;
-
-			case e_rtppkt_st_svacv:
-			{
-				ret = svacv_fua(data + pos + firstsclen, payloadlen, true);
-
-			}break;
-
-			default:
-			{
-				return e_rtppkt_err_unsupportednalustream;
-
-			}break;
-
-			}
-		}
-	}
+ 	}
 
 	if (m_inTimestamp == 0)
-		m_ttbase += m_attr.ttincre;
+	{
+		if (m_ttbase == 0xFFFFFFFF)
+			m_ttbase = 0;//达到最大值进行翻转
+		else 
+		    m_ttbase += rtp_sessionOpt.ttincre;
+ 	}
 	else
 		m_ttbase = m_inTimestamp;
-
 
 	return ret;
 }
 
-int32_t rtp_packet::singlenalu(uint8_t* data, uint32_t datasize, bool last)
+int32_t packet::handle_common(uint8_t* data, uint32_t datasize)
 {
-	uint8_t paddinglen = 0;
+	int32_t ret = e_rtppkt_err_noerror;
+	int nPos = 0, nSendLength = datasize;
 
-	m_outbufsize = 0;
+	m_rtphead.ssrc      = htonl(rtp_sessionOpt.ssrc);
+	m_rtphead.timestamp = htonl(m_ttbase);
 
-	if (e_rtppkt_am_4octet == m_attr.alimod)
+	while (nSendLength > 0)
 	{
-		paddinglen = (0 == (sizeof(m_rtphead) + datasize) % 4) ? 0 : (4 - (sizeof(m_rtphead) + datasize) % 4);
-	}
-	else if (e_rtppkt_am_8octet == m_attr.alimod)
-	{
-		paddinglen = (0 == (sizeof(m_rtphead) + datasize) % 8) ? 0 : (8 - (sizeof(m_rtphead) + datasize) % 8);
-	}
-	else
-	{
-		paddinglen = 0;
-	}
-
-	m_rtphead.p = (0 == paddinglen) ? 0 : 1;
-	m_rtphead.mark = (last ? 1 : 0);
-	m_rtphead.seq = ::htons(m_seqbase);
-	m_rtphead.timestamp = ::htonl(m_ttbase);
-
-
-	memcpy(m_outbuff + m_outbufsize, &m_rtphead, sizeof(m_rtphead));
-	m_outbufsize += sizeof(m_rtphead);
-
-	memcpy(m_outbuff + m_outbufsize, data, datasize);
-	m_outbufsize += datasize;
-
-	if (0 != paddinglen)
-	{
-		if (paddinglen - 1 > 0)
+		m_rtphead.seq = ::htons(m_seqbase);
+		if (nSendLength > RTP_PAYLOAD_MAX_SIZE)
 		{
-			memset(m_outbuff + m_outbufsize, 0x00, paddinglen - 1);
-			m_outbufsize += (paddinglen - 1);
-		}
+	       m_rtphead.mark = 0 ;
+		   memcpy(m_outbuff, (unsigned char*)&m_rtphead, sizeof(m_rtphead));
+		   m_outbufsize = sizeof(m_rtphead);
 
-		memcpy(m_outbuff + m_outbufsize, &paddinglen, 1);
-		++m_outbufsize;
-	}
+		   memcpy(m_outbuff + m_outbufsize, data + nPos, RTP_PAYLOAD_MAX_SIZE);
+		   m_outbufsize += RTP_PAYLOAD_MAX_SIZE;
 
-	if (m_cb)
-	{
-		m_out.data = m_outbuff;
-		m_out.datasize = m_outbufsize;
-
-		m_cb(&m_out);
-	}
-
-	++m_seqbase;
-
-	return e_rtppkt_err_noerror;
-}
-
-int32_t rtp_packet::h264_fua(uint8_t* data, uint32_t datasize, bool last)
-{
-	uint32_t segmentlen = 0;
-	uint8_t paddinglen = 0;
-	uint8_t nal = 0;
-	bool fuafirst = true, fualast = false;
-
-	_rtp_fua_indicator fuaind;
-	_rtp_fua_header fuahead;
-
-	nal = data[0] & 0x1f;
-
-	fuaind.f = (data[0] >> 7) & 0x01;
-	fuaind.n = (data[0] >> 5) & 0x03;
-
-	fuahead.t = nal;
-
-	++data;
-	--datasize;
-
-	for (; datasize > 0;)
-	{
-		m_outbufsize = 0;
-
-		segmentlen = (datasize >= (RTP_PAYLOAD_MAX_SIZE -2) ) ? (RTP_PAYLOAD_MAX_SIZE - 2) : datasize;
-		fualast = (0 == (datasize - segmentlen));
-
-		fuahead.s = (fuafirst ? 1 : 0);
-		fuahead.e = (fualast ? 1 : 0);
-
-		if (e_rtppkt_am_4octet == m_attr.alimod)
-		{
-			paddinglen = (0 == (sizeof(m_rtphead) + segmentlen + 2) % 4) ? 0 : (4 - (sizeof(m_rtphead) + segmentlen + 2) % 4);
-		}
-		else if (e_rtppkt_am_8octet == m_attr.alimod)
-		{
-			paddinglen = (0 == (sizeof(m_rtphead) + segmentlen + 2) % 8) ? 0 : (8 - (sizeof(m_rtphead) + segmentlen + 2) % 8);
+		   nPos        += RTP_PAYLOAD_MAX_SIZE;
+		   nSendLength -= RTP_PAYLOAD_MAX_SIZE;
 		}
 		else
 		{
-			paddinglen = 0;
+			m_rtphead.mark = 1;
+			memcpy(m_outbuff, (unsigned char*)&m_rtphead, sizeof(m_rtphead));
+			m_outbufsize = sizeof(m_rtphead);
+
+			memcpy(m_outbuff + m_outbufsize, data + nPos, nSendLength);
+			m_outbufsize += nSendLength ;
+ 
+			nPos        = datasize;
+			nSendLength = 0;
 		}
-
-		m_rtphead.p = (0 == paddinglen) ? 0 : 1;
-		m_rtphead.mark = ( (last && fualast) ? 1 : 0);
-		m_rtphead.seq = ::htons(m_seqbase);
-		m_rtphead.timestamp = ::htonl(m_ttbase);
-
-		memcpy(m_outbuff + m_outbufsize, &m_rtphead, sizeof(m_rtphead));
-		m_outbufsize += sizeof(m_rtphead);
-
-		memcpy(m_outbuff + m_outbufsize, &fuaind, sizeof(fuaind));
-		m_outbufsize += sizeof(fuaind);
-
-		memcpy(m_outbuff + m_outbufsize, &fuahead, sizeof(fuahead));
-		m_outbufsize += sizeof(fuahead);
-
-		memcpy(m_outbuff + m_outbufsize, data, segmentlen);
-		m_outbufsize += segmentlen;
-
-		if (0 != paddinglen)
-		{
-			if (paddinglen - 1 > 0)
-			{
-				memset(m_outbuff + m_outbufsize, 0x00, paddinglen - 1);
-				m_outbufsize += (paddinglen - 1);
-			}
-
-			memcpy(m_outbuff + m_outbufsize, &paddinglen, 1);
-			++m_outbufsize;
-		}
-
+  
 		if (m_cb)
 		{
-			m_out.data = m_outbuff;
 			m_out.datasize = m_outbufsize;
-
 			m_cb(&m_out);
 		}
 
-		++m_seqbase;
-
-		data += segmentlen;
-		datasize -= segmentlen;
-		fuafirst = false;
+		if (m_seqbase == 0xFFFF)
+			m_seqbase = 0;//达到最大值，进行翻转
+		else 
+ 	        m_seqbase ++;
 	}
 
-	return e_rtppkt_err_noerror;
-}
-
-int32_t rtp_packet::h264_stapa(uint8_t* data, uint32_t datasize, bool last)
-{
-	return e_rtppkt_err_unsupportedmethod;
-}
-
-
-int32_t rtp_packet::h265_fus(uint8_t* data, uint32_t datasize, bool last)
-{
-	uint32_t segmentlen = 0;
-	uint8_t paddinglen = 0;
-	uint8_t nal = 0;
-	uint8_t plhdr[2] = { 0 };
-	bool fusfirst = true, fuslast = false;
-
-	plhdr[0] = 49; //fus
-	plhdr[0] = plhdr[0] << 1;
-	plhdr[0] |= (data[0] & 0x80);
-	plhdr[0] |= (data[0] & 0x01);
-	plhdr[1] = data[1];
-	
-	_rtp_fus_header fushead;
-
-	nal = (data[0] >> 1) & 0x3f;
-
-	fushead.t = nal;
-
-	data += 2;
-	datasize -= 2;
-
-	for (; datasize > 0;)
-	{
-		m_outbufsize = 0;
-
-		segmentlen = (datasize >= (RTP_PAYLOAD_MAX_SIZE - 3)) ? (RTP_PAYLOAD_MAX_SIZE - 3) : datasize;
-		fuslast = (0 == (datasize - segmentlen));
-
-		fushead.s = (fusfirst ? 1 : 0);
-		fushead.e = (fuslast ? 1 : 0);
-
-		if (e_rtppkt_am_4octet == m_attr.alimod)
-		{
-			paddinglen = (0 == (sizeof(m_rtphead) + segmentlen + 3) % 4) ? 0 : (4 - (sizeof(m_rtphead) + segmentlen + 3) % 4);
-		}
-		else if (e_rtppkt_am_8octet == m_attr.alimod)
-		{
-			paddinglen = (0 == (sizeof(m_rtphead) + segmentlen + 3) % 8) ? 0 : (8 - (sizeof(m_rtphead) + segmentlen + 3) % 8);
-		}
-		else
-		{
-			paddinglen = 0;
-		}
-
-		m_rtphead.p = (0 == paddinglen) ? 0 : 1;
-		m_rtphead.mark = ((fuslast &&last) ? 1 : 0);
-		m_rtphead.seq = ::htons(m_seqbase);
-		m_rtphead.timestamp = ::htonl(m_ttbase);
-
-		memcpy(m_outbuff + m_outbufsize, &m_rtphead, sizeof(m_rtphead));
-		m_outbufsize += sizeof(m_rtphead);
-
-		memcpy(m_outbuff + m_outbufsize, &plhdr, sizeof(plhdr));
-		m_outbufsize += sizeof(plhdr);
-
-		memcpy(m_outbuff + m_outbufsize, &fushead, sizeof(fushead));
-		m_outbufsize += sizeof(fushead);
-
-		memcpy(m_outbuff + m_outbufsize, data, segmentlen);
-		m_outbufsize += segmentlen;
-
-		if (0 != paddinglen)
-		{
-			if (paddinglen - 1 > 0)
-			{
-				memset(m_outbuff + m_outbufsize, 0x00, paddinglen - 1);
-				m_outbufsize += (paddinglen - 1);
-			}
-
-			memcpy(m_outbuff + m_outbufsize, &paddinglen, 1);
-			++m_outbufsize;
-		}
-
-		if (m_cb)
-		{
-			m_out.data = m_outbuff;
-			m_out.datasize = m_outbufsize;
-
-			m_cb(&m_out);
-		}
-
-		++m_seqbase;
-
-		data += segmentlen;
-		datasize -= segmentlen;
-		fusfirst = false;
-	}
-
-	return e_rtppkt_err_noerror;
-}
-
-int32_t rtp_packet::h265_aps(uint8_t* data, uint32_t datasize, bool last)
-{
-	return e_rtppkt_err_unsupportedmethod;
-}
-
-int32_t rtp_packet::svacv_fua(uint8_t* data, uint32_t datasize, bool last)
-{
-	uint32_t segmentlen = 0;
-	uint8_t paddinglen = 0;
-	uint8_t nal = 0;
-	bool fuafirst = true, fualast = false;
-
-	_rtp_fua_indicator fuaind;
-	_rtp_fua_header fuahead;
-
-	nal = (data[0] >> 2) & 0x0f;
-
-	fuaind.f = (data[0] >> 7) & 0x01;
-	fuaind.n = (data[0] >> 6) & 0x01;
-
-	fuahead.t = nal;
-
-	++data;
-	--datasize;
-
-	for (; datasize > 0;)
-	{
-		m_outbufsize = 0;
-
-		segmentlen = (datasize >= (RTP_PAYLOAD_MAX_SIZE - 2)) ? (RTP_PAYLOAD_MAX_SIZE - 2) : datasize;
-		fualast = (0 == (datasize - segmentlen));
-
-		fuahead.s = (fuafirst ? 1 : 0);
-		fuahead.e = ( (fualast && last) ? 1 : 0);
-
-		if (e_rtppkt_am_4octet == m_attr.alimod)
-		{
-			paddinglen = (0 == (sizeof(m_rtphead) + segmentlen + 2) % 4) ? 0 : (4 - (sizeof(m_rtphead) + segmentlen + 2) % 4);
-		}
-		else if (e_rtppkt_am_8octet == m_attr.alimod)
-		{
-			paddinglen = (0 == (sizeof(m_rtphead) + segmentlen + 2) % 8) ? 0 : (8 - (sizeof(m_rtphead) + segmentlen + 2) % 8);
-		}
-		else
-		{
-			paddinglen = 0;
-		}
-
-		m_rtphead.p = (0 == paddinglen) ? 0 : 1;
-		m_rtphead.mark = (last ? 1 : 0);
-		m_rtphead.seq = ::htons(m_seqbase);
-		m_rtphead.timestamp = ::htonl(m_ttbase);
-
-		memcpy(m_outbuff + m_outbufsize, &m_rtphead, sizeof(m_rtphead));
-		m_outbufsize += sizeof(m_rtphead);
-
-		memcpy(m_outbuff + m_outbufsize, &fuaind, sizeof(fuaind));
-		m_outbufsize += sizeof(fuaind);
-
-		memcpy(m_outbuff + m_outbufsize, &fuahead, sizeof(fuahead));
-		m_outbufsize += sizeof(fuahead);
-
-		memcpy(m_outbuff + m_outbufsize, data, segmentlen);
-		m_outbufsize += segmentlen;
-
-		if (0 != paddinglen)
-		{
-			if (paddinglen - 1 > 0)
-			{
-				memset(m_outbuff + m_outbufsize, 0x00, paddinglen - 1);
-				m_outbufsize += (paddinglen - 1);
-			}
-
-			memcpy(m_outbuff + m_outbufsize, &paddinglen, 1);
-			++m_outbufsize;
-		}
-
-		if (m_cb)
-		{
-			m_out.data = m_outbuff;
-			m_out.datasize = m_outbufsize;
-
-			m_cb(&m_out);
-		}
-
-		++m_seqbase;
-
-		data += segmentlen;
-		datasize -= segmentlen;
-		fuafirst = false;
-	}
-
-	return e_rtppkt_err_noerror;
-}
-
-int32_t rtp_packet::svacv_stapa(uint8_t* data, uint32_t datasize, bool last)
-{
-	return e_rtppkt_err_unsupportedmethod;
-}
-
-int32_t rtp_packet::handle_common(uint8_t* data, uint32_t datasize)
-{
-	uint32_t segmentlen = 0;
-	uint8_t paddinglen = 0;
-
-	bool first = true;
-	bool last = false;
-
-	for (; datasize > 0;)
-	{
-		m_outbufsize = 0;
-
-		segmentlen = (datasize >= RTP_PAYLOAD_MAX_SIZE) ? RTP_PAYLOAD_MAX_SIZE : datasize;
-		last = (0 == (datasize - segmentlen));
-
-		if (e_rtppkt_am_4octet == m_attr.alimod)
-		{
-			paddinglen = (0 == (sizeof(m_rtphead) + segmentlen) % 4) ? 0 : (4 - (sizeof(m_rtphead) + segmentlen) % 4);
-		}
-		else if (e_rtppkt_am_8octet == m_attr.alimod)
-		{
-			paddinglen = (0 == (sizeof(m_rtphead) + segmentlen) % 8) ? 0 : (8 - (sizeof(m_rtphead) + segmentlen) % 8);
-		}
-		else
-		{
-			paddinglen = 0;
-		}
-
-		m_rtphead.p = (0 == paddinglen) ? 0 : 1;
-		m_rtphead.mark = (e_rtppkt_mt_audio == m_attr.mediatype) ? ( first ? 1 : 0 ) : ( last ? 1 : 0);
-		m_rtphead.seq = ::htons(m_seqbase);
-		m_rtphead.timestamp = ::htonl(m_ttbase);
-
-		memcpy(m_outbuff + m_outbufsize, &m_rtphead, sizeof(m_rtphead));
-		m_outbufsize += sizeof(m_rtphead);
-
-		memcpy(m_outbuff + m_outbufsize, data, segmentlen);
-		m_outbufsize += segmentlen;
-
-		if (0 != paddinglen)
-		{
-			if (paddinglen - 1 > 0)
-			{
-				memset(m_outbuff + m_outbufsize, 0x00, paddinglen - 1);
-				m_outbufsize += (paddinglen - 1);
-			}
-			
-			memcpy(m_outbuff + m_outbufsize, &paddinglen, 1);
-			++m_outbufsize;
-		}
-
-		if (m_cb)
-		{
-			m_out.data = m_outbuff;
-			m_out.datasize = m_outbufsize;
-
-			m_cb(&m_out);
-		}
-
-		++m_seqbase;
-
-		data += segmentlen;
-		datasize -= segmentlen;
-		first = false;
-	}
-
-	if (m_inTimestamp == 0)
-		m_ttbase += m_attr.ttincre;
-	else
-		m_ttbase = m_inTimestamp;
-
-
-	return e_rtppkt_err_noerror;
+	return ret;
 }
 
 //aac打包
-int32_t rtp_packet::aac_adts(uint8_t* data, uint32_t datasize)
+int32_t packet::aac_adts(uint8_t* data, uint32_t datasize)
 {
 	if (datasize <= 7)
 		return e_rtppkt_err_invalidparam;
@@ -646,7 +143,7 @@ int32_t rtp_packet::aac_adts(uint8_t* data, uint32_t datasize)
 	else
 		AdtsHeaderLength = 0;//没有时，不需要去掉 
 
-    datasize -= AdtsHeaderLength;
+	datasize -= AdtsHeaderLength;
 	memset(aacBuffer, 0x00, sizeof(aacBuffer));
 	aacBuffer[0] = 0x00;
 	aacBuffer[1] = 0x10;
@@ -655,4 +152,393 @@ int32_t rtp_packet::aac_adts(uint8_t* data, uint32_t datasize)
 	memcpy(aacBuffer + 4, data + AdtsHeaderLength, datasize);
 
 	return handle_common(aacBuffer, datasize + 4);
+}
+
+//视频h264、h265单nalu 打包 
+uint32_t packet::VideoSingleNalu(unsigned char* pFrameData, int nFrameLength, bool bLast)
+{
+	m_rtphead.payload = rtp_sessionOpt.payload;
+	m_rtphead.ssrc = htonl(rtp_sessionOpt.ssrc);
+	m_rtphead.seq = htons(m_seqbase);
+	m_rtphead.mark = bLast == true ? 1 : 0;
+	m_rtphead.timestamp = htonl(m_ttbase);
+
+	if (m_cb)
+	{//回调打包好的数据
+		memcpy(m_outbuff,(char*)&m_rtphead, sizeof(m_rtphead));
+		m_outbufsize = sizeof(m_rtphead);
+		memcpy(m_outbuff + m_outbufsize, pFrameData, nFrameLength);
+		m_outbufsize += nFrameLength;
+		
+		m_out.datasize = m_outbufsize;//指定输出长度
+		m_cb(&m_out);
+	}
+
+	if (m_seqbase == 0xFFFF)
+		m_seqbase = 0;//达到最大值，进行翻转
+	else
+		m_seqbase ++;
+
+	return e_rtppkt_err_noerror;
+}
+
+//H264 Fua 打包  
+uint32_t packet::H264FuaNalu(unsigned char* pFrameData, int nFrameLength, bool bLast)
+{
+	int nPos = 0;
+	int nSendPacketLength = nFrameLength;
+	unsigned char nNaluHead = pFrameData[0];
+	_rtp_fua_indicator rtpFuaIndicator;
+	_rtp_fua_header    fuaHeader;
+
+	m_rtphead.payload = rtp_sessionOpt.payload;
+	m_rtphead.ssrc = htonl(rtp_sessionOpt.ssrc);
+	m_rtphead.timestamp = htonl(m_ttbase);
+
+	rtpFuaIndicator.f = (nNaluHead >> 7) & 0x01;
+	rtpFuaIndicator.n = (nNaluHead >> 5) & 0x03;
+
+	fuaHeader.t = (nNaluHead & 0x1F);
+
+	//使用了Nalu头的1个字节
+	nPos += 1;
+	nSendPacketLength -= 1;
+
+	while (nSendPacketLength > 0)
+	{
+		m_rtphead.seq = htons(m_seqbase);
+		if (nSendPacketLength > RTP_PAYLOAD_MAX_SIZE - 2)
+		{//不是最后一段,以长度为 RTP_PAYLOAD_MAX_SIZE - 2 进行切割265视频数据, 因为 rtpFuaIndicator ， fuaHeader 占用了2个字节
+ 			m_rtphead.mark = 0;
+
+			if (nPos == 1)
+			{//第一个分包
+				fuaHeader.s = 1;
+				fuaHeader.e = 0;
+			}
+			else
+			{
+				fuaHeader.s = 0;
+				fuaHeader.e = 0;
+			}
+
+		}
+		else
+		{//最后一段
+ 			m_rtphead.mark = 1;
+
+			fuaHeader.s = 0;
+			fuaHeader.e = 1;
+		}
+
+		if (m_cb)
+		{//回调打包好的数据
+			memcpy(m_outbuff, (char*)&m_rtphead, sizeof(m_rtphead));
+			m_outbufsize = sizeof(m_rtphead);
+
+			memcpy(m_outbuff + m_outbufsize,(char*)&rtpFuaIndicator, 1);
+			m_outbufsize += 1;
+
+			memcpy(m_outbuff + m_outbufsize, (char*)&fuaHeader, 1);
+			m_outbufsize += 1;
+			if (m_rtphead.mark == 0)
+			{//中间包
+				memcpy(m_outbuff + m_outbufsize, pFrameData + nPos, RTP_PAYLOAD_MAX_SIZE - 2);
+				m_outbufsize += RTP_PAYLOAD_MAX_SIZE - 2;
+			}
+			else
+			{//最后一包
+				memcpy(m_outbuff + m_outbufsize, pFrameData + nPos, nFrameLength - nPos);
+				m_outbufsize += nFrameLength - nPos;
+			}
+
+			m_out.datasize = m_outbufsize;//指定输出长度
+			m_cb(&m_out);
+		}
+
+		if (m_seqbase == 0xFFFF)
+			m_seqbase = 0;//达到最大值，进行翻转
+		else
+			m_seqbase++;
+
+		if (m_rtphead.mark == 1)
+		{//最后一包 
+			nSendPacketLength = 0;
+			nPos              = nFrameLength;
+		}
+		else
+		{//中间包
+			nSendPacketLength -= RTP_PAYLOAD_MAX_SIZE - 2;
+			nPos              += RTP_PAYLOAD_MAX_SIZE - 2;
+		}
+	}
+
+	return true;
+}
+
+//对H264进行切割并打包 
+int32_t packet::SplitterH264VideoData(unsigned char* pVideoData, int nLength)
+{
+	int nPosStart = -1, nPosEnd = -1;
+	int nStartCodeLength = 3;
+	int nFrameLength = 0;
+	
+	if (!(memcmp(pVideoData, pVideoStartCode_1, sizeof(pVideoStartCode_1)) == 0 || memcmp(pVideoData, pVideoStartCode_2, sizeof(pVideoStartCode_2)) == 0))
+		return e_rtppkt_err_invaliddata;//数据错误
+
+	for (int i = 0; i < nLength; i++)
+	{
+		if (memcmp(pVideoData + i, pVideoStartCode_1, sizeof(pVideoStartCode_1)) == 0)
+		{
+			if (nPosStart == -1 && nPosEnd == -1)
+				nPosStart = i;
+			else if (nPosStart >= 0)
+				nPosEnd = i;
+
+			i += sizeof(pVideoStartCode_1);
+		}
+		else if (memcmp(pVideoData + i, pVideoStartCode_2, sizeof(pVideoStartCode_2)) == 0)
+		{
+			if (nPosStart == -1 && nPosEnd == -1)
+				nPosStart = i;
+			else if (nPosStart >= 0)
+				nPosEnd = i;
+
+			i += sizeof(pVideoStartCode_2);
+		}
+		else
+		{
+			continue;
+		}
+
+		//尚未找到一帧
+		if (!(nPosStart >= 0 && nPosEnd >= 0))
+			continue;
+
+		//确定起始码的长度
+		if (memcmp(pVideoData + nPosStart, pVideoStartCode_1, sizeof(pVideoStartCode_1)) == 0)
+			nStartCodeLength = 4;
+		else if (memcmp(pVideoData + nPosStart, pVideoStartCode_2, sizeof(pVideoStartCode_2)) == 0)
+			nStartCodeLength = 3;
+		else//错误的起始码
+			return e_rtppkt_err_invaliddata;
+		nFrameLength = nPosEnd - nPosStart - nStartCodeLength;
+
+		if (nFrameLength > 0)
+		{//确保数据合法
+		   if (nFrameLength < RTP_PAYLOAD_MAX_SIZE)
+			 VideoSingleNalu(pVideoData + (nPosStart + nStartCodeLength), nFrameLength, false);
+		   else
+			 H264FuaNalu(pVideoData + (nPosStart + nStartCodeLength), nFrameLength, false);
+		}else
+			return e_rtppkt_err_invaliddata;
+		
+		//交换nPosStart，进行查找下一帧 
+		nPosStart = nPosEnd;
+	}
+
+    //确定起始码的长度
+	if (memcmp(pVideoData + nPosStart, pVideoStartCode_1, sizeof(pVideoStartCode_1)) == 0)
+		nStartCodeLength = 4;
+	else if (memcmp(pVideoData + nPosStart, pVideoStartCode_2, sizeof(pVideoStartCode_2)) == 0)
+		nStartCodeLength = 3;
+	else//错误的起始码
+		return e_rtppkt_err_invaliddata;
+
+	nFrameLength = nLength - nPosStart - nStartCodeLength;
+
+ 	if (nFrameLength > 0)
+	{//确保数据合法
+		if (nFrameLength < RTP_PAYLOAD_MAX_SIZE)
+			VideoSingleNalu(pVideoData + (nPosStart + nStartCodeLength), nFrameLength, true);
+		else
+			H264FuaNalu(pVideoData + (nPosStart + nStartCodeLength), nFrameLength, true);
+
+		return e_rtppkt_err_noerror;
+	}
+	else
+		return e_rtppkt_err_invaliddata;
+}
+
+//H265 Fus 打包  
+uint32_t packet::H265FusNalu(unsigned char* pFrameData, int nFrameLength, bool bLast)
+{
+	int nPos = 0;
+	int nSendPacketLength = nFrameLength;
+	uint8_t            h265NaluHead[2];//265Nal头 
+	unsigned char      nNaluHead = pFrameData[0];
+	_rtp_fus_header    fusHeader;
+
+	m_rtphead.payload = rtp_sessionOpt.payload;
+	m_rtphead.ssrc = htonl(rtp_sessionOpt.ssrc);
+	m_rtphead.timestamp = htonl(m_ttbase);
+
+	h265NaluHead[0] = 49;
+	h265NaluHead[0] = h265NaluHead[0] << 1;
+	h265NaluHead[0] |= (pFrameData[0] & 0x80);
+	h265NaluHead[0] |= (pFrameData[0] & 0x01);
+	h265NaluHead[1]  = pFrameData[1];
+
+	nNaluHead = ((pFrameData[0] & 0x7E) >> 1);
+ 	fusHeader.t = nNaluHead ;
+
+	//使用了H265的Nalu头2个字节
+	nPos += 2;
+	nSendPacketLength -= 2;
+
+	while (nSendPacketLength > 0)
+	{
+		m_rtphead.seq = htons(m_seqbase);
+		if (nSendPacketLength > RTP_PAYLOAD_MAX_SIZE - 3)
+		{//不是最后一段、以长度为 RTP_PAYLOAD_MAX_SIZE - 3 进行切割265视频数据 ，因为 h265NaluHead、fusHeader 总共占了3个字节
+			m_rtphead.mark = 0;
+
+			if (nPos == 2)
+			{//第一个分包，nPos 为 2 ，不是264状态下的 1 
+				fusHeader.s = 1;
+				fusHeader.e = 0;
+			}
+			else
+			{
+				fusHeader.s = 0;
+				fusHeader.e = 0;
+			}
+
+		}
+		else
+		{//最后一段
+			m_rtphead.mark = 1;
+
+			fusHeader.s = 0;
+			fusHeader.e = 1;
+		}
+
+		if (m_cb)
+		{//回调打包好的数据
+			memcpy(m_outbuff, (char*)&m_rtphead, sizeof(m_rtphead));
+			m_outbufsize = sizeof(m_rtphead);
+
+			memcpy(m_outbuff + m_outbufsize, h265NaluHead, 2);
+			m_outbufsize += 2;
+
+			memcpy(m_outbuff + m_outbufsize, (char*)&fusHeader, 1);
+			m_outbufsize += 1;
+			if (m_rtphead.mark == 0)
+			{//中间包
+				memcpy(m_outbuff + m_outbufsize, pFrameData + nPos, RTP_PAYLOAD_MAX_SIZE - 3); //以长度为 RTP_PAYLOAD_MAX_SIZE - 3 进行切割265视频数据
+				m_outbufsize += RTP_PAYLOAD_MAX_SIZE - 3;
+			}
+			else
+			{//最后一包
+				memcpy(m_outbuff + m_outbufsize, pFrameData + nPos, nFrameLength - nPos);
+				m_outbufsize += nFrameLength - nPos;
+			}
+
+			m_out.datasize = m_outbufsize;//指定输出长度
+			m_cb(&m_out);
+		}
+
+		if (m_seqbase == 0xFFFF)
+			m_seqbase = 0;//达到最大值，进行翻转
+		else
+			m_seqbase++;
+
+		if (m_rtphead.mark == 1)
+		{//最后一包 
+			nSendPacketLength = 0;
+			nPos              = nFrameLength;
+		}
+		else
+		{//中间包
+			nSendPacketLength -= RTP_PAYLOAD_MAX_SIZE - 3; //以长度为 RTP_PAYLOAD_MAX_SIZE - 3 进行切割265视频数据
+			nPos              += RTP_PAYLOAD_MAX_SIZE - 3; //以长度为 RTP_PAYLOAD_MAX_SIZE - 3 进行切割265视频数据
+		}
+	}
+
+	return true;
+}
+
+//对H265进行切割并打包 
+int32_t packet::SplitterH265VideoData(unsigned char* pVideoData, int nLength)
+{
+	int nPosStart = -1, nPosEnd = -1;
+	int nStartCodeLength = 3;
+	int nFrameLength = 0;
+	
+	if (!(memcmp(pVideoData, pVideoStartCode_1, sizeof(pVideoStartCode_1)) == 0 || memcmp(pVideoData, pVideoStartCode_2, sizeof(pVideoStartCode_2)) == 0))
+		return e_rtppkt_err_invaliddata;//数据错误
+
+	for (int i = 0; i < nLength; i++)
+	{
+		if (memcmp(pVideoData + i, pVideoStartCode_1, sizeof(pVideoStartCode_1)) == 0)
+		{
+			if (nPosStart == -1 && nPosEnd == -1)
+				nPosStart = i;
+			else if (nPosStart >= 0)
+				nPosEnd = i;
+
+			i += sizeof(pVideoStartCode_1);
+		}
+		else if (memcmp(pVideoData + i, pVideoStartCode_2, sizeof(pVideoStartCode_2)) == 0)
+		{
+			if (nPosStart == -1 && nPosEnd == -1)
+				nPosStart = i;
+			else if (nPosStart >= 0)
+				nPosEnd = i;
+
+			i += sizeof(pVideoStartCode_2);
+		}
+		else
+		{
+			continue;
+		}
+
+		//尚未找到一帧
+		if (!(nPosStart >= 0 && nPosEnd >= 0))
+			continue;
+
+		//确定起始码的长度
+		if (memcmp(pVideoData + nPosStart, pVideoStartCode_1, sizeof(pVideoStartCode_1)) == 0)
+			nStartCodeLength = 4;
+		else if (memcmp(pVideoData + nPosStart, pVideoStartCode_2, sizeof(pVideoStartCode_2)) == 0)
+			nStartCodeLength = 3;
+		else//错误的起始码
+			return e_rtppkt_err_invaliddata;
+
+		nFrameLength = nPosEnd - nPosStart - nStartCodeLength;
+
+		if (nFrameLength > 0)
+		{//确保数据合法
+		   if (nFrameLength < RTP_PAYLOAD_MAX_SIZE)
+			  VideoSingleNalu(pVideoData + (nPosStart + nStartCodeLength), nFrameLength, false);
+		   else
+			 H265FusNalu(pVideoData + (nPosStart + nStartCodeLength), nFrameLength, false);
+		}else
+			return e_rtppkt_err_invaliddata;
+			
+		//交换nPosStart，进行查找下一帧 
+		nPosStart = nPosEnd;
+	}
+
+	//确定起始码的长度
+	if (memcmp(pVideoData + nPosStart, pVideoStartCode_1, sizeof(pVideoStartCode_1)) == 0)
+		nStartCodeLength = 4;
+	else if (memcmp(pVideoData + nPosStart, pVideoStartCode_2, sizeof(pVideoStartCode_2)) == 0)
+		nStartCodeLength = 3;
+	else//错误的起始码
+		return e_rtppkt_err_invaliddata;
+
+	nFrameLength = nLength - nPosStart - nStartCodeLength;
+
+	if (nFrameLength > 0)
+	{//确保数据合法
+		if (nFrameLength < RTP_PAYLOAD_MAX_SIZE)
+			VideoSingleNalu(pVideoData + (nPosStart + nStartCodeLength), nFrameLength, true);
+		else
+			H265FusNalu(pVideoData + (nPosStart + nStartCodeLength), nFrameLength, true);
+
+		return e_rtppkt_err_noerror;
+	}
+	else
+		return e_rtppkt_err_invaliddata;
 }

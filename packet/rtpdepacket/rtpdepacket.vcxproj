@@ -19,19 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common.h" />
-    <ClInclude Include="depacket.h" />
+    <ClInclude Include="include\depacket.h" />
     <ClInclude Include="rtp_def.h" />
     <ClInclude Include="rtp_depacket.h" />
-    <ClInclude Include="session.h" />
-    <ClInclude Include="session_manager.h" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="common.cpp" />
     <ClCompile Include="depacket.cpp" />
-    <ClCompile Include="rtp_depacket.cpp" />
-    <ClCompile Include="session.cpp" />
-    <ClCompile Include="session_manager.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="rtpdepacket.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -157,6 +153,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

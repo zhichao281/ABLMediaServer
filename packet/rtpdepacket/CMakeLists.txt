@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.12)
 
-
-project(RtpDepacket
-    VERSION 0.6.0.4
-    DESCRIPTION "RtpDepacket"
+project(rtpdepacket
+    VERSION 1.0.1031
+    DESCRIPTION "rtpdepacket"
     LANGUAGES C CXX)
 
 # 使用现代目标式 CMake 替代传统变量
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -59,6 +58,13 @@ else()
     add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
 endif()
 
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC _WIN32 _WIN64 )
+endif()
+
+if(BUILD_PACKET_SHARED)
+     target_compile_definitions(${PROJECT_NAME} PUBLIC LIB_RTP_DEPACKET_EXPORT)
+endif()
 
 # 现代头文件包含方式（PUBLIC 表示会传递给依赖此库的目标）
 target_include_directories(${PROJECT_NAME}

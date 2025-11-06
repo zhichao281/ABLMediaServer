@@ -119,6 +119,19 @@ struct _rtp_paci_header
 	}
 };
 
+//fu-a for h265
+struct _rtp_fua_indicator_h265
+{
+	uint8_t f : 1;	//nalu forbidden_zero_bit
+	uint8_t m : 6;	//0 ~ 37 
+	uint8_t n : 1;	//nalu nal_ref_idc
+
+	_rtp_fua_indicator_h265()
+		: f(0), n(0), m(0)
+	{
+	}
+};
+
 #pragma pack(pop)
 
 #endif

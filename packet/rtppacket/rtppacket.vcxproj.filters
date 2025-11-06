@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="packet.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -27,27 +24,18 @@
     <ClInclude Include="rtp_packet.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="session.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="session_manager.h">
+    <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="common.cpp">
+    <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="packet.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="rtp_packet.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="session.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="session_manager.cpp">
+    <ClCompile Include="rtppacket.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

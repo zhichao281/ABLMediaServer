@@ -1,49 +1,39 @@
-#pragma once
-#include <memory>
+#ifndef _Packet_H
+#define _Packet_H
 #include "rtp_packet.h"
 #include "rtp_def.h"
 
-class rtp_packet
+class packet
 {
-public: 
-	rtp_packet(rtp_packet_callback cb, void* userdata, const _rtp_packet_sessionopt& opt);
-	~rtp_packet();
+public:
+   packet();
+   ~packet();
+ 
+   bool        set_option(_rtp_packet_sessionopt* op);
+   uint32_t    handle(uint8_t* data, uint32_t datasize, uint32_t inTimestamp);
+   int32_t     handle_common(uint8_t* data, uint32_t datasize);
+   int32_t     aac_adts(uint8_t* data, uint32_t datasize);
+   int32_t     SplitterH264VideoData(unsigned char* pVideoData, int nLength);
+   uint32_t    VideoSingleNalu(unsigned char* pFrameData, int nFrameLength, bool bLast);
+   uint32_t    H264FuaNalu(unsigned char* pFrameData, int nFrameLength, bool bLast);
+   int32_t     SplitterH265VideoData(unsigned char* pVideoData, int nLength);
+   uint32_t    H265FusNalu(unsigned char* pFrameData, int nFrameLength, bool bLast);
 
-	int32_t handle(uint8_t* data, uint32_t datasize, uint32_t inTimestamp);
+   int            AdtsHeaderLength;
+   unsigned char  aacBuffer[1920];
+   _rtp_header    m_rtphead;
+   _rtp_packet_cb m_out;
+   uint8_t        m_outbuff[1920];
+   uint32_t       m_outbufsize;
+   uint32_t       m_ttbase;
+   uint16_t       m_seqbase;
 
-private:
-	int32_t handle_nalu_stream(int32_t st, uint8_t* data, uint32_t datasize); //for h264, h265, svac video
+   _rtp_packet_sessionopt rtp_sessionOpt;//参数 
 
-	int32_t singlenalu(uint8_t* data, uint32_t datasize, bool last);
+   uint32_t               m_inTimestamp;
+   void*                  userdata;
+   uint32_t               nID;//对象ID
+   rtp_packet_callback    m_cb;
+};
 
-	int32_t h264_fua(uint8_t* data, uint32_t datasize, bool last);
-	int32_t h264_stapa(uint8_t* data, uint32_t datasize, bool last);
-
-	int32_t h265_fus(uint8_t* data, uint32_t datasize, bool last);
-	int32_t h265_aps(uint8_t* data, uint32_t datasize, bool last);
-
-	int32_t svacv_fua(uint8_t* data, uint32_t datasize, bool last);
-	int32_t svacv_stapa(uint8_t* data, uint32_t datasize, bool last);
-
-	int32_t handle_common(uint8_t* data, uint32_t datasize);
-
-	int32_t aac_adts(uint8_t* data, uint32_t datasize);
-
-private:
-	const rtp_packet_callback m_cb;
-	const void* m_userdata;
-	const _rtp_packet_sessionopt m_attr;
-	const uint32_t RTP_PAYLOAD_MAX_SIZE;
-	_rtp_packet_cb m_out;
-	_rtp_header m_rtphead;
-	uint8_t m_outbuff[1500];
-	uint32_t m_outbufsize;
-	uint32_t m_ttbase;
-	uint16_t m_seqbase;
-	uint8_t             aacBuffer[1500];
-	int                 AdtsHeaderLength; //动态改变adts头长度
-	volatile uint32_t   m_inTimestamp;//输入的时间戳
- };
-
-typedef std::shared_ptr<rtp_packet> rtp_packet_ptr;
-
+#endif

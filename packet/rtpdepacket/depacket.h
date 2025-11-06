@@ -1,12 +1,14 @@
-#ifndef _RTP_PACKET_DEPACKET_DEPACKET_H_
-#define _RTP_PACKET_DEPACKET_DEPACKET_H_
+#ifndef _DePacket_H
+#define _DePacket_H
 
-#include <stdint.h>
-#include <memory>
-#include <unordered_map>
-#include "rtp_depacket.h"
+#include  "rtp_depacket.h" 
+#include  "rtp_def.h"
 
+#define RTP_DEPACKET_MAX_SIE  1024*1024*3 
 #define      MaxNaluBlockCount    32   //最大Nalu段
+#define DEPACKET_VpsSpsPpsBuffer_SIZE (8192)
+
+#define  H265_UseSplitterVideoFlag     1  //针对H265在高分辨率2K、4K、5K 、8K 可能采用一帧视频有2个以上的slice打包，进行拼接、切割
 
 struct NaluHeardPosition
 {
@@ -14,75 +16,56 @@ struct NaluHeardPosition
 	int NaluHeardLength;//Nalu标志出现的位置
 };
 
-#define DEPACKET_DATA_BUFFER_MAX_SIZE (4 * 1024 * 1024)
-
-class rtp_depacket
+class depacket
 {
 public:
-	bool                CheckVideoIsIFrame(int nVideoFrameType, unsigned char* szPVideoData, int nPVideoLength);
-	int32_t             SplitterRtpDepacketBuffer(uint8_t* data, uint32_t datasize);
-	NaluHeardPosition   nPosArray[MaxNaluBlockCount];
-	unsigned int        nFindCount;
-	int                 nPos1, nPos2, nNaluLength;
-	int                 sclen, payloadlen;
-	bool                bSetOptFlag;
-	int                 nMediaTypeCodec;//媒体类型编码
-	bool                bIsIFrameFlag;
+	 depacket();
+	 ~depacket();
+	 bool                bFindFrameFlag;
+	 bool                CopyVpsSpsPps(uint8_t* pData, int nLength);
+	 bool                CheckIdrFrame(uint8_t* pData, int nLength);
+	 unsigned char       szVpsSpsPpsBuffer[DEPACKET_VpsSpsPpsBuffer_SIZE];
+	 int                 nVpsSpsPpsBufferSize;
 
-	rtp_depacket(uint32_t ssrc, rtp_depacket_callback cb, void* userdata, uint32_t h);
-    ~rtp_depacket();
-	
-	uint32_t get_ssrc() const { return m_ssrc;  }
+	 int32_t             SplitterRtpDepacketBuffer(uint8_t* data, uint32_t datasize);
+	 NaluHeardPosition   nPosArray[MaxNaluBlockCount];
+	 unsigned int        nFindCount;
+	 int                 nPos1, nPos2, nNaluLength;
+	 int                 sclen, payloadlen;
+	 bool                bSetOptFlag;
+	 bool                bIsIFrameFlag;
+	 bool                bLastFlag;
+	 unsigned char       nFrameType;
+	 unsigned char       bFullNaluFlag;
 
-	uint64_t get_lostpakcet() const { return m_lostpkt; }
+	 int32_t handle(unsigned char* pData, int nLength);
+	 int32_t handle_common(unsigned char* pData, int nLength);
+	 int32_t handle_h264(unsigned char* pData, int nLength);
+	 int32_t handle_h265(unsigned char* pData, int nLength);
 
-	void set_payload(uint8_t payload, uint32_t streamtype);
+	 int32_t               SingleDepacket(unsigned char* pData, int nLength);
+	 int32_t               Stap_aDepacket(unsigned char* pData, int nLength);
 
-	uint32_t get_payload(uint8_t payload);
+	 int32_t               H264FuaDepacket(unsigned char* pData, int nLength);
+	 int32_t               H265FusDepacket(unsigned char* pData, int nLength);
 
-	void set_mediaoption(const std::string& opt, const std::string& param);
+	 _rtp_header*            rtpHead;
+	 uint32_t                exLength;
+	 _rtp_fua_indicator_h265 indH265;
+	 _rtp_fus_header         fusH265;
+	 unsigned char           nNalu;
+	 uint32_t                timestamp;
+	 uint8_t                 m_buff[RTP_DEPACKET_MAX_SIE];
+	 uint8_t*                cbBuff;
+	 uint32_t                m_buffsize;
 
-	template<typename T> bool get_mediaoption(const std::string& opt, T& val);
+	 _rtp_depacket_cb      cb;
+	 rtp_depacket_callback m_cb;  //回调函数
+	 void*                 m_userdata;//用户句柄
+	 uint32_t              m_ID;//ID
 
-	int32_t handle(uint8_t* data, uint32_t datasize);
-
-private:
-	bool is_seq_flip(uint16_t except, uint16_t actual);
-
-	void handle_h264(uint8_t* data, uint32_t datasize);
-	void h264_nalunit(uint8_t* data, uint32_t datasize);
-	void h264_stapa(uint8_t* data, uint32_t datasize);
-	void h264_fua(uint8_t* data, uint32_t datasize);
-
-	void handle_h265(uint8_t* data, uint32_t datasize);
-	void h265_nalunit(uint8_t* data, uint32_t datasize);
-	void h265_ap(uint8_t* data, uint32_t datasize);
-	void h265_fu(uint8_t* data, uint32_t datasize);
-	void h265_paci(uint8_t* data, uint32_t datasize);
-	void h265_nallike(uint8_t* data, uint32_t datasize);
-
-	void handle_common(uint8_t* data, uint32_t datasize);
-	void handle_aac(uint8_t* data, uint32_t datasize);
-private:
-	const uint32_t m_handle;
-	const uint32_t m_ssrc;
-	const rtp_depacket_callback m_cb;
-	const void* m_userdata;
-
-	std::unordered_map<uint8_t, uint32_t> m_payloadMap;
-	std::unordered_map<std::string, std::string> m_mediaoptMap;
-
-	_rtp_depacket_cb m_out;
-	uint8_t m_buff[DEPACKET_DATA_BUFFER_MAX_SIZE];
-	uint32_t m_bufsize;
-
-	bool m_firstpkt;
-	bool m_inlost;
-	uint16_t m_nextseq;
-	uint32_t m_lasttimestamp;
-
-	uint64_t m_lostpkt;
+	 uint8_t               payload;//rtp 的 payload 
+	 uint32_t              streamtype;//音频、视频类型 
 };
-typedef std::shared_ptr<rtp_depacket> rtp_depacket_ptr;
 
 #endif

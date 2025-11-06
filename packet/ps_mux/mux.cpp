@@ -3,9 +3,9 @@
 
 #include "mux.h"
 #include "common.h"
-
+#include "identifier_manager.h"
 ps_mux::ps_mux(ps_mux_callback cb, void* userdata, int32_t alignmode, int32_t ttmode, int32_t ttincre)
-	: m_id(generate_identifier())
+	: m_id(IdentifierManager::getInstance().Generate())
 	, m_outbufsize(0)
 	, m_sidbasev(0xe0)
 	, m_sidbasea(0xc0)
@@ -37,7 +37,7 @@ ps_mux::ps_mux(ps_mux_callback cb, void* userdata, int32_t alignmode, int32_t tt
 
 ps_mux::~ps_mux()
 {
-	recycle_identifier(m_id);
+	IdentifierManager::getInstance().Recycle(m_id);
 #ifndef _WIN32
 	malloc_trim(0);
 #endif // _WIN32

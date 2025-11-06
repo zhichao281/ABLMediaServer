@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.12) 
-project(PsDemux
+cmake_minimum_required(VERSION 3.12) # 建议更新到更高版本
+project(ps_demux
     VERSION 0.6.0.4
-    DESCRIPTION "PsDemux"
+    DESCRIPTION "ps_demux"
     LANGUAGES C CXX
 )
 
@@ -58,6 +58,14 @@ if(BUILD_PACKET_SHARED)
     add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 else()
     add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
+endif()
+
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC _WIN32 _WIN64 )
+endif()
+
+if(BUILD_PACKET_SHARED)
+     target_compile_definitions(${PROJECT_NAME} PUBLIC LIB_PS_DEMUX_EXPORT)
 endif()
 
 # 头文件路径

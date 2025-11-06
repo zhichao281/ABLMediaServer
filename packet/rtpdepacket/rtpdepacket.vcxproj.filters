@@ -15,10 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="depacket.h">
+    <ClInclude Include="include\depacket.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="rtp_def.h">
@@ -27,27 +24,18 @@
     <ClInclude Include="rtp_depacket.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="session.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="session_manager.h">
+    <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="common.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="depacket.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="rtp_depacket.cpp">
+    <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="session.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="session_manager.cpp">
+    <ClCompile Include="rtpdepacket.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

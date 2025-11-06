@@ -1,18 +1,12 @@
-INCLUDES = -I../boost/include
-LIBS = -L../boost/lib -lboost_system -lboost_thread -lboost_log -lboost_regex -lboost_filesystem -lboost_date_time -lboost_chrono -lboost_atomic 
+INCLUDES = 
+LIBS = 
 
-libRtpDepacket.so:common.o depacket.o rtp_depacket.o session.o session_manager.o
-	g++ -shared -fvisibility=hidden -fPIC -o libRtpDepacket.so common.o depacket.o rtp_depacket.o session.o session_manager.o $(LIBS) 
-common.o:common.cpp
-	g++ $(INCLUDES) -fvisibility=hidden -fPIC -c common.cpp 
+libRtpDepacket.so:depacket.o rtpdepacket.o
+	g++ -std=c++11  -fPIC -shared -fvisibility=hidden -o libRtpDepacket.so depacket.o rtpdepacket.o $(LIBS)
 depacket.o:depacket.cpp
-	g++ $(INCLUDES) -fvisibility=hidden -fPIC -c depacket.cpp  
-rtp_depacket.o:rtp_depacket.cpp
-	g++ $(INCLUDES) -fvisibility=hidden -fPIC -c rtp_depacket.cpp 
-session.o:session.cpp
-	g++ $(INCLUDES) -fvisibility=hidden -fPIC -c session.cpp 
-session_manager.o:session_manager.cpp
-	g++ $(INCLUDES) -fvisibility=hidden -fPIC -c session_manager.cpp  
+	g++ -std=c++11   $(INCLUDES)  -fvisibility=hidden -fPIC  -c depacket.cpp 
+rtpdepacket.o:rtpdepacket.cpp
+	g++ -std=c++11   $(INCLUDES)  -fvisibility=hidden -fPIC  -c rtpdepacket.cpp  
 	
 clean:
 	rm *.o
