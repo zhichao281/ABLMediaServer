@@ -1391,14 +1391,14 @@ void          Sleep(int mMicroSecond);
 
 #include "XHNetSDK.h"
 #include "ABLSipParse.h"
-
+#include "AutoLogInit.h"
 #ifdef OS_System_Windows 
-#include "ABLogSDK.h"
+
 
 void malloc_trim(int n);
 
 #else 
-#include "ABLogFile.h"
+
 #include "SimpleIni.h"
 #endif
 
