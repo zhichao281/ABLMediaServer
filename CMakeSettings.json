@@ -3,7 +3,7 @@
     {
       "name": "Linux-GCC-Release",
       "generator": "Unix Makefiles",
-      "configurationType": "Release",
+      "configurationType": "RelWithDebInfo",
       "cmakeExecutable": "cmake",
       "remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
       "cmakeCommandArgs": "-DUSE_BOOST=OFF",

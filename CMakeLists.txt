@@ -102,7 +102,6 @@ file(GLOB ABL_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/ABLMediaServer/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ABLMediaServer/*.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/ABLMediaServer/ffmpeg/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/spdlog/*.cpp
 )
 list(FILTER ABL_SRCS EXCLUDE REGEX ".*/test\\.cpp$")
 
@@ -131,6 +130,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_directories(${PROJECT_NAME} PRIVATE 
     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/${ARCH_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/3rd/faac-1.30/lib/${ARCH_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/XHNetSDK/openssl/lib/${ARCH_DIR}

@@ -91,11 +91,7 @@ namespace spdlog
 
 		try
 		{
-			fs::path fs_log_dir = fs::absolute(log_file_path).parent_path();
-			if (!fs::exists(fs_log_dir))
-			{
-				fs::create_directories(fs_log_dir);
-			}
+			fs::create_directories(fs::absolute(log_file_path).parent_path());
 
 			std::shared_ptr<spdlog::logger> newLogger;
 

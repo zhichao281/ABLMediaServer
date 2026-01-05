@@ -16,6 +16,7 @@ file(GLOB SPDLOGHEAD_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/spdloghead.cpp
 )
 
+
 if(SPDLOGHEAD_BUILD_SHARED)
     add_library(${PROJECT_NAME} SHARED ${SPDLOGHEAD_SRC})
     target_include_directories(${PROJECT_NAME} PUBLIC
@@ -25,7 +26,9 @@ if(SPDLOGHEAD_BUILD_SHARED)
     if(WIN32)
         target_compile_definitions(${PROJECT_NAME} PRIVATE SPDLOGHEAD_EXPORTS _WIN32)    
     endif() 
-
+      target_include_directories(${PROJECT_NAME} PUBLIC
+      ${CMAKE_CURRENT_SOURCE_DIR}/../filesystem/include)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USE_GHC)   
     set_target_properties(${PROJECT_NAME} PROPERTIES
         OUTPUT_NAME "spdloghead"
         POSITION_INDEPENDENT_CODE ON
@@ -39,9 +42,11 @@ if(SPDLOGHEAD_BUILD_STATIC)
         $<INSTALL_INTERFACE:include>
     )
      if(WIN32)
-        target_compile_definitions(${PROJECT_NAME} PRIVATE _WIN32)    
+        target_compile_definitions(${PROJECT_NAME}_static PRIVATE _WIN32)    
     endif() 
-
+    target_include_directories(${PROJECT_NAME}_static PUBLIC
+      ${CMAKE_CURRENT_SOURCE_DIR}/../filesystem/include)
+     target_compile_definitions(${PROJECT_NAME}_static PRIVATE USE_GHC)    
     set_target_properties(spdloghead_static PROPERTIES
         OUTPUT_NAME "spdloghead_static"
         POSITION_INDEPENDENT_CODE ON
