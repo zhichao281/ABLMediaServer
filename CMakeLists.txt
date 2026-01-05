@@ -64,13 +64,14 @@ endif()
 # =============================
 # ×ÓÏîÄ¿
 # =============================
-if(USE_WEBRTC)
-    add_subdirectory(simple-media-server)
-endif()
+
 
 add_subdirectory(XHNetSDK)
+
 add_subdirectory(3rd/spdlog)
+
 add_subdirectory(packet)
+
 add_subdirectory(media-server-master)
 
 # =============================

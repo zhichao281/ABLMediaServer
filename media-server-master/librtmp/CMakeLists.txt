@@ -43,6 +43,8 @@ endif()
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../libflv/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 # 源文件收集（对应 SOURCE_FILES）
