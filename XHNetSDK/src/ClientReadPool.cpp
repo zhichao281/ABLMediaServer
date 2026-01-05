@@ -14,7 +14,16 @@ E-Mail  79941308@qq.com
 #include "ClientSendPool.h"
 #include <fstream>
 #include <sstream>
+
+
+#ifdef USE_GHC
+#include "ghc/filesystem.hpp"
+namespace fs = ghc::filesystem;
+#else
 #include <filesystem>
+namespace fs = std::filesystem;
+#endif
+
 
 extern CClientSendPool* clientSendPool;
 
@@ -287,11 +296,11 @@ void CClientReadPool::handle_http_request(client_ptr cli,const std::string& requ
 	if (!file_url.empty() && file_url[0] == '/') file_url = file_url.substr(1);
 
 	// 路径安全校验
-	std::filesystem::path web_root_path = std::filesystem::absolute(m_web_root);
-	std::filesystem::path file_path = web_root_path / std::filesystem::path(file_url);
-	std::filesystem::path safe_path = std::filesystem::weakly_canonical(file_path);
+	fs::path web_root_path = fs::absolute(m_web_root);
+	fs::path file_path = web_root_path / fs::path(file_url);
+	fs::path safe_path = fs::weakly_canonical(file_path);
 
-	if (!std::filesystem::exists(safe_path) || safe_path.string().find(web_root_path.string()) != 0) {
+	if (!fs::exists(safe_path) || safe_path.string().find(web_root_path.string()) != 0) {
 		std::string not_found = "<h1>403 Forbidden</h1>";
 		std::ostringstream response;
 		response << "HTTP/1.1 403 Forbidden\r\nContent-Length: " << not_found.size() << "\r\n\r\n" << not_found;

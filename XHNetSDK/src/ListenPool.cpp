@@ -13,6 +13,9 @@ E-Mail  79941308@qq.com
 #include "identifier_generator.h"
 #include "client_manager.h"
 #include "ClientSendPool.h"
+#ifndef OS_System_Windows
+#include <fcntl.h>
+#endif
 
 extern CClientReadPool*          clientReadPool;
 extern CClientSendPool*          clientSendPool;

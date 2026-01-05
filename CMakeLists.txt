@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(ABLMediaServer
-    VERSION 1.0.0
+    VERSION 1.26.0.0105
      DESCRIPTION "ABLMediaServer"
     LANGUAGES C CXX
 )
@@ -103,6 +103,7 @@ if(USE_WEBRTC)
 endif()
 
 add_subdirectory(XHNetSDK)
+
 set_target_properties(XHNetSDK  PROPERTIES
     # 让运行时查找当前目录
     BUILD_RPATH "\$ORIGIN"
@@ -116,7 +117,7 @@ set_target_properties(XHNetSDK  PROPERTIES
 
 add_subdirectory(packet)
 set_target_properties(
-    PsDemux PsMux RtpDepacket RtpPacket    # 列出所有 media-server 的库目标
+    ps_mux ps_demux rtpdepacket rtppacket    # 列出所有 media-server 的库目标
     PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}
     LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}

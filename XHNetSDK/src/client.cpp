@@ -12,6 +12,7 @@
 #ifdef USE_BOOST
 #include <boost/bind.hpp>
 #else
+#include <fcntl.h>
 #include <functional>
 #endif
 #include "client_manager.h"

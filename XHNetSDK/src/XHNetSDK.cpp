@@ -2,8 +2,8 @@
 //
 
 #include "stdafx.h"
-#include <boost/make_shared.hpp>
-#include <boost/ref.hpp>
+#include <cstring> 
+#include <memory>
 #include "XHNetSDK.h"
 #include "libnet_error.h"
 #include "client_manager.h"

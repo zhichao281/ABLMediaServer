@@ -71,13 +71,9 @@ private:
     std::unordered_map<NETHANDLE, client_ptr> m_clients;
 #endif
 
-#ifdef LIBNET_USE_CORE_SYNC_MUTEX
-    auto_lock::al_mutex m_poolmtx;
-    auto_lock::al_mutex m_climtx;
-#else
-    auto_lock::al_spin m_poolmtx;
     std::mutex          m_climtx;
-#endif
+    std::mutex          m_poolmtx;
+
 
 
 

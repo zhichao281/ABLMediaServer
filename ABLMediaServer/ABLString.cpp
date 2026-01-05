@@ -671,19 +671,7 @@ namespace ABL {
 		}
 		return "";
 	}
-	std::string GbkToUtf8(const char* src)
-	{
-		int len = MultiByteToWideChar(CP_ACP, 0, src, -1, NULL, 0);
-		wchar_t* wstr = new wchar_t[len];
-		MultiByteToWideChar(CP_ACP, 0, src, -1, wstr, len);
-		len = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
-		char* str = new char[len];
-		WideCharToMultiByte(CP_UTF8, 0, wstr, -1, str, len, NULL, NULL);
-		std::string result(str);
-		delete[] wstr;
-		delete[] str;
-		return result;
-	}
+	
 	std::string IniFileToJsonArray(const std::string& iniFilePath)
 	{
 		CSimpleIniA ini;

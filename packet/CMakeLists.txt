@@ -114,12 +114,12 @@ install(DIRECTORY ${LIBRARY_OUTPUT_ROOT}/
 
 # 编译后自动拷贝头文件到 Include 目录
 add_custom_target(copy_headers ALL
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/Include
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/include
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_SOURCE_DIR}/ps_demux/ps_demux.h
-        ${CMAKE_SOURCE_DIR}/ps_mux/ps_mux.h
-        ${CMAKE_SOURCE_DIR}/rtpdepacket/rtp_depacket.h
-        ${CMAKE_SOURCE_DIR}/rtppacket/rtp_packet.h
-        ${CMAKE_SOURCE_DIR}/Include
+        ${CMAKE_CURRENT_SOURCE_DIR}/ps_demux/ps_demux.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/ps_mux/ps_mux.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtpdepacket/rtp_depacket.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/rtppacket/rtp_packet.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
     COMMENT "Copying public headers to Include directory"
 )

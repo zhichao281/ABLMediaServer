@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.12)
 
 project(XHNetSDK
-    VERSION 1.0.0
+    VERSION 1.26.0.0105
      DESCRIPTION "XHNetSDK"
     LANGUAGES C CXX
 )
 
 
 # 设置C++标准
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-option(USE_BOOST "Use Boost library" ON)
+option(USE_BOOST "Use Boost library" OFF)
 
 
 # 检测操作系统
@@ -81,10 +81,16 @@ if(WIN32)
 endif()
 
 # 添加共享库
-add_library(XHNetSDK SHARED ${SOURCES})
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
+
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+   ${CMAKE_CURRENT_SOURCE_DIR}/../3rd/filesystem/include/)
+   
+target_compile_definitions(${PROJECT_NAME} PRIVATE USE_GHC) 
 
 # 设置库属性
-set_target_properties(XHNetSDK  PROPERTIES
+set_target_properties(${PROJECT_NAME}  PROPERTIES
     OUTPUT_NAME "XHNetSDK"
     VERSION 1.0.0
     SOVERSION 1

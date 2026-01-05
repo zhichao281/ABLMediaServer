@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <memory>
 #include <atomic>
+#include <condition_variable>
 #endif
 
 #include   "client.h"
