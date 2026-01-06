@@ -64,7 +64,7 @@ namespace spdlog
 		m_loggers.clear();
 	}
 
-	SPDLOG& SPDLOG::getInstance()
+	 SPDLOG& SPDLOG::getInstance()
 	{
 		static SPDLOG instance;
 		return instance;

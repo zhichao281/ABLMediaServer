@@ -21,6 +21,192 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MediaFifo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XHNetSDK.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetRecvBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetServerHTTP_FLV.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetRtmpServerRecv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetBaseThreadPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetRtspServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MediaStreamSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ABLSipParse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RtcpDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RtcpPacket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetServerHLS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientRecvHttpHLS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rtspMD5\ourMD5.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LCbase64.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="H265_SPS_Nal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientRecvRtmp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientRecvFLV.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientSendRtmp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientRecvRtsp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetServerHTTP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientAddStreamProxy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientSendRtsp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientAddPushProxy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetGB28181RtpServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetGB28181RtpClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetServerWS_FLV.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SHA1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetServerHTTP_MP4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamRecordFMP4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RecordFileSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ReadRecordFileInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="g711_table.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="g711.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="faac.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="faaccfg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AACEncode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientHttp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientSnap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VideoDecode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PictureFileSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AVFrameSWS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FFVideoEncode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FFVideoDecode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetServerRecvRtpTS_PS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RtpTSStreamInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RtpPSStreamInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetGB28181Listen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamRecordMP4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ABLString.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientWebrtcPlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientReadLocalMediaFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetServerRecvAudio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientRecvJTT1078.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamRecordTS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleIni.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetRtspServerUDP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetClientFFmpegRecv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetServerReadMultRecordFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="win\Crash_Dumper.h">
       <Filter>dump</Filter>
     </ClInclude>
@@ -51,245 +237,191 @@
     <ClInclude Include="ffmpeg\thread_pool.h">
       <Filter>ffmpeg</Filter>
     </ClInclude>
-    <ClInclude Include="AACEncode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ABLogFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ABLogSDK.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ABLSipParse.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ABLString.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AVFrameSWS.h">
+    <ClInclude Include="DigestAuthentication.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Base64.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ConvertUTF.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cudaCodecDLL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cudaCodecDLL_Linux.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cudaEncodeDLL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DigestAuthentication.hh">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="faac.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="faaccfg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FFVideoDecode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FFVideoEncode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="g711.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="g711_table.h">
+    <ClInclude Include="strDup.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="gettimeofday.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GlobalManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="H265_SPS_Nal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LCbase64.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MediaFifo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MediaStreamSource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MyWriteLogFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="netBase64.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetBaseThreadPool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetClientAddPushProxy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetClientAddStreamProxy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetClientFFmpegRecv.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetClientHttp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetClientReadLocalMediaFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetClientRecvFLV.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetClientRecvHttpHLS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetClientRecvRtmp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetClientRecvRtsp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetClientSendRtmp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetClientSendRtsp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetClientSnap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetClientWebrtcPlayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetGB28181Listen.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetGB28181RtpClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetGB28181RtpServer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetRecvBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetRtmpServerRecv.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetRtspServer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetRtspServerUDP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetServerHLS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetServerHTTP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetServerHTTP_FLV.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetServerHTTP_MP4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetServerReadMultRecordFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetServerRecvAudio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetServerRecvRtpTS_PS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetServerSendWebRTC.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetServerWS_FLV.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ourMD5.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PictureFileSource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ps_demux.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ps_mux.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ReadRecordFileInput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RecordFileSource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RtcpDef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RtcpPacket.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rtp_depacket.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rtp_packet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RtpPSStreamInput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RtpTSStreamInput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SHA1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleIni.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="strDup.hh">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StreamRecordFMP4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StreamRecordMP4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StreamRecordTS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VideoDecode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WriteAVFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="XHNetSDK.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="AutoLogInit.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetRecvBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetServerHTTP_FLV.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CNetRtmpServerRecv.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetBaseThreadPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetRtspServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MediaStreamSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MediaFifo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ABLSipParse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RtcpPacket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetServerHLS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetClientRecvHttpHLS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LCbase64.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetClientRecvRtmp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetClientRecvFLV.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetClientSendRtmp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetClientRecvRtsp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetServerHTTP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetClientAddStreamProxy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetClientSendRtsp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetClientAddPushProxy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetGB28181RtpServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetGB28181RtpClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetServerWS_FLV.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SHA1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetServerHTTP_MP4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamRecordFMP4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RecordFileSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ReadRecordFileInput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g711_table.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="g711.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AACEncode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetClientHttp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetClientSnap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VideoDecode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PictureFileSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AVFrameSWS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FFVideoEncode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FFVideoDecode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetServerRecvRtpTS_PS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RtpTSStreamInput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RtpPSStreamInput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetGB28181Listen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamRecordMP4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ABLString.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ABLMediaServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetClientWebrtcPlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetClientReadLocalMediaFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetServerRecvAudio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamRecordTS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetRtspServerUDP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetClientFFmpegRecv.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetServerReadMultRecordFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="win\Crash_Dumper.cpp">
       <Filter>dump</Filter>
     </ClCompile>
@@ -308,199 +440,28 @@
     <ClCompile Include="ffmpeg\thread_pool.cpp">
       <Filter>ffmpeg</Filter>
     </ClCompile>
-    <ClCompile Include="AACEncode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ABLMediaServer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ABLogFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ABLogSDK.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ABLSipParse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ABLString.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AVFrameSWS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Base64.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CNetRtmpServerRecv.cpp">
+    <ClCompile Include="NetClientRecvJTT1078.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DigestAuthentication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FFVideoDecode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FFVideoEncode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g711.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="g711_table.cpp">
+    <ClCompile Include="Base64.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="gettimeofday.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GlobalManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LCbase64.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MediaFifo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MediaStreamSource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MyWriteLogFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="netBase64.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetBaseThreadPool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetClientAddPushProxy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetClientAddStreamProxy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetClientFFmpegRecv.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetClientHttp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetClientReadLocalMediaFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetClientRecvFLV.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetClientRecvHttpHLS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetClientRecvRtmp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetClientRecvRtsp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetClientSendRtmp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetClientSendRtsp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetClientSnap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetClientWebrtcPlayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetGB28181Listen.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetGB28181RtpClient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetGB28181RtpServer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetRecvBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetRtspServer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetRtspServerUDP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetServerHLS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetServerHTTP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetServerHTTP_FLV.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetServerHTTP_MP4.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetServerReadMultRecordFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetServerRecvAudio.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetServerRecvRtpTS_PS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetServerSendWebRTC.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetServerWS_FLV.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ourMD5.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PictureFileSource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ReadRecordFileInput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RecordFileSource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RtcpPacket.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RtpPSStreamInput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RtpTSStreamInput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SHA1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="strDup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StreamRecordFMP4.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StreamRecordMP4.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StreamRecordTS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VideoDecode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WriteAVFile.cpp">
+    <ClCompile Include="AutoLogInit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -515,7 +476,7 @@
     <Library Include="..\lib\x64\release\rtpdepacket.lib" />
     <Library Include="..\lib\x64\release\rtppacket.lib" />
     <Library Include="..\lib\x64\release\webrtc-streamer.lib" />
-    <Library Include="..\lib\x64\release\libfaac.lib" />
     <Library Include="..\lib\x64\release\XHNetSDK.lib" />
+    <Library Include="..\lib\x64\release\libfaac.lib" />
   </ItemGroup>
 </Project>

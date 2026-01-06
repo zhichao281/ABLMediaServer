@@ -1387,6 +1387,8 @@ struct muteAACBufferStruct
 unsigned long GetTickCount();
 int64_t  GetTickCount64();
 void          Sleep(int mMicroSecond);
+
+
 #endif
 
 #include "XHNetSDK.h"
@@ -1422,6 +1424,7 @@ using namespace boost;
 #include <cctype>
 
 #endif
+
 #include "ABLString.h"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
