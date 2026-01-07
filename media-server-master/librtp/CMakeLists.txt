@@ -57,8 +57,9 @@ file(GLOB_RECURSE SOURCE_FILES
 
 # 设置静态库（显式声明比变量更清晰）
 add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
-
-#
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE OS_WINDOWS) 
+endif()
 
 # 现代头文件包含方式（PUBLIC 表示会传递给依赖此库的目标）
 target_include_directories(${PROJECT_NAME}

@@ -24,7 +24,7 @@ if(WIN32)
     
     # Windows编译选项
     add_compile_options(/fp:precise /W3 /GL /MP)
-    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+
     
 else()
     message(STATUS "Building for Unix-like platform")
@@ -89,6 +89,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC
    
 target_compile_definitions(${PROJECT_NAME} PRIVATE USE_GHC) 
 
+# 检测操作系统
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE XHNETSDK_EXPORTS _CRT_SECURE_NO_WARNINGS) 
+endif()
 # 设置库属性
 set_target_properties(${PROJECT_NAME}  PROPERTIES
     OUTPUT_NAME "XHNetSDK"

@@ -138,6 +138,11 @@ target_link_directories(${PROJECT_NAME} PRIVATE
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE FFMPEG6)
 
+# 检测操作系统
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE OS_WINDOWS) 
+endif()
+
 set_target_properties(${PROJECT_NAME} PROPERTIES
     BUILD_RPATH "$ORIGIN"
     INSTALL_RPATH "$ORIGIN"
@@ -151,10 +156,25 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 # =============================
 # 链接需要的库文件
 # =============================
+if(WIN32)
+    target_link_directories(${PROJECT_NAME} PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/x64/release
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/ffmpeg6/lib/x64
+    )
+    target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+    libfaac
+    )
+else()
+  target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+    faac
+    )
+endif()
+
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
-    ${MEDIA_SERVER_LIBS}
-    faac
+    ${MEDIA_SERVER_LIBS}   
     avcodec
     avutil
     avformat
