@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\depacket.h" />
+    <ClInclude Include="RtpDePacketManager.h" />
     <ClInclude Include="rtp_def.h" />
     <ClInclude Include="rtp_depacket.h" />
     <ClInclude Include="stdafx.h" />
@@ -28,6 +29,7 @@
     <ClCompile Include="depacket.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="rtpdepacket.cpp" />
+    <ClCompile Include="RtpDePacketManager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

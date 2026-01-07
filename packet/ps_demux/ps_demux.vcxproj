@@ -26,6 +26,7 @@
     <ClInclude Include="header_consumer.h" />
     <ClInclude Include="pes_consumer.h" />
     <ClInclude Include="pes_nonmedia_consumer.h" />
+    <ClInclude Include="psdemux_identifier_manager.h" />
     <ClInclude Include="psm_consumer.h" />
     <ClInclude Include="ps_def.h" />
     <ClInclude Include="ps_demux.h" />
@@ -38,6 +39,7 @@
     <ClCompile Include="header_consumer.cpp" />
     <ClCompile Include="pes_consumer.cpp" />
     <ClCompile Include="pes_nonmedia_consumer.cpp" />
+    <ClCompile Include="psdemux_identifier_manager.cpp" />
     <ClCompile Include="psm_consumer.cpp" />
     <ClCompile Include="ps_demux.cpp" />
     <ClCompile Include="sysheader_consumer.cpp" />

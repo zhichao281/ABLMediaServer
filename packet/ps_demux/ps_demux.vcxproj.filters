@@ -48,6 +48,9 @@
     <ClInclude Include="sysheader_consumer.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="psdemux_identifier_manager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common.cpp">
@@ -75,6 +78,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="sysheader_consumer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="psdemux_identifier_manager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

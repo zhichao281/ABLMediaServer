@@ -30,6 +30,9 @@
     <ClInclude Include="ps_mux.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="identifier_manager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common.cpp">
@@ -42,6 +45,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ps_mux.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="identifier_manager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
